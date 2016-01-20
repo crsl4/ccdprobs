@@ -1,14 +1,59 @@
 # R script to do bootstrap of sites and then neighbor joining to get a tree
 # Claudia January 2016
 # using 60_concat.in (from HGTinconsistency) as example
+# R CMD BATCH bootstrap2NJ.r seqFile treeName
+# generates tree file named treeName in datasets
 
+if(length(args) == 0){
+    file = "../datasets/60_concat.in"
+    outfile = "../datasets/60_concat_bt.out"
+}else{
+    file = args[1]
+    outfile = args[2]
+}
+
+# scenario 1: bootstrap + nj assuming JC69 model
 library(ape)
-library(phylotools)
-boot.samp <- unlist(sample(y, replace = TRUE))
-data <- read.phylip("../datasets/60_concat.in")
-data2 <- phy2dat(data)
-# data2[i,2] has a string with the sequence
+data <- read.dna(file)
+d <- dist.dna(data)
+tr <- nj(d)
+plot(tr)
 
+# returns bootstrap datasets
+bootstrapDNA <- function(x,B=100){
+    # function based on ape boot.phylo
+    boot.samp <- vector("list", B)
+    y <- nc <- ncol(x)
+    for (i in 1:B){
+        index <- unlist(sample(y, replace = TRUE))
+        boot.samp[[i]] <- x[, index]
+    }
+    ans <- boot.samp
+    ans
+}
+
+# returns list of bootstrap trees obtained with nj
+bootstrapNJTree <- function(x,model="JC69",B=100){
+    # function based on ape boot.phylo
+    boot.tree <- vector("list", B)
+    y <- nc <- ncol(x)
+    for (i in 1:B){
+        boot.samp <- unlist(sample(y, replace = TRUE))
+        boot.tree[[i]] <- nj(dist.dna(x[, boot.samp],model=model))
+    }
+    ans <- boot.tree
+    ans
+}
+
+
+bd <- bootstrapDNA(data)
+bt <- bootstrapNJTree(data)
+plot(bt[[1]])
+
+
+for(i in 1:100){
+    write.tree(bt[[i]],file=outfile, append=TRUE)
+}
 
 
 
