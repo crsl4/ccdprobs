@@ -2,6 +2,18 @@
 # Claudia January 2016
 # using 60_concat.in (from HGTinconsistency) as example
 
+library(ape)
+library(phylotools)
+boot.samp <- unlist(sample(y, replace = TRUE))
+data <- read.phylip("../datasets/60_concat.in")
+data2 <- phy2dat(data)
+# data2[i,2] has a string with the sequence
+
+
+
+
+# january 11-15 ------------------------------------------
+if(false){
 library(phangorn)
 # read in data
 data <- read.phyDat("60_concat.in", format="phylip", type="DNA")
@@ -43,7 +55,7 @@ str(fitGTR)
 # bootstrap.phyDat produces a list of bootstrapped dataset, but:
 # 1) how to extract?
 # 2) how to estimate trees the way we want?
-bs <- bootstrap.phyDat(data,pratchet,bs=100) #fixt: pratchet=parsimony search to find best tree
+bs <- bootstrap.phyDat(data,pratchet,bs=100) #fixt: pratchet=parsimony search to find best tree, NJ for neighbor joining
 str(bs)
 bs[[1]] #tree
 str(bs[[1]]) #does not have the data
@@ -54,3 +66,5 @@ for(i in 1:100){
 
 
 # how to read and run with ccdprobs?
+# need a new mbsum to read list of trees
+}
