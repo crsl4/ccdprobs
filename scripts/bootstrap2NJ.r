@@ -5,45 +5,30 @@
 file = "../datasets/60_concat.in"
 outfile = "../datasets/60_concat_bt.out"
 
+file = "../datasets/38_seqgen383.phy"
+outfile = "../datasets/38_seqgen383_bt.out"
+
 #file="../datasets/M1510.nex"
 #outfile="../datasets/M1510_bt.out"
+
+file = "../datasets/38_seqgen383.nex"
+outfile = "../datasets/38_seqgen383_bt_nex.out"
 
 # scenario 1: bootstrap + nj assuming JC69 model
 library(ape)
 data <- read.dna(file)
-#data <- read.nexus.data(file)
+data <- read.nexus.data(file)
 d <- dist.dna(data) #does not work for nexus files
 tr <- nj(d) #does not work for nexus files
+## Error in nj(d) : missing values are not allowed in the distance matrix
+## Consider using njs()
+## > tr <- njs(d)
+## Error in njs(d) :
+##   distance information insufficient to construct a tree, cannot calculate agglomeration criterion
 
 plot(tr)
 
-# returns bootstrap datasets
-bootstrapDNA <- function(x,B=100){
-    # function based on ape boot.phylo
-    boot.samp <- vector("list", B)
-    y <- nc <- ncol(x)
-    for (i in 1:B){
-        index <- unlist(sample(y, replace = TRUE))
-        boot.samp[[i]] <- x[, index]
-    }
-    ans <- boot.samp
-    ans
-}
-
-# returns list of bootstrap trees obtained with nj
-bootstrapNJTree <- function(x,model="JC69",B=100){
-    # function based on ape boot.phylo
-    boot.tree <- vector("list", B)
-    y <- nc <- ncol(x)
-    for (i in 1:B){
-        boot.samp <- unlist(sample(y, replace = TRUE))
-        boot.tree[[i]] <- nj(dist.dna(x[, boot.samp],model=model))
-    }
-    ans <- boot.tree
-    ans
-}
-
-
+source("bootstrap2NJ_functions.r")
 bd <- bootstrapDNA(data)
 bt <- bootstrapNJTree(data)
 plot(bt[[1]])
