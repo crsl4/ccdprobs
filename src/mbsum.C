@@ -40,6 +40,9 @@
 //
 // Usage:    mbsum [--help || -h] [<--skip || -n> number-of-skipped-trees] [<--out || -o> output-file] [--version] [input filename(s)]
 
+// mbsum2.C modified by Claudia to allow reading list of trees not in mrbayes output format
+// January 2016
+
 #define VERSION "1.4.2"
 
 #include <iostream>
@@ -209,13 +212,13 @@ int main(int argc, char *argv[])
   vector<int> numTaxa(numFiles,0);
   TopCountNode* root;
   Pruner* mbsumPruner = new Pruner();
+  // read each file:
   for(int i=0;i<numFiles;i++) {
-    ifstream f(fileNames[i].c_str());
+    ifstream f(fileNames[i].c_str()); // file into stream f
     if(f.fail())
       cerr << "Error: Could not open file " << fileNames[i] << " ." << endl;
     else
       cout << "Reading file " << fileNames[i] << ": " << flush;
-
 
 
     string line;
@@ -237,56 +240,59 @@ int main(int argc, char *argv[])
 
     cerr << endl; // added for debugging!
 
-    while(getline(f,line,foo)) {
+    while(getline(f,line,foo)) { // while you can read line from f
       lineNumber++;
-      istringstream s(line);
-      string keyTree,name,equalSign;
+      istringstream s(line); // line into stream s
+      //string keyTree,name,equalSign; //claudia: don't need this
 
-      if (readTtable){
-	char ch;
-	s >> noskipws >> ch;
-	while (ch != ';' && ch != EOF && s.good()) {
-	  sumOut << ch;
-	  s >> noskipws >> ch;
-	}
-	if (ch == ';'){
-	  sumOut << ";\n";
-	  readTtable = false;
-	} else {
-	  sumOut << "\n";
-	  continue;
-	}
-      }
+      // claudia: this is to skip the table in each file (except 1st), we don't need this
+      // if (readTtable){
+      // 	char ch;
+      // 	s >> noskipws >> ch;
+      // 	while (ch != ';' && ch != EOF && s.good()) {
+      // 	  sumOut << ch;
+      // 	  s >> noskipws >> ch;
+      // 	}
+      // 	if (ch == ';'){
+      // 	  sumOut << ";\n";
+      // 	  readTtable = false;
+      // 	} else {
+      // 	  sumOut << "\n";
+      // 	  continue;
+      // 	}
+      // }
 
-      s >> keyTree;
-      if (i==0){
-	// read translate table only in the first file, assuming the same in other files.
-	if (keyTree=="translate" || keyTree=="TRANSLATE" || keyTree=="Translate"){
-	  readTtable = true;
-	  sumOut << "translate";
-	  char ch;
-	  s >> noskipws >> ch;
-	  while (ch != ';' && ch != EOF && s.good()) {
-	    sumOut << ch;
-	    s >> noskipws >> ch;
-	  }
-	  if (ch == ';'){
-	    sumOut << ";\n";
-	    readTtable = false;
-	  } else {
-	    sumOut << "\n";
-	    continue;
-	  }
-	}
-      }
+      // claudia: don't need to read any table now
+      // s >> keyTree;
+      // if (i==0){ //i goes from 1 to the number of files
+      // 	// read translate table only in the first file, assuming the same in other files.
+      // 	if (keyTree=="translate" || keyTree=="TRANSLATE" || keyTree=="Translate"){
+      // 	  readTtable = true;
+      // 	  sumOut << "translate";
+      // 	  char ch;
+      // 	  s >> noskipws >> ch;
+      // 	  while (ch != ';' && ch != EOF && s.good()) {
+      // 	    sumOut << ch;
+      // 	    s >> noskipws >> ch;
+      // 	  }
+      // 	  if (ch == ';'){
+      // 	    sumOut << ";\n";
+      // 	    readTtable = false;
+      // 	  } else {
+      // 	    sumOut << "\n";
+      // 	    continue;
+      // 	  }
+      // 	}
+      // }
 
-      // skip if the remaining line is not in format "  tree name = treeRep"
-      if(keyTree != "tree")
-	continue;
+      // // skip if the remaining line is not in format "  tree name = treeRep"
+      // if(keyTree != "tree")
+      // 	continue;
 
-      s >> name >> equalSign;
-      if(equalSign != "=")
-	continue;
+      // s >> name >> equalSign;
+      // if(equalSign != "=")
+      // 	continue;
+
       // The rest should be a parenthetic representation of a tree.  Assume no spaces!
       // Skip the first numSkip trees
       if(skipInFile-- > 0) {
@@ -304,7 +310,7 @@ int main(int argc, char *argv[])
 	  break;
 	}
       }
-      
+
       string treeString;
       s >> treeString;
       Tree tree(treeString,lineNumber, mbsumPruner);

@@ -40,9 +40,6 @@
 //
 // Usage:    mbsum [--help || -h] [<--skip || -n> number-of-skipped-trees] [<--out || -o> output-file] [--version] [input filename(s)]
 
-// mbsum2.C modified by Claudia to allow reading list of trees not in mrbayes output format
-// January 2016
-
 #define VERSION "1.4.2"
 
 #include <iostream>
@@ -240,7 +237,7 @@ int main(int argc, char *argv[])
 
     cerr << endl; // added for debugging!
 
-    while(getline(f,line,foo)) { //istringstream f((string)(argv[++i]));, who is argv?
+    while(getline(f,line,foo)) {
       lineNumber++;
       istringstream s(line);
       string keyTree,name,equalSign;
@@ -307,7 +304,7 @@ int main(int argc, char *argv[])
 	  break;
 	}
       }
-
+      
       string treeString;
       s >> treeString;
       Tree tree(treeString,lineNumber, mbsumPruner);

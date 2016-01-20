@@ -1,0 +1,8 @@
+Claudia January 2016
+1) run in R bootstrap2NJ.r to get list of trees from
+sequence data: trees.in
+2) run mbsum: ../src/mbsum trees.in
+(inside datasets)
+3) run ccdprobs: ../src/ccdprobs --in trees.in --out trees
+(inside datasets)
+
