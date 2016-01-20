@@ -1,22 +1,20 @@
 # R script to do bootstrap of sites and then neighbor joining to get a tree
 # Claudia January 2016
 # using 60_concat.in (from HGTinconsistency) as example
-# R CMD BATCH bootstrap2NJ.r seqFile treeName
-# generates tree file named treeName in datasets
 
-if(length(args) == 0){
-    file = "../datasets/60_concat.in"
-    outfile = "../datasets/60_concat_bt.out"
-}else{
-    file = args[1]
-    outfile = args[2]
-}
+file = "../datasets/60_concat.in"
+outfile = "../datasets/60_concat_bt.out"
+
+#file="../datasets/M1510.nex"
+#outfile="../datasets/M1510_bt.out"
 
 # scenario 1: bootstrap + nj assuming JC69 model
 library(ape)
 data <- read.dna(file)
-d <- dist.dna(data)
-tr <- nj(d)
+#data <- read.nexus.data(file)
+d <- dist.dna(data) #does not work for nexus files
+tr <- nj(d) #does not work for nexus files
+
 plot(tr)
 
 # returns bootstrap datasets

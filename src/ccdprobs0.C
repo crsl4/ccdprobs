@@ -731,7 +731,6 @@ void writeOutput(Files& f, vector<RootedTree>& trees, vector<int>& counts, int s
   f.log         << "maximum estimated probability = " << setw(10) << setprecision(8) << max << endl;
   f.log         << "minimum estimated probability = " << setw(10) << setprecision(8) << min << endl;
 
-  // claudia: want to eliminate assumption that starts with translate table
   writeTranslateTable(f.smap,taxaNumbers,taxaNames);
   f.smap.setf(ios::fixed,ios::floatfield);
   for ( map<Clade,int>::iterator p=cladeCount.begin(); p != cladeCount.end(); p++ ) {
@@ -762,7 +761,7 @@ int main(int argc, char* argv[])
   vector<int> taxaNumbers;
   vector<string> taxaNames;
   char eol;
-  readTranslateTable(f.in,taxaNumbers,taxaNames,eol); // claudia: want to eliminate translate table requirement
+  readTranslateTable(f.in,taxaNumbers,taxaNames,eol);
   int numTaxa = taxaNames.size();
 
   map<Clade,int> cladeCount;
