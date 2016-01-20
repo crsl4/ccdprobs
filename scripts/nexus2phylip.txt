@@ -1,0 +1,84 @@
+Hi again Claudia, 
+
+I must have misunderstood something because I could not find a way to give a nexus file as input to raxml. So I pasted below parts of a script to convert nexus files to the phylip format, and then to analyze with raxml.
+
+- some idiosyncrasies in my script: some taxa had “copy” in their names, and I wanted to exclude them.
+- raxml options: -m GTRCAT is for a GTR model + rate variation across sites, multiple rate CATegories, one category estimated for each site. Not good to get the likelihood for a LRT for instance, but good to get a first estimate of the topology, fast. But since you have very few taxa, you should use -m HKYGAMMA instead. There is no option -m HKYGAMMA, but you can add a flag —HKY85. It will override the GTR model. What I don’t know is whether it will also override the GAMMA-distributed rate variation. I read the manual (http://sco.h-its.org/exelixis/resource/download/NewManual.pdf) but I was still unsure. You should try once and look at the output to find out (or else google more to see if other users had the question).
+
+Let me know if you run into more questions!
+Cécile
+
+#-----------------------------------------------#
+#  convert nexus to phylip files                #
+#  interleaved format: do *not* repeat taxon names
+#-----------------------------------------------#
+
+ for my $ig ($startGene..$endGene){
+    my $gene =  $file[$ig];
+    my $infn = "$datadir/nexus/$gene.nex"; # old data: "../NEXUS/$gene.nexus"
+    my $oufn = "$datadir/phylip/$gene.phy";
+    my $read = 0;
+    my $removeNames = 0; my $nReadNames = 0;
+    my $ntax = 0; 
+    my $nchar = 0;
+    my $ncopy = 0;
+    open my $FHi, $infn or die "can't open NEXUS gene sequence file"; 
+    open my $FHo, ">", $oufn or die "can't open PHYLIP gene sequence file"; 
+    while (<$FHi>){
+	if ($read){
+	    # if (/^\s;$/){ last; } # for old data
+	    if (/^\s*;/){ last; } # old data: /^;/
+	    if (/copy/){ $ncopy++; next; } 
+            else {
+                if ($removeNames){
+                   if (/^[^\s]+\s+(.*)/) { print $FHo "$1\n"; }
+                } else {                   print $FHo $_;
+                   $nReadNames++;
+                   if ($nReadNames == $ntax){ $removeNames = 1; }
+                }
+            }
+	}
+	if ($read==0){
+	    if (/ntax=(\d+)/){
+		$ntax = $1;
+		$ntax -= $copyTaxonNumber[$ig];
+		print $FHo " $ntax ";
+	    }
+	    if (/nchar=(\d+)/){
+		$nchar = $1;
+		if ($ntax==0){ print "problem in gene $gene: found nchar before ntax\n"}
+		print $FHo "$nchar\n";
+	    }
+	}
+	if (/^\s*matrix/){
+	    $read=1;
+	    if ($ntax==0 or $nchar==0){
+		print "problem in gene $gene: was unable to find ntax ($ntax) or nchar ($nchar)\n";
+	    }
+	}
+    }
+    if ($ncopy or $copyTaxonNumber[$ig]){
+	print "$gene: ". $copyTaxonNumber[$ig] ." copy taxa, removed $ncopy lines with copy taxa\n"; }
+    close $FHi;
+    close $FHo;
+ }
+}
+
+#-----------------------------------------------#
+#  run RAxML on phylip files                    #
+#-----------------------------------------------#
+if(1){
+ chdir("../raxml/") or die "can't go to raxml directory";
+ for my $ig ($startGene..$endGene){
+    my $gene =  $file[$ig];
+    my $infn = "$datadir/phylip/$gene.phy"; # old data: "../phylip/$gene.phy"
+    my $str = "raxmlHPC-PTHREADS-SSE3  -T 2 -m GTRCAT  -# 10";
+    $str .= " -p " . int(rand(10000));
+    $str .= " -s $infn -n $gene"; 
+    print "starting RAxML for gene $gene...\n";
+    system($str);
+    print "done.\n";
+ }
+ chdir("../penny-treeagreement") or die "can't go back to penny directory";
+}
+
