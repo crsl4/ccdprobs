@@ -22,7 +22,7 @@ GetOptions('phylip=s' => \$phylip, #you can leave this comma
 my($filename, $dirs, $suffix) = fileparse($phylip, qr/\.[^.]*/);
 
 my $oufn = $dirs.$filename."_numbers.phy";
-my $table = $dirs.$filename."_table.txt";
+my $table = $dirs.$filename."_table.out";
 
 open my $FHi, $phylip or die "can't open PHYLIP gene sequence file";
 open my $FHo, ">", $oufn or die "can't open new PHYLIP gene sequence file";

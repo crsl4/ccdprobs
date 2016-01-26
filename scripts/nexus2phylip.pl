@@ -37,7 +37,7 @@ while (<$FHi>){
     if ($read){
 	# if (/^\s;$/){ last; } # for old data
 	if (/^\s*;/){
-	    print "found last in $nReadNames";
+	    #print "found last in $nReadNames";
 	    last;
 	} # old data: /^;/
 	#if (/copy/){ $ncopy++; next; }
@@ -46,7 +46,7 @@ while (<$FHi>){
 		#print "inside remove names";
 		#if (/^[^\s]+\s+(.*)/) { print $FHo "$1\n"; }
 	    #} else {
-	    print "$_ \n";
+	    #print "$_ \n";
 	    print $FHo $_;
 	    $nReadNames++;
 	    #if ($nReadNames == $ntax){ $removeNames = 1; }

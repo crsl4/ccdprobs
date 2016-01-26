@@ -4,23 +4,59 @@
 # Claudia January 2016
 # using 60_concat.in (from HGTinconsistency) as example
 
-file = "../datasets/60_concat.in"
-outfile = "../datasets/60_concat_bt.out"
+## file = "../datasets/60_concat.in"
+## outfile = "../datasets/60_concat_bt.out"
 
-file = "../datasets/38_seqgen383.phy"
-outfile = "../datasets/38_seqgen383_bt.out"
+## file = "../datasets/38_seqgen383.phy"
+## outfile = "../datasets/38_seqgen383_bt.out"
 
-#file="../datasets/M1510.nex"
-#outfile="../datasets/M1510_bt.out"
-
-file="../datasets/M336_numbers.phy"
-outfile="../datasets/M336.out"
+## #file="../datasets/M1510.nex"
+## #outfile="../datasets/M1510_bt.out"
 
 #file = "../datasets/38_seqgen383.nex"
 #outfile = "../datasets/38_seqgen383_bt_nex.out"
 
+file="../datasets/M336_numbers.phy"
+outfile="../datasets/M336.out"
+
+args <- commandArgs(trailingOnly = TRUE)
+if(length(args) != 0){
+    file = args[1]
+    outfile = args[2]
+}
+
+
 # scenario 1: bootstrap + nj assuming JC69 model
 library(ape)
+
+# ---------------------- functions ---------------------------------------------
+# returns bootstrap datasets
+bootstrapDNA <- function(x,B=100){
+    # function based on ape boot.phylo
+    boot.samp <- vector("list", B)
+    y <- nc <- ncol(x)
+    for (i in 1:B){
+        index <- unlist(sample(y, replace = TRUE))
+        boot.samp[[i]] <- x[, index]
+    }
+    ans <- boot.samp
+    ans
+}
+
+# returns list of bootstrap trees obtained with nj
+bootstrapNJTree <- function(x,model="JC69",B=100){
+    # function based on ape boot.phylo
+    boot.tree <- vector("list", B)
+    y <- nc <- ncol(x)
+    for (i in 1:B){
+        boot.samp <- unlist(sample(y, replace = TRUE))
+        boot.tree[[i]] <- nj(dist.dna(x[, boot.samp],model=model))
+    }
+    ans <- boot.tree
+    ans
+}
+# -----------------------------------------------------------------------------
+
 data <- read.dna(file)
 #data <- read.nexus.data(file)
 d <- dist.dna(data) #does not work for nexus files
@@ -31,12 +67,12 @@ tr <- nj(d) #does not work for nexus files
 ## Error in njs(d) :
 ##   distance information insufficient to construct a tree, cannot calculate agglomeration criterion
 
-plot(tr)
+#plot(tr)
 
-source("bootstrap2NJ_functions.r")
+#source("bootstrap2NJ_functions.r")
 bd <- bootstrapDNA(data)
 bt <- bootstrapNJTree(data)
-plot(bt[[1]])
+#plot(bt[[1]])
 
 
 for(i in 1:100){
@@ -46,7 +82,7 @@ for(i in 1:100){
 
 
 # january 11-15 ------------------------------------------
-if(false){
+if(FALSE){
 library(phangorn)
 # read in data
 data <- read.phyDat("60_concat.in", format="phylip", type="DNA")
