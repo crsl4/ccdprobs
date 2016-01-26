@@ -1,3 +1,6 @@
+# functions for the step sequences -> bootstrap -> NJ trees
+# needs ape package, and x = read.dna(phylip)
+
 # returns bootstrap datasets
 bootstrapDNA <- function(x,B=100){
     # function based on ape boot.phylo

@@ -1,4 +1,6 @@
 # R script to do bootstrap of sites and then neighbor joining to get a tree
+# INPUT: sequence file in PHYLIP format
+#        (to use nexus file, first transform to phylip with code nexus2phylip.pl)
 # Claudia January 2016
 # using 60_concat.in (from HGTinconsistency) as example
 
@@ -11,13 +13,16 @@ outfile = "../datasets/38_seqgen383_bt.out"
 #file="../datasets/M1510.nex"
 #outfile="../datasets/M1510_bt.out"
 
+file="../datasets/M336.phy"
+outfile="../datasets/M336_bt.out"
+
 file = "../datasets/38_seqgen383.nex"
 outfile = "../datasets/38_seqgen383_bt_nex.out"
 
 # scenario 1: bootstrap + nj assuming JC69 model
 library(ape)
 data <- read.dna(file)
-data <- read.nexus.data(file)
+#data <- read.nexus.data(file)
 d <- dist.dna(data) #does not work for nexus files
 tr <- nj(d) #does not work for nexus files
 ## Error in nj(d) : missing values are not allowed in the distance matrix
