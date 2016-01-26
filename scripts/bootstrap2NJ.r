@@ -13,11 +13,11 @@ outfile = "../datasets/38_seqgen383_bt.out"
 #file="../datasets/M1510.nex"
 #outfile="../datasets/M1510_bt.out"
 
-file="../datasets/M336.phy"
-outfile="../datasets/M336_bt.out"
+file="../datasets/M336_numbers.phy"
+outfile="../datasets/M336.out"
 
-file = "../datasets/38_seqgen383.nex"
-outfile = "../datasets/38_seqgen383_bt_nex.out"
+#file = "../datasets/38_seqgen383.nex"
+#outfile = "../datasets/38_seqgen383_bt_nex.out"
 
 # scenario 1: bootstrap + nj assuming JC69 model
 library(ape)
