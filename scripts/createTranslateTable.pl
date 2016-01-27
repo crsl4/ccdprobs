@@ -27,7 +27,7 @@ my $table = $dirs.$filename."_table.out";
 open my $FHi, $phylip or die "can't open PHYLIP gene sequence file";
 open my $FHo, ">", $oufn or die "can't open new PHYLIP gene sequence file";
 open my $FHtab, ">", $table or die "can't open new table file";
-print $FHtab "translate\n";
+print $FHtab " translate\n"; # need space at the beginning
 my $numLine = 0;
 my $nReadNames = 1;
 my $ntax = 0;

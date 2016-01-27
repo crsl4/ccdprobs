@@ -77,6 +77,7 @@ print "created list of bootstrap trees: $Rout\n";
 open my $FHi, $Rout or die "can't open list of trees file";
 open my $FHtab, $table or die "can't open translate table";
 open my $FHo, ">", $mbsumIN or die "can't open new list of trees file";
+print $FHo "begin trees;\n"; # need this line at the beginning
 while (<$FHtab>){
     print $FHo "$_";
 }
@@ -93,7 +94,7 @@ print "created mbsum input file: $mbsumIN\n";
 $cmd = "../src/mbsum $mbsumIN";
 print "$cmd\n";
 #system($cmd);
-my $mbsumOUT = $dirs.$filename."_trees.in"; #fixit: check if this is the name after mbsum
+my $mbsumOUT = $dirs.$filename."_trees.in"; 
 print "created mbsum output file: $mbsumOUT\n";
 
 # -------------- run mbsum ----------------------------------

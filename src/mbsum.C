@@ -252,6 +252,7 @@ int main(int argc, char *argv[])
       lineNumber++;
       istringstream s(line); // line into stream s
       string keyTree,name,equalSign;
+      bool istree = false;
 
       //claudia: this is to skip the table in each file (except 1st)
       if (readTtable){
@@ -270,7 +271,14 @@ int main(int argc, char *argv[])
 	}
       }
       
+      if(!MBoutput){
+	char c;
+	c = s.get();
+	if ( c == '(' ) istree = true;
+	s.putback(c);
+      }
       s >> keyTree;
+      //cout << "keyTree " << keyTree << " line number " << lineNumber << endl;
       if (i==0){ //i goes from 1 to the number of files
 	// read translate table only in the first file, assuming the same in other files.
 	if (keyTree=="translate" || keyTree=="TRANSLATE" || keyTree=="Translate"){
@@ -284,7 +292,7 @@ int main(int argc, char *argv[])
 	  }
 	  if (ch == ';'){
 	    sumOut << ";\n";
-	    readTtable = false;
+	    readTtable = false; //claudia: why false here?
 	  } else {
 	    sumOut << "\n";
 	    continue;
@@ -309,30 +317,45 @@ int main(int argc, char *argv[])
 	continue;
       }
 
-      // Skip extra output in MrBayes3.2 [&U] before tree string
-
-      while ( !s.fail() ) {
-	char c;
-	c = s.get();
-	if ( c == '(' ) {
-	  s.putback(c);
-	  break;
+   
+      if(MBoutput){
+	// Skip extra output in MrBayes3.2 [&U] before tree string
+	
+	while ( !s.fail() ) {
+	  char c;
+	  c = s.get();
+	  if ( c == '(' ) {
+	    s.putback(c);
+	    break;
+	  }
 	}
+
+	string treeString;
+	s >> treeString;
+	Tree tree(treeString,lineNumber, mbsumPruner);
+	numTrees[i]++;
+	ostringstream g;
+	tree.printTop(g); // changed from mb2badger to not include an endline
+	string top = g.str();
+	if((i==0) && numTrees[0] == 1) // first tree
+	  root = new TopCountNode(top);
+	else
+	  root->check(top);
       }
-      // claudia: not sure if the tree is in s or already in keyTree
-      string treeString;
-      s >> treeString;
-      Tree tree(treeString,lineNumber, mbsumPruner);
-      numTrees[i]++;
-
-      ostringstream g;
-      tree.printTop(g); // changed from mb2badger to not include an endline
-      string top = g.str();
-
-      if((i==0) && numTrees[0] == 1) // first tree
-	root = new TopCountNode(top);
-      else
-	root->check(top);
+      else {
+	if(istree){
+	  //cout << "keyTree " << keyTree << " line number " << lineNumber << endl;
+	  Tree tree(keyTree,lineNumber, mbsumPruner);
+	  numTrees[i]++;
+	  ostringstream g;
+	  tree.printTop(g); // changed from mb2badger to not include an endline
+	  string top = g.str();
+	  if((i==0) && numTrees[0] == 1) // first tree
+	    root = new TopCountNode(top);
+	  else
+	    root->check(top);
+	}
+      }	
     }
     cout << "Skipped " << numActuallySkipped << " trees, read " << numTrees[i] << " trees." << endl;
   }
