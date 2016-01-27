@@ -2,7 +2,15 @@
 
 # INPUT: phylip or nexus sequence data
 # RUN: perl seq2ccdprob.pl -phylip file.phy (or -nexus file.nex)
-# WARNING: assumes it is in the same path with all the scripts
+# WARNING: assumes it is in the same path with all the datasets
+# because mbsum saves to the current working directory
+# WARNING: if phylip file used to begin with, needs to have specific format:
+# _ntax_length
+# \n
+# 1stTaxon sequence...
+# ...
+# where _ represents whitespace
+# Claudia January 2016
 
 # 0) create translate table and get phylip file with taxon numbers
 # 1) run in R bootstrap2NJ.r to get list of trees
@@ -11,7 +19,7 @@
 # 3) run mbsum: ../src/mbsum trees.out
 # (inside datasets). creates trees.in
 # check that trees.in has the desired format for ccdprobs (it should)
-# 4) run ccdprobs: ../src/ccdprobs --in trees.in --out trees
+# 4) run ccdprobs: ../src/ccdprobs -i trees.in -o trees
 # (inside datasets)
 # Claudia January 2016
 
@@ -25,6 +33,8 @@ use File::Basename;
 my $nexus = "none";
 my $phylip = "none";
 my $cmd;
+my $pathsrc = "../src/";
+my $pathscripts = "../scripts/";
 
 # -------------- read arguments from command-line -----------------------
 GetOptions('nexus=s' => \$nexus, #you can leave this comma
@@ -36,7 +46,7 @@ if($phylip eq "none" && $nexus eq "none"){
     die "you need to input either a nexus or a phylip file";
 } elsif($phylip eq "none"){ #entered nexus file
     print "converting nexus file to phylip...\n";
-    $cmd = "perl nexus2phylip.pl -nexus $nexus";
+    $cmd = "perl ${pathscripts}nexus2phylip.pl -nexus $nexus";
     print "$cmd\n";
     system($cmd);
     my($filename, $dirs, $suffix) = fileparse($nexus, qr/\.[^.]*/);
@@ -46,7 +56,7 @@ if($phylip eq "none" && $nexus eq "none"){
 
 # -------------- translate table and taxon numbers ----------------------------------
 print "creating translate table...\n";
-$cmd = "perl createTranslateTable.pl -phylip $phylip";
+$cmd = "perl ${pathscripts}createTranslateTable.pl -phylip $phylip";
 print "$cmd\n";
 system($cmd);
 
@@ -67,7 +77,7 @@ if(-f $Rout){
 
 # -------------- bootstrap + NJ in R ----------------------------------
 print "running bootstrap + NJ...\n";
-$cmd = "Rscript --vanilla bootstrap2NJ.r $newphylip $Rout";
+$cmd = "Rscript --vanilla ${pathscripts}bootstrap2NJ.r $newphylip $Rout";
 print "$cmd\n";
 system($cmd);
 print "created list of bootstrap trees: $Rout\n";
@@ -91,24 +101,17 @@ close $FHi;
 print "created mbsum input file: $mbsumIN\n";
 
 # -------------- run mbsum ----------------------------------
-$cmd = "../src/mbsum $mbsumIN";
+$cmd = "${pathsrc}mbsum $mbsumIN --noMB";
 print "$cmd\n";
-#system($cmd);
+system($cmd);
 my $mbsumOUT = $dirs.$filename."_trees.in"; 
-print "created mbsum output file: $mbsumOUT\n";
+#print "created mbsum output file: $mbsumOUT\n";
+
 
 # -------------- run mbsum ----------------------------------
 my $ccdprobsOUT = $dirs.$filename."_ccdprobs";
-$cmd = "../src/ccdprobs --in $mbsumOUT --out $ccdprobsOUT";
+$cmd = "${pathsrc}ccdprobs -i $mbsumOUT -o $ccdprobsOUT";
 print "$cmd\n";
-#system($cmd);
+system($cmd);
 
-# ccdprobs
 
-# - need to modify mbsum to accept two types of file: from bucky as it
-# - is (with tree name =), from list of trees with artificial
-# - translate table on top run mbsum in M336_trees.out and check what
-# - file name it produces (update seq2ccdprobs) run ccdprobs in the
-# - output of mbsum
-
-# - finish seq2ccdprobs

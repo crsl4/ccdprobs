@@ -38,6 +38,7 @@ while (<$FHi>){
 	if($numLine == 1){
 	    my @line = split /\s+/, $_;
 	    $ntax = $line[1];
+	    print "ntax $ntax\n";
 	}
 	next
     }
