@@ -4,7 +4,7 @@
 
 ## Code to make a Q matrix and its spectral decomposition
 ##   input is:
-##     x which is the vector for parameters in lower triangle of rate matrix
+##     x which is the vector for parameters in lower triangle of rate matrix (r_AC, r_AG, r_AT, r_CG, r_CT, r_GT)
 ##     p which is the stationary distribution
 ##     n which is the number of states
 ##     a flag which will rescale so mean number of transitions per unit time is one
