@@ -1,0 +1,4 @@
+do changes in .Rnw file, and to compile:
+C-c C-c Sweave
+This will create a tex file, then in the tex file, do
+C-c C-c latex to compile
