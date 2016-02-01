@@ -4,16 +4,16 @@
 
 ## Code to make a Q matrix and its spectral decomposition
 ##   input is:
-##     x which is the vector for parameters in lower triangle of rate matrix (r_AC, r_AG, r_AT, r_CG, r_CT, r_GT)
+##     x which is the vector for parameters in lower triangle of rate matrix
 ##     p which is the stationary distribution
 ##     n which is the number of states
 ##     a flag which will rescale so mean number of transitions per unit time is one
 ##   output is a list with the Q matrix itself, matrices for the eigenvectors and their inverse, and a vector of the eigenvalues
 ##
 
-makeQ = function(x,p,n,rescale=FALSE) {
+makeQ = function(r,p,n,rescale=FALSE,symmetric=TRUE) {
   Q = matrix(0,n,n)
-  Q[row(Q) > col(Q)] = x
+  Q[row(Q) > col(Q)] = r
   Q = Q + t(Q)
   Q = Q %*% diag(p)
   diag(Q) = -apply(Q,1,sum)
@@ -21,11 +21,21 @@ makeQ = function(x,p,n,rescale=FALSE) {
       mu = sum( -p*diag(Q) )
       Q = Q/mu
   }
-  eig = eigen(Q)
-  V = eig$vectors
-  lambda = eig$values
-  Vinv = solve(V)
-  return( list(Q=Q,V=V,Vinv=Vinv,lambda=lambda,p=p) )
+  if ( symmetric ) {
+      p.sqrt = sqrt(p)
+      S = diag(p.sqrt) %*% Q %*% diag(1/p.sqrt)
+      eig = eigen(S,symmetric=TRUE) ## Error in eigen(S, symmetric = TRUE) (from branch-length.R#27) : infinite or missing values in 'x'
+      V = diag(1/p.sqrt) %*% eig$vectors
+      lambda = eig$values
+      Vinv = t(eig$vectors) %*% diag(p.sqrt)
+  }
+  else {
+      eig = eigen(Q)
+      V = eig$vectors
+      lambda = eig$values
+      Vinv = solve(V)
+  }
+  return( list(Q=Q,V=V,Vinv=Vinv,lambda=lambda,p=p,r=r) )
 }
 
 
@@ -57,7 +67,7 @@ simulateSequenceSummary = function(nsites,Q,s) {
     return( out )
 }
 
-## Calculate GTR log-likelihood at a sequence s (times) for an observed matrix x and matrix Q
+## Calculate GTR log-likelihood at a sequence s for an observed matrix x and matrix Q
 gtr.log.like = function(x,s,Q) {
     ns = length(s)
     log.like = numeric( ns )
@@ -68,8 +78,40 @@ gtr.log.like = function(x,s,Q) {
     return( log.like )
 }
 
+## GTR log-likelihood function for optimization
+## theta is log(branch.length,rac,rag,rat,rcg,rct) because rgt=1 is the standardization
+## this function is made to use with optim
+## p is stationary distribution (using observed counts, not truth)
+## x is matrix of observed counts
+logl.gtr = function(theta,p,x) {
+    t0 = exp(theta[1])
+    r = c(exp(theta[2:6]),1)
+    Q = makeQ(r,p,n=4,rescale=TRUE,symmetric=TRUE)
+    P = Q$V %*% diag( exp(Q$lambda*t0) ) %*% Q$Vinv
+    logl = sum(x * log(diag(p) %*% P))
+    return (logl)
+}
+
+## Optimize gtr parameters, return Q matrix
+## cheat and use real r as starting values
+optim.gtr = function(x,r0) {
+    n = sum(x)
+    p = (apply(x,1,sum) + apply(x,2,sum)) / (2*n) #observed counts for p
+    ## use JC distance formula to get starting point for branch length; others will all start at 1 (log(1) = 0)
+    jc.x = n - sum(diag(x))
+    jc.d = -3 * log(1 - 4*jc.x/(3*n))/4
+    r = r0/r0[6]
+    theta0 = c(log(jc.d),log(r[-6]))
+#    gtr.out = optim(par=theta0,fn=logl.gtr,p=p,x=x,method="L-BFGS-B",control=list(fnscale=-1))
+    gtr.out = optim(par=theta0,fn=logl.gtr,p=p,x=x,control=list(fnscale=-1))
+    bl.opt = exp(gtr.out$par[1])
+    r.opt = c(exp(gtr.out$par[2:6]),1)
+    Q.gtr = makeQ(r.opt,p,n=4,rescale=TRUE,symmetric=TRUE)
+    return(list(Q=Q.gtr,branch.length=bl.opt))
+}
+
 ## Simulate branch length using JC
-simulateBranchLength = function(nsim,x, eta=0.9) {
+simulateBranchLength.jc = function(nsim,x, eta=0.9) {
     n = sum(x)
     changes = n - sum(diag(x))
     theta = 4*changes/3
@@ -77,8 +119,39 @@ simulateBranchLength = function(nsim,x, eta=0.9) {
     return( w )
 }
 
+## Now try the Tamura-Nei way
+simulateBranchLength.tn = function(nsim,x,eta=0.9) {
+    n = sum(x)
+    prop.ag = (x[1,3] + x[3,1]) / n
+    prop.ct = (x[2,4] + x[4,2]) / n
+    prop.tv = (x[1,2] + x[1,4] + x[2,1] + x[2,3] + x[3,2] + x[3,4] + x[4,1] + x[4,3]) / n
+
+    p.est = (apply(x,1,sum) + apply(x,2,sum)) / (2*n)
+    p.a = p.est[1]
+    p.c = p.est[2]
+    p.g = p.est[3]
+    p.t = p.est[4]
+    p.r = sum(p.est[c(1,3)])
+    p.y = sum(p.est[c(2,4)])
+    numer1 = 2*p.a*p.g*p.r
+    denom1 = numer1 - p.r^2*prop.ag - p.a*p.g*prop.tv
+    c1 = numer1 / denom1
+    numer2 = 2*p.c*p.t*p.y
+    denom2 = numer2 - p.y^2*prop.ct - p.c*p.t*prop.tv
+    c2 = numer2 / denom2
+    c3 = (2*p.a^2*p.g^2) / (p.r * denom1) +
+         (2*p.c^2*p.t^2) / (p.y * denom2) +
+         (p.r^2 * (p.c^2 + p.t^2) + p.y^2 * (p.a^2 + p.g^2) ) / (2*p.r^2*p.y^2 - p.r*p.y*prop.tv)
+    mu = -2 * ( (p.a*p.g/p.r) * log(1 - p.r*prop.ag/(2*p.a*p.g) - prop.tv/(2*p.r) ) +
+                (p.c*p.t/p.y) * log(1 - p.y*prop.ct/(2*p.c*p.t) - prop.tv/(2*p.y) ) +
+                (p.r*p.y - p.a*p.g*p.y/p.r - p.c*p.t*p.r/p.y) * log(1 - prop.tv/(2*p.r*p.y)) )
+    v = (1/ eta) * ((c1^2*prop.ag + c2^2*prop.ct + c3^2*prop.tv) - (c1*prop.ag + c2*prop.ct + c3*prop.tv)^2)/n
+    w = rgamma(nsim,mu^2/v,mu/v)
+    return( w )
+}
+
 ## Plot likelihood and density from simulated sample
-comparePlot = function(x,s,Q,nsim=10000,eta=0.5) {
+comparePlot = function(x,s,Q,nsim=10000,eta.jc=0.5,eta.tn=0.9) {
     require(ggplot2)
     delta = s[2] - s[1] # (assumes that times s are a regular sequence)
     ## compute the likelihood using counts x and generator Q for each s
@@ -92,33 +165,53 @@ comparePlot = function(x,s,Q,nsim=10000,eta=0.5) {
     y = y / delta
     ## Make a data frame
     df.true = data.frame(s,y)
+    ## GTR Q optimized over data
+    Qlist.gtr = optim.gtr(x,Q$r) ## sometimes: Error in eigen(S, symmetric = TRUE) (from branch-length.R#27) : infinite or missing values in 'x'
+    print(Qlist.gtr$branch.length)
+    ## compute this density also
+    log.like2 = gtr.log.like(x,s,Qlist.gtr$Q)
+    log.like2 = log.like2 - max(log.like2)
+    y2 = exp(log.like2)
+    y2 = y2/sum(y2)
+    y2 = y2 / delta
+    df.gtr = data.frame(s,y2)
+
     ## now get a sample of JCish points to compare
-    jc = simulateBranchLength(nsim,x,eta)
+    jc = simulateBranchLength.jc(nsim,x,eta.jc)
     ## density estimate
-    d = density(jc)
+    d.jc = density(jc)
     ## another data frame
-    df.est = data.frame(x=d$x,y=d$y)
+    df.jc = data.frame(x=d.jc$x,y=d.jc$y)
+    ## TN estimate
+    tn = simulateBranchLength.tn(nsim,x,eta.tn)
+    d.tn = density(tn)
+    df.tn = data.frame(x=d.tn$x,y=d.tn$y)
     ## plot it
     p1 = ggplot(df.true, aes(x=s,y=y)) +
         geom_line(color="blue") +
-        geom_line(aes(x=x,y=y),data=df.est,color="red",linetype="dashed") +
+        geom_line(aes(x=x,y=y),data=df.jc,color="red",linetype="dashed") +
+        geom_line(aes(x=x,y=y),data=df.tn,color="darkgreen",linetype="dashed") +
+        geom_line(aes(x=s,y=y2),data=df.gtr,color="gold") +
         xlab('branch length') +
         ylab('densities') +
-            ggtitle('Blue = GTR Likelihood, Red = JC Approximation')
+            ggtitle('Blue = TrueQ, Red = JC, Green = TN, Gold = GTR')
     return( p1 )
 }
 
+
 ## doit
-Q.random = randomQ(4)
+#Q.random = randomQ(4)
 nsites = 500
 branch.length = 0.15
 
-doit = function(nsites, branch.length, eta=0.5, nsim=10000, delta = 0.001) {
+doit = function(nsites, branch.length, eta.jc=0.5, eta.tn=0.8, nsim=10000, delta = 0.001) {
     s = seq(delta,2*branch.length,delta)
     Q = randomQ(4,rescale=TRUE)
     print(round(Q$Q,4))
     print(round(Q$p,4))
+    print(min(diag(Q$Q)))
     x = simulateSequenceSummary(nsites,Q,branch.length)
-    p1 = comparePlot(x,s,Q,nsim,eta)
+    print(x)
+    p1 = comparePlot(x,s,Q,nsim,eta.jc,eta.tn)
     plot(p1)
 }
