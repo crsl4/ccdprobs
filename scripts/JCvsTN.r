@@ -81,10 +81,6 @@ computeBias = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0.8, de
     return( list(Q=Q$Q,p=Q$p,estT=Qlist.gtr$branch.length, ms=meanSqGTR, bias.jc.true=bias.jc.true, bias.jc.gtr=bias.jc.gtr, bias.tn.true=bias.tn.true, bias.tn.gtr=bias.tn.gtr))
 }
 
-nrep = 1000
-branch.length=0.15
-nsites=500
-
 computeBiasSimulations = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001, nrep=1000) {
     Q.vec = list()
     p.vec = list()
@@ -104,9 +100,40 @@ computeBiasSimulations = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta
         bias.tn.gtr.vec[i] = B$bias.tn.gtr
         estT.vec[i] = B$estT
     }
-    return( list(Q.vec=Q.vec,p.vec=p.vec,estT.vec=estT.vec, bias.jc.true.vec=bias.jc.true.vec, bias.jc.gtr.vec=bias.jc.gtr.vec, bias.tn.true.vec=bias.tn.true.vec, bias.tn.gtr.vec=bias.tn.gtr.vec))
+    return( list(Q.vec=Q.vec,p.vec=p.vec,estT.vec=estT.vec, bias.jc.true=bias.jc.true.vec, bias.jc.gtr=bias.jc.gtr.vec, bias.tn.true=bias.tn.true.vec, bias.tn.gtr=bias.tn.gtr.vec))
 }
 
 
+nrep = 100
+branch.length=0.15
+nsites=500
+B=computeBiasSimulations(nsites,branch.length, nrep=nrep)
+
 ## need function to summarize B for a given branch.length: mean(min(Qdiag)), mean(min(p)), mean(max(p)), mean(biases), mean(estT) (and sd)
-## need function to repeat this for branch.length in (0,1), and create df
+# s=vector of branch lengths
+s=seq(0.01,0.2,by=0.01)
+minDiag = function(x){
+    min(diag(x))}
+
+computeBiasSimulations.bl = function(s,nsites=500,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001, nrep=10) {
+    df=data.frame(bl=s, mean.minQdiag=rep(0,length(s)), min.minQdiag=rep(0,length(s)), meanBiasJC.true=rep(0,length(s)), sdBiasJC.true=rep(0,length(s)), meanBiasJC.gtr=rep(0,length(s)), sdBiasJC.gtr=rep(0,length(s)), meanBiasTN.true=rep(0,length(s)), sdBiasTN.true=rep(0,length(s)), meanBiasTN.gtr=rep(0,length(s)), sdBiasTN.gtr=rep(0,length(s)), meanEstT=rep(0,length(s)), sdEstT=rep(0,length(s)))
+    for(i in 1:length(s)){
+        print(paste0("branch length ",s[i]))
+        B=computeBiasSimulations(nsites,s[i],nsim,eta.jc,eta.tn, delta, nrep)
+        df[i,2] = mean(unlist(lapply(B$Q.vec,FUN=minDiag)))
+        df[i,3] = min(unlist(lapply(B$Q.vec,FUN=minDiag)))
+        df[i,4] = mean(B$bias.jc.true)
+        df[i,5] = sd(B$bias.jc.true)
+        df[i,6] = mean(B$bias.jc.gtr)
+        df[i,7] = sd(B$bias.jc.gtr)
+        df[i,8] = mean(B$bias.tn.true)
+        df[i,9] = sd(B$bias.tn.true)
+        df[i,10] = mean(B$bias.tn.gtr)
+        df[i,11] = sd(B$bias.tn.gtr)
+        df[i,12] = mean(B$estT.vec)
+        df[i,13] = sd(B$estT.vec)
+    }
+    return (df)
+}
+
+df=computeBiasSimulations.bl(s,nrep=10)

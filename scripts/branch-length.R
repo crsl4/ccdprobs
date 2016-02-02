@@ -11,7 +11,7 @@
 ##   output is a list with the Q matrix itself, matrices for the eigenvectors and their inverse, and a vector of the eigenvalues
 ##
 
-makeQ = function(r,p,n,rescale=FALSE,symmetric=TRUE) {
+makeQ = function(r,p,n,rescale=FALSE,symmetric=FALSE) {
   Q = matrix(0,n,n)
   Q[row(Q) > col(Q)] = r
   Q = Q + t(Q)
@@ -86,7 +86,7 @@ gtr.log.like = function(x,s,Q) {
 logl.gtr = function(theta,p,x) {
     t0 = exp(theta[1])
     r = c(exp(theta[2:6]),1)
-    Q = makeQ(r,p,n=4,rescale=TRUE,symmetric=TRUE)
+    Q = makeQ(r,p,n=4,rescale=TRUE,symmetric=FALSE)
     P = Q$V %*% diag( exp(Q$lambda*t0) ) %*% Q$Vinv
     logl = sum(x * log(diag(p) %*% P))
     return (logl)
@@ -106,7 +106,7 @@ optim.gtr = function(x,r0) {
     gtr.out = optim(par=theta0,fn=logl.gtr,p=p,x=x,control=list(fnscale=-1))
     bl.opt = exp(gtr.out$par[1])
     r.opt = c(exp(gtr.out$par[2:6]),1)
-    Q.gtr = makeQ(r.opt,p,n=4,rescale=TRUE,symmetric=TRUE)
+    Q.gtr = makeQ(r.opt,p,n=4,rescale=TRUE,symmetric=FALSE)
     return(list(Q=Q.gtr,branch.length=bl.opt))
 }
 
@@ -215,3 +215,47 @@ doit = function(nsites, branch.length, eta.jc=0.5, eta.tn=0.8, nsim=10000, delta
     p1 = comparePlot(x,s,Q,nsim,eta.jc,eta.tn)
     plot(p1)
 }
+
+for(i in 1:100){
+    doit(nsites,branch.length)}
+
+ ##        [,1]    [,2]    [,3]    [,4]
+## [1,] -4.8076  3.6641  0.9282  0.2153
+## [2,]  0.0038 -0.6253  0.5871  0.0344
+## [3,]  0.0040  2.4673 -4.2804  1.8091
+## [4,]  0.0003  0.0393  0.4921 -0.5316
+## [1] 0.0005 0.4731 0.1126 0.4139
+## [1] -4.807612
+##      [,1] [,2] [,3] [,4]
+## [1,]    0    0    0    0
+## [2,]    0  223   15    7
+## [3,]    0   22   42    9
+## [4,]    0    4   10  168
+## Error in eigen(S, symmetric = TRUE) (from branch-length.R#27) : infinite or missing values in 'x'
+## In addition: There were 14 warnings (use warnings() to see them)
+## > warnings()
+## Warning messages:
+## 1: In log(diag(Q$p) %*% P) : NaNs produced
+## ...
+
+## NOTE: error when row of zeros in Q, p has a very small number 0.0005
+
+#################
+# after symmetric=FALSE in all, new error:
+#Error in optim(par = theta0, fn = logl.gtr, p = p, x = x, control = list(fnscale = -1)) (from branch-length.R#106) :
+#  function cannot be evaluated at initial parameters
+
+##         [,1]    [,2]    [,3]    [,4]
+## [1,] -1.1240  0.8402  0.2836  0.0002
+## [2,]  0.5079 -0.9974  0.4854  0.0041
+## [3,]  0.2355  0.6667 -0.9027  0.0005
+## [4,]  0.0238  0.6653  0.0617 -0.7508
+## [1] 0.2585 0.4276 0.3113 0.0026
+## [1] -1.124033
+##      [,1] [,2] [,3] [,4]
+## [1,]  135    9    1    0
+## [2,]    9  177   12    0
+## [3,]    8   17  132    0
+## [4,]    0    0    0    0
+
+## NOTE: same error when row of zeros in Q, p has a very small number 0.0026
