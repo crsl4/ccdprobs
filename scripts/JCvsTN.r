@@ -9,10 +9,15 @@ source('branch-length.r')
 computeBias = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001) {
     s = seq(delta,2*branch.length,delta)
     Q = randomQ(4,rescale=TRUE)
+    x = simulateSequenceSummary(nsites,Q,branch.length)
+    while(0 %in% colSums(x)){ #discard x (counts) with rows of zero
+        Q = randomQ(4,rescale=TRUE)
+        x = simulateSequenceSummary(nsites,Q,branch.length)
+    }
     print(round(Q$Q,4))
     print(round(Q$p,4))
     print(min(diag(Q$Q)))
-    x = simulateSequenceSummary(nsites,Q,branch.length)
+    print(x)
     ## compute the likelihood using counts x and generator Q for each s
     log.like = gtr.log.like(x,s,Q)
     ## turn into a density estimate proportional to likelihood, so truncated uniform prior in t
@@ -111,29 +116,57 @@ B=computeBiasSimulations(nsites,branch.length, nrep=nrep)
 
 ## need function to summarize B for a given branch.length: mean(min(Qdiag)), mean(min(p)), mean(max(p)), mean(biases), mean(estT) (and sd)
 # s=vector of branch lengths
-s=seq(0.01,0.2,by=0.01)
-minDiag = function(x){
-    min(diag(x))}
+#s=seq(0.01,0.2,by=0.01)
+#minDiag = function(x){
+#    min(diag(x))}
 
-computeBiasSimulations.bl = function(s,nsites=500,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001, nrep=10) {
-    df=data.frame(bl=s, mean.minQdiag=rep(0,length(s)), min.minQdiag=rep(0,length(s)), meanBiasJC.true=rep(0,length(s)), sdBiasJC.true=rep(0,length(s)), meanBiasJC.gtr=rep(0,length(s)), sdBiasJC.gtr=rep(0,length(s)), meanBiasTN.true=rep(0,length(s)), sdBiasTN.true=rep(0,length(s)), meanBiasTN.gtr=rep(0,length(s)), sdBiasTN.gtr=rep(0,length(s)), meanEstT=rep(0,length(s)), sdEstT=rep(0,length(s)))
+computeBiasSimulations.df = function(s,nsites=500,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001, nrep=10) {
+    df=data.frame(bl=rep(0,length(s)*nrep), minQdiag=rep(0,length(s)*nrep), biasJC.true=rep(0,length(s)*nrep), biasJC.gtr=rep(0,length(s)*nrep),  biasTN.true=rep(0,length(s)*nrep), biasTN.gtr=rep(0,length(s)*nrep), estT=rep(0,length(s)*nrep))
     for(i in 1:length(s)){
         print(paste0("branch length ",s[i]))
         B=computeBiasSimulations(nsites,s[i],nsim,eta.jc,eta.tn, delta, nrep)
-        df[i,2] = mean(unlist(lapply(B$Q.vec,FUN=minDiag)))
-        df[i,3] = min(unlist(lapply(B$Q.vec,FUN=minDiag)))
-        df[i,4] = mean(B$bias.jc.true)
-        df[i,5] = sd(B$bias.jc.true)
-        df[i,6] = mean(B$bias.jc.gtr)
-        df[i,7] = sd(B$bias.jc.gtr)
-        df[i,8] = mean(B$bias.tn.true)
-        df[i,9] = sd(B$bias.tn.true)
-        df[i,10] = mean(B$bias.tn.gtr)
-        df[i,11] = sd(B$bias.tn.gtr)
-        df[i,12] = mean(B$estT.vec)
-        df[i,13] = sd(B$estT.vec)
+        for(j in 1:nrep){
+            df[j,1] = s[i]
+            df[j,2] = min(diag(B$Q.vec[[j]]))
+            df[j,3] = B$bias.jc.true[j]
+            df[j,4] = B$bias.jc.gtr[j]
+            df[j,5] = B$bias.tn.true[j]
+            df[j,6] = B$bias.tn.gtr[j]
+            df[j,7] = B$estT.vec[j]
+        }
     }
     return (df)
 }
 
-df=computeBiasSimulations.bl(s,nrep=10)
+s=0.15
+df=computeBiasSimulations.df(s,nrep=1000)
+
+## ERROR
+## [1] 125
+##         [,1]    [,2]    [,3]    [,4]
+## [1,] -0.9556  0.0039  0.6559  0.2958
+## [2,]  0.2686 -0.7248  0.2550  0.2012
+## [3,]  1.2434  0.0070 -1.5025  0.2521
+## [4,]  0.4562  0.0045  0.2051 -0.6658
+## [1] 0.4565 0.0066 0.2408 0.2960
+## [1] -1.502495
+##      [,1] [,2] [,3] [,4]
+## [1,]  194    0   20   11
+## [2,]    0    0    0    0
+## [3,]   20    0  113    5
+## [4,]   17    1    3  116
+## Error in density.default(tn) (from JCvsTN.r@14092cu#42) : 'x' contains missing values
+## In addition: Warning messages:
+## 1: In log(1 - p.y * prop.ct/(2 * p.c * p.t) - prop.tv/(2 * p.y)) :
+##   NaNs produced
+## 2: In rgamma(nsim, mu^2/v, mu/v) : NAs produced
+
+## TO DO: figure out error (add prints), do many many simulations with s=0.15, find bias:
+# -always positive?
+# -always TN<JC?
+# -how close to each other?
+
+## then: repeat for different values of s, to see if there is any correlation with bl
+
+## then, do pne similar script but now for spread to choose best eta that covers the dist
+# maybe add eta.tn, eta.jc vector to the function? so that for a fixed branch length, it tried many etas?

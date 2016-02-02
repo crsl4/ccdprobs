@@ -11,7 +11,7 @@
 ##   output is a list with the Q matrix itself, matrices for the eigenvectors and their inverse, and a vector of the eigenvalues
 ##
 
-makeQ = function(r,p,n,rescale=FALSE,symmetric=FALSE) {
+makeQ = function(r,p,n,rescale=FALSE,symmetric=TRUE) {
   Q = matrix(0,n,n)
   Q[row(Q) > col(Q)] = r
   Q = Q + t(Q)
@@ -86,7 +86,7 @@ gtr.log.like = function(x,s,Q) {
 logl.gtr = function(theta,p,x) {
     t0 = exp(theta[1])
     r = c(exp(theta[2:6]),1)
-    Q = makeQ(r,p,n=4,rescale=TRUE,symmetric=FALSE)
+    Q = makeQ(r,p,n=4,rescale=TRUE,symmetric=TRUE)
     P = Q$V %*% diag( exp(Q$lambda*t0) ) %*% Q$Vinv
     logl = sum(x * log(diag(p) %*% P))
     return (logl)
@@ -106,7 +106,7 @@ optim.gtr = function(x,r0) {
     gtr.out = optim(par=theta0,fn=logl.gtr,p=p,x=x,control=list(fnscale=-1))
     bl.opt = exp(gtr.out$par[1])
     r.opt = c(exp(gtr.out$par[2:6]),1)
-    Q.gtr = makeQ(r.opt,p,n=4,rescale=TRUE,symmetric=FALSE)
+    Q.gtr = makeQ(r.opt,p,n=4,rescale=TRUE,symmetric=TRUE)
     return(list(Q=Q.gtr,branch.length=bl.opt))
 }
 
@@ -216,8 +216,8 @@ doit = function(nsites, branch.length, eta.jc=0.5, eta.tn=0.8, nsim=10000, delta
     plot(p1)
 }
 
-for(i in 1:100){
-    doit(nsites,branch.length)}
+#for(i in 1:100){
+#    doit(nsites,branch.length)}
 
  ##        [,1]    [,2]    [,3]    [,4]
 ## [1,] -4.8076  3.6641  0.9282  0.2153
