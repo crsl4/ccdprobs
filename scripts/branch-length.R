@@ -238,7 +238,7 @@ for(i in 1:100){
 ## 1: In log(diag(Q$p) %*% P) : NaNs produced
 ## ...
 
-## NOTE: error when row of zeros in Q, p has a very small number 0.0005
+## NOTE: error when row of zeros in x (counts), p has a very small number 0.0005
 
 #################
 # after symmetric=FALSE in all, new error:
@@ -258,4 +258,4 @@ for(i in 1:100){
 ## [3,]    8   17  132    0
 ## [4,]    0    0    0    0
 
-## NOTE: same error when row of zeros in Q, p has a very small number 0.0026
+## NOTE: same error when row of zeros in x (counts), p has a very small number 0.0026
