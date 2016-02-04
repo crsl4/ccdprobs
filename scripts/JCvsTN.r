@@ -184,15 +184,27 @@ pdf("../manuscript/JCvsTNtrue1000_2.pdf")
 plot(p3)
 dev.off()
 
+# ========================================================================================================
+# coverage
+source('branch-length.r')
+library(ggplot2)
+nsites=500
+branch.length=0.15
+nsim=10000
+eta.jc=0.2
+eta.tn=0.2
+delta=0.001
 
-compareCoverage = function(nsites,branch.length,nsim=10000,eta.jc=0.8,eta.tn=0.8, delta=0.001) {
+computeCoverage = function(nsites,branch.length,nsim=10000,eta.jc=0.8,eta.tn=0.8, delta=0.001) {
     D = simulateDensities(nsites,branch.length,nsim,eta.jc,eta.tn, delta)
-    cutoff = c(0.01,5,10)
-    covJC.true = 0 #max 6
+    #cutoff = c(0.01,5,10)
+    cutoff = seq(0.01,5,by=0.5)
+    covJC.true = 0
     covTN.true = 0
-    covJC.gtr = 0 #max 6
+    covJC.gtr = 0
     covTN.gtr = 0
     for(c in cutoff){
+        print(paste("cutoff",c,"-------"))
         subsetTrue = D$df.true[D$df.true$y>c,]
         subsetGTR = D$df.gtr[D$df.gtr$y>c,]
         subsetJC = D$df.jc[D$df.jc$y>c,]
@@ -205,13 +217,74 @@ compareCoverage = function(nsites,branch.length,nsim=10000,eta.jc=0.8,eta.tn=0.8
         upperGTR = subsetGTR[length(subsetGTR$s),1]
         upperJC = subsetJC[length(subsetJC$x),1]
         upperTN = subsetTN[length(subsetTN$x),1]
+        print(paste("lowerTrue",lowerTrue,"upperTrue", upperTrue))
+        print(paste("lowerJC",lowerJC,"upperJC", upperJC))
+        print(paste("lowerTN",lowerTN,"upperTN", upperTN))
         covJC.true = covJC.true + (lowerTrue>lowerJC) +(upperTrue<lowerJC)
         covJC.gtr = covJC.gtr + (lowerGTR>lowerJC) +(upperGTR<lowerJC)
         covTN.true = covJC.true + (lowerTrue>lowerTN) +(upperTrue<lowerTN)
         covTN.gtr = covJC.gtr + (lowerGTR>lowerTN) +(upperGTR<lowerTN)
     }
+    covJC.true= covJC.true/(2*length(cutoff))
+    covTN.true= covTN.true/(2*length(cutoff))
+    covJC.gtr= covJC.gtr/(2*length(cutoff))
+    covTN.gtr= covTN.gtr/(2*length(cutoff))
+    ## p1 = ggplot(D$df.true, aes(x=s,y=y)) +
+    ##     geom_line(color="blue") +
+    ##         geom_line(aes(x=x,y=y),data=D$df.jc,color="red",linetype="dashed") +
+    ##             geom_line(aes(x=x,y=y),data=D$df.tn,color="darkgreen",linetype="dashed") +
+    ##                 geom_line(aes(x=s,y=y2),data=D$df.gtr,color="gold") +
+    ##                     xlab('branch length') +
+    ##                         ylab('densities') +
+    ##                             ggtitle('Blue = TrueQ, Red = JC, Green = TN, Gold = GTR')
+    ##plot(p1)
     return( list(Q=D$Q,p=D$p,estT=D$estT,covJC.true=covJC.true, covJC.gtr=covJC.gtr,covTN.true=covTN.true, covTN.gtr=covTN.gtr))
 }
+
+computeCoverageSimulations = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001, nrep=1000) {
+    cov.jc.true.vec = rep(0,nrep)
+    cov.jc.gtr.vec = rep(0,nrep)
+    cov.tn.true.vec = rep(0,nrep)
+    cov.tn.gtr.vec = rep(0,nrep)
+    for(i in 1:nrep){
+        print(i)
+        D = computeCoverage(nsites, branch.length, nsim, eta.jc, eta.tn, delta)
+        cov.jc.true.vec[i] = D$covJC.true
+        cov.jc.gtr.vec[i] = D$covJC.gtr
+        cov.tn.true.vec[i] = D$covTN.true
+        cov.tn.gtr.vec[i] = D$covTN.gtr
+    }
+    return( list(cov.jc.true = mean(cov.jc.true.vec),cov.jc.gtr = mean(cov.jc.gtr.vec),cov.tn.true = mean(cov.tn.true.vec),cov.tn.gtr = mean(cov.tn.gtr.vec)))
+}
+
+nrep = 10
+branch.length=0.15
+nsites=500
+eta=0.2
+B=computeCoverageSimulations(nsites,branch.length, nrep=nrep, eta.jc=eta, eta.tn=eta)
+B
+
+# eta=vector (same value for JC and TN)
+computeCoverageSimulations.df = function(s,eta,nsites=500,nsim=10000, delta=0.001, nrep=1000) {
+    df=data.frame(eta=eta, covJC.true=rep(0,length(eta)), covJC.gtr=rep(0,length(eta)),  covTN.true=rep(0,length(eta)), covTN.gtr=rep(0,length(eta)))
+    j = 1
+    for(e in eta){
+        B=computeCoverageSimulations(nsites,s,nsim,eta.jc=e,eta.tn=e, delta, nrep)
+        df[j,2] = B$cov.jc.true
+        df[j,3] = B$cov.jc.true
+        df[j,4] = B$cov.jc.gtr
+        df[j,5] = B$cov.tn.true
+        j = j+1
+    }
+    return ( df )
+}
+
+nsites=1000
+nrep=100
+s=0.15
+eta=seq(0.1,0.9,by=0.1)
+df=computeCoverageSimulations.df(s,eta, nsites=nsites, nrep=nrep)
+save(df,file="covDf.Rda")
 
 ## todo: check compareCoverage, see that it works and does what we want
 # do simulations and simulations.df
@@ -221,6 +294,8 @@ compareCoverage = function(nsites,branch.length,nsim=10000,eta.jc=0.8,eta.tn=0.8
 
 
 
+
+###########################################################################################################
 ## Errors:
 
 ## [1] 253
