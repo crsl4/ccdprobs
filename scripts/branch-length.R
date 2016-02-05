@@ -215,7 +215,8 @@ doit = function(nsites, branch.length, eta.jc=0.5, eta.tn=0.8, nsim=10000, delta
     x = simulateSequenceSummary(nsites,Q,branch.length)
     print(x)
     p1 = comparePlot(x,s,Q,nsim,eta.jc,eta.tn)
-    plot(p1)
+#    plot(p1)
+    return (p1)
 }
 
 #for(i in 1:100){

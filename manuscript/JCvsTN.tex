@@ -1,0 +1,198 @@
+\documentclass[12pt,letterpaper]{article}
+
+\usepackage[english]{babel}
+
+% Page Layout
+\usepackage[hmargin={1.0in, 1.0in}, vmargin={1.0in, 1.0in}]{geometry}
+
+% Spacing
+\usepackage{setspace}
+% Use \singlespacing, \onehalfspacing, or \doublespacing,
+% or alternatively \setstretch{3} for triple spacing (or any other number).
+
+% Mathematical Notation
+\usepackage{amsmath,amstext,amssymb}
+
+\renewcommand{\Pr}{\mathsf{P}}
+\newcommand{\prob}[1]{\Pr\left(#1\right)}
+\newcommand{\given}{\mid}
+\newcommand{\me}{\mathrm{e}}
+\renewcommand{\emptyset}{\varnothing} % use a circle instead of a zero for the empty set, requires amssymb
+
+% our commands:
+\newcommand{\help}[1]{\textcolor{blue}{#1}}
+\newcommand{\falta}[1]{\textcolor{red}{#1}}
+
+%\usepackage{alltt}
+% for mathematical notation in a verbatim-like environment
+% \begin{alltt} ... \end{alltt}
+
+% Graphics
+\usepackage{graphicx}
+%\usepackage[small]{subfigure}
+% for subfigures in a single figure
+%\usepackage{epsfig,rotating,epsf,psfrag,lscape}
+
+% Lists
+\usepackage{enumitem}
+% usage: \begin{enumerate}[resume] will continue numbering from previous enumerate block
+
+% Citations
+\usepackage{natbib}
+
+\usepackage{Sweave}
+\begin{document}
+\begin{center}
+Ideas on sampling branch lengths given two sequences.
+\end{center}
+
+The requirement is to find a method that is reasonably fast
+to generate at random (with a probability density that can be computed)
+branch lengths for a tree topology that are not too different from an actual posterior distribution
+for the purposes of implementing an importance sampling method for Bayesian phylogenetics.
+The approach outlined here requires a method to generate a random distance between two ``sequences'',
+where ``sequences'' is quoted because a sequence will be generalized to a site-wise independent probability distribution.
+
+\paragraph{Jukes-Cantor model.---}
+Data: X= number of sites that differ between 2 sequences; n= total
+number of sites
+\begin{align*}
+X|p &\sim Binomial(n,p)\\
+p &\sim Beta(\alpha_0,\beta_0)\\
+p|X &\sim Beta(\alpha=\alpha_0+X,\beta=\beta_0+n-X)
+\end{align*}
+
+\textbf{Idea:}
+\begin{enumerate}
+\item Draw beta distribution
+\item Rescale to $(0,3/4)$ instead of $(0,1)$
+\item Plug into $\hat{t}_{MLE}$ formula:
+\begin{align*}
+\hat{t}_{MLE}=-\frac{3}{4} \log \left( 1- \frac{4}{3} \frac{x}{n} \right)
+\end{align*}
+\end{enumerate}
+
+We introduce the parameter $\eta$ to control the variance of the JC
+density for $T$:
+\begin{align*}
+\frac{x}{n}&=\frac{3\alpha}{a(\alpha+\beta)}\\
+\alpha+\beta &= \eta n
+\end{align*}
+
+So, the parameters for beta are
+\begin{align*}
+\alpha&=\frac{4}{3}\eta x \\
+\beta&=\eta n - \frac{4}{3} \eta x
+\end{align*}
+
+\textbf{Procedure:}
+\begin{enumerate}
+\item Simulate $W \sim Beta(\alpha,\beta)$
+\item Rescale $0.75W=x/n$
+\item Compute $T=-0.75 \log(1-W)$
+\end{enumerate}
+We could also simulate $1-W \sim Beta(\beta,\alpha)$.
+%% fixit: do we want to add here density of T?
+\textbf{Code:} \texttt{branch-length.r}
+\begin{Schunk}
+\begin{Sinput}
+> Q = randomQ(n=4,rescale=TRUE)
+> x = simulateSequenceSummary(nsites=500,Q=Q,s=0.15)
+> w = simulateBranchLength.jc(nsim=100,x=x,eta=0.8)
+\end{Sinput}
+\end{Schunk}
+
+
+\paragraph{Tamura-Nei model.---}
+add assumptions
+\begin{Schunk}
+\begin{Sinput}
+> simulateBranchLength.tn = function(nsim,x,eta=0.9) {
++    n = sum(x)
++    prop.ag = (x[1,3] + x[3,1]) / n
++    prop.ct = (x[2,4] + x[4,2]) / n
++    prop.tv = (x[1,2] + x[1,4] + x[2,1] + x[2,3] + x[3,2] + x[3,4] + x[4,1] + x[4,3]) / n
++    print(paste("prop.ag",prop.ag,"prop.ct",prop.ct,"prop.tv",prop.tv))
++    p.est = (apply(x,1,sum) + apply(x,2,sum)) / (2*n)
++    p.a = p.est[1]
++    p.c = p.est[2]
++    p.g = p.est[3]
++    p.t = p.est[4]
++    p.r = sum(p.est[c(1,3)])
++    p.y = sum(p.est[c(2,4)])
++    print(paste("p.a",p.a,"p.c",p.c,"p.g",p.g,"p.t",p.t,"p.r",p.r,"p.y",p.y))
++    numer1 = 2*p.a*p.g*p.r
++    denom1 = numer1 - p.r^2*prop.ag - p.a*p.g*prop.tv
++    c1 = numer1 / denom1
++    numer2 = 2*p.c*p.t*p.y
++    denom2 = numer2 - p.y^2*prop.ct - p.c*p.t*prop.tv
++    c2 = numer2 / denom2
++    c3 = (2*p.a^2*p.g^2) / (p.r * denom1) +
++         (2*p.c^2*p.t^2) / (p.y * denom2) +
++         (p.r^2 * (p.c^2 + p.t^2) + p.y^2 * (p.a^2 + p.g^2) ) / (2*p.r^2*p.y^2 - p.r*p.y*prop.tv)
++    mu = -2 * ( (p.a*p.g/p.r) * log(1 - p.r*prop.ag/(2*p.a*p.g) - prop.tv/(2*p.r) ) +
++                (p.c*p.t/p.y) * log(1 - p.y*prop.ct/(2*p.c*p.t) - prop.tv/(2*p.y) ) +
++                (p.r*p.y - p.a*p.g*p.y/p.r - p.c*p.t*p.r/p.y) * log(1 - prop.tv/(2*p.r*p.y)) )
++    v = (1/ eta) * ((c1^2*prop.ag + c2^2*prop.ct + c3^2*prop.tv) - (c1*prop.ag + c2*prop.ct + c3*prop.tv)^2)/n
++    print(paste("mu",mu,"v",v))
++    w = rgamma(nsim,mu^2/v,mu/v)
++    return( w )
++}
+\end{Sinput}
+\end{Schunk}
+
+
+\paragraph{Comparison JC vs TN.--}
+\textbf{Code:} \texttt{JCvsTN.r}
+
+\begin{Schunk}
+\begin{Sinput}
+> s=0.15
+> nrep=1000
+> nsites=1000
+> eta=0.8
+\end{Sinput}
+\end{Schunk}
+
+
+\begin{itemize}
+\item $bias=true mode - JC(TN) mode$
+\item Most times bias positive ($\sim 0.926$)
+\item Most times ($\sim 0.99$), bias less than $0.02$ (spread density $\sim 0.1$).
+\item JC bias is systematically bigger than TN bias.
+\item When one of them is surprisingly big, the other is too
+\item Big biases associated to too small diagonal values in Q ($<-5.0$)
+\end{itemize}
+
+\textbf{Problems with TN}
+\begin{itemize}
+\item Errors with rows (or columns) of zero in the count matrix
+\item Errors if row (or column) only one entry different than zero (or
+  close to vector of zeros).
+\item This is also associated with very small values in the diagonal
+  of Q matrix, but not as small as causing big bias ($<-2.2$).
+\end{itemize}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{biasTrue1000_2.pdf}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{biasGTR1000_2.pdf}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{JCvsTN1000_2.pdf}
+\end{figure}
+
+
+
+\end{document}
+
+
+
+
+

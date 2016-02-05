@@ -3,6 +3,15 @@
 # Claudia February 2016
 
 source('branch-length.r')
+nsites=500
+branch.length=0.15
+eta=0.2
+
+p1 = doit(nsites=nsites,branch.length=branch.length,eta.jc=eta, eta.tn=eta)
+pdf("densities_eta02.pdf")
+plot(p1)
+dev.off()
+
 
 ## simulate densities
 simulateDensities = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001) {
@@ -147,12 +156,14 @@ computeBiasSimulations.df = function(s,nsites=500,nsim=10000,eta.jc=0.5,eta.tn=0
 s=0.15
 nrep=1000
 nsites=500
-d500=computeBiasSimulations.df(s,nrep=nrep, nsites=nsites)
-save(d500,file="d500.Rda")
+eta=0.8
+d500=computeBiasSimulations.df(s,nrep=nrep, nsites=nsites, eta.jc=eta,eta.tn=eta)
+save(d500,file="d500_3.Rda")
+# many times stopped for errors
 
 nsites=1000
-d1000=computeBiasSimulations.df(s,nrep=nrep, nsites=nsites)
-save(d1000,file="d1000.Rda")
+d1000=computeBiasSimulations.df(s,nrep=nrep, nsites=nsites, eta.jc=eta, eta.tn=eta)
+save(d1000,file="d1000_2.Rda")
 
 load("df.Rda")
 library('ggplot2')
@@ -176,13 +187,70 @@ pdf("../manuscript/biasGTR1000_2.pdf")
 plot(p2)
 dev.off()
 
-p3 <- ggplot(d$df, aes(x=biasTN.true, y=biasJC.true))+ggtitle("true blue, GTR green")+
-    geom_point(alpha=0.3, color='blue')+
-    geom_point(aes(x=biasTN.gtr, y=biasJC.gtr), data=d$df,color='green', alpha=0.2)+
+p3 <- ggplot(d$df, aes(x=biasTN.true, y=biasJC.true))+ggtitle("true red, GTR gold")+
+    geom_point(alpha=0.3, color='red')+
+    geom_point(aes(x=biasTN.gtr, y=biasJC.gtr), data=d$df,color='gold', alpha=0.2)+
     geom_abline(slope=1)
-pdf("../manuscript/JCvsTNtrue1000_2.pdf")
+pdf("../manuscript/JCvsTN1000_2.pdf")
 plot(p3)
 dev.off()
+
+## equal bias GTR
+m1=mean(d$df$biasJC.gtr)
+m2=mean(d$df$biasTN.gtr)
+s1=sd(d$df$biasJC.gtr)
+s2=sd(d$df$biasTN.gtr)
+sp=((nrep-1)*s1^2+(nrep-1)*s2^2)/(2*nrep-2)
+num=1/(sqrt(2/nrep)*sp)
+t=(m1-m2)*num
+t ## 624.17
+
+## bias positive. bias - true mode -JC(TN) mode
+jc.true = sum(d$df$biasJC.true > 0)
+jc.true/nrep # 0.958
+tn.true = sum(d$df$biasTN.true > 0)
+tn.true/nrep # 0.839
+jc.gtr = sum(d$df$biasJC.gtr > 0)
+jc.gtr/nrep # 0.993
+tn.gtr = sum(d$df$biasTN.gtr > 0)
+tn.gtr/nrep # 0.915
+
+
+## big biases
+big=0.02
+jc.true = sum(d$df$biasJC.true > big)
+jc.gtr = sum(d$df$biasJC.gtr>big)
+tn.true = sum(d$df$biasTN.true > big)
+tn.gtr = sum(d$df$biasTN.gtr>big)
+jc.true/nrep # 0.019
+jc.gtr/nrep #0.015
+tn.true/nrep #0.002
+tn.gtr/nrep #0.003
+
+## huge biases
+huge=0.05
+jc = which(d$df$biasJC.true > huge)
+d$B$Q.vec[[jc]] #huge -diag = -10.6, -17.67
+tn = which(d$df$biasTN.true > huge)
+d$B$Q.vec[[tn]]
+# same jc=tn=577
+d$df$biasJC.true[jc]
+d$df$biasTN.true[tn]
+
+huge=0.2
+jc = which(d$df$biasJC.gtr > huge)
+d$B$Q.vec[[jc]]
+tn = which(d$df$biasTN.gtr > huge)
+d$B$Q.vec[[tn]]
+# same jc=tn=577
+
+huge=0.1
+jc = which(d$df$biasJC.gtr > huge) # 353 577
+d$B$Q.vec[[jc[1]]] # also big -diag = -11.9, -4.24
+tn = which(d$df$biasTN.gtr > huge) # 353 577
+d$B$Q.vec[[tn[1]]]
+
+
 
 # ========================================================================================================
 # coverage
@@ -280,11 +348,18 @@ computeCoverageSimulations.df = function(s,eta,nsites=500,nsim=10000, delta=0.00
 }
 
 nsites=1000
-nrep=100
+nrep=500
 s=0.15
 eta=seq(0.1,0.9,by=0.1)
 df=computeCoverageSimulations.df(s,eta, nsites=nsites, nrep=nrep)
 save(df,file="covDf.Rda")
+
+p4 <- ggplot(df,aes(eta,covJC.true))+
+    geom_line(color="blue")+
+    geom_line(aes(x=eta, y=covTN.true), data=df,color='green')
+pdf("../manuscript/cov.pdf")
+plot(p4)
+dev.off()
 
 ## todo: check compareCoverage, see that it works and does what we want
 # do simulations and simulations.df
@@ -351,7 +426,52 @@ log(1-a-b)
 ## Therefore, the application of mu formula should be confined to the case of relatively closely related sequences (mu<1) and a
 ## relatively large value of n
 
+## [1] 578
+##         [,1]    [,2]    [,3]    [,4]
+## [1,] -0.8301  0.0644  0.0387  0.7270
+## [2,]  0.5986 -0.7211  0.0397  0.0828
+## [3,]  2.6884  0.2971 -4.5341  1.5487
+## [4,]  1.1934  0.0146  0.0366 -1.2446
+## [1] 0.5776 0.0622 0.0083 0.3519
+## [1] -4.534142
+##      [,1] [,2] [,3] [,4]
+## [1,]  254    3    1   28
+## [2,]    2   27    0    0
+## [3,]    1    0    0    0
+## [4,]   34    1    0  149
+## [1] "prop.ag 0.004 prop.ct 0.002 prop.tv 0.134"
+## [1] "p.a 0.577 p.c 0.06 p.g 0.002 p.t 0.361 p.r 0.579 p.y 0.421"
+## [1] "mu NaN v 0.00124646846841193"
+## Error in density.default(tn) (from JCvsTN.r@499bPf#42) : 'x' contains missing values
+## In addition: Warning messages:
+## 1: In log(1 - p.r * prop.ag/(2 * p.a * p.g) - prop.tv/(2 * p.r)) :
+##   NaNs produced
+## 2: In rgamma(nsim, mu^2/v, mu/v) : NAs produced
 
+## problem associated with small Q diag << -2
+
+## [1] 590
+##          [,1]    [,2]     [,3]    [,4]
+## [1,] -66.7354 29.1960   0.1765 37.3630
+## [2,]   0.4170 -0.8337   0.0022  0.4145
+## [3,]   0.5954  0.5276 -36.2091 35.0860
+## [4,]   0.2644  0.2054   0.0736 -0.5434
+## [1] 0.0047 0.3293 0.0014 0.6646
+## [1] -66.73542
+##      [,1] [,2] [,3] [,4]
+## [1,]    0    3    0    0
+## [2,]    2  301    0   20
+## [3,]    0    1    0    3
+## [4,]    4   31    1  634
+## [1] "prop.ag 0 prop.ct 0.051 prop.tv 0.014"
+## [1] "p.a 0.0045 p.c 0.3295 p.g 0.0025 p.t 0.6635 p.r 0.007 p.y 0.993"
+## [1] "mu NaN v 6.44048109812991e+25"
+## Error in density.default(tn) (from JCvsTN.r@647Cef#42) : 'x' contains missing values
+## In addition: Warning messages:
+## 1: In log(1 - p.r * prop.ag/(2 * p.a * p.g) - prop.tv/(2 * p.r)) :
+##   NaNs produced
+## 2: In log(1 - prop.tv/(2 * p.r * p.y)) : NaNs produced
+## 3: In rgamma(nsim, mu^2/v, mu/v) : NAs produced
 
 
 ## TO DO:
