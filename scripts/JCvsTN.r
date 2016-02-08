@@ -5,9 +5,10 @@
 source('branch-length.r')
 nsites=500
 branch.length=0.15
-eta=0.2
+eta.jc=0.5
+eta.tn=0.5
 
-p1 = doit(nsites=nsites,branch.length=branch.length,eta.jc=eta, eta.tn=eta)
+p1 = doit(nsites=nsites,branch.length=branch.length,eta.jc=eta.jc, eta.tn=eta.tn)
 pdf("densities_eta02.pdf")
 plot(p1)
 dev.off()
