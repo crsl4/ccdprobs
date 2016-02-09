@@ -18,8 +18,11 @@ dev.off()
 simulateDensities = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001) {
     s = seq(delta,2*branch.length,delta)
     Q = randomQ(4,rescale=TRUE)
+    while(min(diag(Q$Q)) < -3){
+        Q = randomQ(4,rescale=TRUE)
+    }
     x = simulateSequenceSummary(nsites,Q,branch.length)
-    while((0 %in% rowSums(x)) || (0 %in% colSums(x))){ #discard x (counts) with rows of zero (and also columns because error in density(tn))
+    while((0 %in% rowSums(x)) || (0 %in% colSums(x)) || (any(rowSums(x)<5)) || (any(colSums(x)<5))){ #discard x (counts) with rows of zero (and also columns because error in density(tn)), also discard few counts in one row/column
         Q = randomQ(4,rescale=TRUE)
         x = simulateSequenceSummary(nsites,Q,branch.length)
     }
@@ -257,14 +260,8 @@ d$B$Q.vec[[tn[1]]]
 # coverage
 source('branch-length.r')
 library(ggplot2)
-nsites=500
-branch.length=0.15
-nsim=10000
-eta.jc=0.2
-eta.tn=0.2
-delta=0.001
 
-computeCoverage = function(nsites,branch.length,nsim=10000,eta.jc=0.8,eta.tn=0.8, delta=0.001) {
+computeCoverage = function(nsites,branch.length,nsim=10000,eta.jc=0.8,eta.tn=0.8, delta=0.001, plot=FALSE) {
     D = simulateDensities(nsites,branch.length,nsim,eta.jc,eta.tn, delta)
     #cutoff = c(0.01,5,10)
     cutoff = seq(0.01,5,by=0.5)
@@ -289,26 +286,34 @@ computeCoverage = function(nsites,branch.length,nsim=10000,eta.jc=0.8,eta.tn=0.8
         print(paste("lowerTrue",lowerTrue,"upperTrue", upperTrue))
         print(paste("lowerJC",lowerJC,"upperJC", upperJC))
         print(paste("lowerTN",lowerTN,"upperTN", upperTN))
-        covJC.true = covJC.true + (lowerTrue>lowerJC) +(upperTrue<lowerJC)
-        covJC.gtr = covJC.gtr + (lowerGTR>lowerJC) +(upperGTR<lowerJC)
-        covTN.true = covJC.true + (lowerTrue>lowerTN) +(upperTrue<lowerTN)
-        covTN.gtr = covJC.gtr + (lowerGTR>lowerTN) +(upperGTR<lowerTN)
+        covJC.true = covJC.true + (lowerTrue>lowerJC) +(upperTrue<upperJC)
+        covJC.gtr = covJC.gtr + (lowerGTR>lowerJC) +(upperGTR<upperJC)
+        covTN.true = covTN.true + (lowerTrue>lowerTN) +(upperTrue<upperTN)
+        covTN.gtr = covTN.gtr + (lowerGTR>lowerTN) +(upperGTR<upperTN)
     }
     covJC.true= covJC.true/(2*length(cutoff))
     covTN.true= covTN.true/(2*length(cutoff))
     covJC.gtr= covJC.gtr/(2*length(cutoff))
     covTN.gtr= covTN.gtr/(2*length(cutoff))
-    ## p1 = ggplot(D$df.true, aes(x=s,y=y)) +
-    ##     geom_line(color="blue") +
-    ##         geom_line(aes(x=x,y=y),data=D$df.jc,color="red",linetype="dashed") +
-    ##             geom_line(aes(x=x,y=y),data=D$df.tn,color="darkgreen",linetype="dashed") +
-    ##                 geom_line(aes(x=s,y=y2),data=D$df.gtr,color="gold") +
-    ##                     xlab('branch length') +
-    ##                         ylab('densities') +
-    ##                             ggtitle('Blue = TrueQ, Red = JC, Green = TN, Gold = GTR')
-    ##plot(p1)
+    if(plot){
+    p1 = ggplot(D$df.true, aes(x=s,y=y)) +
+        geom_line(color="blue") +
+            geom_line(aes(x=x,y=y),data=D$df.jc,color="red",linetype="dashed") +
+                geom_line(aes(x=x,y=y),data=D$df.tn,color="darkgreen",linetype="dashed") +
+                    geom_line(aes(x=s,y=y2),data=D$df.gtr,color="gold") +
+                        xlab('branch length') +
+                            ylab('densities') +
+                                ggtitle('Blue = TrueQ, Red = JC, Green = TN, Gold = GTR')
+    plot(p1)}
     return( list(Q=D$Q,p=D$p,estT=D$estT,covJC.true=covJC.true, covJC.gtr=covJC.gtr,covTN.true=covTN.true, covTN.gtr=covTN.gtr))
 }
+
+nsites=1000
+branch.length=0.15
+nsim=10000
+eta=0.2
+delta=0.001
+D = computeCoverage(nsites,branch.length,nsim=nsim,eta.jc=eta,eta.tn=eta, delta=delta, plot=TRUE)
 
 computeCoverageSimulations = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001, nrep=1000) {
     cov.jc.true.vec = rep(0,nrep)
@@ -340,9 +345,9 @@ computeCoverageSimulations.df = function(s,eta,nsites=500,nsim=10000, delta=0.00
     for(e in eta){
         B=computeCoverageSimulations(nsites,s,nsim,eta.jc=e,eta.tn=e, delta, nrep)
         df[j,2] = B$cov.jc.true
-        df[j,3] = B$cov.jc.true
-        df[j,4] = B$cov.jc.gtr
-        df[j,5] = B$cov.tn.true
+        df[j,3] = B$cov.jc.gtr
+        df[j,4] = B$cov.tn.true
+        df[j,5] = B$cov.tn.gtr
         j = j+1
     }
     return ( df )
@@ -355,12 +360,173 @@ eta=seq(0.1,0.9,by=0.1)
 df=computeCoverageSimulations.df(s,eta, nsites=nsites, nrep=nrep)
 save(df,file="covDf.Rda")
 
-p4 <- ggplot(df,aes(eta,covJC.true))+
+p4 <- ggplot(df,aes(eta,covJC.true))+ggtitle("JC blue, TN green, GTR dashed")+
     geom_line(color="blue")+
-    geom_line(aes(x=eta, y=covTN.true), data=df,color='green')
+    geom_line(aes(x=eta, y=covTN.true), data=df,color='green')+
+    geom_line(aes(x=eta, y=covJC.gtr), data=df,color='blue', linetype='dashed')+
+    geom_line(aes(x=eta, y=covTN.gtr), data=df,color='green', linetype='dashed')
 pdf("../manuscript/cov.pdf")
 plot(p4)
 dev.off()
+
+# ===================================================================================
+# coverage with CI (instead of cuts in density)
+source('branch-length.r')
+library(ggplot2)
+
+computeCoverageCI = function(nsites,branch.length,nsim=10000,eta.jc=0.8,eta.tn=0.8, delta=0.001, plot=FALSE) {
+    D = simulateDensities(nsites,branch.length,nsim,eta.jc,eta.tn, delta)
+    sum.true = sum(D$df.true$y)
+    sum.gtr = sum(D$df.gtr$y)
+    sum.jc = sum(D$df.jc$y)
+    sum.tn = sum(D$df.tn$y)
+    # lowerTrue
+    i = 1
+    suma = 0
+    while(suma <= 0.05){
+        suma = suma + D$df.true$y[i]/sum.true
+        i = i+1
+    }
+    lowerTrue = D$df.true$s[i]
+    # upperTrue
+    i = 1
+    suma = 0
+    while(suma <= 0.95){
+        suma = suma + D$df.true$y[i]/sum.true
+        i = i+1
+    }
+    upperTrue = D$df.true$s[i]
+    # lowerGTR
+    i = 1
+    suma = 0
+    while(suma <= 0.05){
+        suma = suma + D$df.gtr$y[i]/sum.gtr
+        i = i+1
+    }
+    lowerGTR = D$df.gtr$s[i]
+    # upperGTR
+    i = 1
+    suma = 0
+    while(suma <= 0.95){
+        suma = suma + D$df.gtr$y[i]/sum.gtr
+        i = i+1
+    }
+    upperGTR = D$df.gtr$s[i]
+    # lowerJC
+    i = 1
+    suma = 0
+    while(suma <= 0.05){
+        suma = suma + D$df.jc$y[i]/sum.jc
+        i = i+1
+    }
+    lowerJC = D$df.jc$x[i]
+    # upperJC
+    i = 1
+    suma = 0
+    while(suma <= 0.95){
+        suma = suma + D$df.jc$y[i]/sum.jc
+        i = i+1
+    }
+    upperJC = D$df.jc$x[i]
+    # lowerTN
+    i = 1
+    suma = 0
+    while(suma <= 0.05){
+        suma = suma + D$df.tn$y[i]/sum.tn
+        i = i+1
+    }
+    lowerTN = D$df.tn$x[i]
+    # upperTN
+    i = 1
+    suma = 0
+    while(suma <= 0.95){
+        suma = suma + D$df.tn$y[i]/sum.tn
+        i = i+1
+    }
+    upperTN = D$df.tn$x[i]
+    print(paste("lowerTrue",lowerTrue,"upperTrue", upperTrue))
+    print(paste("lowerGTR",lowerGTR,"upperGTR", upperGTR))
+    print(paste("lowerJC",lowerJC,"upperJC", upperJC))
+    print(paste("lowerTN",lowerTN,"upperTN", upperTN))
+    covJC.true = (lowerTrue>lowerJC) + (upperTrue<upperJC)
+    covJC.gtr = (lowerGTR>lowerJC) + (upperGTR<upperJC)
+    covTN.true = (lowerTrue>lowerTN) + (upperTrue<upperTN)
+    covTN.gtr = (lowerGTR>lowerTN) + (upperGTR<upperTN)
+    if(plot){
+    p1 = ggplot(D$df.true, aes(x=s,y=y)) +
+        geom_line(color="blue") +
+            geom_line(aes(x=x,y=y),data=D$df.jc,color="red",linetype="dashed") +
+                geom_line(aes(x=x,y=y),data=D$df.tn,color="darkgreen",linetype="dashed") +
+                    geom_line(aes(x=s,y=y2),data=D$df.gtr,color="gold") +
+                        xlab('branch length') +
+                            ylab('densities') +
+                                ggtitle('Blue = TrueQ, Red = JC, Green = TN, Gold = GTR')
+    plot(p1)}
+    return( list(Q=D$Q,p=D$p,estT=D$estT,covJC.true=covJC.true, covJC.gtr=covJC.gtr,covTN.true=covTN.true, covTN.gtr=covTN.gtr))
+}
+
+nsites=500
+branch.length=0.15
+nsim=10000
+eta=0.2
+delta=0.001
+D = computeCoverageCI(nsites,branch.length,nsim=nsim,eta.jc=eta,eta.tn=eta, delta=delta, plot=TRUE)
+
+
+computeCoverageCISimulations = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0.8, delta=0.001, nrep=1000) {
+    cov.jc.true.vec = rep(0,nrep)
+    cov.jc.gtr.vec = rep(0,nrep)
+    cov.tn.true.vec = rep(0,nrep)
+    cov.tn.gtr.vec = rep(0,nrep)
+    for(i in 1:nrep){
+        print(i)
+        D = computeCoverageCI(nsites, branch.length, nsim, eta.jc, eta.tn, delta)
+        cov.jc.true.vec[i] = D$covJC.true
+        cov.jc.gtr.vec[i] = D$covJC.gtr
+        cov.tn.true.vec[i] = D$covTN.true
+        cov.tn.gtr.vec[i] = D$covTN.gtr
+    }
+    return( list(cov.jc.true = mean(cov.jc.true.vec),cov.jc.gtr = mean(cov.jc.gtr.vec),cov.tn.true = mean(cov.tn.true.vec),cov.tn.gtr = mean(cov.tn.gtr.vec)))
+}
+
+nrep = 10
+branch.length=0.15
+nsites=500
+eta=0.2
+B=computeCoverageCISimulations(nsites,branch.length, nrep=nrep, eta.jc=eta, eta.tn=eta)
+B
+
+# eta=vector (same value for JC and TN)
+computeCoverageCISimulations.df = function(s,eta,nsites=500,nsim=10000, delta=0.001, nrep=1000) {
+    df=data.frame(eta=eta, covJC.true=rep(0,length(eta)), covJC.gtr=rep(0,length(eta)),  covTN.true=rep(0,length(eta)), covTN.gtr=rep(0,length(eta)))
+    j = 1
+    for(e in eta){
+        B=computeCoverageCISimulations(nsites,s,nsim,eta.jc=e,eta.tn=e, delta, nrep)
+        df[j,2] = B$cov.jc.true
+        df[j,3] = B$cov.jc.gtr
+        df[j,4] = B$cov.tn.true
+        df[j,5] = B$cov.tn.gtr
+        j = j+1
+    }
+    return ( df )
+}
+
+nsites=1000
+nrep=1000
+s=0.15
+eta=seq(0.1,0.9,by=0.05)
+df=computeCoverageCISimulations.df(s,eta, nsites=nsites, nrep=nrep)
+save(df,file="covCIDf.Rda")
+
+p4 <- ggplot(df,aes(eta,covJC.true))+ggtitle("JC blue, TN green, GTR dashed")+
+    geom_line(color="blue")+
+    geom_line(aes(x=eta, y=covTN.true), data=df,color='green')+
+    geom_line(aes(x=eta, y=covJC.gtr), data=df,color='blue', linetype='dashed')+
+    geom_line(aes(x=eta, y=covTN.gtr), data=df,color='green', linetype='dashed')
+pdf("../manuscript/covCI.pdf")
+plot(p4)
+dev.off()
+
 
 ## todo: check compareCoverage, see that it works and does what we want
 # do simulations and simulations.df

@@ -1,0 +1,8 @@
+Chosen 4 cats: cat, tiger, leopard, clouded leopard
+In datasets:
+1) perl ../scripts/seq2ccdprobs.pl -phylip 4-taxon-cats.phy
+2) need to sample one tree from clade dist
+3) 4taxa_cats_dogs.r with input tree and phylip file to sample branch lengths
+4) compute importance weight (need code)
+
+Repeat 2,3,4
