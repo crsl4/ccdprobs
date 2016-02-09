@@ -1,0 +1,154 @@
+\documentclass[12pt,letterpaper]{article}
+
+\usepackage[english]{babel}
+
+% Page Layout
+\usepackage[hmargin={1.0in, 1.0in}, vmargin={1.0in, 1.0in}]{geometry}
+
+% Spacing
+\usepackage{setspace}
+% Use \singlespacing, \onehalfspacing, or \doublespacing,
+% or alternatively \setstretch{3} for triple spacing (or any other number).
+
+% Mathematical Notation
+\usepackage{amsmath,amstext,amssymb}
+
+\renewcommand{\Pr}{\mathsf{P}}
+\newcommand{\prob}[1]{\Pr\left(#1\right)}
+\newcommand{\given}{\mid}
+\newcommand{\me}{\mathrm{e}}
+\renewcommand{\emptyset}{\varnothing} % use a circle instead of a zero for the empty set, requires amssymb
+
+% our commands:
+\usepackage{color}
+\newcommand{\help}[1]{\textcolor{blue}{#1}}
+\newcommand{\falta}[1]{\textcolor{red}{#1}}
+
+%\usepackage{alltt}
+% for mathematical notation in a verbatim-like environment
+% \begin{alltt} ... \end{alltt}
+
+% Graphics
+\usepackage{graphicx}
+%\usepackage[small]{subfigure}
+% for subfigures in a single figure
+%\usepackage{epsfig,rotating,epsf,psfrag,lscape}
+
+% Lists
+\usepackage{enumitem}
+% usage: \begin{enumerate}[resume] will continue numbering from previous enumerate block
+
+% Citations
+\usepackage{natbib}
+
+
+\usepackage{Sweave}
+\begin{document}
+\begin{center}
+\textbf{Importance sampling: 4 taxa case}
+\end{center}
+
+\paragraph{Data.} 4 sequences for cats: cat, tiger, leopard, clouded
+leopard in phylip file \texttt{4taxa-cats.phy}:
+
+\texttt{Cat ATGTTCATAAACCGGTGACTATTTTCAACTAATCACAAACTGAGCTGGCATGGTGGGGACTGC...}
+
+\texttt{CloudedLeopard ATGTTCATAAACCGCTGACTATTTTCAACTAACCATCGCTTGGGCCGGTATAGTA...}
+
+\texttt{Leopard ATGTTCATAAACCGCTGACTATTTTCAACCAATCACAAAGATAGCTGGCATGGTGGGGACTGC...}
+
+\texttt{Tiger ATGTTCATAAACCGCTGACTATTTTCAACCAATCACAAGGATATTTGGTATAGTGGGGACTGC...}
+
+% fixit: need a section on model and model assumptions
+
+\paragraph{Conditional clade distribution.} From the phylip input
+file, we obtain the conditional clade distribution from a sample bootstrapped
+NJ trees with the perl script \texttt{seq2ccdprobs.pl}.
+
+\paragraph{Sample topology.} From the clade distribution, we sample
+one topology. \falta{still don't know how? which output file to use?}
+
+\paragraph{Sample branch lengths given a topology.} Let $T$ be the 4-taxon
+topology sampled from the conditional clade distribution.
+\begin{enumerate}
+\item Choose one tip at random to exclude. Denote the other three sequences by
+  $seq_1,seq_2,seq_3$, where $seq_1,seq_2$ are sisters.
+\item Compute the matrices of counts between all pairs of the three
+  sequences: $x_{12}, x_{13}, x_{23}$, and simulate the branch length between
+  each pair with JC (or TN) model, and $\eta=0.5$ (see JCvsTN.pdf for
+  details on choosing $\eta$): $d_{12},d_{13},d_{23}$
+\item Compute the distances between $seq_1,seq_2$ and its parent $x$:
+\begin{align*}
+  d_{1x} &= \frac{(d_{12}+d_{13}-d_{23})}{2} \\
+  d_{2x} &= \frac{(d_{12}+d_{23}-d_{13})}{2}
+\end{align*}
+\item Convert $seq_1,seq_2,seq_3,seq_4$ to matrices like
+\begin{center}
+\texttt{Cat ATGTTCAT...}\\[0.5cm]
+$S_{cat}=$
+\begin{tabular}{cccccccc}
+A & 1 & 0 & 0 & 0 & 0 & 0 & 1 ...\\
+C & 0 & 0 & 0 & 0 & 0 & 1 & 0 ...\\
+G & 0 & 0 & 1 & 0 & 0 & 0 & 0 ...\\
+T & 0 & 1 & 0 & 1 & 1 & 0 & 0 ...
+\end{tabular}
+\end{center}
+\item Estimate the sequence distribution at $x$ from the sequences
+  $seq_1,seq_2$. The formula for the likelihood at site $j$ for node
+  $x$, parent of $1,2$ is:
+\begin{align*}
+L^x_j(s) &= \left[ \sum_{i \in \{A,C,G,T\}} P_{si}(d_{1x}) L^1_j(i)
+\right] * \left[ \sum_{i \in \{A,C,G,T\}} P_{si}(d_{2x}) L^2_j(i)
+\right] \\
+s &\in \{A,C,G,T\}
+\end{align*}
+where
+\begin{align*}
+L^k_j(i) &= S_k[i,j], k=1,2 \\
+P(t) &= \exp(\mathbf{Q}t)
+\end{align*}
+\falta{Q: how to estimate this Q? Also, $L^x_j$ is the likelihood, we
+  want $P(x|1,2)$}\\
+So that the sequence matrix for $x$ is given by $S_x$:
+\begin{align*}
+S_x[i,j] \falta{= L^x_j(i)}
+\end{align*}
+\begin{center}
+$S_x=$
+\begin{tabular}{cccccccc}
+A & $L^x_1(A)$ & $L^x_2(A)$...\\
+C & $L^x_1(C)$ & $L^x_2(C)$...\\
+G & $L^x_1(G)$ & $L^x_2(G)$... \\
+T & $L^x_1(T)$ & $L^x_2(T)$...
+\end{tabular}
+\end{center}
+%aqui voy: falta d34, d3x, d4x
+\item Compute the count matrix between $seq_3,seq_4$: $x_{34}$ and
+  simulate the branch length $d_{34}$ with JC (or TN) model and
+  $\eta=0.5$
+\item Compute the equivalent to the count matrix between $x$ and
+  $seq_3,seq_4$:
+\begin{align*}
+x_{x3}=\sum_{j=1}^{nsites} S_3[,j]*S_x[,j]^T
+\end{align*}
+\item Simulate branch lengths $d_{3x}, d_{4x}$ with JC (or TN) model
+  and $\eta=0.5$
+\item Compute the distances between $seq_3,seq_4$ and its parent $y$,
+  and between $x,y$:
+\begin{align*}
+  d_{3y} &= \frac{(d_{34}+d_{3x}-d_{4x})}{2} \\
+  d_{4y} &= \frac{(d_{34}+d_{4x}-d_{3x})}{2} \\
+  d_{xy} &= \frac{(d_{3x}+d_{4x}-d_{34})}{2}
+\end{align*}
+
+\end{enumerate}
+
+\paragraph{Compute importance weight}
+\begin{align*}
+w(tree) &= posterior(tree)/ g(tree) \\
+g(tree) &= p(topology) density(branch lengths | topology)
+\end{align*}
+where $p(topology)$ comes from the clade distribution.
+
+
+\end{document}
