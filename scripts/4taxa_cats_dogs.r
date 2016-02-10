@@ -65,7 +65,8 @@ sampleBL = function(d,tre,nsim=1, eta=0.5){
     print(d2x)
 
 
-    # need seq distribution at x: felsenstein algorithm
+    #need seq distribution at x: felsenstein algorithm
+    # r = rep(1,6)
     #Q = optim.gtr(x,r) #fixit: x=matrix of counts, which counts when there are 4 sequences?
     Q = randomQ(4) #fixit: for the moment
     print(Q$Q)
