@@ -1,18 +1,13 @@
-# list of doubts:
-# 1) JC vs TN? eta=0.5
-# 2) seq dist at x: how to estimate Q? which counts? the siteLik function is merely the lik, we want P(x|1,2)
-# 3) we have ccdprobs, how to sample tree? from which output file?
 
 library(ape)
 source('branch-length.r')
 
 d=read.dna("../datasets/4taxa-cats.phy") #needs to be 4 taxa
 tre=read.tree("../datasets/4taxa-cats.tre") # fixit: how to sample a tree? from 4-taxon-cats_ccdprobs.out?
-nsim=1
 eta=0.5
 
 # function to sample branch lengths for 4-taxon tree
-sampleBL = function(d,tre,nsim=1, eta=0.5){
+sampleBL = function(d,tre,eta=0.5){
     thr = sample(1:4, size=3, replace=FALSE) # need to choose three taxa
     fth = setdiff(1:4,thr)
     seq1 = as.vector(unname(as.character(d[thr[1],]))) # fixit: need to make sure that 1,2 are sisters
@@ -27,35 +22,35 @@ sampleBL = function(d,tre,nsim=1, eta=0.5){
     nuc = c("a","c","g","t")
     n = 4
 
-    out = matrix(0,n,n) # distance between 1 and 2
+    out12 = matrix(0,n,n) # distance between 1 and 2
     for(i in 1:n)
         for(j in 1:n)
-            out[i,j] = sum(seq1==nuc[i] & seq2==nuc[j])
-    print(out)
+            out12[i,j] = sum(seq1==nuc[i] & seq2==nuc[j])
+    print(out12)
     # want to check if out is good for tn? fixit
     # need to determine eta, and jc vs tn?
-    d12 = simulateBranchLength.jc(nsim=nsim,out,eta=eta)
-    d12 = simulateBranchLength.tn(nsim=nsim, out, eta=eta)
+    d12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
+    d12 = simulateBranchLength.tn(nsim=1, out12, eta=eta)
     print(d12)
 
-    out = matrix(0,n,n)     # distance between 1 and 3
+    out13 = matrix(0,n,n)     # distance between 1 and 3
     for(i in 1:n)
         for(j in 1:n)
-            out[i,j] = sum(seq1==nuc[i] & seq3==nuc[j])
-    print(out)
+            out13[i,j] = sum(seq1==nuc[i] & seq3==nuc[j])
+    print(out13)
 
-    d13 = simulateBranchLength.jc(nsim=nsim,out,eta=eta)
-    d13 = simulateBranchLength.tn(nsim=nsim, out, eta=eta)
+    d13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
+    d13 = simulateBranchLength.tn(nsim=1, out13, eta=eta)
     print(d13)
 
-    out = matrix(0,n,n)     # distance between 2 and 3
+    out23 = matrix(0,n,n)     # distance between 2 and 3
     for(i in 1:n)
         for(j in 1:n)
-            out[i,j] = sum(seq2==nuc[i] & seq3==nuc[j])
-    print(out)
+            out23[i,j] = sum(seq2==nuc[i] & seq3==nuc[j])
+    print(out23)
 
-    d23 = simulateBranchLength.jc(nsim=nsim,out,eta=eta)
-    d23 = simulateBranchLength.tn(nsim=nsim, out, eta=eta)
+    d23 = simulateBranchLength.jc(nsim=1,out23,eta=eta)
+    d23 = simulateBranchLength.tn(nsim=1, out23, eta=eta)
     print(d23)
 
     d1x = (d12+d13-d23)/2
@@ -66,10 +61,10 @@ sampleBL = function(d,tre,nsim=1, eta=0.5){
 
 
     #need seq distribution at x: felsenstein algorithm
-    # r = rep(1,6)
-    #Q = optim.gtr(x,r) #fixit: x=matrix of counts, which counts when there are 4 sequences?
-    Q = randomQ(4) #fixit: for the moment
-    print(Q$Q)
+    r = rep(1,6)
+    Q = optim.gtr(out12,r) #fixit: x=matrix of counts, which counts when there are 4 sequences?
+    #Q = randomQ(4) #fixit: for the moment
+    print(Q$Q$Q)
 
     #need seq1.dist and seq2.dist which are matrices
     seq1.dist = matrix(0,n,nsites)
@@ -120,37 +115,38 @@ sampleBL = function(d,tre,nsim=1, eta=0.5){
     #print(seq3.dist)
     #print(seq4.dist)
 
-    seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q) #fixit
+    seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q) #fixit: correct Q? lik, not P(x|1,2)
+    print(seqx)
 
-    out = matrix(0,n,n) # distance between 3 and 4
+    out34 = matrix(0,n,n) # distance between 3 and 4
     for(i in 1:n)
         for(j in 1:n)
-            out[i,j] = sum(seq3==nuc[i] & seq4==nuc[j])
-    print(out)
+            out34[i,j] = sum(seq3==nuc[i] & seq4==nuc[j])
+    print(out34)
 
-    d34 = simulateBranchLength.jc(nsim=nsim,out,eta=eta)
-    d34 = simulateBranchLength.tn(nsim=nsim, out, eta=eta)
+    d34 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
+    d34 = simulateBranchLength.tn(nsim=1, out34, eta=eta)
     print(d34)
 
 
-    out = matrix(0,n,n) # distance between 3 and x
+    out3x = matrix(0,n,n) # distance between 3 and x
     for(i in 1:nsites){
-        out = out + seq3.dist[,i]%*%t(seqx[,i])
+        out3x = out3x + seq3.dist[,i]%*%t(seqx[,i])
     }
-    print(out)
+    print(out3x)
 
-    d3x = simulateBranchLength.jc(nsim=nsim,out,eta=eta)
-    d3x = simulateBranchLength.tn(nsim=nsim, out, eta=eta)
+    d3x = simulateBranchLength.jc(nsim=1,out3x,eta=eta)
+    d3x = simulateBranchLength.tn(nsim=1, out3x, eta=eta)
     print(d3x)
 
-    out = matrix(0,n,n) # distance between 4 and x
+    out4x = matrix(0,n,n) # distance between 4 and x
     for(i in 1:nsites){
-        out = out + seq4.dist[,i]%*%t(seqx[,i])
+        out4x = out4x + seq4.dist[,i]%*%t(seqx[,i])
     }
-    print(out)
+    print(out4x)
 
-    d4x = simulateBranchLength.jc(nsim=nsim,out,eta=eta)
-    d4x = simulateBranchLength.tn(nsim=nsim, out, eta=eta)
+    d4x = simulateBranchLength.jc(nsim=1,out4x,eta=eta)
+    d4x = simulateBranchLength.tn(nsim=1, out4x, eta=eta)
     print(d4x)
 
     d3y = (d34+d3x-d4x)/2
@@ -163,6 +159,7 @@ sampleBL = function(d,tre,nsim=1, eta=0.5){
                                         # need to update new bl in tre
 }
 
+# 1-----x-----2
 # d1x = distance from 1 to parent x, similarly d2x
 # seq1.distj = jth column in seq1.dist matrix (for site j), similarly seq2.distj
 # Q = matrix of rates
@@ -195,3 +192,7 @@ sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q){
     # fixit: this is merely the likelihood, we want P(x|1,2)
 }
 
+# list of doubts:
+# 1) JC vs TN? eta=0.5
+# 2) seq dist at x: how to estimate Q? which counts? the siteLik function is merely the lik, we want P(x|1,2)
+# 3) we have ccdprobs, how to sample tree? from which output file?
