@@ -42,6 +42,11 @@
 \usepackage{natbib}
 
 
+%==================================================== ALGORITHM SETUP
+\usepackage[ruled,vlined]{algorithm2e}
+%Algorithms
+\def \validationAlg{{\hyperref[validationAlg]{Algorithm \ref{validationAlg}}}}
+
 \usepackage{Sweave}
 \begin{document}
 \begin{center}
@@ -65,18 +70,25 @@ leopard in phylip file \texttt{4taxa-cats.phy}:
 file, we obtain the conditional clade distribution from a sample bootstrapped
 NJ trees with the perl script \texttt{seq2ccdprobs.pl}.
 
-\paragraph{Sample topology.} From the clade distribution, we sample
-one topology. \falta{still don't know how? which output file to use?}
+\paragraph{Sample topology.} From the conditional clade distribution, we sample
+one topology. Denote by $p_{ccd}(T)$ the probability of sampling the
+particular topology $T$ from the conditional clade distribution.
 
 \paragraph{Sample branch lengths given a topology.} Let $T$ be the 4-taxon
 topology sampled from the conditional clade distribution.
 \begin{enumerate}
 \item Choose one tip at random to exclude. Denote the other three sequences by
   $seq_1,seq_2,seq_3$, where $seq_1,seq_2$ are sisters.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=4cm,height=2cm]{quartet12x34y.eps}
+\end{figure}
+
 \item Compute the matrices of counts between all pairs of the three
   sequences: $x_{12}, x_{13}, x_{23}$, and simulate the branch length between
-  each pair with JC (or TN) model, and $\eta=0.5$ (see JCvsTN.pdf for
-  details on choosing $\eta$): $d_{12},d_{13},d_{23}$
+  each pair with Tamura-Nei (TN) model, and $\eta=0.5$ (see JCvsTN.pdf for
+  details on choosing TN and $\eta$): $d_{12},d_{13},d_{23}$
 \item Compute the distances between $seq_1,seq_2$ and its parent $x$:
 \begin{align*}
   d_{1x} &= \frac{(d_{12}+d_{13}-d_{23})}{2} \\
@@ -105,33 +117,32 @@ s &\in \{A,C,G,T\}
 where
 \begin{align*}
 L^k_j(i) &= S_k[i,j], k=1,2 \\
-P(t) &= \exp(\mathbf{Q}t)
+P(t) &= \exp(\hat{Q}t)
 \end{align*}
-\falta{Q: how to estimate this Q? Also, $L^x_j$ is the likelihood, we
-  want $P(x|1,2)$}\\
+
 So that the sequence matrix for $x$ is given by $S_x$:
 \begin{align*}
-S_x[i,j] \falta{= L^x_j(i)}
+S_x[i,j] = \frac{\pi_i L^x_j(i)}{\sum_{i=1}^4 \pi_i L^x_j(i)}
 \end{align*}
-\begin{center}
-$S_x=$
-\begin{tabular}{cccccccc}
-A & $L^x_1(A)$ & $L^x_2(A)$...\\
-C & $L^x_1(C)$ & $L^x_2(C)$...\\
-G & $L^x_1(G)$ & $L^x_2(G)$... \\
-T & $L^x_1(T)$ & $L^x_2(T)$...
-\end{tabular}
-\end{center}
-%aqui voy: falta d34, d3x, d4x
+% \begin{center}
+% $S_x=$
+% \begin{tabular}{cccccccc}
+% A & $L^x_1(A)$ & $L^x_2(A)$...\\
+% C & $L^x_1(C)$ & $L^x_2(C)$...\\
+% G & $L^x_1(G)$ & $L^x_2(G)$... \\
+% T & $L^x_1(T)$ & $L^x_2(T)$...
+% \end{tabular}
+% \end{center}
+
 \item Compute the count matrix between $seq_3,seq_4$: $x_{34}$ and
-  simulate the branch length $d_{34}$ with JC (or TN) model and
+  simulate the branch length $d_{34}$ with TN model and
   $\eta=0.5$
 \item Compute the equivalent to the count matrix between $x$ and
   $seq_3,seq_4$:
 \begin{align*}
 x_{x3}=\sum_{j=1}^{nsites} S_3[,j]*S_x[,j]^T
 \end{align*}
-\item Simulate branch lengths $d_{3x}, d_{4x}$ with JC (or TN) model
+\item Simulate branch lengths $d_{3x}, d_{4x}$ with TN model
   and $\eta=0.5$
 \item Compute the distances between $seq_3,seq_4$ and its parent $y$,
   and between $x,y$:
@@ -141,14 +152,72 @@ x_{x3}=\sum_{j=1}^{nsites} S_3[,j]*S_x[,j]^T
   d_{xy} &= \frac{(d_{3x}+d_{4x}-d_{34})}{2}
 \end{align*}
 
+\item Compute the density of the branch lengths given the topology,
+  denoted as $f_{TN}(d|T)$ for
+  $d=(d_{1x},d_{2x},d_{xy},d_{3y},d_{4y})$. \falta{how to do this?
+    Bret email: One issue is that we don't really have a
+    bijection.... For the 4-taxon tree, we generate 3 gamma random
+    variables and then 3 more; 6 rvs go to 5 branch lengths. As the
+    tree gets bigger, this difference gets bigger. We discard the
+    distance from the cherry parent to the other node. At one point I
+    considered saving it, but this made the rest of the algorithm
+    messy if we had to keep track of this distance. So, if we add each
+    of these as sort of an auxiliary rv, then we can get the
+    bijection. For the density of the actual branch lengths, we
+    integrate out the auxiliary rvs and hopefully get the same
+    answer.}
 \end{enumerate}
 
-\paragraph{Compute importance weight}
+\paragraph{Importance weight.} Let $p(T)$ denote the prior
+distribution of tree $T$ \falta{(for topology only, or with bl?)}, and
+let $L(T,d)$ denote the likelihood of $T$ under the GTR model.
 \begin{align*}
-w(tree) &= posterior(tree)/ g(tree) \\
-g(tree) &= p(topology) density(branch lengths | topology)
+L(T,d) &= \prod_k L_k(T,d) \\
+L_k(T,d) & = \sum_{i=1}^4 \sum_{j=1}^4 \pi_i P_{ij}(d_{xy}) P_{i1}(d_{1x}) P_{i2}(d_{2x}) P_{j3}(d_{3y}) P_{j4}(d_{4y})
 \end{align*}
-where $p(topology)$ comes from the clade distribution.
+\falta{(likelihood correct?)}
+
+Then, the importance weight is
+\begin{align*}
+w(T) &= \frac{p(T)L(T,d)}{g(T)} \\
+g(T) &= p_{ccd}(T) f_{TN}(d | T)
+\end{align*}
+
+
+\begin{algorithm}
+\caption{Importance sampling}
+\label{someAlg}
+
+\textbf{Input:} PHYLIP or NEXUS file with DNA sequences for 4 taxa;
+likelihood model (e.g. GTR) and prior
+
+- Compute the conditional clade probabilities by bootstrapping and NJ: $p_{ccd}$
+
+- \For{$i=1$ \KwTo $N$}{
+
+- Sample a topology $T \sim p_{ccd}$
+
+- Sample branch lengths from TN model $d|T \sim f_{TN}(d|T)$
+
+- Compute importance weight $w(T)$ with likelihood and prior
+
+}
+
+- Normalize importance weights
+
+% - \uIf{something}{
+
+% - Do this
+
+% }
+
+% - \Else{
+
+% - Do that
+
+% }
+
+\end{algorithm}
 
 
 \end{document}
