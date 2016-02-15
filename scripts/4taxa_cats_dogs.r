@@ -3,14 +3,17 @@ library(ape)
 source('branch-length.r')
 
 d=read.dna("../datasets/4taxa-cats.phy") #needs to be 4 taxa
+# as.character?
 tre=read.tree("../datasets/4taxa-cats.tre") # fixit: how to sample a tree? from 4-taxon-cats_ccdprobs.out?
 eta=0.5
+tre=read.tree(text="((1,2),3,4);")
 
 # function to sample branch lengths for 4-taxon tree
 sampleBL = function(d,tre,eta=0.5){
     thr = sample(1:4, size=3, replace=FALSE) # need to choose three taxa
     fth = setdiff(1:4,thr)
     seq1 = as.vector(unname(as.character(d[thr[1],]))) # fixit: need to make sure that 1,2 are sisters
+    tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]]
     seq2 = as.vector(unname(as.character(d[thr[2],])))
     seq3 = as.vector(unname(as.character(d[thr[3],])))
     seq4 = as.vector(unname(as.character(d[fth,])))
