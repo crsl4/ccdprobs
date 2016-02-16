@@ -29,7 +29,7 @@ siteLik = function(d1x,d2x,seq1.distj,seq2.distj, Q){
 # estimates the seq dist at x (parent of 1 and 2)
 sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q){
     nsites = length(seq1.dist[1,])
-    if(length(seq2[1,]) != nsites){
+    if(length(seq2.dist[1,]) != nsites){
         error()
     }
     nuc = c('a','c','g','t')
@@ -249,9 +249,29 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     }
 
     # we need to compute density(bl|top)
-    dens = 0.01 #fixit: how? with TN gamma?
+    dens = logJointDensity.tn(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4x.tn,d34.tn) #fixit: integral?
 
-    return (list(bl=bl, loglik=suma, density=dens)) #would like to update bl tre inside, but not possible in R
+    return (list(bl=bl, loglik=suma, logdensity=dens)) #would like to update bl tre inside, but not possible in R
+}
+
+# d12,d13,d23,d3x,d4x,d34 = simulateBranchLength.tn
+logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12,d13,d23,d3x,d4x,d34){
+    cte = 0
+    ## for(d in c("d12","d13","d23","d3x","d4x","d34")){
+    ##     a = eval(parse(text = paste0(d,"$beta^",d,"$alpha / gamma(",d,"$alpha)")))
+    ##     cte = cte + log(a)
+    ## } #fixit: do we want the constant? it is huge
+
+    logd = cte + (d12$alpha-1)*log(d1x+d2x)-d12$beta*(d1x+d2x)+(d34$alpha-1)*log(d3y+d4y)-d34$beta*(d3y+d4y)+log(4)-d23$beta*(d2x-d1x)+(d3x$alpha-1)*log(d3y+dxy)-
+        d3x$beta*(d3y+dxy)+(d4x$alpha-1)*log(d4y+dxy)-d4x$beta*(d4y+dxy)
+
+    ## integrand = function(x){
+    ##     x^(d13$alpha-1)*(x-d1x+d2x)^(d23$alpha-1)*exp((-d13$beta-d23$beta)*x)
+    ## }
+    ## I = integrate(integrand,lower=0,upper=Inf)
+    ## logd = logd + log(I)
+
+    return (logd)
 }
 
 
@@ -267,7 +287,7 @@ b=sampleBLQuartet(d,t$tre)
 tre$edge.length <- b$bl
 
 prior = 1/3 #fixit
-logw = log(prior)+b$loglik-log(t$prob)-log(b$density) #posterior = prior*lik, not normalized
+logw = log(prior)+b$loglik-log(t$prob)-b$logdensity #posterior = prior*lik, not normalized
 print(logw) #very small
 
 nreps = 100
@@ -276,7 +296,7 @@ logwv = rep(0,nreps)
 for(i in 1:nreps){
     t=sampleTopQuartet(dat.tre)
     b=sampleBLQuartet(d,t$tre)
-    logw = log(prior)+b$loglik-log(t$prob)-log(b$density)
+    logw = log(prior)+b$loglik-log(t$prob)-b$logdensity
     print(logw)
     trees[i] = write.tree(t$tre)
     logwv[i] = logw
