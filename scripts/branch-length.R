@@ -149,7 +149,7 @@ simulateBranchLength.tn = function(nsim,x,eta=0.9) {
     v = (1/ eta) * ((c1^2*prop.ag + c2^2*prop.ct + c3^2*prop.tv) - (c1*prop.ag + c2*prop.ct + c3*prop.tv)^2)/n
     print(paste("mu",mu,"v",v))
     w = rgamma(nsim,mu^2/v,mu/v)
-    return( w )
+    return( list(t=w,alpha=mu^2/v,beta=mu/v) )
 }
 
 ## Plot likelihood and density from simulated sample
@@ -186,7 +186,7 @@ comparePlot = function(x,s,Q,nsim=10000,eta.jc=0.5,eta.tn=0.9) {
     df.jc = data.frame(x=d.jc$x,y=d.jc$y)
     ## TN estimate
     tn = simulateBranchLength.tn(nsim,x,eta.tn)
-    d.tn = density(tn)
+    d.tn = density(tn$t)
     df.tn = data.frame(x=d.tn$x,y=d.tn$y)
     ## plot it
     p1 = ggplot(df.true, aes(x=s,y=y)) +

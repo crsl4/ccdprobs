@@ -59,7 +59,7 @@ simulateDensities = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0
     df.jc = data.frame(x=d.jc$x,y=d.jc$y)
     ## TN estimate
     tn = simulateBranchLength.tn(nsim,x,eta.tn)
-    d.tn = density(tn)
+    d.tn = density(tn$t)
     df.tn = data.frame(x=d.tn$x,y=d.tn$y)
     ## plot from comparePlots
     ## p1 = ggplot(df.true, aes(x=s,y=y)) +

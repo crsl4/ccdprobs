@@ -28,8 +28,8 @@ siteLik = function(d1x,d2x,seq1.distj,seq2.distj, Q){
 
 # estimates the seq dist at x (parent of 1 and 2)
 sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q){
-    nsites = length(seq1)
-    if(length(seq2) != nsites){
+    nsites = length(seq1.dist[1,])
+    if(length(seq2[1,]) != nsites){
         error()
     }
     nuc = c('a','c','g','t')
@@ -90,7 +90,8 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     checkMatCounts(out12)
 
     #d12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
-    d12 = simulateBranchLength.tn(nsim=1, out12, eta=eta)
+    d12.tn = simulateBranchLength.tn(nsim=1, out12, eta=eta)
+    d12=d12.tn$t
     print(d12)
 
     out13 = matrix(0,n,n)     # distance between 1 and 3
@@ -101,7 +102,8 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     checkMatCounts(out13)
 
     #d13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
-    d13 = simulateBranchLength.tn(nsim=1, out13, eta=eta)
+    d13.tn = simulateBranchLength.tn(nsim=1, out13, eta=eta)
+    d13 = d13.tn$t
     print(d13)
 
     out23 = matrix(0,n,n)     # distance between 2 and 3
@@ -112,7 +114,8 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     checkMatCounts(out23)
 
     #d23 = simulateBranchLength.jc(nsim=1,out23,eta=eta)
-    d23 = simulateBranchLength.tn(nsim=1, out23, eta=eta)
+    d23.tn = simulateBranchLength.tn(nsim=1, out23, eta=eta)
+    d23 = d23.tn$t
     print(d23)
 
     d1x = (d12+d13-d23)/2
@@ -184,7 +187,8 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     checkMatCounts(out34)
 
     #d34 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
-    d34 = simulateBranchLength.tn(nsim=1, out34, eta=eta)
+    d34.tn = simulateBranchLength.tn(nsim=1, out34, eta=eta)
+    d34 = d34.tn$t
     print(d34)
 
 
@@ -196,7 +200,8 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     checkMatCounts(out3x)
 
     #d3x = simulateBranchLength.jc(nsim=1,out3x,eta=eta)
-    d3x = simulateBranchLength.tn(nsim=1, out3x, eta=eta)
+    d3x.tn = simulateBranchLength.tn(nsim=1, out3x, eta=eta)
+    d3x = d3x.tn$t
     print(d3x)
 
     out4x = matrix(0,n,n) # distance between 4 and x
@@ -207,7 +212,8 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     checkMatCounts(out4x)
 
     #d4x = simulateBranchLength.jc(nsim=1,out4x,eta=eta)
-    d4x = simulateBranchLength.tn(nsim=1, out4x, eta=eta)
+    d4x.tn = simulateBranchLength.tn(nsim=1, out4x, eta=eta)
+    d4x = d4x.tn$t
     print(d4x)
 
     d3y = (d34+d3x-d4x)/2
