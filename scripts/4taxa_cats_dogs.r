@@ -288,9 +288,10 @@ b=sampleBLQuartet(d,t$tre)
 t$tre$edge.length <- b$bl
 
 prior = 1/3 #fixit
-logw = log(prior)+b$loglik-log(t$prob)-b$logdensity #posterior = prior*lik, not normalized
+logw = log(prior)+b$loglik-log(t$prob)-b$logdensity #posterior = prior*lik, not normalized, logdensity not normalized
 print(logw) #very small
 
+# fixit: what do we want to do next?
 nreps = 100
 trees = rep(NA,nreps)
 logwv = rep(0,nreps)
