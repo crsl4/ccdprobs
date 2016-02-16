@@ -271,7 +271,8 @@ logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12,d13,d23,d3x,d4x,d34){
     ## I = integrate(integrand,lower=0,upper=Inf)
     ## logd = logd + log(I)
 
-    return (logd)
+    ## if we can ignore the constants, we only need to show that the integral is finite
+    return (logd) #fixit: not normalized
 }
 
 
@@ -284,7 +285,7 @@ d=read.dna("../datasets/4taxa-cats.phy") #needs to be 4 taxa
 dat.tre=read.table("../datasets/4taxa-cats_ccdprobs.out", header=FALSE)
 t=sampleTopQuartet(dat.tre)
 b=sampleBLQuartet(d,t$tre)
-tre$edge.length <- b$bl
+t$tre$edge.length <- b$bl
 
 prior = 1/3 #fixit
 logw = log(prior)+b$loglik-log(t$prob)-b$logdensity #posterior = prior*lik, not normalized
@@ -302,4 +303,33 @@ for(i in 1:nreps){
     logwv[i] = logw
 }
 data=data.frame(trees=trees,logw=logwv)
+head(data)
 summary(data)
+save(data,file="data.Rda")
+
+# plot importance weigth
+tree1 = "((1,2),3,4);"
+data1=which(data$trees== tree1)
+tree2 = "((1,3),2,4);"
+data2=which(data$trees== tree2)
+tree3 = "(1,(2,3),4);"
+data3=which(data$trees== tree3)
+
+
+log.w = data$logw - max(data$logw) # going to rescale anyway, may exp() accurate
+y = exp(log.w)
+
+w1 = mean(y[data1])
+w2 = mean(y[data2])
+w3 = mean(y[data3])
+
+w1=w1/(w1+w2+w3)
+w2=w2/(w1+w2+w3)
+w3=w3/(w1+w2+w3)
+
+print(paste(tree1,w1,tree2,w2,tree3,w3))
+
+density = data.frame(x=c(1,2,3),y=c(w1,w2,w3))
+library(ggplot2)
+pl <- ggplot(density,aes(x=x,y=y))+geom_line(color="blue")
+plot(pl)

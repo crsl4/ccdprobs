@@ -154,18 +154,69 @@ x_{x3}=\sum_{j=1}^{nsites} S_3[,j]*S_x[,j]^T
 
 \item Compute the density of the branch lengths given the topology,
   denoted as $f_{TN}(d|T)$ for
-  $d=(d_{1x},d_{2x},d_{xy},d_{3y},d_{4y})$. \falta{how to do this?
-    Bret email: One issue is that we don't really have a
-    bijection.... For the 4-taxon tree, we generate 3 gamma random
-    variables and then 3 more; 6 rvs go to 5 branch lengths. As the
-    tree gets bigger, this difference gets bigger. We discard the
-    distance from the cherry parent to the other node. At one point I
-    considered saving it, but this made the rest of the algorithm
-    messy if we had to keep track of this distance. So, if we add each
-    of these as sort of an auxiliary rv, then we can get the
-    bijection. For the density of the actual branch lengths, we
-    integrate out the auxiliary rvs and hopefully get the same
-    answer.}
+  $d=(d_{1x},d_{2x},d_{xy},d_{3y},d_{4y})$.  We simulate the branch
+  lengths: $d_{12},d_{13},d_{23},d_{3x},d_{4x},d_{34}$ with the TN
+  model as gamma random variables. If we assume these 6 branch lengths
+  are independent \falta{(are they?)}, the joint density is given by
+  \begin{align*}
+    f(d_{12},d_{13},d_{23},d_{3x},d_{4x},d_{34}) &= \prod_{i}
+    \frac{\beta_i^{\alpha_i}}{\Gamma(\alpha_i)} d_i^{\alpha_i-1} \exp{(-\beta_id_i)}
+  \end{align*}
+
+  We then transform those branch lengths into the desired parameters
+  (keeping the variable $d_{13}$ for the transformation to be
+  bijective):
+  \begin{align*}
+    d_{1x} &= \frac{(d_{12}+d_{13}-d_{23})}{2} \\
+    d_{2x} &= \frac{(d_{12}+d_{23}-d_{13})}{2} \\
+    d_{13} &= d_{13} \\
+    d_{3y} &= \frac{(d_{34}+d_{3x}-d_{4x})}{2} \\
+    d_{4y} &= \frac{(d_{34}+d_{4x}-d_{3x})}{2} \\
+    d_{xy} &= \frac{(d_{3x}+d_{4x}-d_{34})}{2}
+  \end{align*}
+  
+  The determinant of the Jacobian in absolute value is $4$. Thus, the
+  joint density for the transformed variables is
+  \begin{align*}
+    f(d_{1x},d_{2x},d_{3y},d_{4y},d_{xy},d_{13}) &=
+    \left[ \prod_i \frac{\beta_i^{\alpha_i}}{\Gamma(\alpha_i)} \right] (d_{1x}+d_{2x})^{\alpha_{12}-1}
+    \exp{(-\beta_{12}(d_{1x}+d_{2x}))} \\
+    &* d_{13}^{\alpha_{13}-1}\exp{(-\beta_{13}d_{13})} \\
+    &* (d_{13}-d_{1x}+d_{2x})^{\alpha_{23}-1}\exp{(-\beta_{23}(d_{13}-d_{1x}+d_{2x}))}\\
+    &* (d_{3y}+d_{xy})^{\alpha_{3x}-1}\exp{(-\beta_{3x}(d_{3y}+d_{xy}))} \\
+    &*(d_{4y}+d_{xy})^{\alpha_{4x}-1}\exp{(-\beta_{4x}(d_{4y}+d_{xy}))} \\
+    &* (d_{3y}+d_{4y})^{\alpha_{34}-1}\exp{(-\beta_{34}(d_{3y}+d_{4y}))} *4
+  \end{align*}
+
+  We want to integrate out $d_{13}$,
+  \begin{align*}
+    f_{TN}(d_{1x},d_{2x},d_{3y},d_{4y},d_{xy}) &= \int_0^\infty
+    f(d_{1x},d_{2x},d_{3y},d_{4y},d_{xy},d_{13}) d d_{13} \\
+    &=\left[ \prod_i \frac{\beta_i^{\alpha_i}}{\Gamma(\alpha_i)} \right] (d_{1x}+d_{2x})^{\alpha_{12}-1}
+    \exp{(-\beta_{12}(d_{1x}+d_{2x}))} \\
+    &* 4\exp{(-\beta_{23}(-d_{1x}+d_{2x}))}\\
+    &* (d_{3y}+d_{xy})^{\alpha_{3x}-1}\exp{(-\beta_{3x}(d_{3y}+d_{xy}))} \\
+    &*(d_{4y}+d_{xy})^{\alpha_{4x}-1}\exp{(-\beta_{4x}(d_{4y}+d_{xy}))} \\
+    &*(d_{3y}+d_{4y})^{\alpha_{34}-1}\exp{(-\beta_{34}(d_{3y}+d_{4y}))} \\
+    &* \int_0^\infty
+    d_{13}^{\alpha_{13}-1}(d_{13}-d_{1x}+d_{2x})^{\alpha_{23}-1}\exp{(-(\beta_{13}+\beta_{23})d_{13})}
+    d d_{13}
+  \end{align*}
+  \falta{are we keeping the constants? if not, we only need to check
+    that the integral is finite (which mathematica could not do,
+    unless certain conditions)}
+
+    % Bret email: One issue is that we don't really have a
+    % bijection.... For the 4-taxon tree, we generate 3 gamma random
+    % variables and then 3 more; 6 rvs go to 5 branch lengths. As the
+    % tree gets bigger, this difference gets bigger. We discard the
+    % distance from the cherry parent to the other node. At one point I
+    % considered saving it, but this made the rest of the algorithm
+    % messy if we had to keep track of this distance. So, if we add each
+    % of these as sort of an auxiliary rv, then we can get the
+    % bijection. For the density of the actual branch lengths, we
+    % integrate out the auxiliary rvs and hopefully get the same
+    % answer.
 \end{enumerate}
 
 \paragraph{Importance weight.} Let $p(T)$ denote the prior
