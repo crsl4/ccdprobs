@@ -265,13 +265,14 @@ logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12,d13,d23,d3x,d4x,d34){
     logd = cte + (d12$alpha-1)*log(d1x+d2x)-d12$beta*(d1x+d2x)+(d34$alpha-1)*log(d3y+d4y)-d34$beta*(d3y+d4y)+log(4)-d23$beta*(d2x-d1x)+(d3x$alpha-1)*log(d3y+dxy)-
         d3x$beta*(d3y+dxy)+(d4x$alpha-1)*log(d4y+dxy)-d4x$beta*(d4y+dxy)
 
+    # fixit: integral shown finite, but R says it diverges
     ## integrand = function(x){
     ##     x^(d13$alpha-1)*(x-d1x+d2x)^(d23$alpha-1)*exp((-d13$beta-d23$beta)*x)
     ## }
     ## I = integrate(integrand,lower=0,upper=Inf)
     ## logd = logd + log(I)
 
-    ## if we can ignore the constants, we only need to show that the integral is finite
+    ## if we can ignore the constants, but the integral is not constant
     return (logd) #fixit: not normalized
 }
 
