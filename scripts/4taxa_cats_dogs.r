@@ -234,7 +234,7 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     bl[ed4y] = d4y
     ind = which(bl==0)
     bl[ind] = dxy
-    print(bl)
+    print(bl) #fixit: cannot update bl inside
 
     # now, compute likelihood of quartet with bl
     suma = 0
@@ -247,6 +247,7 @@ sampleBLQuartet = function(d,tre,eta=0.5){
         Lik = Q$Q$p * L2
         suma = suma+log(sum(Lik))
     }
+    print(suma)
 
     # we need to compute density(bl|top)
     dens = logJointDensity.tn(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4x.tn,d34.tn) #fixit: integral?
@@ -255,22 +256,24 @@ sampleBLQuartet = function(d,tre,eta=0.5){
 }
 
 # d12,d13,d23,d3x,d4x,d34 = simulateBranchLength.tn
-logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12,d13,d23,d3x,d4x,d34){
+logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4x.tn,d34.tn){
     cte = 0
     ## for(d in c("d12","d13","d23","d3x","d4x","d34")){
     ##     a = eval(parse(text = paste0(d,"$beta^",d,"$alpha / gamma(",d,"$alpha)")))
     ##     cte = cte + log(a)
     ## } #fixit: do we want the constant? it is huge
 
-    logd = cte + (d12$alpha-1)*log(d1x+d2x)-d12$beta*(d1x+d2x)+(d34$alpha-1)*log(d3y+d4y)-d34$beta*(d3y+d4y)+log(4)-d23$beta*(d2x-d1x)+(d3x$alpha-1)*log(d3y+dxy)-
-        d3x$beta*(d3y+dxy)+(d4x$alpha-1)*log(d4y+dxy)-d4x$beta*(d4y+dxy)
+    logd = cte + (d12.tn$alpha-1)*log(d1x+d2x)-d12.tn$beta*(d1x+d2x)+(d34.tn$alpha-1)*log(d3y+d4y)-d34.tn$beta*(d3y+d4y)+log(4)-d23.tn$beta*(d2x-d1x)+(d3x.tn$alpha-1)*log(d3y+dxy)-
+        d3x.tn$beta*(d3y+dxy)+(d4x.tn$alpha-1)*log(d4y+dxy)-d4x.tn$beta*(d4y+dxy)
+    print(logd)
 
     # fixit: integral shown finite, but R says it diverges
     ## integrand = function(x){
-    ##     x^(d13$alpha-1)*(x-d1x+d2x)^(d23$alpha-1)*exp((-d13$beta-d23$beta)*x)
+    ##     x^(d13.tn$alpha-1)*(x-d1x+d2x)^(d23.tn$alpha-1)*exp((-d13.tn$beta-d23.tn$beta)*x)
     ## }
-    ## I = integrate(integrand,lower=0,upper=Inf)
-    ## logd = logd + log(I)
+    ## # also, beta~500, so exp almost zero for x>10
+    ## I = integrate(integrand,lower=0,upper=10) # if upper=Inf, error
+    ## logd = logd + log(I$value)
 
     ## if we can ignore the constants, but the integral is not constant
     return (logd) #fixit: not normalized
@@ -284,15 +287,20 @@ logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12,d13,d23,d3x,d4x,d34){
 
 d=read.dna("../datasets/4taxa-cats.phy") #needs to be 4 taxa
 dat.tre=read.table("../datasets/4taxa-cats_ccdprobs.out", header=FALSE)
+print(dat.tre)
 t=sampleTopQuartet(dat.tre)
+print(t)
 b=sampleBLQuartet(d,t$tre)
+print(b)
 t$tre$edge.length <- b$bl
 
 prior = 1/3 #fixit
 logw = log(prior)+b$loglik-log(t$prob)-b$logdensity #posterior = prior*lik, not normalized, logdensity not normalized
-print(logw) #very small
+print(logw)
 
-# fixit: what do we want to do next?
+
+#fixit: what do we want to do next?
+# there are only three trees, we sample many, how to get back the "posterior"
 nreps = 100
 trees = rep(NA,nreps)
 logwv = rep(0,nreps)
