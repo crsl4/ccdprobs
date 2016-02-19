@@ -1,0 +1,8 @@
+These files are from BADGER and can be used to summarize tree files. I
+think `make summarize' should work to compile.
+
+The code mb2badger.C can take input from *.t MrBayes files to create a
+.top and a .tre file with .top containing topologies in canonical
+order and .tre the same for trees with branch lengths.
+
+February 2016
