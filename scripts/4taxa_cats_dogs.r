@@ -172,9 +172,11 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     }
 
     #need seq distribution at x: felsenstein algorithm
-    r = rep(1,6)
+    #r = rep(1,6)
+    r = c(2.815,51.982,1.903,1.275,65.402,1.000) #mrbayes
     Q = optim.gtr(out12,r)
     print(Q$Q$Q)
+    print(Q$Q$p)
 
     seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
     #print(seqx)
@@ -300,8 +302,7 @@ print(logw)
 
 
 #fixit: what do we want to do next?
-#there are only three trees, we sample many, how to get back the "posterior"
-# how mrbayes with bootstrap NJ?
+# there are only three trees, we sample many, how to get back the "posterior"
 nreps = 1000
 trees = rep(NA,nreps)
 logwv = rep(0,nreps)
@@ -316,7 +317,7 @@ for(i in 1:nreps){
 data=data.frame(trees=trees,logw=logwv)
 head(data)
 summary(data)
-save(data,file="data.Rda")
+save(data,file="data_fixedR.Rda")
 
 # plot importance weigth
 tree1 = "((1,2),3,4);"
@@ -334,13 +335,19 @@ w1 = mean(y[data1])
 w2 = mean(y[data2])
 w3 = mean(y[data3])
 
-w1=w1/(w1+w2+w3)
-w2=w2/(w1+w2+w3)
-w3=w3/(w1+w2+w3)
+suma=w1+w2+w3
+w1=w1/suma
+w2=w2/suma
+w3=w3/suma
 
 print(paste(tree1,w1,tree2,w2,tree3,w3))
-#"((1,2),3,4); 0.999959000390836 ((1,3),2,4); 7.32493185614684e-08 (1,(2,3),4); 6.35642960416419e-13"
+# "((1,2),3,4); 0.549360431059891 ((1,3),2,4); 0.431282704232963 (1,(2,3),4); 0.0193568647071461"
+# "((1,2),3,4); 0.999959000390836 ((1,3),2,4); 7.32493184614684e-08 (1,(2,3),4); 6.35642960416419e-13"
+# "((1,2),3,4); 0.999982825390402 ((1,3),2,4); 1.20515012895953e-05 (1,(2,3),4); 5.12310830815401e-06"
 
+# fixed r
+# "((1,2),3,4); 0.999949391089637 ((1,3),2,4); 5.06088524840088e-05 (1,(2,3),4); 5.78788347104571e-11"
+# "((1,2),3,4); 0.99999946547807 ((1,3),2,4); 5.34521926549172e-07 (1,(2,3),4); 3.11309951538364e-15"
 
 density = data.frame(x=c(1,2,3),y=c(w1,w2,w3))
 library(ggplot2)
