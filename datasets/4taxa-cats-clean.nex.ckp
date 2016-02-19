@@ -1,5 +1,5 @@
 #NEXUS
-[run stamp:1033372170]
+[run stamp:5635383273]
 [generation: 1100000]
 
 begin trees;
@@ -8,32 +8,32 @@ begin trees;
        2 Neofelis_nebulosa___clouded_leopard,
        3 Panthera_pardus___leopard,
        4 Panthera_tigris___tiger;
-	tree mcmc.tree_1 = (2:9.224828e-02,(3:6.434126e-02,4:5.400922e-02):1.117932e-02,1:8.493465e-02);
-	tree mcmc.tree_2 = (2:7.520509e-02,(4:6.431313e-02,3:4.822458e-02):1.966911e-02,1:8.296222e-02);
-	tree mcmc.tree_3 = (2:8.446010e-02,(4:6.272769e-02,3:3.445965e-02):1.913230e-02,1:8.416751e-02);
-	tree mcmc.tree_4 = (2:7.239849e-02,(4:6.865927e-02,3:5.586432e-02):2.393358e-02,1:1.030292e-01);
+	tree mcmc.tree_1 = (2:8.418971e-02,(4:8.123242e-02,3:4.754606e-02):1.110735e-02,1:9.160186e-02);
+	tree mcmc.tree_2 = (3:5.058600e-02,(4:5.085067e-02,2:8.695937e-02):2.686408e-02,1:9.617898e-02);
+	tree mcmc.tree_3 = (2:8.424048e-02,(4:6.815096e-02,3:5.886751e-02):1.351586e-02,1:7.085077e-02);
+	tree mcmc.tree_4 = ((4:5.421714e-02,2:7.821966e-02):1.191330e-02,3:4.606844e-02,1:8.456634e-02);
 end;
 
 begin mrbayes;
 	startvals
 		Tau(1,4)=mcmc.tree_1
-		Tau(1,1)=mcmc.tree_2
-		Tau(1,2)=mcmc.tree_3
+		Tau(1,2)=mcmc.tree_2
+		Tau(1,1)=mcmc.tree_3
 		Tau(1,3)=mcmc.tree_4
 		V(1,4)=mcmc.tree_1
-		V(1,1)=mcmc.tree_2
-		V(1,2)=mcmc.tree_3
+		V(1,2)=mcmc.tree_2
+		V(1,1)=mcmc.tree_3
 		V(1,3)=mcmc.tree_4
 	;
 	propset
-		Multiplier(V)$lambda(1,4)=2.109886722395366e+00
-		Multiplier(V)$lambda(1,1)=1.834247397873008e+00
-		Multiplier(V)$lambda(1,2)=1.871301653250635e+00
-		Multiplier(V)$lambda(1,3)=2.088892998737116e+00
-		TLMultiplier(V)$lambda(1,4)=7.023202797639354e-01
-		TLMultiplier(V)$lambda(1,1)=6.483233306489237e-01
-		TLMultiplier(V)$lambda(1,2)=6.884134064610387e-01
-		TLMultiplier(V)$lambda(1,3)=6.884134064610387e-01
+		Multiplier(V)$lambda(1,4)=2.068108166119482e+00
+		Multiplier(V)$lambda(1,2)=2.047530146041890e+00
+		Multiplier(V)$lambda(1,1)=1.797926865911491e+00
+		Multiplier(V)$lambda(1,3)=1.947670922467290e+00
+		TLMultiplier(V)$lambda(1,4)=7.093787159221626e-01
+		TLMultiplier(V)$lambda(1,2)=6.815635786174498e-01
+		TLMultiplier(V)$lambda(1,1)=6.418724057246737e-01
+		TLMultiplier(V)$lambda(1,3)=7.165080905431329e-01
 	;
 end;
 

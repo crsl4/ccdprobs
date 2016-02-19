@@ -1,0 +1,21 @@
+#NEXUS
+
+[ID: 5635383273]
+begin taxa;
+	dimensions ntax=4;
+	taxlabels
+		Felis_catus___domestic_cat
+		Neofelis_nebulosa___clouded_leopard
+		Panthera_pardus___leopard
+		Panthera_tigris___tiger
+		;
+end;
+begin trees;
+	translate
+		1	Felis_catus___domestic_cat,
+		2	Neofelis_nebulosa___clouded_leopard,
+		3	Panthera_pardus___leopard,
+		4	Panthera_tigris___tiger
+		;
+   tree con_50_majrule = [&U] (1[&prob=1.000000000000000e+00,prob(percent)="100"]:8.734812e-02[&length_mean=8.749903664889115e-02,length_median=8.734812000000000e-02,length_95%HPD={6.932464000000001e-02,1.058645000000000e-01}],2[&prob=1.000000000000000e+00,prob(percent)="100"]:7.950736e-02[&length_mean=7.985960612289425e-02,length_median=7.950736000000000e-02,length_95%HPD={6.199314000000000e-02,9.772918000000000e-02}],(3[&prob=1.000000000000000e+00,prob(percent)="100"]:4.778335e-02[&length_mean=4.810114962186395e-02,length_median=4.778335000000000e-02,length_95%HPD={3.430345000000000e-02,6.222619000000000e-02}],4[&prob=1.000000000000000e+00,prob(percent)="100"]:6.187768e-02[&length_mean=6.221737735547184e-02,length_median=6.187768000000000e-02,length_95%HPD={4.595385000000000e-02,7.707078000000001e-02}])[&prob=9.615804144952127e-01,prob(percent)="96"]:1.993025e-02[&length_mean=2.026714276783460e-02,length_median=1.993025000000000e-02,length_95%HPD={1.016079000000000e-02,3.012473000000000e-02}]);
+end;

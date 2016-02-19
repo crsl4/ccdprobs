@@ -22,4 +22,5 @@ prset
 
 mcmcp nchains=4 ngen=1100000 samplefreq=100 savebrlens=yes printfreq=10000 ordertaxa=yes printall=no nruns=1;
 mcmc;
+sumt burnin=1001;
 end;
