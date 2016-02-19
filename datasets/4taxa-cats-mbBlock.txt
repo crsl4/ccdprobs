@@ -1,0 +1,42 @@
+Here is the code block I used for MrBayes. My order of the taxa was
+
+1 - cat
+2 - clouded leopard
+3 - leopard
+4 - tiger
+
+I first ran MrBayes letting the Q matrix vary. (1,100,000 generations, sample every 100 of last 1,000,000 for a total of 100,000 trees).
+
+I then ran again with fixed Q (MrBayes keeps r parameters so they sum to one, but I rescaled so that the last was 1).  The results are here:
+
+begin trees;
+   translate
+    1 Felis_catus___domestic_cat,
+    2 Neofelis_nebulosa___clouded_leopard,
+    3 Panthera_pardus___leopard,
+    4 Panthera_tigris___tiger;
+   tree tree_1 [p = 0.962, P = 0.962] = [&W 0.962400] (1,2,(3,4));
+   tree tree_2 [p = 0.037, P = 1.000] = [&W 0.037500] (1,3,(2,4));
+   tree tree_3 [p = 0.000, P = 1.000] = [&W 0.000100] (1,4,(2,3));
+end;
+
+The branch length summaries are here:
+
+tree con_50_majrule = (Felis_catus___domestic_cat:0.087513,Neofelis_nebulosa___clouded_leopard:0.079521,(Panthera_pardus___leopard:0.048142,Panthera_tigris___tiger:0.062346):0.020288);
+
+This has the mean branch length of the four terminal edges and 0.020288 for the internal edge for the tree with probability 0.962, but not for the two minority trees.
+
+Here is the block.
+
+begin mrbayes;
+
+lset nst=6;
+
+prset
+ revmatpr=fixed(2.815,51.982,1.903,1.275,65.402,1.000);
+ statefreqpr=fixed(0.2590,0.2379,0.1900,0.3131);
+
+mcmcp nchains=4 ngen=1100000 samplefreq=100 savebrlens=yes printfreq=10000 ordertaxa=yes printall=no nruns=1;
+mcmc;
+end;
+

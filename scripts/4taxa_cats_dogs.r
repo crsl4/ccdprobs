@@ -300,8 +300,9 @@ print(logw)
 
 
 #fixit: what do we want to do next?
-# there are only three trees, we sample many, how to get back the "posterior"
-nreps = 100
+#there are only three trees, we sample many, how to get back the "posterior"
+# how mrbayes with bootstrap NJ?
+nreps = 1000
 trees = rep(NA,nreps)
 logwv = rep(0,nreps)
 for(i in 1:nreps){
@@ -338,6 +339,8 @@ w2=w2/(w1+w2+w3)
 w3=w3/(w1+w2+w3)
 
 print(paste(tree1,w1,tree2,w2,tree3,w3))
+#"((1,2),3,4); 0.999959000390836 ((1,3),2,4); 7.32493185614684e-08 (1,(2,3),4); 6.35642960416419e-13"
+
 
 density = data.frame(x=c(1,2,3),y=c(w1,w2,w3))
 library(ggplot2)
