@@ -1,0 +1,36 @@
+Here is another data set with 4 taxa we can try. It also has a shorter
+middle branch length. The fixed parameters are at the bottom of the
+.nex file. The .out file contains a summary of the tree topology
+probabilities and the mean and middle 95%-iles of all the branch
+lengths, by topology and combined.
+
+I also create a file I name mb.sed that has just this line.
+
+s/\[&U\]//g;
+
+I use this to eliminate the text [&U] that appears in the MrBayes 3.2
+.t files. I should just fix the mb2badger program.
+
+So, here is an example work flow.
+
+mb birds4.nex     // this creates birds4.nex.t and other files
+sed -f mb.sed birds4.nex.t > birds4.t
+mb2badger birds4.t
+summarize -s 1001 birds4.tre
+
+In R, I then read in the birds4.top file as a data frame and the .tre
+file using read.tree() form ape. A lot of messing around gave me the
+branch length summaries in the .out file.
+
+That type of summary we will want to generalize for trees of arbitrary
+size so that we can easily compare MrBayes MCMC output with the
+Importance Sampling output, but for now is okay. Let's see if we can
+tinker with the branch length generation software until we get samples
+where the weights are much more evenly spread out for both of these
+data sets.
+
+The birds data set is selected from a larger data set with 10 taxa
+that would be good to work with when we expand to larger trees as
+there is a lot of topological uncertainty and small internal edges.
+
+-Bret
