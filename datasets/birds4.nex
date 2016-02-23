@@ -2,7 +2,7 @@
 begin data;
 dimensions  ntax=4 NCHAR=1560;
 
-format datatype=dna missing = ? gap = -; 
+format datatype=dna missing = ? gap = -;
 matrix
 
 kiwi

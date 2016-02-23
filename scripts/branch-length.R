@@ -120,12 +120,13 @@ simulateBranchLength.jc = function(nsim,x, eta=0.9) {
 }
 
 ## Now try the Tamura-Nei way
-simulateBranchLength.tn = function(nsim,x,eta=0.9) {
+simulateBranchLength.tn = function(nsim,x,eta=0.9, verbose=FALSE) {
     n = sum(x)
     prop.ag = (x[1,3] + x[3,1]) / n
     prop.ct = (x[2,4] + x[4,2]) / n
     prop.tv = (x[1,2] + x[1,4] + x[2,1] + x[2,3] + x[3,2] + x[3,4] + x[4,1] + x[4,3]) / n
-    print(paste("prop.ag",prop.ag,"prop.ct",prop.ct,"prop.tv",prop.tv))
+    if(verbose)
+        print(paste("prop.ag",prop.ag,"prop.ct",prop.ct,"prop.tv",prop.tv))
     p.est = (apply(x,1,sum) + apply(x,2,sum)) / (2*n)
     p.a = p.est[1]
     p.c = p.est[2]
@@ -133,7 +134,8 @@ simulateBranchLength.tn = function(nsim,x,eta=0.9) {
     p.t = p.est[4]
     p.r = sum(p.est[c(1,3)])
     p.y = sum(p.est[c(2,4)])
-    print(paste("p.a",p.a,"p.c",p.c,"p.g",p.g,"p.t",p.t,"p.r",p.r,"p.y",p.y))
+    if(verbose)
+        print(paste("p.a",p.a,"p.c",p.c,"p.g",p.g,"p.t",p.t,"p.r",p.r,"p.y",p.y))
     numer1 = 2*p.a*p.g*p.r
     denom1 = numer1 - p.r^2*prop.ag - p.a*p.g*prop.tv
     c1 = numer1 / denom1
@@ -147,13 +149,14 @@ simulateBranchLength.tn = function(nsim,x,eta=0.9) {
                 (p.c*p.t/p.y) * log(1 - p.y*prop.ct/(2*p.c*p.t) - prop.tv/(2*p.y) ) +
                 (p.r*p.y - p.a*p.g*p.y/p.r - p.c*p.t*p.r/p.y) * log(1 - prop.tv/(2*p.r*p.y)) )
     v = (1/ eta) * ((c1^2*prop.ag + c2^2*prop.ct + c3^2*prop.tv) - (c1*prop.ag + c2*prop.ct + c3*prop.tv)^2)/n
-    print(paste("mu",mu,"v",v))
+    if(verbose)
+        print(paste("mu",mu,"v",v))
     w = rgamma(nsim,mu^2/v,mu/v)
     return( list(t=w,alpha=mu^2/v,beta=mu/v) )
 }
 
 ## Plot likelihood and density from simulated sample
-comparePlot = function(x,s,Q,nsim=10000,eta.jc=0.5,eta.tn=0.9) {
+comparePlot = function(x,s,Q,nsim=10000,eta.jc=0.5,eta.tn=0.9, verbose=FALSE) {
     require(ggplot2)
     delta = s[2] - s[1] # (assumes that times s are a regular sequence)
     ## compute the likelihood using counts x and generator Q for each s
@@ -169,7 +172,8 @@ comparePlot = function(x,s,Q,nsim=10000,eta.jc=0.5,eta.tn=0.9) {
     df.true = data.frame(s,y)
     ## GTR Q optimized over data
     Qlist.gtr = optim.gtr(x,Q$r) ## sometimes: Error in eigen(S, symmetric = TRUE) (from branch-length.R#27) : infinite or missing values in 'x'
-    print(Qlist.gtr$branch.length)
+    if(verbose)
+        print(Qlist.gtr$branch.length)
     ## compute this density also
     log.like2 = gtr.log.like(x,s,Qlist.gtr$Q)
     log.like2 = log.like2 - max(log.like2)

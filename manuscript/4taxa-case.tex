@@ -156,8 +156,8 @@ x_{x3}=\sum_{j=1}^{nsites} S_3[,j]*S_x[,j]^T
   denoted as $f_{TN}(d|T)$ for
   $d=(d_{1x},d_{2x},d_{xy},d_{3y},d_{4y})$.  We simulate the branch
   lengths: $d_{12},d_{13},d_{23},d_{3x},d_{4x},d_{34}$ with the TN
-  model as gamma random variables. If we assume these 6 branch lengths
-  are independent \falta{(are they?)}, the joint density is given by
+  model as gamma random variables. These 6 branch lengths
+  were simulated independently, so the joint density is given by
   \begin{align*}
     f(d_{12},d_{13},d_{23},d_{3x},d_{4x},d_{34}) &= \prod_{i}
     \frac{\beta_i^{\alpha_i}}{\Gamma(\alpha_i)} d_i^{\alpha_i-1} \exp{(-\beta_id_i)}
@@ -202,10 +202,9 @@ x_{x3}=\sum_{j=1}^{nsites} S_3[,j]*S_x[,j]^T
     d_{13}^{\alpha_{13}-1}(d_{13}-d_{1x}+d_{2x})^{\alpha_{23}-1}\exp{(-(\beta_{13}+\beta_{23})d_{13})}
     d d_{13}
   \end{align*}
-\falta{the integral is not constant, I showed that it is finite, but
-  cannot find its expression. mathematica could not either, and R
-  could not solve numerically, it says it diverges, but I don't think so}
-
+The integral is finite, but it does not have an analytic
+expression. The integral is a function of $d_{1x},d_{2x}$. \help{We will
+ignore this integral for the moment, and assume it is a constant.}
     % Bret email: One issue is that we don't really have a
     % bijection.... For the 4-taxon tree, we generate 3 gamma random
     % variables and then 3 more; 6 rvs go to 5 branch lengths. As the
@@ -220,13 +219,12 @@ x_{x3}=\sum_{j=1}^{nsites} S_3[,j]*S_x[,j]^T
 \end{enumerate}
 
 \paragraph{Importance weight.} Let $p(T)$ denote the prior
-distribution of tree $T$ \falta{(for topology only, or with bl?)}, and
-let $L(T,d)$ denote the likelihood of $T$ under the GTR model.
+distribution of tree $T$, and let $L(T,d)$ denote the likelihood of
+$T$ under the GTR model.
 \begin{align*}
 L(T,d) &= \prod_k L_k(T,d) \\
 L_k(T,d) & = \sum_{i=1}^4 \sum_{j=1}^4 \pi_i P_{ij}(d_{xy}) P_{i1}(d_{1x}) P_{i2}(d_{2x}) P_{j3}(d_{3y}) P_{j4}(d_{4y})
 \end{align*}
-\falta{(likelihood correct?)}
 
 Then, the importance weight is
 \begin{align*}

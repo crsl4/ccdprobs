@@ -7,23 +7,24 @@
 # seq1.distj = jth column in seq1.dist matrix (for site j), similarly seq2.distj
 # Q = estimated matrix of rates
 # returns column of site likelihood
-siteLik = function(d1x,d2x,seq1.distj,seq2.distj, Q){
+siteLik = function(d1x,d2x,seq1.distj,seq2.distj, Q, verbose=FALSE){
     P1 = matrixExp(Q,d1x)
     P2 = matrixExp(Q,d2x)
     lik = rep(0,4)
     for(i in 1:4){
         lik[i] = P1[i,]%*%seq1.distj * P2[i,]%*%seq2.distj
-        #print(lik)
+        if(verbose)
+            print(lik)
     }
     return (lik)
 }
 
 
 # estimates the seq dist at x (parent of 1 and 2)
-sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q){
+sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q, verbose=FALSE){
     nsites = length(seq1.dist[1,])
     if(length(seq2.dist[1,]) != nsites){
-        error()
+        stop("error in number of sites seq1,seq2")
     }
     nuc = c('a','c','g','t')
     seqx = matrix(rep(0,nsites*4),nrow=4)
@@ -31,7 +32,8 @@ sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q){
         seqx[,i] = siteLik(d1x,d2x,seq1.dist[,i],seq2.dist[,i],Q) * Q$p
         seqx[,i] = seqx[,i]/sum(seqx[,i])
     }
-    #print(seqx)
+    if(verbose)
+        print(seqx)
     return(seqx)
 }
 
@@ -42,7 +44,7 @@ checkMatCounts = function(x){
     }
 }
 
-sampleTopQuartet = function(dat.tre){
+sampleTopQuartet = function(dat.tre, verbose=FALSE){
     u=runif(1,0,1)
     if(u<dat.tre$V2[1]){
         t = dat.tre$V1[1]
@@ -55,12 +57,13 @@ sampleTopQuartet = function(dat.tre){
         prob=dat.tre$V2[3]
     }
     tre = read.tree(text=as.character(t))
-    print(write.tree(tre))
+    if(verbose)
+        print(write.tree(tre))
     return (list(tre=tre,prob=prob))
 }
 
 # function to sample branch lengths for 4-taxon tree
-sampleBLQuartet = function(d,tre,eta=0.5){
+sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     sis = tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]] #works only for unrooted quartet
     fth = setdiff(1:4,sis)
     seq1 = as.vector(unname(as.character(d[as.numeric(sis[1]),])))
@@ -69,7 +72,7 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     seq4 = as.vector(unname(as.character(d[fth[2],])))
     nsites = length(seq1)
     if(length(seq2) != nsites && length(seq3) != nsites){
-        error()
+        stop("error in number of sites seq1,seq2,seq3")
     }
 
     nuc = c("a","c","g","t")
@@ -79,43 +82,51 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     for(i in 1:n)
         for(j in 1:n)
             out12[i,j] = sum(seq1==nuc[i] & seq2==nuc[j])
-    print(out12)
+    if(verbose)
+        print(out12)
     checkMatCounts(out12)
 
     #d12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
     d12.tn = simulateBranchLength.tn(nsim=1, out12, eta=eta)
     d12=d12.tn$t
-    print(d12)
+    if(verbose)
+        print(d12)
 
     out13 = matrix(0,n,n)     # distance between 1 and 3
     for(i in 1:n)
         for(j in 1:n)
             out13[i,j] = sum(seq1==nuc[i] & seq3==nuc[j])
-    print(out13)
+    if(verbose)
+        print(out13)
     checkMatCounts(out13)
 
     #d13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
     d13.tn = simulateBranchLength.tn(nsim=1, out13, eta=eta)
     d13 = d13.tn$t
-    print(d13)
+    if(verbose)
+        print(d13)
 
     out23 = matrix(0,n,n)     # distance between 2 and 3
     for(i in 1:n)
         for(j in 1:n)
             out23[i,j] = sum(seq2==nuc[i] & seq3==nuc[j])
-    print(out23)
+    if(verbose)
+        print(out23)
     checkMatCounts(out23)
 
     #d23 = simulateBranchLength.jc(nsim=1,out23,eta=eta)
     d23.tn = simulateBranchLength.tn(nsim=1, out23, eta=eta)
     d23 = d23.tn$t
-    print(d23)
+    if(verbose)
+        print(d23)
 
     d1x = (d12+d13-d23)/2
     d2x = (d12+d23-d13)/2
 
-    print(d1x)
-    print(d2x)
+    if(verbose){
+        print(d1x)
+        print(d2x)
+    }
 
     #need seq1.dist and seq2.dist which are matrices
     seq1.dist = matrix(0,n,nsites)
@@ -168,9 +179,10 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     r = rep(1,6)
     #r = c(2.815,51.982,1.903,1.275,65.402,1.000) #mrbayes
     Q = optim.gtr(out12,r)
-    print(Q$Q$Q)
-    print(Q$Q$p)
-
+    if(verbose){
+        print(Q$Q$Q)
+        print(Q$Q$p)
+    }
     seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
     #print(seqx)
 
@@ -178,45 +190,53 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     for(i in 1:n)
         for(j in 1:n)
             out34[i,j] = sum(seq3==nuc[i] & seq4==nuc[j])
-    print(out34)
+    if(verbose)
+        print(out34)
     checkMatCounts(out34)
 
     #d34 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
     d34.tn = simulateBranchLength.tn(nsim=1, out34, eta=eta)
     d34 = d34.tn$t
-    print(d34)
+    if(verbose)
+        print(d34)
 
 
     out3x = matrix(0,n,n) # distance between 3 and x
     for(i in 1:nsites){
         out3x = out3x + seq3.dist[,i]%*%t(seqx[,i])
     }
-    print(out3x)
+    if(verbose)
+        print(out3x)
     checkMatCounts(out3x)
 
     #d3x = simulateBranchLength.jc(nsim=1,out3x,eta=eta)
     d3x.tn = simulateBranchLength.tn(nsim=1, out3x, eta=eta)
     d3x = d3x.tn$t
-    print(d3x)
+    if(verbose)
+        print(d3x)
 
     out4x = matrix(0,n,n) # distance between 4 and x
     for(i in 1:nsites){
         out4x = out4x + seq4.dist[,i]%*%t(seqx[,i])
     }
-    print(out4x)
+    if(verbose)
+        print(out4x)
     checkMatCounts(out4x)
 
     #d4x = simulateBranchLength.jc(nsim=1,out4x,eta=eta)
     d4x.tn = simulateBranchLength.tn(nsim=1, out4x, eta=eta)
     d4x = d4x.tn$t
-    print(d4x)
+    if(verbose)
+        print(d4x)
 
     d3y = (d34+d3x-d4x)/2
     d4y = (d34+d4x-d3x)/2
     dxy = (d3x+d4x-d34)/2
 
-    print(paste("d12",d12,"d13",d13,"d23",d23,"d34",d34))
-    print(paste("d1x",d1x,"d2x",d2x,"d3y",d3y,"d4y",d4y,"dxy",dxy))
+    if(verbose){
+        print(paste("d12",d12,"d13",d13,"d23",d23,"d34",d34))
+        print(paste("d1x",d1x,"d2x",d2x,"d3y",d3y,"d4y",d4y,"dxy",dxy))
+    }
 
     bl <- rep(0,5) #works only for unrooted quartet
     ed1x = which(tre$edge[,2] == which(tre$tip.label == sis[1]))
@@ -229,7 +249,8 @@ sampleBLQuartet = function(d,tre,eta=0.5){
     bl[ed4y] = d4y
     ind = which(bl==0)
     bl[ind] = dxy
-    print(bl)
+    if(verbose)
+        print(bl)
 
     # now, compute likelihood of quartet with bl
     suma = 0
@@ -242,19 +263,21 @@ sampleBLQuartet = function(d,tre,eta=0.5){
         Lik = Q$Q$p * L2
         suma = suma+log(sum(Lik))
     }
-    print(suma)
+    if(verbose)
+        print(suma)
 
     # we need to compute density(bl|top)
     dens = logJointDensity.tn(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4x.tn,d34.tn)
-
-    return (list(bl=bl, loglik=suma, logdensity=dens))
+    prior = logPriorExpDist(d1x,d2x,d3y,d4y,dxy,0.1) #could be other priors
+    return (list(bl=bl, loglik=suma, logdensity=dens, logprior=prior))
 }
 
 # d12,d13,d23,d3x,d4x,d34 = simulateBranchLength.tn
-logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4x.tn,d34.tn){
-    logd = (d12.tn$alpha-1)*log(d1x+d2x)-d12.tn$beta*(d1x+d2x)+(d34.tn$alpha-1)*log(d3y+d4y)-d34.tn$beta*(d3y+d4y)+log(4)-d23.tn$beta*(d2x-d1x)+(d3x.tn$alpha-1)*log(d3y+dxy)-
+logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4x.tn,d34.tn, verbose=FALSE){
+    logd = (d12.tn$alpha-1)*log(d1x+d2x)-d12.tn$beta*(d1x+d2x)+(d34.tn$alpha-1)*log(d3y+d4y)-d34.tn$beta*(d3y+d4y)-d23.tn$beta*(d2x-d1x)+(d3x.tn$alpha-1)*log(d3y+dxy)-
         d3x.tn$beta*(d3y+dxy)+(d4x.tn$alpha-1)*log(d4y+dxy)-d4x.tn$beta*(d4y+dxy)
-    print(logd)
+    if(verbose)
+        print(logd)
 
     # fixit: integral shown finite, but R says it diverges
     ## integrand = function(x){
@@ -264,5 +287,22 @@ logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4
     ## I = integrate(integrand,lower=0,upper=10) # if upper=Inf, error
     ## logd = logd + log(I$value)
 
-    return (logd) #fixit: ignoring integral
+    return ( logd ) #fixit: ignoring integral
+}
+
+# m= mean
+logPriorExpDist = function(d1x,d2x,d3y,d4y,dxy,m, verbose=FALSE){
+    logp = (-1/m)*(d1x+d2x+d3y+d4y+dxy)
+    if(verbose)
+        print(logp)
+    return ( logp )
+}
+
+
+weighted.quantile = function(x,w,probs=0.25){
+    ord <- order(x)
+    x <- x[ord]
+    w <- w[ord]/sum(w)
+    y <- which(cumsum(w)<probs)
+    return( x[y[length(y)]] )
 }

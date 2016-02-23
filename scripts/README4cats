@@ -1,8 +1,17 @@
-Chosen 4 cats: cat, tiger, leopard, clouded leopard
+*Chosen 4 cats: cat, tiger, leopard, clouded leopard
 In datasets:
-1) perl ../scripts/seq2ccdprobs.pl -phylip 4-taxon-cats.phy
-2) need to sample one tree from clade dist
-3) 4taxa_cats_dogs.r with input tree and phylip file to sample branch lengths
-4) compute importance weight (need code)
+1) perl ../scripts/seq2ccdprobs.pl -phylip 4taxa-cats.phy
+In scripts:
+2) R CMD BATCH 4taxa_cats_dogs.r (after changing the input files)
+This will create data_cats.Rda, df_cats.Rda, df_cats.csv
+3) mb 4taxa-cats-clean.nex
+4) summarize mb output, need code still
 
-Repeat 2,3,4
+* birds
+In datasets:
+1) perl ../scripts/seq2ccdprobs.pl -nexus birds4-clean.nex
+In scripts:
+2) R CMD BATCH 4taxa_cats_dogs.r (after changing the input files)
+This will create data_birds.Rda, df_birds.Rda, df_birds.csv
+3) mb birds4.nex (done by bret)
+4) summarize mb output: birds4.out (done by bret)
