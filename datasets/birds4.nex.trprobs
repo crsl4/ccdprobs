@@ -1,0 +1,17 @@
+#NEXUS
+[ID: 1434018498]
+[This file contains the trees that were found during the MCMC
+search, sorted by posterior probability. "p" indicates the
+posterior probability of the tree whereas "P" indicates the
+cumulative posterior probability.]
+
+begin trees;
+   translate
+    1 kiwi,
+    2 penguin,
+    3 owl,
+    4 parrot;
+   tree tree_1 [p = 0.683, P = 0.683] = [&W 0.682948] (2,(4,3),1);
+   tree tree_2 [p = 0.298, P = 0.981] = [&W 0.297903] (4,(2,3),1);
+   tree tree_3 [p = 0.019, P = 1.000] = [&W 0.019149] ((4,2),3,1);
+end;

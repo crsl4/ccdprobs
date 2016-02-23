@@ -1,0 +1,39 @@
+#NEXUS
+[ID: 1434018498]
+[generation: 1100000]
+
+begin trees;
+	translate
+       1 kiwi,
+       2 penguin,
+       3 owl,
+       4 parrot;
+	tree mcmc.tree_1 = (2:8.285309350943500e-02,(3:1.060180747539043e-01,4:9.521828236275369e-02):3.555920491572927e-02,1:9.855764141700160e-02);
+	tree mcmc.tree_2 = (2:8.441411992248754e-02,(4:1.108867376463808e-01,3:9.295795630868178e-02):1.779246885549685e-02,1:1.140569016347951e-01);
+	tree mcmc.tree_3 = (4:9.192734290839730e-02,(3:7.512668787973731e-02,2:7.914231358321738e-02):2.442617416849472e-02,1:9.994245425002776e-02);
+	tree mcmc.tree_4 = ((3:8.127025682187101e-02,4:9.914783763724695e-02):3.235878260668971e-02,2:7.793201399045632e-02,1:1.033207591177813e-01);
+end;
+
+begin mrbayes;
+	startvals
+		Tau(1,4)=mcmc.tree_1
+		Tau(1,1)=mcmc.tree_2
+		Tau(1,3)=mcmc.tree_3
+		Tau(1,2)=mcmc.tree_4
+		V(1,4)=mcmc.tree_1
+		V(1,1)=mcmc.tree_2
+		V(1,3)=mcmc.tree_3
+		V(1,2)=mcmc.tree_4
+	;
+	propset
+		Multiplier(V)$lambda(1,4)=1.780037194688834e+00
+		Multiplier(V)$lambda(1,1)=1.594618081099730e+00
+		Multiplier(V)$lambda(1,3)=1.643181431593473e+00
+		Multiplier(V)$lambda(1,2)=1.659695679530590e+00
+		TLMultiplier(V)$lambda(1,4)=6.418724057246737e-01
+		TLMultiplier(V)$lambda(1,1)=5.099891948679061e-01
+		TLMultiplier(V)$lambda(1,3)=6.354856685758922e-01
+		TLMultiplier(V)$lambda(1,2)=5.807901703044438e-01
+	;
+end;
+

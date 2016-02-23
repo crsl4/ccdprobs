@@ -315,5 +315,9 @@ weighted.quantile = function(x,w,probs=0.25){
     x <- x[ord]
     w <- w[ord]/sum(w)
     y <- which(cumsum(w)<probs)
-    return( x[y[length(y)]] )
+    if(length(y) == 0){
+        return ( 0.0 )
+    } else {
+        return( x[y[length(y)]] )
+    }
 }

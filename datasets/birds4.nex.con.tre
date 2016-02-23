@@ -1,0 +1,20 @@
+#NEXUS
+[ID: 1434018498]
+begin taxa;
+	dimensions ntax=4;
+	taxlabels
+		kiwi
+		penguin
+		owl
+		parrot
+		;
+end;
+begin trees;
+	translate
+		1	kiwi,
+		2	penguin,
+		3	owl,
+		4	parrot
+		;
+   tree con_50_majrule = [&U] (1[&prob=1.00000000e+00,prob(percent)="100"]:1.097655e-01[&length_mean=1.10056214e-01,length_median=1.09765500e-01,length_95%HPD={9.09317800e-02,1.30364900e-01}],2[&prob=1.00000000e+00,prob(percent)="100"]:7.862051e-02[&length_mean=7.89590482e-02,length_median=7.86205100e-02,length_95%HPD={6.12148500e-02,9.63372500e-02}],(3[&prob=1.00000000e+00,prob(percent)="100"]:9.113593e-02[&length_mean=9.14902008e-02,length_median=9.11359300e-02,length_95%HPD={7.32869000e-02,1.10073000e-01}],4[&prob=1.00000000e+00,prob(percent)="100"]:9.725464e-02[&length_mean=9.74900957e-02,length_median=9.72546400e-02,length_95%HPD={7.87387800e-02,1.17201400e-01}])[&prob=6.82947522e-01,prob(percent)="68"]:2.582162e-02[&length_mean=2.60894153e-02,length_median=2.58216200e-02,length_95%HPD={1.49160100e-02,3.73614300e-02}]);
+end;

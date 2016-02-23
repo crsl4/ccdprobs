@@ -6,6 +6,10 @@ In scripts:
 This will create data_cats.Rda, df_cats.Rda, df_cats.csv
 3) mb 4taxa-cats-clean.nex
 4) summarize mb output, need code still
+In datasets:
+sed -f ../scripts/mb.sed 4taxa-cats-clean.nex.t > 4taxa-cats-clean.t
+../src/badger/mb2badger 4taxa-cats-clean.t
+../src/Summarize/summarize -s 1001 4taxa-cats-clean.tre
 
 * birds
 In datasets:
@@ -13,5 +17,16 @@ In datasets:
 In scripts:
 2) R CMD BATCH 4taxa_cats_dogs.r (after changing the input files)
 This will create data_birds.Rda, df_birds.Rda, df_birds.csv
-3) mb birds4.nex (done by bret)
+3) mb birds4.nex (done by bret) // this creates birds4.nex.t and other files
 4) summarize mb output: birds4.out (done by bret)
+sed -f mb.sed birds4.nex.t > birds4.t
+mb2badger birds4.t
+summarize -s 1001 birds4.tre
+In R, I then read in the birds4.top file as a data frame and the .tre
+file using read.tree() form ape. A lot of messing around gave me the
+branch length summaries in the .out file.
+
+
+------ 
+*0.* files in cats-birds are the first test of importance
+sampling comparison with mb: internal branch not correctly sampled
