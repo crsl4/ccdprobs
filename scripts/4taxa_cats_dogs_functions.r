@@ -70,6 +70,16 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     seq2 = as.vector(unname(as.character(d[as.numeric(sis[2]),])))
     seq3 = as.vector(unname(as.character(d[fth[1],])))
     seq4 = as.vector(unname(as.character(d[fth[2],])))
+    # remove missing:
+    s1 <-seq1!="-"
+    s2 <- seq2!="-"
+    s3 <- seq3!="-"
+    s4 <- seq4!="-"
+    seq1 <- seq1[s1&s2&s3&s4]
+    seq2 <- seq2[s1&s2&s3&s4]
+    seq3 <- seq3[s1&s2&s3&s4]
+    seq4 <- seq4[s1&s2&s3&s4]
+
     nsites = length(seq1)
     if(length(seq2) != nsites && length(seq3) != nsites){
         stop("error in number of sites seq1,seq2,seq3")
@@ -184,7 +194,8 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
         print(Q$Q$p)
     }
     seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
-    #print(seqx)
+    if(verbose)
+        print(seqx)
 
     out34 = matrix(0,n,n) # distance between 3 and 4
     for(i in 1:n)
