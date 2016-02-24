@@ -37,6 +37,15 @@ sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q, verbose=FALSE){
     return(seqx)
 }
 
+sampleSeq = function(seqx){
+    seq = matrix(rep(0,nsites*4),nrow=4)
+    for(i in 1:ncol(seqx)){
+        ind = sample(1:4,1,replace=FALSE,prob=seqx[,i])
+        seq[ind,i] = 1
+    }
+    return (seq)
+}
+
 #warning if x (counts) with rows of zero (and also columns because error in density(tn)), also if few counts in one row/column
 checkMatCounts = function(x){
     if((0 %in% rowSums(x)) || (0 %in% colSums(x)) || (any(rowSums(x)<5)) || (any(colSums(x)<5))){
@@ -193,7 +202,11 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
         print(Q$Q$Q)
         print(Q$Q$p)
     }
-    seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
+    #seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
+
+    # sample sequence at x
+    seqdist = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
+    seqx = sampleSeq(seqdist)
     if(verbose)
         print(seqx)
 
