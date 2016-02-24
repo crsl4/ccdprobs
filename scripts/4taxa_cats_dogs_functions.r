@@ -224,7 +224,6 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     if(verbose)
         print(d34)
 
-
     out3x = matrix(0,n,n) # distance between 3 and x
     for(i in 1:nsites){
         out3x = out3x + seq3.dist[,i]%*%t(seqx[,i])
