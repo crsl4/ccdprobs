@@ -1,32 +1,40 @@
 *Chosen 4 cats: cat, tiger, leopard, clouded leopard
+IMPORTANCE SAMPLING -----
 In datasets:
-1) perl ../scripts/seq2ccdprobs.pl -phylip 4taxa-cats.phy
+1) perl ../scripts/seq2ccdprobs.pl -phylip 4taxa-cats.phy: creates ccdprobs outfiles, we need 4taxa-cats-clean_ccdprobs.out
 In scripts:
 2) R CMD BATCH 4taxa_cats_dogs.r (after changing the input files)
-This will create data_cats.Rda, df_cats.Rda, df_cats.csv
+This will create data_cats.Rda, df_cats.Rda, df_cats.csv with branch length summaries for IS
+MRBAYES ----
 3) mb 4taxa-cats-clean.nex
 4) summarize mb output, need code still
 In datasets:
 sed -f ../scripts/mb.sed 4taxa-cats-clean.nex.t > 4taxa-cats-clean.t
 ../src/badger/mb2badger 4taxa-cats-clean.t
 ../src/Summarize/summarize -s 1001 4taxa-cats-clean.tre
+5) run in R afterSummarize.r (after changing input files), to get table of bl summarie
+This will create data_cats_mb.Rda, df_cats_mb.Rda, df_cats_mb.csv with branch length summaries for Mb
+COMPARISON ----
+6) run in R compareBL_mb_is.r (after changing input files) to get the table of bl numbers matches
 
 * birds
+IMPORTANCE SAMPLING -----
 In datasets:
-1) perl ../scripts/seq2ccdprobs.pl -nexus birds4-clean.nex
+1) perl ../scripts/seq2ccdprobs.pl -nexus birds4-clean.nex: : creates ccdprobs outfiles, we need birds4-clean_ccdprobs.out
 In scripts:
 2) R CMD BATCH 4taxa_cats_dogs.r (after changing the input files)
-This will create data_birds.Rda, df_birds.Rda, df_birds.csv
+This will create data_birds.Rda, df_birds.Rda, df_birds.csv with branch length summaries for IS
+MRBAYES ----
 3) mb birds4.nex (done by bret) // this creates birds4.nex.t and other files
 4) summarize mb output: birds4.out (done by bret)
 sed -f mb.sed birds4.nex.t > birds4.t
 mb2badger birds4.t
 summarize -s 1001 birds4.tre
-In R, I then read in the birds4.top file as a data frame and the .tre
-file using read.tree() form ape. A lot of messing around gave me the
-branch length summaries in the .out file.
+5) run in R afterSummarize.r (after changing input files), to get table of bl summaries
+This will create data_birds_mb.Rda, df_birds_mb.Rda, df_birds_mb.csv with branch length summaries for Mb
+COMPARISON ----
+6) run in R compareBL_mb_is.r (after changing input files) to get the table of bl numbers matches
 
-
------- 
+------
 *0.* files in cats-birds are the first test of importance
 sampling comparison with mb: internal branch not correctly sampled
