@@ -323,6 +323,8 @@ logPriorExpDist = function(d1x,d2x,d3y,d4y,dxy,m, verbose=FALSE){
 
 
 weighted.quantile = function(x,w,probs=0.25){
+    if(length(x) != length(w))
+        stop("x and w should have same length")
     ord <- order(x)
     x <- x[ord]
     w <- w[ord]/sum(w)
@@ -332,4 +334,11 @@ weighted.quantile = function(x,w,probs=0.25){
     } else {
         return( x[y[length(y)]] )
     }
+}
+
+weighted.mean = function(x,w){
+    if(length(x) != length(w))
+        stop("x and w should have same length")
+    w <- w/sum(w) # need to normalize
+    return (x %*% w)
 }

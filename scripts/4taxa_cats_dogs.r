@@ -56,7 +56,7 @@ tree3 = "(1,(2,3),4);"
 data3=which(data$trees== tree3)
 
 df=data.frame(tree=c(tree1,tree2,tree3,"combined"))
-df$probTop = round(c(sum(data$w[data1]), sum(data$w[data2]), sum(data$w[data3]), 1.0),4)
+df$probTop = round(c(sum(data$w[data1]), sum(data$w[data2]), sum(data$w[data3]), 1.0),6)
 # mean bl
 df$meanX1 = round(c(weighted.mean(data$X1[data1],data$w[data1]),
     weighted.mean(data$X1[data2],data$w[data2]),
