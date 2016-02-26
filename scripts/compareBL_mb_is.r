@@ -3,6 +3,7 @@
 
 library(ape)
 library(phangorn)
+
 who="birds"
 load("data_birds_mb.Rda")
 data_mb=data
@@ -109,4 +110,4 @@ data[15,3] = which(emb[,2] == omb[4])
 
 data
 save(data,file=paste0("bl_",who,".Rda"))
-write.table(data,file=paste0("bl_",who,".csv"), sep=",", row.names=FALSE)
+write.table(data,file=paste0("bl_",who,".txt"), sep=",", row.names=FALSE)

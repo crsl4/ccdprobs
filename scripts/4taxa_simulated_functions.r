@@ -72,23 +72,9 @@ sampleTopQuartet = function(dat.tre, verbose=FALSE){
 }
 
 # function to sample branch lengths for 4-taxon tree
-sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
-    sis = tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]] #works only for unrooted quartet
-    fth = setdiff(1:4,sis)
-    seq1 = as.vector(unname(as.character(d[as.numeric(sis[1]),])))
-    seq2 = as.vector(unname(as.character(d[as.numeric(sis[2]),])))
-    seq3 = as.vector(unname(as.character(d[fth[1],])))
-    seq4 = as.vector(unname(as.character(d[fth[2],])))
-    # remove missing:
-    s1 <-seq1!="-"
-    s2 <- seq2!="-"
-    s3 <- seq3!="-"
-    s4 <- seq4!="-"
-    seq1 <- seq1[s1&s2&s3&s4]
-    seq2 <- seq2[s1&s2&s3&s4]
-    seq3 <- seq3[s1&s2&s3&s4]
-    seq4 <- seq4[s1&s2&s3&s4]
-
+# the tree is fixed as ((1,2),3,4), and sequences were simulated
+# estSeqx = TRUE: estimate seqx instead of using the true one
+sampleBLQuartetSim = function(seq1,seq2,seq3,seq4,seqx,eta=0.5, verbose=FALSE, estSeqx=FALSE){
     nsites = length(seq1)
     if(length(seq2) != nsites && length(seq3) != nsites){
         stop("error in number of sites seq1,seq2,seq3")
@@ -193,7 +179,6 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
             seq4.dist[4,i] = 1
         }
     }
-
     #need seq distribution at x: felsenstein algorithm
     r = rep(1,6)
     #r = c(2.815,51.982,1.903,1.275,65.402,1.000) #mrbayes
@@ -202,13 +187,32 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
         print(Q$Q$Q)
         print(Q$Q$p)
     }
-    #seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
 
-    # sample sequence at x
-    seqdist = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
-    seqx = sampleSeq(seqdist)
+    if(estSeqx){
+        #seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
+
+        #sample sequence at x
+        seqdist = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
+        seqx = sampleSeq(seqdist)
+        if(verbose)
+            print(seqx)
+    } else {
+        seqx.dist = matrix(0,n,nsites)
+        for(i in 1:nsites){
+            if(seqx[i] == 'a'){
+                seqx.dist[1,i] = 1
+            } else if(seqx[i] == 'c'){
+                seqx.dist[2,i] = 1
+            } else if(seq3[i] == 'g'){
+                seqx.dist[3,i] = 1
+            } else if(seq3[i] == 't'){
+                seqx.dist[4,i] = 1
+            }
+        }
+        seqx=seqx.dist
+    }
     if(verbose)
-        print(seqx)
+        print(seqx[1:4,1:4])
 
     out34 = matrix(0,n,n) # distance between 3 and 4
     for(i in 1:n)
@@ -261,20 +265,10 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
         print(paste("d1x",d1x,"d2x",d2x,"d3y",d3y,"d4y",d4y,"dxy",dxy))
     }
 
-    bl <- rep(0,5) #works only for unrooted quartet
-    ed1x = which(tre$edge[,2] == which(tre$tip.label == sis[1]))
-    ed2x = which(tre$edge[,2] == which(tre$tip.label == sis[2]))
-    ed3y = which(tre$edge[,2] == which(tre$tip.label == as.character(fth[1])))
-    ed4y = which(tre$edge[,2] == which(tre$tip.label == as.character(fth[2])))
-    bl[ed1x] = d1x
-    bl[ed2x] = d2x
-    bl[ed3y] = d3y
-    bl[ed4y] = d4y
-    ind = which(bl==0)
-    bl[ind] = dxy
-    if(verbose)
-        print(bl)
+    if(dxy<0)
+        stop("dxy is negative")
 
+    bl <- c(dxy,d1x,d2x,d3y,d4y)
     # now, compute likelihood of quartet with bl
     suma = 0
     for(s in 1:nsites){
@@ -292,7 +286,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     # we need to compute density(bl|top)
     dens = logJointDensity.tn(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4x.tn,d34.tn)
     prior = logPriorExpDist(d1x,d2x,d3y,d4y,dxy,0.1) #could be other priors
-    return (list(bl=bl, loglik=suma, logdensity=dens, logprior=prior))
+    return (list(bl=bl, loglik=suma, logdensity=dens, logprior=prior, estQ=Q))
 }
 
 # d12,d13,d23,d3x,d4x,d34 = simulateBranchLength.tn

@@ -7,9 +7,10 @@ library(ape)
 source('branch-length.r')
 source('4taxa_cats_dogs_functions.r')
 
-#who = "cats"
-#d=read.dna("../datasets/4taxa-cats.phy") #needs to be 4 taxa
-#dat.tre=read.table("../datasets/4taxa-cats_ccdprobs.out", header=FALSE)
+who = "cats"
+d=read.dna("../datasets/4taxa-cats.phy") #needs to be 4 taxa
+dat.tre=read.table("../datasets/4taxa-cats_ccdprobs.out", header=FALSE)
+
 who = "birds"
 d=read.dna("../datasets/birds4-clean.phy") #needs to be 4 taxa
 dat.tre=read.table("../datasets/birds4-clean_ccdprobs.out", header=FALSE)
@@ -45,6 +46,7 @@ my.logw = logwv - mean(logwv)
 data$w = exp(my.logw)/sum(exp(my.logw))
 save(data,file=paste0("data_",who,".Rda"))
 #load("data_birds.Rda")
+data[data$w>0.01,]
 
 tree1 = "((1,2),3,4);"
 data1=which(data$trees== tree1)
@@ -122,7 +124,7 @@ df$q975.X5 = round(c(weighted.quantile(data$X5[data1],data$w[data1], probs=0.975
     weighted.quantile(data$X5,data$w, probs=0.975)),4)
 
 save(df,file=paste0("df_",who,".Rda"))
-write.table(df,file=paste0("df_",who,".csv"), sep=",", row.names=FALSE)
+write.table(df,file=paste0("df_",who,".txt"), sep=",", row.names=FALSE)
 
 ## #things to check:
 ## # weight well-distributed:

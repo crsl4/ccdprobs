@@ -38,3 +38,6 @@ COMPARISON ----
 ------
 *0.* files in cats-birds are the first test of importance
 sampling comparison with mb: internal branch not correctly sampled
+
+*1.* files in cats-birds are with sampled seqx (not seq dist)
+branch lengths a little off
