@@ -204,7 +204,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     }
     #seqx = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
 
-    # sample sequence at x
+    ## sample sequence at x
     seqdist = sequenceDist(d1x,d2x, seq1.dist, seq2.dist,Q$Q)
     seqx = sampleSeq(seqdist)
     if(verbose)
