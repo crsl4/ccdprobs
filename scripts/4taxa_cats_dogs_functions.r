@@ -342,3 +342,16 @@ weighted.mean = function(x,w){
     w <- w/sum(w) # need to normalize
     return (x %*% w)
 }
+
+
+## NORMAL
+## d12,d13,d23,d3x,d4x,d34 = simulateBranchLength.norm
+logJointDensity.norm = function(d1x,d2x,d3y,d4y,dxy,d12.n,d13.n,d23.n,d3x.n,d4x.n,d34.n, verbose=FALSE){
+    logd = (d1x+d2x-d12.n$mu)^2/d12.n$sigma^2 + (d3y+d4y-d34.n$mu)^2/d34.n$sigma^2 + (d3y+dxy-d3x.n$mu)^2/d3x.n$sigma^2 + (d4y+dxy-d4x.n$mu)^2/d4x.n$sigma^2 +
+        (-d1x+d2x-d23.n$mu)^2/(d23.n$sigma^2) -
+                ((d23.n$sigma^2*d13.n$mu+d13.n$sigma^2*d1x-d13.n$sigma^2*d2x+d13.n$sigma^2*d23.n$mu)^2/(d13.n$sigma^2*d23.n$sigma^2*(d23.n$sigma^2+d13.n$sigma^2)))
+    logd = -0.5 * logd
+    if(verbose)
+        print(logd)
+    return ( logd )
+}

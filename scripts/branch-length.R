@@ -223,6 +223,42 @@ doit = function(nsites, branch.length, eta.jc=0.5, eta.tn=0.8, nsim=10000, delta
     return (p1)
 }
 
+simulateBranchLength.normal = function(nsim,x,eta=0.9, verbose=FALSE) {
+    n = sum(x)
+    prop.ag = (x[1,3] + x[3,1]) / n
+    prop.ct = (x[2,4] + x[4,2]) / n
+    prop.tv = (x[1,2] + x[1,4] + x[2,1] + x[2,3] + x[3,2] + x[3,4] + x[4,1] + x[4,3]) / n
+    if(verbose)
+        print(paste("prop.ag",prop.ag,"prop.ct",prop.ct,"prop.tv",prop.tv))
+    p.est = (apply(x,1,sum) + apply(x,2,sum)) / (2*n)
+    p.a = p.est[1]
+    p.c = p.est[2]
+    p.g = p.est[3]
+    p.t = p.est[4]
+    p.r = sum(p.est[c(1,3)])
+    p.y = sum(p.est[c(2,4)])
+    if(verbose)
+        print(paste("p.a",p.a,"p.c",p.c,"p.g",p.g,"p.t",p.t,"p.r",p.r,"p.y",p.y))
+    numer1 = 2*p.a*p.g*p.r
+    denom1 = numer1 - p.r^2*prop.ag - p.a*p.g*prop.tv
+    c1 = numer1 / denom1
+    numer2 = 2*p.c*p.t*p.y
+    denom2 = numer2 - p.y^2*prop.ct - p.c*p.t*prop.tv
+    c2 = numer2 / denom2
+    c3 = (2*p.a^2*p.g^2) / (p.r * denom1) +
+         (2*p.c^2*p.t^2) / (p.y * denom2) +
+         (p.r^2 * (p.c^2 + p.t^2) + p.y^2 * (p.a^2 + p.g^2) ) / (2*p.r^2*p.y^2 - p.r*p.y*prop.tv)
+    mu = -2 * ( (p.a*p.g/p.r) * log(1 - p.r*prop.ag/(2*p.a*p.g) - prop.tv/(2*p.r) ) +
+                (p.c*p.t/p.y) * log(1 - p.y*prop.ct/(2*p.c*p.t) - prop.tv/(2*p.y) ) +
+                (p.r*p.y - p.a*p.g*p.y/p.r - p.c*p.t*p.r/p.y) * log(1 - prop.tv/(2*p.r*p.y)) )
+    v = (1/ eta) * ((c1^2*prop.ag + c2^2*prop.ct + c3^2*prop.tv) - (c1*prop.ag + c2*prop.ct + c3*prop.tv)^2)/n
+    if(verbose)
+        print(paste("mu",mu,"v",v))
+    w = rnorm(nsim,mu,sqrt(v))
+    return( list(t=w,mu=mu,sigma=sqrt(v)) )
+}
+
+
 #for(i in 1:100){
 #    doit(nsites,branch.length)}
 
@@ -266,3 +302,4 @@ doit = function(nsites, branch.length, eta.jc=0.5, eta.tn=0.8, nsim=10000, delta
 ## [4,]    0    0    0    0
 
 ## NOTE: same error when row of zeros in x (counts), p has a very small number 0.0026
+
