@@ -355,3 +355,16 @@ logJointDensity.norm = function(d1x,d2x,d3y,d4y,dxy,d12.n,d13.n,d23.n,d3x.n,d4x.
         print(logd)
     return ( logd )
 }
+
+## JC beta
+## d12,d13,d23,d3x,d4x,d34 = simulateBranchLength.jc
+logJointDensity.jc = function(d1x,d2x,d3y,d4y,dxy,d12.jc,d13.jc,d23.jc,d3x.jc,d4x.jc,d34.jc, verbose=FALSE){
+    logd = (-4/3)*(d12.jc$beta*(d1x+d2x)+d34.jc$beta*(d3y+d4y)+d23.jc$beta*(-d1x+d2x)+d3x.jc$beta*(d3y+dxy)+d4x.jc$beta*(d4y+dxy))+
+        (d12.jc$alpha-1)*log(1-exp((-4/3)*(d1x+d2x)))+
+            (d34.jc$alpha-1)*log(1-exp((-4/3)*(d3y+d4y)))+
+                (d3x.jc$alpha-1)*log(1-exp((-4/3)*(d3y+dxy)))+
+                    (d4x.jc$alpha-1)*log(1-exp((-4/3)*(d4y+dxy)))
+    if(verbose)
+        print(logd)
+    return ( logd )
+}

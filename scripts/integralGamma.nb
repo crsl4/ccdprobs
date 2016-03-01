@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      8996,        292]
-NotebookOptionsPosition[      8203,        259]
-NotebookOutlinePosition[      8570,        275]
-CellTagsIndexPosition[      8527,        272]
+NotebookDataLength[     14329,        468]
+NotebookOptionsPosition[     13232,        424]
+NotebookOutlinePosition[     13600,        440]
+CellTagsIndexPosition[     13557,        437]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -254,12 +254,177 @@ Cell[BoxData[
 }, Open  ]],
 
 Cell["Conclusion: we will have to integrate numerically inside R", "Text",
- CellChangeTimes->{{3.664633525634863*^9, 3.664633537560034*^9}}]
+ CellChangeTimes->{{3.664633525634863*^9, 3.664633537560034*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Integral for JC beta transformation", "Section",
+ CellChangeTimes->{{3.665842249763352*^9, 3.665842259827969*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Integrate", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"E", "^", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"-", "a"}], "*", "x"}], ")"}]}], "*", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"1", "-", 
+       RowBox[{"E", "^", 
+        RowBox[{"(", 
+         RowBox[{"-", "x"}], ")"}]}]}], ")"}], "^", "b"}], "*", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"1", "-", 
+       RowBox[{"c", "*", 
+        RowBox[{"E", "^", 
+         RowBox[{"(", 
+          RowBox[{"-", "x"}], ")"}]}]}]}], ")"}], "^", "d"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", "0", ",", "Infinity"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.665842262566922*^9, 3.665842330165097*^9}}],
+
+Cell[BoxData[
+ RowBox[{"If", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"Re", "[", "a", "]"}], ">", "0"}], "&&", 
+    RowBox[{
+     RowBox[{"Re", "[", "b", "]"}], ">", 
+     RowBox[{"-", "1"}]}], "&&", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"c", "\[NotElement]", "Reals"}], "||", 
+      RowBox[{
+       RowBox[{"Re", "[", "c", "]"}], "\[LessEqual]", "1"}]}], ")"}]}], ",", 
+   RowBox[{
+    RowBox[{"Gamma", "[", "a", "]"}], " ", 
+    RowBox[{"Gamma", "[", 
+     RowBox[{"1", "+", "b"}], "]"}], " ", 
+    RowBox[{"Hypergeometric2F1Regularized", "[", 
+     RowBox[{"a", ",", 
+      RowBox[{"-", "d"}], ",", 
+      RowBox[{"1", "+", "a", "+", "b"}], ",", "c"}], "]"}]}], ",", 
+   RowBox[{"Integrate", "[", 
+    RowBox[{
+     RowBox[{
+      SuperscriptBox["\[ExponentialE]", 
+       RowBox[{
+        RowBox[{"-", "a"}], " ", "x"}]], " ", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         SuperscriptBox["\[ExponentialE]", 
+          RowBox[{"-", "x"}]]}], ")"}], "b"], " ", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         RowBox[{"c", " ", 
+          SuperscriptBox["\[ExponentialE]", 
+           RowBox[{"-", "x"}]]}]}], ")"}], "d"]}], ",", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+     RowBox[{"Assumptions", "\[Rule]", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Re", "[", "a", "]"}], "\[LessEqual]", "0"}], "||", 
+       RowBox[{
+        RowBox[{"Re", "[", "b", "]"}], "\[LessEqual]", 
+        RowBox[{"-", "1"}]}], "||", 
+       RowBox[{"c", ">", "1"}]}]}]}], "]"}]}], "]"}]], "Output",
+ CellChangeTimes->{3.6658423404866123`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Integrate", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"E", "^", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"-", "a"}], "*", "x"}], ")"}]}], "*", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"1", "-", 
+       RowBox[{"E", "^", 
+        RowBox[{"(", 
+         RowBox[{"-", "x"}], ")"}]}]}], ")"}], "^", "b"}], "*", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"1", "-", 
+       RowBox[{"c", "*", 
+        RowBox[{"E", "^", 
+         RowBox[{"(", 
+          RowBox[{"-", "x"}], ")"}]}]}]}], ")"}], "^", "d"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", "0", ",", "Infinity"}], "}"}], ",", 
+   "\[IndentingNewLine]", 
+   RowBox[{"Assumptions", "\[Rule]", " ", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"a", ">", "0"}], ",", 
+      RowBox[{"b", ">", "0"}], ",", 
+      RowBox[{"c", ">", "0"}], ",", 
+      RowBox[{"d", ">", "0"}]}], "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.665842262566922*^9, 3.665842330165097*^9}, {
+  3.665842363776443*^9, 3.665842403693697*^9}}],
+
+Cell[BoxData[
+ RowBox[{"If", "[", 
+  RowBox[{
+   RowBox[{"c", "<", "1"}], ",", 
+   FractionBox[
+    RowBox[{"\[Pi]", " ", 
+     RowBox[{"Csc", "[", 
+      RowBox[{"a", " ", "\[Pi]"}], "]"}], " ", 
+     RowBox[{"Gamma", "[", 
+      RowBox[{"1", "+", "b"}], "]"}], " ", 
+     RowBox[{"Hypergeometric2F1Regularized", "[", 
+      RowBox[{"a", ",", 
+       RowBox[{"-", "d"}], ",", 
+       RowBox[{"1", "+", "a", "+", "b"}], ",", "c"}], "]"}]}], 
+    RowBox[{"Gamma", "[", 
+     RowBox[{"1", "-", "a"}], "]"}]], ",", 
+   RowBox[{"Integrate", "[", 
+    RowBox[{
+     RowBox[{
+      SuperscriptBox["\[ExponentialE]", 
+       RowBox[{
+        RowBox[{"-", "a"}], " ", "x"}]], " ", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         SuperscriptBox["\[ExponentialE]", 
+          RowBox[{"-", "x"}]]}], ")"}], "b"], " ", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         RowBox[{"c", " ", 
+          SuperscriptBox["\[ExponentialE]", 
+           RowBox[{"-", "x"}]]}]}], ")"}], "d"]}], ",", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+     RowBox[{"Assumptions", "\[Rule]", 
+      RowBox[{
+       RowBox[{"d", ">", "0"}], "&&", 
+       RowBox[{"c", "\[GreaterEqual]", "1"}], "&&", 
+       RowBox[{"b", ">", "0"}], "&&", 
+       RowBox[{"a", ">", "0"}]}]}]}], "]"}]}], "]"}]], "Output",
+ CellChangeTimes->{3.665842412156534*^9}]
+}, Open  ]]
+}, Open  ]]
 }, Open  ]]
 },
 WindowToolbars->"EditBar",
 WindowSize->{640, 750},
-WindowMargins->{{31, Automatic}, {Automatic, 43}},
+WindowMargins->{{241, Automatic}, {Automatic, 41}},
 FrontEndVersion->"7.0 for Mac OS X x86 (32-bit) (November 10, 2008)",
 StyleDefinitions->"Default.nb"
 ]
@@ -292,11 +457,21 @@ Cell[CellGroupData[{
 Cell[6798, 213, 594, 18, 53, "Input"],
 Cell[7395, 233, 637, 19, 53, "Output"]
 }, Open  ]],
-Cell[8047, 255, 140, 1, 26, "Text"]
+Cell[8047, 255, 140, 1, 26, "Text"],
+Cell[CellGroupData[{
+Cell[8212, 260, 120, 1, 67, "Section"],
+Cell[CellGroupData[{
+Cell[8357, 265, 703, 23, 27, "Input"],
+Cell[9063, 290, 1661, 49, 88, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10761, 344, 1013, 32, 43, "Input"],
+Cell[11777, 378, 1415, 41, 123, "Output"]
+}, Open  ]]
+}, Open  ]]
 }, Open  ]]
 }
 ]
 *)
 
 (* End of internal cache information *)
-
