@@ -116,7 +116,7 @@ simulateBranchLength.jc = function(nsim,x, eta=0.9) {
     changes = n - sum(diag(x))
     theta = 4*changes/3
     w = -0.75 * log( rbeta(nsim,eta*(n - theta),eta*theta) )
-    return( w )
+    return( list(t=w, beta=eta*(n-theta), alpha=eta*theta) )
 }
 
 ## Now try the Tamura-Nei way
@@ -185,7 +185,7 @@ comparePlot = function(x,s,Q,nsim=10000,eta.jc=0.5,eta.tn=0.9, verbose=FALSE) {
     ## now get a sample of JCish points to compare
     jc = simulateBranchLength.jc(nsim,x,eta.jc)
     ## density estimate
-    d.jc = density(jc)
+    d.jc = density(jc$t)
     ## another data frame
     df.jc = data.frame(x=d.jc$x,y=d.jc$y)
     ## TN estimate

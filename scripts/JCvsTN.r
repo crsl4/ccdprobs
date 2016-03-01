@@ -54,7 +54,7 @@ simulateDensities = function(nsites,branch.length,nsim=10000,eta.jc=0.5,eta.tn=0
     ## now get a sample of JCish points to compare
     jc = simulateBranchLength.jc(nsim,x,eta.jc)
     ## density estimate
-    d.jc = density(jc)
+    d.jc = density(jc$t)
     ## another data frame
     df.jc = data.frame(x=d.jc$x,y=d.jc$y)
     ## TN estimate

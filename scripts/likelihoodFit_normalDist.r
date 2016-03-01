@@ -70,7 +70,7 @@ df.gtr = data.frame(s,y2)
 
 
 jc = simulateBranchLength.jc(nsim,x,eta)
-d.jc = density(jc)
+d.jc = density(jc$t)
 df.jc = data.frame(x=d.jc$x,y=d.jc$y)
 
 tn = simulateBranchLength.tn(nsim,x,eta)

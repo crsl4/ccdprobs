@@ -35,7 +35,7 @@ df.gtr = data.frame(s,y2)
 
 
 jc = simulateBranchLength.jc(nsim,x,eta)
-d.jc = density(jc)
+d.jc = density(jc$t)
 df.jc = data.frame(x=d.jc$x,y=d.jc$y)
 
 tn = simulateBranchLength.tn(nsim,x,eta)
@@ -313,18 +313,56 @@ y = y/sum(y)
 y = y / delta
 df.norm = data.frame(x=v.dxy,y=y)
 
+## JC beta density
+d12.jc = simulateBranchLength.jc(nsim=1, out12, eta=eta)
+d12=d12.jc$t
+if(verbose)
+    print(d12)
+d13.jc = simulateBranchLength.jc(nsim=1, out13, eta=eta)
+d13 = d13.jc$t
+if(verbose)
+    print(d13)
+d23.jc = simulateBranchLength.jc(nsim=1, out23, eta=eta)
+d23 = d23.jc$t
+if(verbose)
+    print(d23)
+d34.jc = simulateBranchLength.jc(nsim=1, out34, eta=eta)
+d34 = d34.jc$t
+if(verbose)
+    print(d34)
+d3x.jc = simulateBranchLength.jc(nsim=1, out3x, eta=eta)
+d3x = d3x.jc$t
+if(verbose)
+    print(d3x)
+d4x.jc = simulateBranchLength.jc(nsim=1, out4x, eta=eta)
+d4x = d4x.jc$t
+if(verbose)
+    print(d4x)
+
+density = rep(0,length(v.dxy))
+for(i in 1:length(v.dxy)){
+    density[i] = logJointDensity.jc(d1x,d2x,d3y,d4y,v.dxy[i],d12.jc,d13.jc,d23.jc,d3x.jc,d4x.jc,d34.jc)
+}
+density = density - max(density)
+y = exp(density)
+y = y/sum(y)
+y = y / delta
+df.jc = data.frame(x=v.dxy,y=y)
+
 
 
 p1 = ggplot(df.gtr, aes(x=x,y=y)) +
     geom_line(color="blue") +
     geom_line(aes(x=x,y=y),data=df.tn,color="red",linetype="dashed") +
     geom_line(aes(x=x,y=y),data=df.norm,color="darkgreen",linetype="dashed") +
+    geom_line(aes(x=x,y=y),data=df.jc,color="gold",linetype="dashed") +
     geom_vline(xintercept=dxy)+
     xlab('branch length') +
     ylab('densities') +
-    ggtitle('Blue = GTR, Red = TN, Green = Normal')
+    ggtitle('Blue = GTR, Red = TN, Green = Normal, Gold = JC')
 
 plot(p1)
+
 
 ## simulated data
 library(ape)
@@ -627,16 +665,52 @@ y = y/sum(y)
 y = y / delta
 df.norm = data.frame(x=v.dxy,y=y)
 
+## JC beta density
+d12.jc = simulateBranchLength.jc(nsim=1, out12, eta=eta)
+d12=d12.jc$t
+if(verbose)
+    print(d12)
+d13.jc = simulateBranchLength.jc(nsim=1, out13, eta=eta)
+d13 = d13.jc$t
+if(verbose)
+    print(d13)
+d23.jc = simulateBranchLength.jc(nsim=1, out23, eta=eta)
+d23 = d23.jc$t
+if(verbose)
+    print(d23)
+d34.jc = simulateBranchLength.jc(nsim=1, out34, eta=eta)
+d34 = d34.jc$t
+if(verbose)
+    print(d34)
+d3x.jc = simulateBranchLength.jc(nsim=1, out3x, eta=eta)
+d3x = d3x.jc$t
+if(verbose)
+    print(d3x)
+d4x.jc = simulateBranchLength.jc(nsim=1, out4x, eta=eta)
+d4x = d4x.jc$t
+if(verbose)
+    print(d4x)
+
+density = rep(0,length(v.dxy))
+for(i in 1:length(v.dxy)){
+    density[i] = logJointDensity.jc(d1x,d2x,d3y,d4y,v.dxy[i],d12.jc,d13.jc,d23.jc,d3x.jc,d4x.jc,d34.jc)
+}
+density = density - max(density)
+y = exp(density)
+y = y/sum(y)
+y = y / delta
+df.jc = data.frame(x=v.dxy,y=y)
 
 library(ggplot2)
 p1 = ggplot(df.gtr, aes(x=x,y=y)) +
     geom_line(color="blue") +
     geom_line(aes(x=x,y=y),data=df.tn,color="red",linetype="dashed") +
     geom_line(aes(x=x,y=y),data=df.norm,color="black", linetype="dashed") +
+    geom_line(aes(x=x,y=y),data=df.jc,color="gold", linetype="dashed") +
     geom_vline(xintercept=dxy)+
     xlab('branch length') +
     ylab('densities') +
-    ggtitle('Blue = GTR, Red = TN, Black = Normal')
+    ggtitle('Blue = GTR, Red = TN, Black = Normal, Gold = JC')
 
 plot(p1)
 
