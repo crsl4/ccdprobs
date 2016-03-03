@@ -64,16 +64,31 @@ fy = function(y,seq1,seq2,seq3,seq4, d1x,d2x,d3y,d4y){
 
 ## function that will find the MLE for the internal branch length
 ## given the sequences and the other branch lengths
+## with Newton-Rahpson: does not work!
 findMLE = function(seq1,seq2,seq3,seq4, d1x,d2x,d3y,d4y){
     y0 = 0.8 # chosen arbitrarily, true value is 0.9659
-    it = 100 #number of iterations
-    y = rep(0, it)
-    y[1] = y0
-
-    for(i in 2:it){
-        f = fy(y[i-1],seq1,seq2,seq3,seq4, d1x,d2x,d3y,d4y)
-        y[i] = y[i-1] - f$fy/f$fyprime
+    tol = 0.0001
+    y = y0
+    error = 1
+    i = 1
+    while(error > tol){
+        f = fy(y[i],seq1,seq2,seq3,seq4, d1x,d2x,d3y,d4y)
+        y[i+1] = y[i] - f$fy/f$fyprime
+        error = abs(y[i+1]-y[i])
+        i = i+1
     }
     return ( y )
+}
+
+## function that will find the MLE for the internal branch length
+## given the sequences and the other branch lengths
+findMLE2 = function(seq1,seq2,seq3,seq4, d1x,d2x,d3y,d4y){
+    y = seq(0,1,by=0.001)
+    f= rep(0,length(y))
+    for(i in 1:length(y)){
+        g = fy(y[i],seq1,seq2,seq3,seq4, d1x,d2x,d3y,d4y)
+        f[i] = g$fy
+    }
+    return ( list(y=y,f=f) )
 }
 
