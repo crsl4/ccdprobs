@@ -92,3 +92,7 @@ findMLE2 = function(seq1,seq2,seq3,seq4, d1x,d2x,d3y,d4y){
     return ( list(y=y,f=f) )
 }
 
+
+## TO DO:
+## check newton raphson, why it does not work! pick starting point carefully
+## compute obs Information, and generate a gamma: compare to lik plot
