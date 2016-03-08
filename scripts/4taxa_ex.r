@@ -2,7 +2,19 @@
 # and calculate importance weight
 # Claudia February 2016
 
-## TODO: rerun this with the new sampleBLQuartet, make sure that weights behave nicely now
+
+## TODO: check all functions in branch-length_lik.r, make sure they work
+## also, check all functions, make sure that the loglik function computes the same log lik as previousli
+## without the matrices notation
+## make sure all needed functions are there
+## compare the lik to density for one branch length only (2 known sequences, already done for JC in internalBranch.r)
+## choose eta
+## beware of newton raphson, use starting point that works at first, and later worry on how to choose this
+
+## theoretical work: joint density for 4taxa tree. study jacobian for 4 taxa, 5, 6
+
+## later, do the case for 4 taxa: need 4taxa_functions to be updated
+## rerun this with the new sampleBLQuartet, make sure that weights behave nicely now
 
 library(ape)
 # library(bigvis)

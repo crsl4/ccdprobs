@@ -2,57 +2,6 @@
 # Functions
 # ===========================================================================================
 
-# 1-----x-----2
-# d1x = distance from 1 to parent x, similarly d2x
-# seq1.distj = jth column in seq1.dist matrix (for site j), similarly seq2.distj
-# Q = estimated matrix of rates
-# returns column of site likelihood
-siteLik = function(d1x,d2x,seq1.distj,seq2.distj, Q, verbose=FALSE){
-    P1 = matrixExp(Q,d1x)
-    P2 = matrixExp(Q,d2x)
-    lik = rep(0,4)
-    for(i in 1:4){
-        lik[i] = P1[i,]%*%seq1.distj * P2[i,]%*%seq2.distj
-        if(verbose)
-            print(lik)
-    }
-    return (lik)
-}
-
-
-# estimates the seq dist at x (parent of 1 and 2)
-sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q, verbose=FALSE){
-    nsites = length(seq1.dist[1,])
-    if(length(seq2.dist[1,]) != nsites){
-        stop("error in number of sites seq1,seq2")
-    }
-    nuc = c('a','c','g','t')
-    seqx = matrix(rep(0,nsites*4),nrow=4)
-    for(i in 1:nsites){
-        seqx[,i] = siteLik(d1x,d2x,seq1.dist[,i],seq2.dist[,i],Q) * Q$p
-        seqx[,i] = seqx[,i]/sum(seqx[,i])
-    }
-    if(verbose)
-        print(seqx)
-    return(seqx)
-}
-
-sampleSeq = function(seqx){
-    seq = matrix(rep(0,ncol(seqx)*4),nrow=4)
-    for(i in 1:ncol(seqx)){
-        ind = sample(1:4,1,replace=FALSE,prob=seqx[,i])
-        seq[ind,i] = 1
-    }
-    return (seq)
-}
-
-#warning if x (counts) with rows of zero (and also columns because error in density(tn)), also if few counts in one row/column
-checkMatCounts = function(x){
-    if((0 %in% rowSums(x)) || (0 %in% colSums(x)) || (any(rowSums(x)<5)) || (any(colSums(x)<5))){
-        warning("the counts matrix rows/columns of zero, or very few counts per row/column, TN simulation of branch length could have an error")
-    }
-}
-
 sampleTopQuartet = function(dat.tre, verbose=FALSE){
     u=runif(1,0,1)
     if(u<dat.tre$V2[1]){
@@ -98,6 +47,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     n = 4
 
     ## TO DO: modify how we sample distances: simulateBranchLength.lik (fixit)
+    ## use countsMatrix
     out12 = matrix(0,n,n) # distance between 1 and 2
     for(i in 1:n)
         for(j in 1:n)
@@ -148,7 +98,8 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
         print(d2x)
     }
 
-    #need seq1.dist and seq2.dist which are matrices
+    ## use seqMatrix function
+    ##need seq1.dist and seq2.dist which are matrices
     seq1.dist = matrix(0,n,nsites)
     seq2.dist = matrix(0,n,nsites)
     for(i in 1:nsites){
