@@ -174,8 +174,7 @@ sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q, verbose=FALSE){
     nuc = c('a','c','g','t')
     seqx = matrix(rep(0,nsites*4),nrow=4)
     for(i in 1:nsites){
-        seqx[,i] = siteLik(d1x,d2x,seq1.dist[,i],seq2.dist[,i],Q) * Q$p
-        seqx[,i] = seqx[,i]/sum(seqx[,i])
+        seqx[,i] = siteLik(d1x,d2x,seq1.dist[,i],seq2.dist[,i],Q$Q) * Q$Q$p
     }
     if(verbose)
         print(seqx)
@@ -225,7 +224,7 @@ seqMatrix = function(seq1){
 ## maybe create another function that calls this one
 gtr.log.lik.all = function(d1x,d2x,dxy,d3y,d4y,seq1.dist,seq2.dist, seq3.dist,seq4.dist,Q){
     suma = 0
-    for(s in 1:nsites){
+    for(s in 1:ncol(seq1.dist)){
         lik12 = siteLik(d1x,d2x,seq1.dist[,s],seq2.dist[,s],Q$Q)
         lik34 = siteLik(d3y,d4y,seq3.dist[,s],seq4.dist[,s],Q$Q)
         L = lik12 %*% t(lik34)
@@ -245,10 +244,10 @@ fk = function(pa,pb,Q,t){
     Pxy = matrixExp(Q$Q,t)
     A=diag(Q$Q$p * pa)
     B=diag(pb)
-    fk = rep(1,4) * A * Pxy * B * t(rep(1,4))
-    fk.pr = rep(1,4) * A * Q$Q* Pxy * B * t(rep(1,4))
-    fk.doublepr = rep(1,4) * A * Q$Q * Q$Q * Pxy * B * t(rep(1,4))
-    return ( list(fk=fk, fk_pr=fk.pr, fk_doublepr= fk.doublepr) )
+    fk = rep(1,4) %*% A %*% Pxy %*% B %*% rep(1,4)
+    fk.pr = rep(1,4) %*% A %*% Q$Q$Q %*% Pxy %*% B %*% rep(1,4)
+    fk.doublepr = rep(1,4) %*% A %*% Q$Q$Q %*% Q$Q$Q %*% Pxy %*% B %*% rep(1,4)
+    return ( list(fk=as.numeric(fk), fk_pr=as.numeric(fk.pr), fk_doublepr= as.numeric(fk.doublepr)) )
 }
 
 ## returns loglik, llprime, lldoubleprime
@@ -256,7 +255,7 @@ loglik = function(seq1.dist, seq2.dist, Q, t){
     if(ncol(seq1.dist) != ncol(seq2.dist))
         stop("wrong number of sites")
     suma = 0
-    sum2 = 0
+    suma2 = 0
     suma3 = 0
     for(i in 1:ncol(seq1.dist)){
         f = fk(seq1.dist[,i],seq2.dist[,i],Q,t)

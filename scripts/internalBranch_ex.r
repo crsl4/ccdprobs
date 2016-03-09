@@ -51,7 +51,7 @@ source("internalBranch.r")
 # loglik ((1,2)x,(3,4)y)
 gtr.log.lik.all = function(d1x,d2x,dxy,d3y,d4y,seq1.dist,seq2.dist, seq3.dist,seq4.dist,Q){
     suma = 0
-    for(s in 1:nsites){
+    for(s in 1:ncol(seq1.dist)){
         lik12 = siteLik(d1x,d2x,seq1.dist[,s],seq2.dist[,s],Q$Q)
         lik34 = siteLik(d3y,d4y,seq3.dist[,s],seq4.dist[,s],Q$Q)
         L = lik12 %*% t(lik34)
