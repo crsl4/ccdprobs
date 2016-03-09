@@ -70,6 +70,18 @@ simulateSequenceSummary = function(nsites,Q,s) {
     return( out )
 }
 
+
+## Calculate GTR log-likelihood at a sequence s for an observed matrix x and matrix Q
+gtr.log.like = function(x,s,Q) {
+    ns = length(s)
+    log.like = numeric( ns )
+    for ( i in 1:ns ) {
+        P = matrixExp(Q,s[i])
+        log.like[i] = sum( x * log(diag(Q$p) %*% P) )
+    }
+    return( log.like )
+}
+
 ## GTR log-likelihood function for optimization
 ## theta is log(branch.length,rac,rag,rat,rcg,rct) because rgt=1 is the standardization
 ## this function is made to use with optim
@@ -174,7 +186,7 @@ sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q, verbose=FALSE){
     nuc = c('a','c','g','t')
     seqx = matrix(rep(0,nsites*4),nrow=4)
     for(i in 1:nsites){
-        seqx[,i] = siteLik(d1x,d2x,seq1.dist[,i],seq2.dist[,i],Q$Q) * Q$Q$p
+        seqx[,i] = siteLik(d1x,d2x,seq1.dist[,i],seq2.dist[,i],Q$Q) #* Q$Q$p
     }
     if(verbose)
         print(seqx)
@@ -267,13 +279,16 @@ loglik = function(seq1.dist, seq2.dist, Q, t){
 }
 
 ## t0= starting point for Newton-Raphson
-findMLE = function(seq1.dist, seq2.dist, Q, t0, tol=0.0001, Nmax=10000){
+findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000){
     t = t0
     error = 1
     i = 1
     while(error > tol & i < Nmax){
+        print(t[i])
+        if(t[i]<0)
+            stop("found negative BL")
         f =loglik(seq1.dist, seq2.dist, Q, t[i])
-        t[i+1] = t[i] - f$ll/f$ll_pr
+        t[i+1] = t[i] - f$ll_pr/f$ll_doublepr
         error = abs(t[i+1]-t[i])
         i = i+1
     }
@@ -282,12 +297,11 @@ findMLE = function(seq1.dist, seq2.dist, Q, t0, tol=0.0001, Nmax=10000){
     return ( list(t=t[length(t)], obsInfo=f$ll_doublepr) )
 }
 
-simulateBranchLength.lik = function(nsim,seq1,seq2, Q){
+simulateBranchLength.lik = function(nsim,seq1,seq2, Q, t0, eta=0.5){
     seq1.dist = seqMatrix(seq1)
     seq2.dist = seqMatrix(seq2)
-    t0 = 0.999
     mu = findMLE(seq1.dist, seq2.dist, Q, t0)
-    w = rgamma(nsim, mu$t^2*mu$obsInfo, mu$t*mu$obsInfo)
+    w = rgamma(nsim, mu$t^2*(-mu$obsInfo)*eta, mu$t*(-mu$obsInfo)*eta)
     return ( w )
 }
 

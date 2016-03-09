@@ -2,13 +2,9 @@
 # and calculate importance weight
 # Claudia February 2016
 
-
-## TODO: check all functions in branch-length_lik.r, make sure they work
-## also, check all functions, make sure that the loglik function computes the same log lik as previousli
-## without the matrices notation
-## make sure all needed functions are there
 ## compare the lik to density for one branch length only (2 known sequences, already done for JC in internalBranch.r)
 ## choose eta
+## this is in oneBranch_ex.r
 ## beware of newton raphson, use starting point that works at first, and later worry on how to choose this
 
 ## theoretical work: joint density for 4taxa tree. study jacobian for 4 taxa, 5, 6

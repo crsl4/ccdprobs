@@ -44,40 +44,36 @@ suma=0
 for(i in 1:ncol(seq1.dist)){
     suma = suma + log(Q$Q$p[which(seq1.dist[,i]==1)]*P[which(seq1.dist[,i]==1),which(seq2.dist[,i]==1)])
 }
-l1=suma   # -2972.42
+suma   # -2972.42
 
 suma=0
 for(i in 1:ncol(seq1.dist)){
     A=seq1.dist[,i] %*% t(seq2.dist[,i])
     suma = suma + log(sum(Q$Q$p * P * A))
 }
-l2=suma # -2972.42
+suma # -2972.42
 
 suma=0
 for(i in 1:ncol(seq1.dist)){
     f = fk(seq1.dist[,i],seq2.dist[,i],Q,d12)
     suma = suma + log(f$fk)
 }
-l3 = suma # -2972.42
+suma # -2972.42
 
 
 siteLik(d1x,d2x,seq1.dist[,1],seq2.dist[,1],Q$Q)
 P1 = matrixExp(Q$Q,d1x)
 P2 = matrixExp(Q$Q,d2x)
-## todo: is this correct, is seqDist correct? why dont lik match?
-
-
+P1[,3]*P2[,3]
 
 
 l = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist,seq2.dist, seq3.dist,seq4.dist,Q)
 l ## -4405.753
 
-pa = seqx.dist[,1]
-pb = seqy.dist[,1]
-t=dxy
+
 
 seqx.dist = sequenceDist(d1x,d2x,seq1.dist, seq2.dist, Q)
 seqy.dist = sequenceDist(d3y,d4y,seq3.dist, seq4.dist, Q)
 l2 = loglik(seqx.dist, seqy.dist, Q, dxy)
-l2$ll ## -8593.091
+l2$ll ## -4405.753
 
