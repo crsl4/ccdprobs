@@ -40,7 +40,9 @@ y2 = y2 / delta
 df.gtr = data.frame(x=s,y=y2)
 
 nsim=10000
-w = simulateBranchLength.lik(nsim,seq1,seq2,Q,t0=0.1, eta=0.5)
+seq1.dist = seqMatrix(seq1)
+seq2.dist = seqMatrix(seq2)
+w = simulateBranchLength.lik(nsim,seq1.dist,seq2.dist,Q,t0=0.1, eta=0.5)
 d.w = density(w)
 df.w = data.frame(x=d.w$x,y=d.w$y)
 

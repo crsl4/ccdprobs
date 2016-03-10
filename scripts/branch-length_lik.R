@@ -297,9 +297,7 @@ findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000){
     return ( list(t=t[length(t)], obsInfo=f$ll_doublepr) )
 }
 
-simulateBranchLength.lik = function(nsim,seq1,seq2, Q, t0, eta=0.5){
-    seq1.dist = seqMatrix(seq1)
-    seq2.dist = seqMatrix(seq2)
+simulateBranchLength.lik = function(nsim,seq1.dist,seq2.dist, Q, t0, eta=0.5){
     mu = findMLE(seq1.dist, seq2.dist, Q, t0)
     w = rgamma(nsim, mu$t^2*(-mu$obsInfo)*eta, mu$t*(-mu$obsInfo)*eta)
     return ( w )
