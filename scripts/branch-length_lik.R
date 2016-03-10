@@ -284,7 +284,7 @@ findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000){
     error = 1
     i = 1
     while(error > tol & i < Nmax){
-        print(t[i])
+        ##print(t[i])
         if(t[i]<0)
             stop("found negative BL")
         f =loglik(seq1.dist, seq2.dist, Q, t[i])
@@ -300,7 +300,7 @@ findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000){
 simulateBranchLength.lik = function(nsim,seq1.dist,seq2.dist, Q, t0, eta=0.5){
     mu = findMLE(seq1.dist, seq2.dist, Q, t0)
     w = rgamma(nsim, mu$t^2*(-mu$obsInfo)*eta, mu$t*(-mu$obsInfo)*eta)
-    return ( w )
+    return ( list(t=w, alpha=mu$t^2*(-mu$obsInfo)*eta, beta=mu$t*(-mu$obsInfo)*eta) )
 }
 
 

@@ -21,7 +21,7 @@ sampleTopQuartet = function(dat.tre, verbose=FALSE){
 }
 
 # function to sample branch lengths for 4-taxon tree
-sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
+sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
     sis = tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]] #works only for unrooted quartet
     fth = setdiff(1:4,sis)
     seq1 = as.vector(unname(as.character(d[as.numeric(sis[1]),])))
@@ -61,7 +61,15 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
         print(Q$Q$p)
     }
     t0 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
-    d12 = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=t0,eta=eta)
+    if(verbose)
+        print(paste("JC t0", t0$t))
+    if(trueT0){
+        t0 = 0.17 #close to true value
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d12.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=t0,eta=eta)
+    d12 = d12.lik$t
     if(verbose)
         print(d12)
 
@@ -69,7 +77,15 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     if(verbose)
         print(out13)
     t0 = simulateBranchLength.jc(nsim=1, out13, eta=eta)
-    d13 = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=t0,eta=eta)
+    if(verbose)
+        print(paste("JC t0", t0$t))
+    if(trueT0){
+        t0 = 0.2 #close to true value
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d13.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=t0,eta=eta)
+    d13 = d13.lik$t
     if(verbose)
         print(d13)
 
@@ -77,7 +93,15 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     if(verbose)
         print(out23)
     t0 = simulateBranchLength.jc(nsim=1, out23, eta=eta)
-    d23 = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=t0,eta=eta)
+    if(verbose)
+        print(paste("JC t0", t0$t))
+    if(trueT0){
+        t0 = 0.18 #close to true value
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d23.lik = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=t0,eta=eta)
+    d23 = d23.lik$t
     if(verbose)
         print(d23)
 
@@ -87,11 +111,20 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     if(verbose){
         print(d1x)
         print(d2x)
+        print(d3x)
     }
 
-    seqx = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q)
-    ##t0 = simulateBranchLength.jc(nsim=1, out23, eta=eta)
-    d4x = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta)
+    seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q)
+    t0 = simulateBranchLength.jc(nsim=1, out12, eta=eta) ## fixit
+    if(verbose)
+        print(paste("JC t0", t0))
+    if(trueT0){
+        t0 = 0.11 #close to true value
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d4x.lik = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta)
+    d4x = d4x.lik$t
     if(verbose)
         print(d4x)
 
@@ -99,13 +132,24 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     if(verbose)
         print(out34)
     t0 = simulateBranchLength.jc(nsim=1, out34, eta=eta)
-    d34 = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=t0,eta=eta)
+    if(verbose)
+        print(paste("JC t0", t0$t))
+    if(trueT0){
+        t0 = 0.16 #close to true value
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d34.lik = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=t0,eta=eta)
+    d34 = d34.lik$t
     if(verbose)
         print(d34)
 
     d3y = (d34+d3x-d4x)/2
     d4y = (d34+d4x-d3x)/2
     dxy = (d3x+d4x-d34)/2
+
+    if(dxy<0 || d1x<0 || d2x<0 || d3y<0 || d4y<0)
+        stop("dxy negative")
 
     if(verbose){
         print(paste("d12",d12,"d13",d13,"d23",d23,"d34",d34))
@@ -126,46 +170,23 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
     if(verbose)
         print(bl)
 
-    ## aqui voy: need to double check the lik (maybe use other functions), and the density for bl
-    ## worry about t0, maybe we want values close to the true at first, which are they? check for birds and cats
-    ## check 4taxa_ex.r for birds and cats, see if it works with t0 close to original, and then try with JC
     ## now, compute likelihood of quartet with bl
-    suma = 0
-    for(s in 1:nsites){
-        lik12 = siteLik(d1x,d2x,seq1.dist[,s],seq2.dist[,s],Q$Q)
-        lik34 = siteLik(d3y,d4y,seq3.dist[,s],seq4.dist[,s],Q$Q)
-        L = lik12 %*% t(lik34)
-        Pxy = matrixExp(Q$Q,dxy)
-        L2 = L*Pxy
-        Lik = Q$Q$p * L2
-        suma = suma+log(sum(Lik))
-    }
-    if(verbose)
-        print(suma)
+    suma = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
 
     # we need to compute density(bl|top)
-    dens = logJointDensity.tn(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4x.tn,d34.tn)
+    dens = logJointDensity.lik(d12.lik,d13.lik,d23.lik,d4x.lik,d34.lik)
     prior = logPriorExpDist(d1x,d2x,d3y,d4y,dxy,0.1) #could be other priors
     return (list(bl=bl, loglik=suma, logdensity=dens, logprior=prior))
 }
 
-## d12,d13,d23,d3x,d4x,d34 = simulateBranchLength.tn
-## fixit: modify here to use joint gamma density from simulateBranchLength.lik
-logJointDensity.tn = function(d1x,d2x,d3y,d4y,dxy,d12.tn,d13.tn,d23.tn,d3x.tn,d4x.tn,d34.tn, verbose=FALSE){
-    logd = (d12.tn$alpha-1)*log(d1x+d2x)-d12.tn$beta*(d1x+d2x)+(d34.tn$alpha-1)*log(d3y+d4y)-d34.tn$beta*(d3y+d4y)-d23.tn$beta*(d2x-d1x)+(d3x.tn$alpha-1)*log(d3y+dxy)-
-        d3x.tn$beta*(d3y+dxy)+(d4x.tn$alpha-1)*log(d4y+dxy)-d4x.tn$beta*(d4y+dxy)
-    if(verbose)
-        print(logd)
-
-    # fixit: integral shown finite, but R says it diverges
-    ## integrand = function(x){
-    ##     x^(d13.tn$alpha-1)*(x-d1x+d2x)^(d23.tn$alpha-1)*exp((-d13.tn$beta-d23.tn$beta)*x)
-    ## }
-    ## # also, beta~500, so exp almost zero for x>10
-    ## I = integrate(integrand,lower=0,upper=10) # if upper=Inf, error
-    ## logd = logd + log(I$value)
-
-    return ( logd ) #fixit: ignoring integral
+## d12,d13,d23,d4x,d34 = simulateBranchLength.lik
+logJointDensity.lik = function(d12.lik,d13.lik,d23.lik,d4x.lik,d34.lik){
+    logd = (d12.lik$alpha-1)*log(d12.lik$t)-d12.lik$beta*d12.lik$t +
+        (d13.lik$alpha-1)*log(d13.lik$t)-d13.lik$beta*d13.lik$t +
+            (d23.lik$alpha-1)*log(d23.lik$t)-d23.lik$beta*d23.lik$t +
+                (d4x.lik$alpha-1)*log(d4x.lik$t)-d4x.lik$beta*d4x.lik$t +
+                    (d34.lik$alpha-1)*log(d34.lik$t)-d34.lik$beta*d34.lik$t
+    return ( logd )
 }
 
 # m= mean

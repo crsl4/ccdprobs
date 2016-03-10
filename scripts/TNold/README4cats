@@ -3,7 +3,7 @@ IMPORTANCE SAMPLING -----
 In datasets:
 1) perl ../scripts/seq2ccdprobs.pl -phylip 4taxa-cats.phy: creates ccdprobs outfiles, we need 4taxa-cats-clean_ccdprobs.out
 In scripts:
-2) R CMD BATCH 4taxa_ex.r (after changing the input files)
+2) R CMD BATCH 4taxa_cats_dogs.r (after changing the input files)
 This will create data_cats.Rda, df_cats.Rda, df_cats.csv with branch length summaries for IS
 MRBAYES ----
 3) mb 4taxa-cats-clean.nex
@@ -22,7 +22,7 @@ IMPORTANCE SAMPLING -----
 In datasets:
 1) perl ../scripts/seq2ccdprobs.pl -nexus birds4-clean.nex: : creates ccdprobs outfiles, we need birds4-clean_ccdprobs.out
 In scripts:
-2) R CMD BATCH 4taxa_ex.r (after changing the input files)
+2) R CMD BATCH 4taxa_cats_dogs.r (after changing the input files)
 This will create data_birds.Rda, df_birds.Rda, df_birds.csv with branch length summaries for IS
 MRBAYES ----
 3) mb birds4.nex (done by bret) // this creates birds4.nex.t and other files
@@ -35,3 +35,9 @@ This will create data_birds_mb.Rda, df_birds_mb.Rda, df_birds_mb.csv with branch
 COMPARISON ----
 6) run in R compareBL_mb_is.r (after changing input files) to get the table of bl numbers matches
 
+------
+*0.* files in cats-birds are the first test of importance
+sampling comparison with mb: internal branch not correctly sampled
+
+*1.* files in cats-birds are with sampled seqx (not seq dist)
+branch lengths a little off

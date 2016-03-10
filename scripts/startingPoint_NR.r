@@ -1,8 +1,9 @@
-## r script to test if the new gamma based on lik matches the lik
-## for one branch only
-## similar to internalBranch_ex.r
+## r script to study if JC (or TN) or which is a good
+## starting point for the Newton-Raphson of findMLE
 ## Claudia March 2016
 
+
+## one branch: 1------2
 library(ape)
 library(ggplot2)
 source('branch-length_lik.r')
@@ -46,15 +47,18 @@ w = simulateBranchLength.lik(nsim,seq1.dist,seq2.dist,Q,t0=0.1, eta=0.5)
 d.w = density(w$t)
 df.w = data.frame(x=d.w$x,y=d.w$y)
 
+t.jc = simulateBranchLength.jc(nsim=1,x,eta=0.5)
+w2 = simulateBranchLength.lik(nsim,seq1.dist,seq2.dist,Q,t0=t.jc$t, eta=0.5)
+d.w2 = density(w2$t)
+df.w2 = data.frame(x=d.w2$x,y=d.w2$y)
+
 p1 = ggplot(df.gtr, aes(x=x,y=y)) +
     geom_line(color="blue")+
     geom_line(aes(x=x,y=y),data=df.w,color="red",linetype="dashed") +
+    geom_line(aes(x=x,y=y),data=df.w2,color="darkgreen",linetype="dashed") +
     xlab('branch length') +
     ylab('densities') +
-    ggtitle('Blue = GTR, Red = Sim, eta=0.5')
+    ggtitle('Blue = GTR, Red = Simulated (t0=true), Green= Simulated (t0=JC), eta=0.5')
 
 plot(p1)
 
-pdf("oneBranch.pdf")
-plot(p1)
-dev.off()

@@ -21,7 +21,7 @@ dat.tre=read.table("../datasets/birds4-clean_ccdprobs.out", header=FALSE)
 print(dat.tre)
 t=sampleTopQuartet(dat.tre)
 print(t)
-b=sampleBLQuartet(d,t$tre)
+b=sampleBLQuartet(d,t$tre, trueT0=TRUE)
 print(b)
 t$tre$edge.length <- b$bl
 
@@ -32,19 +32,27 @@ nreps = 1000
 trees = rep(NA,nreps)
 logwv = rep(0,nreps)
 branch.lengths = matrix(0,nreps,5)
+err = 0
 for(i in 1:nreps){
     t=sampleTopQuartet(dat.tre)
-    b=sampleBLQuartet(d,t$tre)
-    branch.lengths[i,]=b$bl
-    logw = b$logprior+b$loglik-log(t$prob)-b$logdensity
-    #print(logw)
-    trees[i] = write.tree(t$tre)
-    logwv[i] = logw
+    b=try(sampleBLQuartet(d,t$tre, trueT0=TRUE))
+    if(class(b) == "try-error"){
+        err = err + 1
+    } else {
+        branch.lengths[i,]=b$bl
+        logw = b$logprior+b$loglik-b$logdensity
+        ##print(logw)
+        trees[i] = write.tree(t$tre)
+        logwv[i] = logw
+    }
 }
+
 data = data.frame(trees,logwv,branch.lengths)
+lines=which(!is.na(data$trees))
+data=data[lines,]
 head(data)
 summary(data)
-my.logw = logwv - mean(logwv)
+my.logw = logwv[lines] - mean(logwv[lines])
 data$w = exp(my.logw)/sum(exp(my.logw))
 save(data,file=paste0("data_",who,".Rda"))
 #load("data_birds.Rda")
