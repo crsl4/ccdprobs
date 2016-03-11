@@ -55,8 +55,10 @@ summary(data)
 my.logw = logwv[lines] - mean(logwv[lines])
 data$w = exp(my.logw)/sum(exp(my.logw))
 save(data,file=paste0("data_",who,".Rda"))
-#load("data_birds.Rda")
+
+load("data_birds1.Rda")
 data[data$w>0.01,]
+
 
 tree1 = "((1,2),3,4);"
 data1=which(data$trees== tree1)
