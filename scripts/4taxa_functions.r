@@ -60,11 +60,13 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         print(Q$Q$Q)
         print(Q$Q$p)
     }
-    t0 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
+    jc = simulateBranchLength.jc(nsim=1,out12,eta=eta)
+    t0=jc$t
     if(verbose)
-        print(paste("JC t0", t0$t))
+        print(paste("JC t0", t0))
     if(trueT0){
-        t0 = 0.17 #close to true value
+        ##t0 = 0.17 #close to true value
+        t0=0.14
         if(verbose)
             print(paste("true t0",t0))
     }
@@ -76,11 +78,13 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
     out13 = countsMatrix(seq1,seq3)
     if(verbose)
         print(out13)
-    t0 = simulateBranchLength.jc(nsim=1, out13, eta=eta)
+    jc = simulateBranchLength.jc(nsim=1, out13, eta=eta)
+    t0=jc$t
     if(verbose)
-        print(paste("JC t0", t0$t))
+        print(paste("JC t0", t0))
     if(trueT0){
-        t0 = 0.2 #close to true value
+        ##t0 = 0.2 #close to true value
+        t0=0.14
         if(verbose)
             print(paste("true t0",t0))
     }
@@ -92,11 +96,13 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
     out23 = countsMatrix(seq2,seq3)
     if(verbose)
         print(out23)
-    t0 = simulateBranchLength.jc(nsim=1, out23, eta=eta)
+    jc = simulateBranchLength.jc(nsim=1, out23, eta=eta)
+    t0=jc$t
     if(verbose)
-        print(paste("JC t0", t0$t))
+        print(paste("JC t0", t0))
     if(trueT0){
-        t0 = 0.18 #close to true value
+        ##t0 = 0.18 #close to true value
+        t0=0.14
         if(verbose)
             print(paste("true t0",t0))
     }
@@ -115,7 +121,10 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
     }
 
     seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q)
-    t0 = simulateBranchLength.jc(nsim=1, out12, eta=eta) ## fixit
+    ##t0 = 0.11
+    t0=0.1
+    ##jc = simulateBranchLength.jc(nsim=1, out12, eta=eta) ## fixit
+    ##t0=jc$t
     if(verbose)
         print(paste("JC t0", t0))
     if(trueT0){
@@ -131,11 +140,13 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
     out34 = countsMatrix(seq3,seq4)
     if(verbose)
         print(out34)
-    t0 = simulateBranchLength.jc(nsim=1, out34, eta=eta)
+    jc = simulateBranchLength.jc(nsim=1, out34, eta=eta)
+    t0=jc$t
     if(verbose)
-        print(paste("JC t0", t0$t))
+        print(paste("JC t0", t0))
     if(trueT0){
-        t0 = 0.16 #close to true value
+        ##t0 = 0.16 #close to true value
+        t0=0.1
         if(verbose)
             print(paste("true t0",t0))
     }

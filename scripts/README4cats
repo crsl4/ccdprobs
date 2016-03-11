@@ -35,3 +35,6 @@ This will create data_birds_mb.Rda, df_birds_mb.Rda, df_birds_mb.csv with branch
 COMPARISON ----
 6) run in R compareBL_mb_is.r (after changing input files) to get the table of bl numbers matches
 
+-------------------
+*0.* : 4taxa_ex with t0 close to true value
+*1.* : 4taxa_ex with t0 JC

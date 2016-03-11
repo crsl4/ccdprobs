@@ -21,7 +21,7 @@ dat.tre=read.table("../datasets/birds4-clean_ccdprobs.out", header=FALSE)
 print(dat.tre)
 t=sampleTopQuartet(dat.tre)
 print(t)
-b=sampleBLQuartet(d,t$tre, trueT0=TRUE)
+b=sampleBLQuartet(d,t$tre, trueT0=TRUE, verbose=TRUE)
 print(b)
 t$tre$edge.length <- b$bl
 
