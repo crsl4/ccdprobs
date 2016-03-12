@@ -184,17 +184,19 @@ plot(p1)
 dev.off()
 
 ## when newton raphson was not working:
-## t = findMLE2(seq1,seq2,seq3,seq4,d1x,d2x,d3y,d4y) ## this takes forever!
-## #save(t,file="findMLE2.Rda")
-## plot(t$y,t$f)
-## abline(h=0)
-## t$f[t$f>0]
-## t$f[t$f<0]
-## t$f[968] ## 15.33
-## t$f[969] ## -6.5
-## t$y[968] ## 0.967
-## t$y[969] ## 0.968
-## ## true value should be between 0.967, 0.968
+t = findMLE2(seq1,seq2,seq3,seq4,d1x,d2x,d3y,d4y) ## this takes forever!
+#save(t,file="findMLE2.Rda")
+pdf("plotLogLik.pdf")
+plot(t$y,t$f)
+abline(h=0)
+dev.off()
+t$f[t$f>0]
+t$f[t$f<0]
+t$f[968] ## 15.33
+t$f[969] ## -6.5
+t$y[968] ## 0.967
+t$y[969] ## 0.968
+## true value should be between 0.967, 0.968
 
 ## exp(-4*dxy/3) ## 0.9659, so above good approx!
 ## yest = t$y[968]
