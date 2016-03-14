@@ -255,3 +255,155 @@ logJointDensity.jc = function(d1x,d2x,d3y,d4y,dxy,d12.jc,d13.jc,d23.jc,d3x.jc,d4
         print(logd)
     return ( logd )
 }
+
+
+## for negativeBL.r
+sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
+    leaves = tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]] #works only for unrooted quartet
+    leaves = as.numeric(leaves)
+    if(leaves[1] == 1 || leaves[2] == 1){
+        sis = leaves
+        fth = setdiff(1:4,sis)
+    } else{
+        fth = leaves
+        sis = setdiff(1:4,fth)
+    }
+    seq1 = as.vector(unname(as.character(d[sis[1],])))
+    seq2 = as.vector(unname(as.character(d[sis[2],])))
+    seq3 = as.vector(unname(as.character(d[fth[1],])))
+    seq4 = as.vector(unname(as.character(d[fth[2],])))
+    # remove missing:
+    s1 <-seq1!="-"
+    s2 <- seq2!="-"
+    s3 <- seq3!="-"
+    s4 <- seq4!="-"
+    seq1 <- seq1[s1&s2&s3&s4]
+    seq2 <- seq2[s1&s2&s3&s4]
+    seq3 <- seq3[s1&s2&s3&s4]
+    seq4 <- seq4[s1&s2&s3&s4]
+
+    nsites = length(seq1)
+    if(length(seq2) != nsites && length(seq3) != nsites){
+        stop("error in number of sites seq1,seq2,seq3")
+    }
+
+    nuc = c("a","c","g","t")
+    n = 4
+
+    seq1.dist = seqMatrix(seq1)
+    seq2.dist = seqMatrix(seq2)
+    seq3.dist = seqMatrix(seq3)
+    seq4.dist = seqMatrix(seq4)
+
+    out12 = countsMatrix(seq1,seq2)
+    if(verbose)
+        print(out12)
+    r = rep(1,6)
+    Q = optim.gtr(out12,r) ## fixit: estimating Q for 1,2 only and using everywhere
+    if(verbose){
+        print(Q$Q$Q)
+        print(Q$Q$p)
+    }
+    jc = simulateBranchLength.jc(nsim=1,out12,eta=eta)
+    t0=jc$t
+    if(verbose)
+        print(paste("JC t0", t0))
+    if(trueT0){
+        ##t0 = 0.17 #close to true value
+        t0=0.14
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d12.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=t0,eta=eta)
+    d12 = d12.lik$t
+    if(verbose)
+        print(d12)
+
+    out13 = countsMatrix(seq1,seq3)
+    if(verbose)
+        print(out13)
+    jc = simulateBranchLength.jc(nsim=1, out13, eta=eta)
+    t0=jc$t
+    if(verbose)
+        print(paste("JC t0", t0))
+    if(trueT0){
+        ##t0 = 0.2 #close to true value
+        t0=0.14
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d13.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=t0,eta=eta)
+    d13 = d13.lik$t
+    if(verbose)
+        print(d13)
+
+    out23 = countsMatrix(seq2,seq3)
+    if(verbose)
+        print(out23)
+    jc = simulateBranchLength.jc(nsim=1, out23, eta=eta)
+    t0=jc$t
+    if(verbose)
+        print(paste("JC t0", t0))
+    if(trueT0){
+        ##t0 = 0.18 #close to true value
+        t0=0.14
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d23.lik = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=t0,eta=eta)
+    d23 = d23.lik$t
+    if(verbose)
+        print(d23)
+
+    d1x = (d12+d13-d23)/2
+    d2x = (d12+d23-d13)/2
+    d3x = (d13+d23-d12)/2
+    if(verbose){
+        print(d1x)
+        print(d2x)
+        print(d3x)
+    }
+
+    seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q)
+    ##t0 = 0.11
+    t0=0.1
+    ##jc = simulateBranchLength.jc(nsim=1, out12, eta=eta) ## fixit
+    ##t0=jc$t
+    if(verbose)
+        print(paste("JC t0", t0))
+    if(trueT0){
+        t0 = 0.11 #close to true value
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d4x.lik = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta)
+    d4x = d4x.lik$t
+    if(verbose)
+        print(d4x)
+
+    out34 = countsMatrix(seq3,seq4)
+    if(verbose)
+        print(out34)
+    jc = simulateBranchLength.jc(nsim=1, out34, eta=eta)
+    t0=jc$t
+    if(verbose)
+        print(paste("JC t0", t0))
+    if(trueT0){
+        ##t0 = 0.16 #close to true value
+        t0=0.1
+        if(verbose)
+            print(paste("true t0",t0))
+    }
+    d34.lik = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=t0,eta=eta)
+    d34 = d34.lik$t
+    if(verbose)
+        print(d34)
+
+    d3y = (d34+d3x-d4x)/2
+    d4y = (d34+d4x-d3x)/2
+    dxy = (d3x+d4x-d34)/2
+
+    return (list(d12=d12.lik,d23=d23.lik,d13=d13.lik,d4x=d4x.lik,d34=d34.lik,
+                 bl=c(d1x,d2x,d3x,d3y,d4y,dxy),
+                 seq=c(as.numeric(sis[1]), as.numeric(sis[2]),fth[1],fth[2])))
+}
