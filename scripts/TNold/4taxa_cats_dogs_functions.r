@@ -196,7 +196,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE){
 
     #need seq distribution at x: felsenstein algorithm
     r = rep(1,6)
-    #r = c(2.815,51.982,1.903,1.275,65.402,1.000) #mrbayes
+    #r = c(2.815,51.982,1.903,1.275,65.402,1.000) #mrbayes: cats
     Q = optim.gtr(out12,r)
     if(verbose){
         print(Q$Q$Q)

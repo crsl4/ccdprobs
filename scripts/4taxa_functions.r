@@ -70,7 +70,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d12.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=t0,eta=eta)
+    d12.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q$Q,t0=t0,eta=eta)
     d12 = d12.lik$t
     if(verbose)
         print(d12)
@@ -88,7 +88,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d13.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=t0,eta=eta)
+    d13.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q$Q,t0=t0,eta=eta)
     d13 = d13.lik$t
     if(verbose)
         print(d13)
@@ -106,7 +106,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d23.lik = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=t0,eta=eta)
+    d23.lik = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q$Q,t0=t0,eta=eta)
     d23 = d23.lik$t
     if(verbose)
         print(d23)
@@ -120,7 +120,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         print(d3x)
     }
 
-    seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q)
+    seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q$Q)
     ##t0 = 0.11
     t0=0.1
     ##jc = simulateBranchLength.jc(nsim=1, out12, eta=eta) ## fixit
@@ -132,7 +132,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d4x.lik = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta)
+    d4x.lik = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q$Q,t0=t0,eta=eta)
     d4x = d4x.lik$t
     if(verbose)
         print(d4x)
@@ -150,7 +150,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d34.lik = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=t0,eta=eta)
+    d34.lik = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q$Q,t0=t0,eta=eta)
     d34 = d34.lik$t
     if(verbose)
         print(d34)
@@ -182,7 +182,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         print(bl)
 
     ## now, compute likelihood of quartet with bl
-    suma = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
+    suma = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q$Q)
 
     # we need to compute density(bl|top)
     dens = logJointDensity.lik(d12.lik,d13.lik,d23.lik,d4x.lik,d34.lik)
@@ -258,16 +258,18 @@ logJointDensity.jc = function(d1x,d2x,d3y,d4y,dxy,d12.jc,d13.jc,d23.jc,d3x.jc,d4
 
 
 ## for negativeBL.r
-sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
+sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, estQ=TRUE){
     leaves = tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]] #works only for unrooted quartet
     leaves = as.numeric(leaves)
-    if(leaves[1] == 1 || leaves[2] == 1){
-        sis = leaves
-        fth = setdiff(1:4,sis)
-    } else{
-        fth = leaves
-        sis = setdiff(1:4,fth)
-    }
+    ## if(leaves[1] == 1 || leaves[2] == 1){
+    ##     sis = leaves
+    ##     fth = setdiff(1:4,sis)
+    ## } else{
+    ##     fth = leaves
+    ##     sis = setdiff(1:4,fth)
+    ## }
+    sis = leaves
+    fth = setdiff(1:4,sis)
     seq1 = as.vector(unname(as.character(d[sis[1],])))
     seq2 = as.vector(unname(as.character(d[sis[2],])))
     seq3 = as.vector(unname(as.character(d[fth[1],])))
@@ -298,14 +300,27 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
     out12 = countsMatrix(seq1,seq2)
     if(verbose)
         print(out12)
-    r = rep(1,6)
-    Q = optim.gtr(out12,r) ## fixit: estimating Q for 1,2 only and using everywhere
-    if(verbose){
-        print(Q$Q$Q)
-        print(Q$Q$p)
+    if(estQ){
+        r = rep(1,6)
+        Q = optim.gtr(out12,r) ## fixit: estimating Q for 1,2 only and using everywhere
+        if(verbose){
+            print(Q$Q$Q)
+            print(Q$Q$p)
+        }
+    } else{
+        r = c(0.2463,0.1764,0.1231,0.0187,0.4185,0.0170) #birds
+        den = r[6]
+        r = r/den
+        p = c(0.2776,0.2937,0.1612,0.2675) #birds
+        Q = makeQ(r,p,4, rescale=TRUE)
+        if(verbose){
+            print(Q$Q)
+            print(Q$p)
+        }
+
     }
-    jc = simulateBranchLength.jc(nsim=1,out12,eta=eta)
-    t0=jc$t
+    jc12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
+    t0=jc12$t
     if(verbose)
         print(paste("JC t0", t0))
     if(trueT0){
@@ -314,7 +329,11 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d12.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=t0,eta=eta)
+    if(estQ){
+        d12.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q$Q,t0=t0,eta=eta)
+    } else{
+        d12.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=t0,eta=eta)
+    }
     d12 = d12.lik$t
     if(verbose)
         print(d12)
@@ -322,8 +341,8 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
     out13 = countsMatrix(seq1,seq3)
     if(verbose)
         print(out13)
-    jc = simulateBranchLength.jc(nsim=1, out13, eta=eta)
-    t0=jc$t
+    jc13 = simulateBranchLength.jc(nsim=1, out13, eta=eta)
+    t0=jc13$t
     if(verbose)
         print(paste("JC t0", t0))
     if(trueT0){
@@ -332,7 +351,11 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d13.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=t0,eta=eta)
+    if(estQ){
+        d13.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q$Q,t0=t0,eta=eta)
+    } else{
+        d13.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=t0,eta=eta)
+    }
     d13 = d13.lik$t
     if(verbose)
         print(d13)
@@ -340,8 +363,8 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
     out23 = countsMatrix(seq2,seq3)
     if(verbose)
         print(out23)
-    jc = simulateBranchLength.jc(nsim=1, out23, eta=eta)
-    t0=jc$t
+    jc23 = simulateBranchLength.jc(nsim=1, out23, eta=eta)
+    t0=jc23$t
     if(verbose)
         print(paste("JC t0", t0))
     if(trueT0){
@@ -350,7 +373,11 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d23.lik = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=t0,eta=eta)
+    if(estQ){
+        d23.lik = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q$Q,t0=t0,eta=eta)
+    } else{
+        d23.lik = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=t0,eta=eta)
+    }
     d23 = d23.lik$t
     if(verbose)
         print(d23)
@@ -364,11 +391,12 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         print(d3x)
     }
 
-    seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q)
-    ##t0 = 0.11
-    t0=0.1
-    ##jc = simulateBranchLength.jc(nsim=1, out12, eta=eta) ## fixit
-    ##t0=jc$t
+    if(estQ){
+        seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q$Q)
+    } else{
+        seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q)
+    }
+    t0=(max(c(jc12$t,jc13$t,jc23$t))+min(c(jc12$t,jc13$t,jc23$t)))/2
     if(verbose)
         print(paste("JC t0", t0))
     if(trueT0){
@@ -376,7 +404,11 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d4x.lik = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta)
+    if(estQ){
+        d4x.lik = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q$Q,t0=t0,eta=eta)
+    } else{
+        d4x.lik = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta)
+    }
     d4x = d4x.lik$t
     if(verbose)
         print(d4x)
@@ -394,7 +426,11 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d34.lik = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=t0,eta=eta)
+    if(estQ){
+        d34.lik = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q$Q,t0=t0,eta=eta)
+    } else{
+        d34.lik = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=t0,eta=eta)
+    }
     d34 = d34.lik$t
     if(verbose)
         print(d34)

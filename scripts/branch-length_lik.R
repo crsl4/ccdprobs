@@ -186,7 +186,7 @@ sequenceDist = function(d1x,d2x,seq1.dist,seq2.dist, Q, verbose=FALSE){
     nuc = c('a','c','g','t')
     seqx = matrix(rep(0,nsites*4),nrow=4)
     for(i in 1:nsites){
-        seqx[,i] = siteLik(d1x,d2x,seq1.dist[,i],seq2.dist[,i],Q$Q) #* Q$Q$p
+        seqx[,i] = siteLik(d1x,d2x,seq1.dist[,i],seq2.dist[,i],Q) #* Q$p
     }
     if(verbose)
         print(seqx)
@@ -237,12 +237,12 @@ seqMatrix = function(seq1){
 gtr.log.lik.all = function(d1x,d2x,dxy,d3y,d4y,seq1.dist,seq2.dist, seq3.dist,seq4.dist,Q){
     suma = 0
     for(s in 1:ncol(seq1.dist)){
-        lik12 = siteLik(d1x,d2x,seq1.dist[,s],seq2.dist[,s],Q$Q)
-        lik34 = siteLik(d3y,d4y,seq3.dist[,s],seq4.dist[,s],Q$Q)
+        lik12 = siteLik(d1x,d2x,seq1.dist[,s],seq2.dist[,s],Q)
+        lik34 = siteLik(d3y,d4y,seq3.dist[,s],seq4.dist[,s],Q)
         L = lik12 %*% t(lik34)
-        Pxy = matrixExp(Q$Q,dxy)
+        Pxy = matrixExp(Q,dxy)
         L2 = L*Pxy
-        Lik = Q$Q$p * L2
+        Lik = Q$p * L2
         suma = suma+log(sum(Lik))
     }
     return ( suma )
@@ -253,12 +253,12 @@ gtr.log.lik.all = function(d1x,d2x,dxy,d3y,d4y,seq1.dist,seq2.dist, seq3.dist,se
 ## returns fk, fk_prime, fk_doubleprime
 ## fixit: matrix multiplication can be more efficient with eigenvector decomp
 fk = function(pa,pb,Q,t){
-    Pxy = matrixExp(Q$Q,t)
-    A=diag(Q$Q$p * pa)
+    Pxy = matrixExp(Q,t)
+    A=diag(Q$p * pa)
     B=diag(pb)
     fk = rep(1,4) %*% A %*% Pxy %*% B %*% rep(1,4)
-    fk.pr = rep(1,4) %*% A %*% Q$Q$Q %*% Pxy %*% B %*% rep(1,4)
-    fk.doublepr = rep(1,4) %*% A %*% Q$Q$Q %*% Q$Q$Q %*% Pxy %*% B %*% rep(1,4)
+    fk.pr = rep(1,4) %*% A %*% Q$Q %*% Pxy %*% B %*% rep(1,4)
+    fk.doublepr = rep(1,4) %*% A %*% Q$Q %*% Q$Q %*% Pxy %*% B %*% rep(1,4)
     return ( list(fk=as.numeric(fk), fk_pr=as.numeric(fk.pr), fk_doublepr= as.numeric(fk.doublepr)) )
 }
 
@@ -279,22 +279,40 @@ loglik = function(seq1.dist, seq2.dist, Q, t){
 }
 
 ## t0= starting point for Newton-Raphson
-findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000){
-    t = t0
+findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000, verbose=FALSE){
+    t = rep(0,Nmax)
+    t[1] = t0 ## fixit: later do a binary search before choosing t0
     error = 1
     i = 1
     while(error > tol & i < Nmax){
-        ##print(t[i])
-        if(t[i]<0)
-            stop("found negative BL")
+        if(verbose)
+            print(t[i])
         f =loglik(seq1.dist, seq2.dist, Q, t[i])
-        t[i+1] = t[i] - f$ll_pr/f$ll_doublepr
+        gap = f$ll_pr/f$ll_doublepr
+        t[i+1] = t[i] - gap
+        while(t[i+1]<0){ #avoid negative BL
+            gap = gap/2
+            if(verbose)
+                print("found negative candidate t[i+1]")
+            t[i+1] = t[i] - gap
+        }
+        ## after finding a positive candidate:
+        f2 =loglik(seq1.dist, seq2.dist, Q, t[i+1])
+        if(f$ll * f2$ll < 0){ #one positive, and one negative
+            while(abs(f2$ll) > 2*abs(f$ll)){ #t[i+1] too far from root
+                if(verbose)
+                    print("t[i+1] positive, but too far from root")
+                t[i+1] = t[i+1]/2
+                f2 =loglik(seq1.dist, seq2.dist, Q, t[i+1])
+            }
+        }
         error = abs(t[i+1]-t[i])
         i = i+1
     }
+    t = t[which(t>0)]
     if(i>=Nmax)
         warning("Newton-Rapshon did not converge")
-    return ( list(t=t[length(t)], obsInfo=f$ll_doublepr) )
+    return ( list(t=t[length(t)], obsInfo=f2$ll_doublepr) )
 }
 
 simulateBranchLength.lik = function(nsim,seq1.dist,seq2.dist, Q, t0, eta=0.5){
