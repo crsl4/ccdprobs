@@ -258,7 +258,12 @@ logJointDensity.jc = function(d1x,d2x,d3y,d4y,dxy,d12.jc,d13.jc,d23.jc,d3x.jc,d4
 
 
 ## for negativeBL.r
-sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, estQ=TRUE){
+sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, Q=diag(4)){
+    if(typeof(Q) == "list"){
+        estQ = FALSE
+    } else{
+        estQ = TRUE
+    }
     leaves = tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]] #works only for unrooted quartet
     leaves = as.numeric(leaves)
     ## if(leaves[1] == 1 || leaves[2] == 1){
@@ -307,18 +312,8 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, es
             print(Q$Q$Q)
             print(Q$Q$p)
         }
-    } else{
-        r = c(0.2463,0.1764,0.1231,0.0187,0.4185,0.0170) #birds
-        den = r[6]
-        r = r/den
-        p = c(0.2776,0.2937,0.1612,0.2675) #birds
-        Q = makeQ(r,p,4, rescale=TRUE)
-        if(verbose){
-            print(Q$Q)
-            print(Q$p)
-        }
-
     }
+
     jc12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
     t0=jc12$t
     if(verbose)
