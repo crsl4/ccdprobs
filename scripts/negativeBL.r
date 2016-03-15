@@ -273,6 +273,128 @@ pl4 <- ggtern(data=newdat2,aes(d12,d23,d13)) +
     geom_Tline(Tintercept=0.5) + geom_Rline(Rintercept=0.5) + geom_Lline(Lintercept=0.5)
 plot(pl4)
 
+
+## ----------------------------------------------------------------
+## covariances of branch lengths
+## histograms of BL
+## ---------------------------------------------------------------
+load("negBL_birdstree1.Rda") # MLE tree birds
+load("negBL_birdstree2.Rda") # tree birds
+load("negBL_birdstree3.Rda") # NJ tree birds
+
+load("negBL_catstree1.Rda") # MLE&NJ tree cats
+load("negBL_catstree2.Rda") # tree cats
+load("negBL_catstree3.Rda") # tree cats
+head(data)
+
+data <- within(data,var12 <- alpha12/beta12^2)
+data <- within(data,var23 <- alpha23/beta23^2)
+data <- within(data,var13 <- alpha13/beta13^2)
+data <- within(data,var4x <- alpha4x/beta4x^2)
+data <- within(data,var34 <- alpha34/beta34^2)
+data <- within(data,var3x <- 0.25*(var23+var13+var12))
+
+data <- within(data,cov1x.2x <- 0.25*(var12-var13-var23))
+data <- within(data,cov2x.3x <- 0.25*(var23-var12-var13))
+data <- within(data,cov1x.3x <- 0.25*(var13-var12-var23))
+data <- within(data,cov3y.xy <- 0.25*(var34-var3x-var4x))
+data <- within(data,cov4y.xy <- 0.25*(var4x-var34-var3x))
+data <- within(data,cov3y.4y <- 0.25*(var3x-var34-var4x))
+summary(data)
+
+## for tree1
+data1 <- subset(data,seq1+seq2==3) ## d12=dist 1,2
+data2 <- subset(data,seq1+seq2==7) ## d12=dist 3,4
+summary(data1) #to check that seq3 matches across
+summary(data2)
+
+## for tree2
+data1 <- subset(data,seq1+seq2==4) ## d12=dist 1,3
+data2 <- subset(data,seq1+seq2==6) ## d12=dist 2,4
+summary(data1) #to check that seq3 matches across
+summary(data2)
+
+## for tree3
+data1 <- subset(data,seq1==1) ## d12=dist 1,4
+data2 <- subset(data,seq1==2) ## d12=dist 2,3
+summary(data1) #to check that seq3 matches across
+summary(data2)
+
+## birds tree1:
+d1x = 0.111
+d2x = 0.078
+d3y = 0.091
+d4y = 0.098
+dxy = 0.026
+## birds tree2:
+d1x = 0.112
+d2x = 0.081
+d3y = 0.091
+d4y = 0.103
+dxy = 0.0213
+## birds tree3:
+d1x = 0.110
+d2x = 0.082
+d3y = 0.093
+d4y = 0.091
+dxy = 0.0255
+
+## cats tree1
+d1x = 0.087
+d2x = 0.0796
+d3y = 0.0482
+d4y = 0.0625
+dxy = 0.0203
+## cats tree2
+d1x = 0.0937
+d2x = 0.0853
+d3y = 0.0435
+d4y = 0.0563
+dxy = 0.0193
+## cats tree3
+d1x = 0.105
+d2x = 0.0881
+d3y = 0.0503
+d4y = 0.0617
+dxy = 0.0186
+
+
+d12=d1x+d2x
+d13=d3y+dxy+d1x
+d23=d3y+dxy+d2x
+d34=d3y+d4y
+d3x=d3y+dxy
+d4x=d4y+dxy
+
+dat=data1
+## change file name and main title
+pdf("cats_histBL_tree3.pdf", height=6,width=15)
+layout(m=matrix(c(1,2,3,4,5,6,7,8,9,10,11,12), nrow=2))
+hist(dat$d12, main="Cats (1,4),2,3")
+abline(v=d12,col="red")
+hist(dat$d13)
+abline(v=d13,col="red")
+hist(dat$d23)
+abline(v=d23,col="red")
+hist(dat$d34)
+abline(v=d34,col="red")
+hist(dat$d3x)
+abline(v=d3x,col="red")
+hist(dat$d4x)
+abline(v=d4x,col="red")
+hist(dat$d1x)
+abline(v=d1x,col="red")
+hist(dat$d2x)
+abline(v=d2x,col="red")
+hist(dat$d3y)
+abline(v=d3y,col="red")
+hist(dat$d4y)
+abline(v=d4y,col="red")
+hist(dat$dxy)
+abline(v=dxy,col="red")
+dev.off()
+
+
 ## NJ estimate:
 ## library(ape)
 ## d=read.dna("~/Documents/phylo/projects/CladeCondProb/ccdprobs/datasets/birds4-clean.phy")

@@ -280,6 +280,8 @@ loglik = function(seq1.dist, seq2.dist, Q, t){
 
 ## t0= starting point for Newton-Raphson
 findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000, verbose=FALSE){
+    if(verbose)
+        print("entering findMLE...")
     t = rep(0,Nmax)
     t[1] = t0 ## fixit: later do a binary search before choosing t0
     error = 1
@@ -298,6 +300,11 @@ findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000, verb
         }
         ## after finding a positive candidate:
         f2 =loglik(seq1.dist, seq2.dist, Q, t[i+1])
+        if(verbose){
+            print("f$ll, f2$ll")
+            print(f$ll)
+            print(f2$ll)
+        }
         if(f$ll * f2$ll < 0){ #one positive, and one negative
             while(abs(f2$ll) > 2*abs(f$ll)){ #t[i+1] too far from root
                 if(verbose)
