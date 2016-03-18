@@ -67,6 +67,7 @@ P2 = matrixExp(Q$Q,d2x)
 P1[,3]*P2[,3]
 
 
+## (1,2),3,4
 l = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist,seq2.dist, seq3.dist,seq4.dist,Q)
 l ## -4405.753
 
