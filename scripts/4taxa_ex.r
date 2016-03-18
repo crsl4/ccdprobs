@@ -21,28 +21,30 @@ dat.tre=read.table("../datasets/birds4-clean_ccdprobs.out", header=FALSE)
 print(dat.tre)
 t=sampleTopQuartet(dat.tre)
 print(t)
-b=sampleBLQuartet(d,t$tre, trueT0=TRUE, verbose=TRUE)
+b=sampleBLQuartet(d,tre, trueT0=TRUE, verbose=TRUE, Q=Q)
 print(b)
 t$tre$edge.length <- b$bl
 
 logw = b$logprior+b$loglik-log(t$prob)-b$logdensity
 print(logw)
 
-nreps = 1000
+nreps = 100
 trees = rep(NA,nreps)
 logwv = rep(0,nreps)
 branch.lengths = matrix(0,nreps,5)
 err = 0
 for(i in 1:nreps){
-    t=sampleTopQuartet(dat.tre)
-    b=try(sampleBLQuartet(d,t$tre, trueT0=TRUE))
+    ##    t=sampleTopQuartet(dat.tre)
+    t = sample(c("((1,2),3,4);", "((1,3),2,4);", "((1,4),2,3);"),1)
+    tre= read.tree(text=t)
+    b=try(sampleBLQuartet(d,tre, trueT0=FALSE, Q=Q))
     if(class(b) == "try-error"){
         err = err + 1
     } else {
         branch.lengths[i,]=b$bl
         logw = b$logprior+b$loglik-b$logdensity
         ##print(logw)
-        trees[i] = write.tree(t$tre)
+        trees[i] = write.tree(tre)
         logwv[i] = logw
     }
 }

@@ -368,12 +368,25 @@ d2x = 0.078
 d3y = 0.091
 d4y = 0.098
 
+d1x=0.08141034
+d2y=0.09337547
+d3y=0.09561165
+d4x=0.10845926
+dxy=0.02568966
+r = c(0.2463,0.1764,0.1231,0.0187,0.4185,0.0170)
+p = c(0.2776,0.2937,0.1612,0.2675)
+den = r[6]
+r = r/den
+Q = makeQ(r,p,4, rescale=TRUE)
+
+
 out = countsMatrix(seq1,seq2)
 Q = optim.gtr(out,r)
 dist1 = seq1.dist
 dist2 = seq2.dist
 true_d=d1x+d2x
 who="1---2"
+
 
 out= countsMatrix(seq1,seq3)
 Q = optim.gtr(out,r)
@@ -389,11 +402,16 @@ dist2 = seq3.dist
 true_d=d2x+dxy+d3y
 who="2---3"
 
+dist1=seq2.dist
+dist2=seq3.dist
+out=countsMatrix(seq2,seq3)
+true_d=d2y+d3y
+
 delta=0.01
 t=seq(delta,0.5,by=delta)
 ll=rep(0, length(t))
 for(i in 1:length(t)){
-    l = loglik(dist1,dist2,Q$Q,t[i])
+    l = loglik(dist1,dist2,Q,t[i])
     ll[i] = l$ll
 }
 
@@ -409,7 +427,7 @@ nsim=10000
 jc = simulateBranchLength.jc(nsim=1,out,eta=eta)
 t0=jc$t
 
-t.lik = simulateBranchLength.lik(nsim, dist1,dist2,Q$Q,t0,eta=eta)
+t.lik = simulateBranchLength.lik(nsim, dist1,dist2,Q,t0,eta=eta)
 d.lik = density(t.lik$t)
 df.lik = data.frame(x=d.lik$x,y=d.lik$y)
 
@@ -428,5 +446,4 @@ plot(p1)
 pdf(paste0(who,"lik_birds.pdf"))
 plot(p1)
 dev.off()
-## to do: compare the lik of 12,13,23 with the gamma
-## with true Q and estimated Q
+

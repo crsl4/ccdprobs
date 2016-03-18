@@ -21,7 +21,7 @@ sampleTopQuartet = function(dat.tre, verbose=FALSE){
 }
 
 # function to sample branch lengths for 4-taxon tree
-sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
+sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, Q){
     sis = tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]] #works only for unrooted quartet
     fth = setdiff(1:4,sis)
     seq1 = as.vector(unname(as.character(d[as.numeric(sis[1]),])))
@@ -54,12 +54,12 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
     out12 = countsMatrix(seq1,seq2)
     if(verbose)
         print(out12)
-    r = rep(1,6)
-    Q = optim.gtr(out12,r) ## fixit: estimating Q for 1,2 only and using everywhere
-    if(verbose){
-        print(Q$Q$Q)
-        print(Q$Q$p)
-    }
+    ##r = rep(1,6)
+    ##Q = optim.gtr(out12,r) ## fixit: estimating Q for 1,2 only and using everywhere
+    ##if(verbose){
+    ##    print(Q$Q$Q)
+    ##    print(Q$Q$p)
+    ##}
     jc = simulateBranchLength.jc(nsim=1,out12,eta=eta)
     t0=jc$t
     if(verbose)
@@ -70,7 +70,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d12.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q$Q,t0=t0,eta=eta)
+    d12.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=t0,eta=eta)
     d12 = d12.lik$t
     if(verbose)
         print(d12)
@@ -88,7 +88,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d13.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q$Q,t0=t0,eta=eta)
+    d13.lik = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=t0,eta=eta)
     d13 = d13.lik$t
     if(verbose)
         print(d13)
@@ -106,7 +106,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d23.lik = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q$Q,t0=t0,eta=eta)
+    d23.lik = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=t0,eta=eta)
     d23 = d23.lik$t
     if(verbose)
         print(d23)
@@ -120,7 +120,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         print(d3x)
     }
 
-    seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q$Q)
+    seqx.dist = sequenceDist(d1x,d2x,seq1.dist,seq2.dist,Q)
     ##t0 = 0.11
     t0=0.1
     ##jc = simulateBranchLength.jc(nsim=1, out12, eta=eta) ## fixit
@@ -132,7 +132,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d4x.lik = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q$Q,t0=t0,eta=eta)
+    d4x.lik = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta)
     d4x = d4x.lik$t
     if(verbose)
         print(d4x)
@@ -150,7 +150,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         if(verbose)
             print(paste("true t0",t0))
     }
-    d34.lik = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q$Q,t0=t0,eta=eta)
+    d34.lik = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=t0,eta=eta)
     d34 = d34.lik$t
     if(verbose)
         print(d34)
@@ -182,7 +182,7 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE){
         print(bl)
 
     ## now, compute likelihood of quartet with bl
-    suma = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q$Q)
+    suma = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
 
     # we need to compute density(bl|top)
     dens = logJointDensity.lik(d12.lik,d13.lik,d23.lik,d4x.lik,d34.lik)
@@ -592,7 +592,29 @@ sampleBLQuartet_details_sim= function(seq1,seq2,seq3,seq4,eta=0.5, verbose=FALSE
     d4y = (d34+d4x-d3x)/2
     dxy = (d3x+d4x-d34)/2
 
-    return (list(d12=d12.lik,d23=d23.lik,d13=d13.lik,d4x=d4x.lik,d34=d34.lik,
-                 bl=c(d1x,d2x,d3x,d3y,d4y,dxy),
-                 seq=c(1,2,3,4)))
+    bl <- rep(0,5) #works only for unrooted quartet
+    ed1x = which(tre$edge[,2] == which(tre$tip.label == sis[1]))
+    ed2x = which(tre$edge[,2] == which(tre$tip.label == sis[2]))
+    ed3y = which(tre$edge[,2] == which(tre$tip.label == as.character(fth[1])))
+    ed4y = which(tre$edge[,2] == which(tre$tip.label == as.character(fth[2])))
+    bl[ed1x] = d1x
+    bl[ed2x] = d2x
+    bl[ed3y] = d3y
+    bl[ed4y] = d4y
+    ind = which(bl==0)
+    bl[ind] = dxy
+    if(verbose)
+        print(bl)
+
+    ## now, compute likelihood of quartet with bl
+    suma = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
+
+    # we need to compute density(bl|top)
+    dens = logJointDensity.lik(d12.lik,d13.lik,d23.lik,d4x.lik,d34.lik)
+    prior = logPriorExpDist(d1x,d2x,d3y,d4y,dxy,0.1) #could be other priors
+    return (list(bl=bl, loglik=suma, logdensity=dens, logprior=prior))
+
+    ## return (list(d12=d12.lik,d23=d23.lik,d13=d13.lik,d4x=d4x.lik,d34=d34.lik,
+    ##              bl=c(d1x,d2x,d3x,d3y,d4y,dxy),
+    ##              seq=c(1,2,3,4)))
 }
