@@ -26,20 +26,20 @@ r = r/den
 Q = makeQ(r,p,4, rescale=TRUE)
 
 
-who = "simulated" #tree (1,2),3,4
+who = "sim" #tree (1,2),3,4
 nsites=1500
 branch.length = c(0.03,0.11,0.078,0.091,0.098) #bl as birds mb: dxy,d1x,d2x,d3y,d4y
 Q = randomQ(4,rescale=TRUE)
 r=Q$r
 p=Q$p
-d = simulateData(Q,branch.length, nsites,filename="simSeq1_Qrand.txt")
+d = simulateData(Q,branch.length, nsites,filename=paste0(who,".txt"))
 dat.tre=read.table("../datasets/birds4-clean_ccdprobs.out", header=FALSE)
 dat.tre$V2 = c(0.0,1.0,0.0)
 
 print(dat.tre)
 t=sampleTopQuartet(dat.tre)
 print(t)
-b=sampleBLQuartet(d,t$tre, trueT0=TRUE, verbose=TRUE)
+b=sampleBLQuartet(d,t$tre, trueT0=FALSE, verbose=TRUE, Q=Q)
 print(b)
 t$tre$edge.length <- b$bl
 

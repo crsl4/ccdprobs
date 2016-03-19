@@ -599,7 +599,7 @@ sampleBLQuartet_details_sim= function(seq1,seq2,seq3,seq4,eta=0.5, verbose=FALSE
 }
 
 ## function to sample BL for a given tree
-sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, Q=diag(4)){
+sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, Q=diag(4)){
     if(typeof(Q) == "list"){
         estQ = FALSE
     } else{
@@ -792,7 +792,7 @@ sampleBLQuartet_details= function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, Q=
         print(bl)
 
     ## now, compute likelihood of quartet with bl
-    suma = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q$Q)
+    suma = gtr.log.lik.all(d1x,d2x,dxy,d3y,d4y,seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
 
     # we need to compute density(bl|top)
     dens = logJointDensity.lik(d12.lik,d13.lik,d23.lik,d4x.lik,d34.lik)

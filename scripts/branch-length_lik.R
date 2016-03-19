@@ -370,7 +370,7 @@ simulateData = function(Q,branch.length, nsites, filename="simSeq.txt"){
     for ( i in 1:nsites )
         seq4[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
 
-    l1 = paste("4",nsites)
+    l1 = paste("6",nsites)
     l2 = paste("1",paste0(seq1,collapse=""))
     l3 = paste("2",paste0(seq2,collapse=""))
     l4 = paste("3",paste0(seq3,collapse=""))
