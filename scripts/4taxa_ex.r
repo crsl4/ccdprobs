@@ -26,7 +26,9 @@ r = r/den
 Q = makeQ(r,p,4, rescale=TRUE)
 
 
-who = "sim" #tree (1,2),3,4
+who = "simRandTree" #tree (1,2),3,4
+pr = c(0.0,1.0,0.0)
+pr= c(1/3,1/3,1/3) ## same sim.txt
 nsites=1500
 branch.length = c(0.03,0.11,0.078,0.091,0.098) #bl as birds mb: dxy,d1x,d2x,d3y,d4y
 Q = randomQ(4,rescale=TRUE)
@@ -34,7 +36,7 @@ r=Q$r
 p=Q$p
 d = simulateData(Q,branch.length, nsites,filename=paste0(who,".txt"))
 dat.tre=read.table("../datasets/birds4-clean_ccdprobs.out", header=FALSE)
-dat.tre$V2 = c(0.0,1.0,0.0)
+dat.tre$V2 = pr
 
 print(dat.tre)
 t=sampleTopQuartet(dat.tre)
@@ -52,6 +54,7 @@ logwv = rep(0,nreps)
 branch.lengths = matrix(0,nreps,5)
 err = 0
 for(i in 1:nreps){
+    print(i)
     t=sampleTopQuartet(dat.tre)
     b=try(sampleBLQuartet(d,t$tre, trueT0=FALSE, Q=Q))
     if(class(b) == "try-error"){
@@ -74,7 +77,7 @@ my.logw = logwv[lines] - mean(logwv[lines])
 data$w = exp(my.logw)/sum(exp(my.logw))
 save(data,file=paste0("data_",who,".Rda"))
 
-load("data_birds1.Rda")
+##load("data_birds1.Rda")
 data[data$w>0.01,]
 
 
@@ -156,3 +159,7 @@ df$q975.X5 = round(c(weighted.quantile(data$X5[data1],data$w[data1], probs=0.975
 save(df,file=paste0("df_",who,".Rda"))
 write.table(df,file=paste0("df_",who,".txt"), sep=",", row.names=FALSE)
 
+pdf(paste0(who,"_histW.pdf"))
+hist(data$w, main="")
+title(paste("#>0.01:",length(data[data$w>0.01,]$w)))
+dev.off()
