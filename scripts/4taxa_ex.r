@@ -1,9 +1,7 @@
-# r script to sample tree from ccdprobs, and sample branch lengths with TN,
-# and calculate importance weight
-# Claudia February 2016
-
-## later, do the case for 4 taxa: need 4taxa_functions to be updated
-## rerun this with the new sampleBLQuartet, make sure that weights behave nicely now
+## r script to sample tree from ccdprobs, and sample branch lengths with TN,
+## and calculate importance weight
+## Claudia February 2016
+## for cats, birds and sim data
 
 library(ape)
 source('branch-length_lik.r')
@@ -12,39 +10,57 @@ source('4taxa_functions.r')
 who = "cats"
 d=read.dna("../datasets/4taxa-cats.phy") #needs to be 4 taxa
 dat.tre=read.table("../datasets/4taxa-cats_ccdprobs.out", header=FALSE)
+r=c(2.815,51.982,1.903,1.275,65.402,1.000)
+p=c(0.2590,0.2379,0.1900,0.3131);
+den = r[6]
+r = r/den
+Q = makeQ(r,p,4, rescale=TRUE)
 
 who = "birds"
 d=read.dna("../datasets/birds4-clean.phy") #needs to be 4 taxa
 dat.tre=read.table("../datasets/birds4-clean_ccdprobs.out", header=FALSE)
+r = c(0.2463,0.1764,0.1231,0.0187,0.4185,0.0170)
+p = c(0.2776,0.2937,0.1612,0.2675)
+den = r[6]
+r = r/den
+Q = makeQ(r,p,4, rescale=TRUE)
 
+
+who = "simulated" #tree (1,2),3,4
+nsites=1500
+branch.length = c(0.03,0.11,0.078,0.091,0.098) #bl as birds mb: dxy,d1x,d2x,d3y,d4y
+Q = randomQ(4,rescale=TRUE)
+r=Q$r
+p=Q$p
+d = simulateData(Q,branch.length, nsites,filename="simSeq1_Qrand.txt")
+dat.tre=read.table("../datasets/birds4-clean_ccdprobs.out", header=FALSE)
+dat.tre$V2 = c(0.0,1.0,0.0)
 
 print(dat.tre)
 t=sampleTopQuartet(dat.tre)
 print(t)
-b=sampleBLQuartet(d,tre, trueT0=TRUE, verbose=TRUE, Q=Q)
+b=sampleBLQuartet(d,t$tre, trueT0=TRUE, verbose=TRUE)
 print(b)
 t$tre$edge.length <- b$bl
 
 logw = b$logprior+b$loglik-log(t$prob)-b$logdensity
 print(logw)
 
-nreps = 100
+nreps = 1000
 trees = rep(NA,nreps)
 logwv = rep(0,nreps)
 branch.lengths = matrix(0,nreps,5)
 err = 0
 for(i in 1:nreps){
-    ##    t=sampleTopQuartet(dat.tre)
-    t = sample(c("((1,2),3,4);", "((1,3),2,4);", "((1,4),2,3);"),1)
-    tre= read.tree(text=t)
-    b=try(sampleBLQuartet(d,tre, trueT0=FALSE, Q=Q))
+    t=sampleTopQuartet(dat.tre)
+    b=try(sampleBLQuartet(d,t$tre, trueT0=FALSE, Q=Q))
     if(class(b) == "try-error"){
         err = err + 1
     } else {
         branch.lengths[i,]=b$bl
         logw = b$logprior+b$loglik-b$logdensity
         ##print(logw)
-        trees[i] = write.tree(tre)
+        trees[i] = write.tree(t$tre)
         logwv[i] = logw
     }
 }
@@ -140,17 +156,3 @@ df$q975.X5 = round(c(weighted.quantile(data$X5[data1],data$w[data1], probs=0.975
 save(df,file=paste0("df_",who,".Rda"))
 write.table(df,file=paste0("df_",who,".txt"), sep=",", row.names=FALSE)
 
-## #things to check:
-## # weight well-distributed:
-#round(data$w,4)
-#data[data$w>0.01,] # we don't want all weight in few trees
-
-## #want to compare sample branch lengths, to true branch lengths (posterior dist)
-## library(ggplot2)
-## tre=read.tree(text=tree1)
-## tre$edge #which branch length corresponds each branch
-## ggplot(data[data1,],aes(x=X3)) + geom_density()
-## trueBL = c(0.087513,0.079521,0.048142,0.062346,0.020288);
-## ## (Felis_catus___domestic_cat:0.087513,Neofelis_nebulosa___clouded_leopard:0.079521,(Panthera_pardus___leopard:0.048142,Panthera_tigris___tiger:0.062346):0.020288);
-
-## ## want to compare not only the true mean, but 95% CI for each branch length

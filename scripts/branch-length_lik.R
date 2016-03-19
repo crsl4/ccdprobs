@@ -329,3 +329,64 @@ simulateBranchLength.lik = function(nsim,seq1.dist,seq2.dist, Q, t0, eta=0.5){
 }
 
 
+
+simulateData = function(Q,branch.length, nsites, filename="simSeq.txt"){
+    nuc <- c('a','c','g','t')
+    ## simulate seqx
+    seqx = sample(nuc,size=nsites,prob=Q$p,replace=TRUE)
+
+    ## simulate seqy
+    s=branch.length[1]
+    P = matrixExp(Q,s)
+    seqy = numeric(nsites)
+    for ( i in 1:nsites )
+        seqy[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+
+    ## simulate seq1
+    s=branch.length[2]
+    P = matrixExp(Q,s)
+    seq1 = numeric(nsites)
+    for ( i in 1:nsites )
+        seq1[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+
+    ## simulate seq2
+    s=branch.length[3]
+    P = matrixExp(Q,s)
+    seq2 = numeric(nsites)
+    for ( i in 1:nsites )
+        seq2[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+
+    ## simulate seq3
+    s=branch.length[4]
+    P = matrixExp(Q,s)
+    seq3 = numeric(nsites)
+    for ( i in 1:nsites )
+        seq3[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+
+    ## simulate seq4
+    s=branch.length[5]
+    P = matrixExp(Q,s)
+    seq4 = numeric(nsites)
+    for ( i in 1:nsites )
+        seq4[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+
+    l1 = paste("4",nsites)
+    l2 = paste("1",paste0(seq1,collapse=""))
+    l3 = paste("2",paste0(seq2,collapse=""))
+    l4 = paste("3",paste0(seq3,collapse=""))
+    l5 = paste("4",paste0(seq4,collapse=""))
+    l6 = paste("x",paste0(seqx,collapse=""))
+    l7 = paste("y",paste0(seqy,collapse=""))
+
+    write(l1,file=filename)
+    write(l2,file=filename, append=TRUE)
+    write(l3,file=filename, append=TRUE)
+    write(l4,file=filename, append=TRUE)
+    write(l5,file=filename, append=TRUE)
+    write(l6,file=filename, append=TRUE)
+    write(l7,file=filename, append=TRUE)
+
+    d = read.dna(filename)
+
+    return ( d )
+}

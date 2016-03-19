@@ -1,6 +1,9 @@
 ## r script to see how the plot of l(t) and l'(t)
 ## look like for different settings
 ## Claudia March 2016
+## creates the plots 1---2lik_sim.pdf, lik_plot_intBL.pdf,
+## lik_intBL_3trees.pdf, 1---2_lik_birds.pdf
+
 
 library(ape)
 source('branch-length_lik.r')
@@ -361,18 +364,6 @@ seq2.dist=seqMatrix(seq2)
 seq3.dist=seqMatrix(seq3)
 seq4.dist=seqMatrix(seq4)
 
-r = rep(1,6)
-dxy = 0.026
-d1x = 0.11
-d2x = 0.078
-d3y = 0.091
-d4y = 0.098
-
-d1x=0.08141034
-d2y=0.09337547
-d3y=0.09561165
-d4x=0.10845926
-dxy=0.02568966
 r = c(0.2463,0.1764,0.1231,0.0187,0.4185,0.0170)
 p = c(0.2776,0.2937,0.1612,0.2675)
 den = r[6]
@@ -380,32 +371,50 @@ r = r/den
 Q = makeQ(r,p,4, rescale=TRUE)
 
 
+## (1,2),3,4
+dxy = 0.026
+d1x = 0.11
+d2x = 0.078
+d3y = 0.091
+d4y = 0.098
+
 out = countsMatrix(seq1,seq2)
-Q = optim.gtr(out,r)
 dist1 = seq1.dist
 dist2 = seq2.dist
 true_d=d1x+d2x
 who="1---2"
 
-
 out= countsMatrix(seq1,seq3)
-Q = optim.gtr(out,r)
 dist1 = seq1.dist
 dist2 = seq3.dist
 true_d=d1x+dxy+d3y
 who="1---3"
 
 out= countsMatrix(seq2,seq3)
-Q = optim.gtr(out,r)
 dist1 = seq2.dist
 dist2 = seq3.dist
 true_d=d2x+dxy+d3y
 who="2---3"
 
+
+## (1,4),2,3
+d1x=0.08141034
+d2y=0.09337547
+d3y=0.09561165
+d4x=0.10845926
+dxy=0.02568966
+
+out=countsMatrix(seq1,seq4)
+dist1=seq1.dist
+dist2=seq4.dist
+true_d=d1x+d4x
+who="1---4"
+
+out=countsMatrix(seq2,seq3)
 dist1=seq2.dist
 dist2=seq3.dist
-out=countsMatrix(seq2,seq3)
 true_d=d2y+d3y
+who="2---3"
 
 delta=0.01
 t=seq(delta,0.5,by=delta)
