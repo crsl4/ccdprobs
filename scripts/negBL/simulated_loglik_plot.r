@@ -6,8 +6,8 @@
 
 
 library(ape)
-source('branch-length_lik.r')
-source('4taxa_functions.r')
+source('../branch-length_lik.r')
+source('../4taxa_functions.r')
 
 nsites = 1500
 t="((1,2),3,4);"
@@ -79,42 +79,48 @@ d3y=branch.length[4]
 d4y=branch.length[5]
 r = rep(1,6)
 title = paste("dxy",dxy0)
+Q = trueQ
 
 out12 = countsMatrix(seq1,seq2)
-Q = optim.gtr(out12,r)
+##Q = optim.gtr(out12,r)
 dist1 = seq1.dist
 dist2 = seq2.dist
 true_d=d1x+d2x
 who="1---2"
 
 out13= countsMatrix(seq1,seq3)
-Q = optim.gtr(out13,r)
+##Q = optim.gtr(out13,r)
 dist1 = seq1.dist
 dist2 = seq3.dist
 true_d=d1x+dxy+d3y
 who="1---3"
 
 out23= countsMatrix(seq2,seq3)
-Q = optim.gtr(out23,r)
+##Q = optim.gtr(out23,r)
 dist1 = seq2.dist
 dist2 = seq3.dist
 true_d=d2x+dxy+d3y
 who="2---3"
 
-t=seq(0.01,0.5,by=0.01)
+delta=0.01
+t=seq(delta,0.5,by=delta)
 ll=rep(0, length(t))
 llprime=rep(0, length(t))
 for(i in 1:length(t)){
-    l = loglik(dist1,dist2,Q$Q,t[i])
+    l = loglik(dist1,dist2,Q,t[i])
     ll[i] = l$ll
     llprime[i] = l$ll_pr
 }
 
+logl = ll - max(ll)
+y2 = exp(logl)
+y2 = y2/sum(y2)
+y2 = y2 / delta
 
 
 pdf(paste0(who,"_lik_sim.pdf"))
 layout(m=matrix(c(1,2),ncol=2))
-plot(t,ll)
+plot(t,y2, type="l")
 abline(v=true_d, col="red")
 title(who)
 plot(t,llprime)
@@ -342,7 +348,21 @@ dev.off()
 ## cases for birds data
 ## ------------------------------------------------------------
 who = "birds"
-d=read.dna("../datasets/birds4-clean.phy") #needs to be 4 taxa
+d=read.dna("../../datasets/birds4-clean.phy") #needs to be 4 taxa
+r = c(0.2463,0.1764,0.1231,0.0187,0.4185,0.0170)
+p = c(0.2776,0.2937,0.1612,0.2675)
+den = r[6]
+r = r/den
+Q = makeQ(r,p,4, rescale=TRUE)
+
+who = "sim"
+nsites=1500
+branch.length = c(0.03,0.11,0.078,0.091,0.098) #bl as birds mb: dxy,d1x,d2x,d3y,d4y
+Q = randomQ(4,rescale=TRUE)
+r=Q$r
+p=Q$p
+d = simulateData(Q,branch.length, nsites,filename=paste0(who,".txt"))
+
 seq1 = as.vector(unname(as.character(d[1,])))
 seq2 = as.vector(unname(as.character(d[2,])))
 seq3 = as.vector(unname(as.character(d[3,])))
@@ -358,18 +378,14 @@ seq2 <- seq2[s1&s2&s3&s4]
 seq3 <- seq3[s1&s2&s3&s4]
 seq4 <- seq4[s1&s2&s3&s4]
 
+
 nsites= length(seq3)
 seq1.dist=seqMatrix(seq1)
 seq2.dist=seqMatrix(seq2)
 seq3.dist=seqMatrix(seq3)
 seq4.dist=seqMatrix(seq4)
 
-r = c(0.2463,0.1764,0.1231,0.0187,0.4185,0.0170)
-p = c(0.2776,0.2937,0.1612,0.2675)
-den = r[6]
-r = r/den
-Q = makeQ(r,p,4, rescale=TRUE)
-
+withPrior = TRUE
 
 ## (1,2),3,4
 dxy = 0.026
@@ -416,12 +432,26 @@ dist2=seq3.dist
 true_d=d2y+d3y
 who="2---3"
 
+out=countsMatrix(seq1,seq3)
+dist1=seq1.dist
+dist2=seq3.dist
+true_d=d1x+dxy+d3y
+who="1---3"
+
+out=countsMatrix(seq4,seq3)
+dist1=seq4.dist
+dist2=seq3.dist
+true_d=d4x+dxy+d3y
+who="4---3"
+
 delta=0.01
 t=seq(delta,0.5,by=delta)
 ll=rep(0, length(t))
 for(i in 1:length(t)){
     l = loglik(dist1,dist2,Q,t[i])
     ll[i] = l$ll
+    if(withPrior)
+        ll[i] = ll[i] -10*t[i] #prior
 }
 
 
@@ -440,8 +470,14 @@ t.lik = simulateBranchLength.lik(nsim, dist1,dist2,Q,t0,eta=eta)
 d.lik = density(t.lik$t)
 df.lik = data.frame(x=d.lik$x,y=d.lik$y)
 
+if(withPrior){
+    priortitle = "(with prior)"
+} else {
+    priortitle = "(no prior)"
+}
+
 library(ggplot2)
-title = paste(who,'Blue = GTR, Red = Gamma')
+title = paste(who,'Blue = GTR, Red = Gamma', priortitle)
 p1 = ggplot(df.gtr, aes(x=x,y=y)) +
     geom_line(color="blue") +
     geom_line(aes(x=x,y=y),data=df.lik,color="red",linetype="dashed") +
