@@ -609,6 +609,8 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, Q=diag(4)
     leaves = as.numeric(leaves)
     sis = leaves
     fth = setdiff(1:4,sis)
+    print(paste("sis",sis))
+    print(paste("fth",fth))
     seq1 = as.vector(unname(as.character(d[sis[1],])))
     seq2 = as.vector(unname(as.character(d[sis[2],])))
     seq3 = as.vector(unname(as.character(d[fth[1],])))
@@ -772,10 +774,10 @@ sampleBLQuartet = function(d,tre,eta=0.5, verbose=FALSE, trueT0=FALSE, Q=diag(4)
     if(dxy<0)
         stop("dxy negative")
 
-    if(verbose){
+    #if(verbose){
         print(paste("d12",d12,"d13",d13,"d23",d23,"d34",d34))
         print(paste("d1x",d1x,"d2x",d2x,"d3y",d3y,"d4y",d4y,"dxy",dxy))
-    }
+    #}
 
     bl <- rep(0,5) #works only for unrooted quartet
     ed1x = which(tre$edge[,2] == which(tre$tip.label == as.character(sis[1])))

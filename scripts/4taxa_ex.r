@@ -26,7 +26,7 @@ r = r/den
 Q = makeQ(r,p,4, rescale=TRUE)
 
 
-who = "simRandTree" #tree (1,2),3,4
+who = "sim" #tree (1,2),3,4
 pr = c(0.0,1.0,0.0)
 pr= c(1/3,1/3,1/3) ## same sim.txt
 nsites=1500
@@ -56,7 +56,7 @@ err = 0
 for(i in 1:nreps){
     print(i)
     t=sampleTopQuartet(dat.tre)
-    b=try(sampleBLQuartet(d,t$tre, trueT0=FALSE, Q=Q))
+    b=try(sampleBLQuartet(d,t$tre, trueT0=FALSE, Q=Q, eta=1.0))
     if(class(b) == "try-error"){
         err = err + 1
     } else {
