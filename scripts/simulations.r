@@ -12,11 +12,11 @@ library(ggplot2)
 ## Case (1,2)---3
 
 who="Case (1,2)---3"
-d1x=0.02
-d2x=0.02
-d3x=0.02
+d1x=0.15
+d2x=0.15
+d3x=0.15
 eta = 0.5
-nsites=1500
+nsites=15000
 
 nuc <- c('a','c','g','t')
 Q = randomQ(4,rescale=TRUE)
@@ -80,11 +80,7 @@ for(i in 1:length(t1)){
 }
 
 
-#logl = ll - max(ll)
-#y2 = exp(logl)
-#y2 = y2/sum(y2)
-#y2 = y2 / delta
-df.gtr = data.frame(x12=x12,x13=x13,x23=x23,y=ll-max(ll))
+df.gtr = data.frame(x12=x12,x13=x13,x23=x23,y=ll)
 head(df.gtr)
 
 out12 = countsMatrix(seq1,seq2)
@@ -105,11 +101,26 @@ d.lik23 = density(t.lik23$t)
 df.lik = data.frame(x12=d.lik12$x,y12=d.lik12$y,x13=d.lik13$x,y13=d.lik13$y,x23=d.lik23$x,y23=d.lik23$y)
 head(df.lik)
 
-title = paste(who,'Blue = GTR, Red = Gamma,\n', 'eta', eta, 'nsites', nsites, 'Black line=true t, Gold line=MLE')
+title = paste(who,'gamma density \n Blue = d12, Red = d13, Gold = d23', 'nsites', nsites)
 p1 = ggplot(df.lik, aes(x=x12,y=y12)) +
-    geom_line(color="blue")
+    geom_line(color="blue")+
+    geom_vline(xintercept = d1x+d2x, colour="blue")+
+    geom_vline(xintercept = t.lik12$alpha/t.lik12$beta, colour="blue", linetype="dashed")+
+    geom_line(aes(x=x13,y=y13),data=df.lik,colour="red")+
+    geom_vline(xintercept = d1x+d3x, colour="red")+
+    geom_vline(xintercept = t.lik13$alpha/t.lik13$beta, colour="red", linetype="dashed")+
+    geom_line(aes(x=x23,y=y23),data=df.lik,colour="gold")+
+    geom_vline(xintercept = d2x+d3x, colour="gold")+
+    geom_vline(xintercept = t.lik23$alpha/t.lik23$beta, colour="gold", linetype="dashed")+
+    ggtitle(title)
 
 plot(p1)
+
+## compare this behavior of d12 with simulating from d12 (instead of d1x,d2x)
+
+## check for d1x,,d2x,d3x now
+
+
 
 ## aqui voy, tengo q ver como graficar las cosas bien, tengo q normalizar y
 ## parece qe p1 y p2 ya son comparable, pero no estan centradas donde deben!
