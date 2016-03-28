@@ -9,9 +9,231 @@ source('4taxa_functions.r')
 library(ggplot2)
 library(weights)
 
+## to do: do weights
+
+## replicate Case (1,2)---(3,4)
+## conclusion: all branches seem to be correctly generated
+who="(1,2)---(3,4)"
+d1x0=0.11
+d2x0=0.078
+dxy0 = 0.03
+d3y0 = 0.091
+d4y0 = 0.098
+eta = 0.5
+nsites=1500
+nuc <- c('a','c','g','t')
+nrep = 100
+
+d1x=rep(0,nrep)
+d2x=rep(0,nrep)
+d3x=rep(0,nrep)
+d3y=rep(0,nrep)
+d4y=rep(0,nrep)
+dxy=rep(0,nrep)
+
+alpha12=rep(0,nrep)
+beta12=rep(0,nrep)
+alpha13=rep(0,nrep)
+beta13=rep(0,nrep)
+alpha23=rep(0,nrep)
+beta23=rep(0,nrep)
+alpha3x=rep(0,nrep)
+beta3x=rep(0,nrep)
+alpha4x=rep(0,nrep)
+beta4x=rep(0,nrep)
+alpha34=rep(0,nrep)
+beta34=rep(0,nrep)
+
+
+for(nr in 1:nrep){
+    print(nr)
+    Q = randomQ(4,rescale=TRUE)
+    r=Q$r
+    p=Q$p
+    ## simulate seqx
+    seqx = sample(nuc,size=nsites,prob=Q$p,replace=TRUE)
+
+    ## simulate seq1
+    P = matrixExp(Q,d1x0)
+    seq1 = numeric(nsites)
+    for ( i in 1:nsites )
+        seq1[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+    ## simulate seq2
+    P = matrixExp(Q,d2x0)
+    seq2 = numeric(nsites)
+    for ( i in 1:nsites )
+        seq2[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+
+    ## simulate seqy
+    P = matrixExp(Q,dxy0)
+    seqy = numeric(nsites)
+    for ( i in 1:nsites )
+        seqy[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+
+    ## simulate seq3
+    P = matrixExp(Q,d3y0)
+    seq3 = numeric(nsites)
+    for ( i in 1:nsites )
+        seq3[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+    ## simulate seq4
+    P = matrixExp(Q,d4y0)
+    seq4 = numeric(nsites)
+    for ( i in 1:nsites )
+        seq4[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+
+
+    seq1.dist = seqMatrix(seq1)
+    seq2.dist = seqMatrix(seq2)
+    seqx.dist = sequenceDist(d1x0,d2x0,seq1.dist,seq2.dist,Q) ## with true values d1x,d2x
+    seq3.dist = seqMatrix(seq3)
+    seq4.dist = seqMatrix(seq4)
+
+
+    ## gamma density
+    out12 = countsMatrix(seq1,seq2)
+    out13 = countsMatrix(seq1,seq3)
+    out23 = countsMatrix(seq2,seq3)
+    out34 = countsMatrix(seq3,seq4)
+    jc12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
+    jc13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
+    jc23 = simulateBranchLength.jc(nsim=1,out23,eta=eta)
+    jc34 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
+    ## starting point for d3x,d4x
+    t0=(max(c(jc12$t,jc13$t,jc23$t))+min(c(jc12$t,jc13$t,jc23$t)))/2
+
+    t.lik12 = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=jc12$t,eta=eta)
+    t.lik13 = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=jc13$t,eta=eta)
+    t.lik23 = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=jc23$t,eta=eta)
+
+    alpha12[nr] = t.lik12$alpha
+    beta12[nr] = t.lik12$beta
+    alpha13[nr] = t.lik13$alpha
+    beta13[nr] = t.lik13$beta
+    alpha23[nr] = t.lik23$alpha
+    beta23[nr] = t.lik23$beta
+
+    d12 = t.lik12$t
+    d13 = t.lik13$t
+    d23 = t.lik23$t
+
+    d1x[nr] = (d12+d13-d23)/2
+    d2x[nr] = (d12+d23-d13)/2
+    d3x[nr] = (d13+d23-d12)/2
+
+    ##t.lik3x = simulateBranchLength.lik(nsim=1, seqx.dist,seq3.dist,Q,t0=t0,eta=eta)
+    t.lik4x = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta)
+    t.lik34 = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=jc34$t,eta=eta)
+
+    ##d3x = t.lik3x$t
+    d4x = t.lik4x$t
+    d34 = t.lik34$t
+
+    d3y[nr] = (d34+d3x[nr]-d4x)/2
+    d4y[nr] = (d34+d4x-d3x[nr])/2
+    dxy[nr] = (d3x[nr]+d4x-d34)/2
+
+    alpha4x[nr] = t.lik4x$alpha
+    beta4x[nr] = t.lik4x$beta
+    alpha34[nr] = t.lik34$alpha
+    beta34[nr] = t.lik34$beta
+}
+
+data=data.frame(d1x=d1x, d2x=d2x,d3x=d3x, d3y=d3y, d4y=d4y, dxy=dxy,alpha12=alpha12,beta12=beta12,alpha13=alpha13, beta13=beta13, alpha23=alpha23, beta23=beta23, mean12=alpha12/beta12, mean13=alpha13/beta13, mean23=alpha23/beta23, var12=alpha12/beta12^2, var13=alpha13/beta13^2, var23=alpha23/beta23^2, alpha4x=alpha4x, beta4x=beta4x, alpha34=alpha34, beta34=beta34, mean4x=alpha4x/beta4x, mean34=alpha34/beta34, var4x=alpha4x/beta4x^2, var34=alpha34/beta34^2)
+head(data)
+
+## plot d12,d13,d23
+m12 = mean(data$mean12)
+v12 = mean(data$var12)
+m13 = mean(data$mean13)
+v13 = mean(data$var13)
+m23 = mean(data$mean23)
+v23 = mean(data$var23)
+
+w12 = rgamma(10000,m12^2/v12, m12/v12)
+df12 = density(w12)
+w13 = rgamma(10000,m13^2/v13, m13/v13)
+df13 = density(w13)
+w23 = rgamma(10000,m23^2/v23, m23/v23)
+df23 = density(w23)
+
+df = data.frame(x12=df12$x, y12=df12$y, x13=df13$x, y13=df13$y, x23=df23$x, y23=df23$y)
+
+title = paste(who,'Gamma density with average mean&var, line true value,\n Blue=d12, Red=d13, Gold=d23,\n nsites', nsites, 'nrep', nrep)
+p1 = ggplot(df,aes(x=x12,y=y12))+
+    geom_line(colour="blue")+
+    geom_vline(xintercept=d1x0+d2x0, colour="blue")+
+    geom_line(aes(x=x13,y=y13), data=df, colour="red")+
+    geom_vline(xintercept=d1x0+d3y0+dxy0, colour="red")+
+    geom_line(aes(x=x23,y=y23), data=df, colour="gold")+
+    geom_vline(xintercept=d2x0+d3y0+dxy0, colour="gold")+
+    ggtitle(title)
+
+plot(p1)
+
+## d1x,d2x,d3x
+title = paste(who,'Blue=d1x, Red=d2x, Green=d3x, nsites', nsites, 'nrep', nrep)
+p1 = ggplot(data,aes(x=d1x))+
+    geom_freqpoly(colour="blue")+
+    geom_vline(xintercept=d1x0, colour="blue")+
+    geom_vline(xintercept=mean(d1x), colour="blue", linetype="dashed")+
+    geom_freqpoly(aes(x=d2x), data=data, colour="red")+
+    geom_vline(xintercept=d2x0, colour="red")+
+    geom_vline(xintercept=mean(d2x), colour="red", linetype="dashed")+
+    geom_freqpoly(aes(x=d3x), data=data, colour="darkgreen")+
+    geom_vline(xintercept=d3y0+dxy0, colour="darkgreen")+
+    geom_vline(xintercept=mean(d3x), colour="darkgreen", linetype="dashed")+
+    ggtitle(title)
+
+plot(p1)
+
+
+## d4x, d34
+m4x = mean(data$mean4x)
+v4x = mean(data$var4x)
+m34 = mean(data$mean34)
+v34 = mean(data$var34)
+
+w4x = rgamma(10000,m4x^2/v4x, m4x/v4x)
+df4x = density(w4x)
+w34 = rgamma(10000,m34^2/v34, m34/v34)
+df34 = density(w34)
+
+df = data.frame(x4x=df4x$x, y4x=df4x$y, x34=df34$x, y34=df34$y)
+
+title = paste(who,'Gamma density with average mean&var, line true value,\n Red=d4x, Gold=d34,\n nsites', nsites, 'nrep', nrep)
+p1 = ggplot(df,aes(x=x4x,y=y4x))+
+    geom_line(colour="red")+
+    geom_vline(xintercept=dxy0+d4y0, colour="red")+
+    geom_vline(xintercept=m4x,colour="red", linetype="dashed")+
+    geom_line(aes(x=x34,y=y34), data=df, colour="gold")+
+    geom_vline(xintercept=d3y0+d4y0, colour="gold")+
+    geom_vline(xintercept=m34,colour="gold", linetype="dashed")+
+    ggtitle(title)
+
+plot(p1)
+
+
+
+## plot d3y,d4y,dxy
+title = paste(who,'Blue=d3y, Red=d4y, Green=dxy, nsites', nsites, 'nrep', nrep)
+p1 = ggplot(data,aes(x=d3y))+
+    geom_freqpoly(colour="blue")+
+    geom_vline(xintercept=d3y0, colour="blue")+
+    geom_vline(xintercept=mean(d3y), colour="blue", linetype="dashed")+
+    geom_freqpoly(aes(x=d4y), data=data, colour="red")+
+    geom_vline(xintercept=d4y0, colour="red")+
+    geom_vline(xintercept=mean(d4y), colour="red", linetype="dashed")+
+    geom_freqpoly(aes(x=dxy), data=data, colour="darkgreen")+
+    geom_vline(xintercept=dxy0, colour="darkgreen")+
+    geom_vline(xintercept=mean(dxy), colour="darkgreen", linetype="dashed")+
+    ggtitle(title)
+
+plot(p1)
+
 
 ## replicate: Case x---(3,4)
 ## we want to know if from d3x,d4x,d34 we can get good estimated of d3y,d4y,dxy
+## conclusion: d3y,d4y,dxy seem to be accurately computed
 who="x---(3,4)"
 d1x=0.1
 d2x=0.1
@@ -97,8 +319,7 @@ for(nr in 1:nrep){
 
 data=data.frame(d3y=d3y, d4y=d4y,dxy=dxy)
 head(data)
-## to do: try with different bl sizes, and then do the weights for x---(3,4)
-## then, the whole case for quartet (replicates and weights)
+
 hist(d3y)
 hist(d4y)
 hist(dxy)
