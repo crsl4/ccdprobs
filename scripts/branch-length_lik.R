@@ -322,8 +322,8 @@ findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000, verb
     return ( list(t=t[length(t)], obsInfo=f2$ll_doublepr) )
 }
 
-simulateBranchLength.lik = function(nsim,seq1.dist,seq2.dist, Q, t0, eta=0.5){
-    mu = findMLE(seq1.dist, seq2.dist, Q, t0)
+simulateBranchLength.lik = function(nsim,seq1.dist,seq2.dist, Q, t0, eta=0.5, verbose=FALSE){
+    mu = findMLE(seq1.dist, seq2.dist, Q, t0, verbose=verbose)
     w = rgamma(nsim, mu$t^2*(-mu$obsInfo)*eta, mu$t*(-mu$obsInfo)*eta)
     return ( list(t=w, alpha=mu$t^2*(-mu$obsInfo)*eta, beta=mu$t*(-mu$obsInfo)*eta) )
 }
