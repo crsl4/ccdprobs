@@ -947,11 +947,11 @@ plot(p1)
 ## they look good, they weighted histograms are weighted statistics
 ## do cover the real values
 who="Case (1,2)---3"
-d1x0=0.02
+d1x0=0.1
 d2x0=0.1
-d3x0=0.02
+d3x0=0.1
 eta = 0.5
-nsites=1500
+nsites=150000
 nuc <- c('a','c','g','t')
 
 Q = randomQ(4,rescale=TRUE)
@@ -1036,6 +1036,7 @@ my.logw = data$logwv - mean(data$logwv)
 data$w = exp(my.logw)/sum(exp(my.logw))
 data[data$w>0.01,]
 hist(data$w)
+save(data,file="data1m.Rda")
 
 m.1x=weighted.mean(data$d1x,data$w)
 m2.1x=weighted.mean(data$d1x^2,data$w)
