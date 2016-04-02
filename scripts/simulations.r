@@ -22,7 +22,7 @@ dxy0 = 0.1
 d3y0 = 0.1
 d4y0 = 0.1
 eta = 0.5
-nsites=1500
+nsites=150000
 nuc <- c('a','c','g','t')
 Q = randomQ(4,rescale=TRUE)
 r=Q$r
@@ -105,8 +105,8 @@ for(nr in 1:nreps){
     seqx.dist = sequenceDist(d1x[nr],d2x[nr],seq1.dist,seq2.dist,Q) ## with est values d1x,d2x
 
     ##t.lik3x = simulateBranchLength.lik(nsim=1, seqx.dist,seq3.dist,Q,t0=t0,eta=eta)
-    t.lik4x = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta, verbose=TRUE)
-    t.lik34 = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=jc34$t,eta=eta, verbose=TRUE)
+    t.lik4x = simulateBranchLength.lik(nsim=1, seqx.dist,seq4.dist,Q,t0=t0,eta=eta, verbose=FALSE)
+    t.lik34 = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=jc34$t,eta=eta, verbose=FALSE)
 
     ##d3x = t.lik3x$t
     d4x = t.lik4x$t
