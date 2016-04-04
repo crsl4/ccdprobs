@@ -235,6 +235,27 @@ wtd.hist(data$dxy,weight=data$w)
 abline(v=dxy0, col="red")
 abline(v=m.xy,col="blue")
 
+## real histograms for nsites=150000 case
+hist(data$d1x)
+abline(v=d1x0, col="red")
+abline(v=m.1x,col="blue")
+
+hist(data$d2x)
+abline(v=d2x0, col="red")
+abline(v=m.2x,col="blue")
+
+hist(data$d3y)
+abline(v=d3y0, col="red")
+abline(v=m.3y,col="blue")
+
+hist(data$d4y)
+abline(v=d4y0, col="red")
+abline(v=m.4y,col="blue")
+
+hist(data$dxy)
+abline(v=dxy0, col="red")
+abline(v=m.xy,col="blue")
+
 ## replicate Case (1,2)---(3,4)
 ## let's redo this case, but with fixed simulated data
 ## instead of drawing a new simulated data each time
