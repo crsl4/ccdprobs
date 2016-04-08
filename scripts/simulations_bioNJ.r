@@ -9,6 +9,8 @@ library(weights)
 
 ## how do weights behave??
 ## now, using bioNJ method
+## bl seem closer to true values, but
+## weights still ~17/1000 >0.01
 who="(1,2)---(3,4)"
 ## d1x0=0.11
 ## d2x0=0.078
@@ -117,7 +119,6 @@ for(nr in 1:nreps){
     d1x[nr] = (d12+1/2*(s1-s2))/2
     d2x[nr] = (d12+1/2*(s2-s1))/2
 
-    ## need lambda
     lambda = 0.5 + ((v23-v13)+(v24-v14))/(2*2*v12)
 
     d3x = (lambda*d13+(1-lambda)*d23-lambda*d1x[nr]-(1-lambda)*d2x[nr])
