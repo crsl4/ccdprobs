@@ -328,6 +328,12 @@ simulateBranchLength.lik = function(nsim,seq1.dist,seq2.dist, Q, t0, eta=0.5, ve
     return ( list(t=w, alpha=mu$t^2*(-mu$obsInfo)*eta, beta=mu$t*(-mu$obsInfo)*eta) )
 }
 
+simulateBranchLength.norm = function(nsim,seq1.dist,seq2.dist, Q, t0, eta=0.5, verbose=FALSE){
+    mu = findMLE(seq1.dist, seq2.dist, Q, t0, verbose=verbose)
+    w = rnorm(nsim, mu$t, -1/mu$obsInfo)
+    return ( list(t=w, mu=mu$t, sigma=-1/mu$obsInfo) )
+}
+
 
 
 simulateData = function(Q,branch.length, nsites, filename="simSeq.txt"){
