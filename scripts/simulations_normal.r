@@ -9,9 +9,11 @@ source('branch-length_lik.r')
 source('4taxa_functions.r')
 library(ggplot2)
 library(weights)
+library(mvtnorm)
 
 ## how do weights behave??
-
+## comparing three densities: normal without constant, normal with constant, dep normal
+## all the three weights are identical (as they should)
 who="(1,2)---(3,4)"
 ## d1x0=0.11
 ## d2x0=0.078
@@ -74,9 +76,13 @@ out23 = countsMatrix(seq2,seq3)
 out34 = countsMatrix(seq3,seq4)
 
 nreps = 1000
-logwv = rep(0,nreps)
+logwv1 = rep(0,nreps)
+logwv2 = rep(0,nreps)
+logwv3 = rep(0,nreps)
 logl = rep(0,nreps)
-logdens = rep(0,nreps)
+logdens1 = rep(0,nreps) #indep normal without constant
+logdens2 = rep(0,nreps) #indep normal with constant
+logdens3 = rep(0,nreps) #dep normal
 d1x=rep(0,nreps)
 d2x=rep(0,nreps)
 d3y=rep(0,nreps)
@@ -117,26 +123,38 @@ for(nr in 1:nreps){
         print("all positive")
         print(paste(d1x[nr],d2x[nr], dxy[nr], d3y[nr], d4y[nr]))
         logl[nr] = gtr.log.lik.all(d1x[nr],d2x[nr],dxy[nr],d3y[nr],d4y[nr],seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
-        logdens[nr] = logJointDensity.norm(t.lik12,t.lik13,t.lik23,t.lik14,t.lik34)
-        logprior = logPriorExpDist(d1x[nr], d2x[nr], d3y[nr], d4y[nr], dxy[nr], m=0.1)
-        ## print(paste('loglik', suma))
-        ## print(paste('logdens', logdens))
-        ## print(paste('logprior', logprior))
-        logwv[nr] = logprior +logl[nr] - logdens[nr]
+        logdens = logJointDensity.norm(t.lik12,t.lik13,t.lik23,t.lik14,t.lik34)
+        logdens3[nr] = logJointDensity.multinorm(d1x[nr], d2x[nr], dxy[nr], d3y[nr], d4y[nr], t.lik12,t.lik13,t.lik23,t.lik14,t.lik34) #from multinorm
+        logdens1[nr] = logdens$logd1 #no constant
+        logdens2[nr] = logdens$logd2 #from dnorm
+        logprior  = 0 #= logPriorExpDist(d1x[nr], d2x[nr], d3y[nr], d4y[nr], dxy[nr], m=0.1)
+        logwv1[nr] = logprior +logl[nr] - logdens1[nr]
+        logwv2[nr] = logprior +logl[nr] - logdens2[nr]
+        logwv3[nr] = logprior +logl[nr] - logdens3[nr]
     }
 }
 
-data = data.frame(d1x,d2x,d3y,d4y,dxy,logwv, logl, logdens)
+data = data.frame(d1x,d2x,d3y,d4y,dxy,logwv1, logwv2, logwv3, logl, logdens1, logdens2, logdens3)
 head(data)
 summary(data)
-data[data$logwv==0,]
-length(data[data$logwv==0,]$logwv)
-data <- subset(data,logwv!=0)
-my.logw = data$logwv - mean(data$logwv)
-data$w = exp(my.logw)/sum(exp(my.logw))
-data[data$w>0.01,]
-length(data[data$w>0.01,]$w)
-hist(data$w)
+data[data$logwv1==0,]
+length(data[data$logwv1==0,]$logwv1)
+data <- subset(data,logwv1!=0)
+my.logw1 = data$logwv1 - mean(data$logwv1)
+my.logw2 = data$logwv2 - mean(data$logwv2)
+my.logw3 = data$logwv3 - mean(data$logwv3)
+data$w1 = exp(my.logw1)/sum(exp(my.logw1))
+data$w2 = exp(my.logw2)/sum(exp(my.logw2))
+data$w3 = exp(my.logw3)/sum(exp(my.logw3))
+data[data$w1>0.01,]
+data[data$w2>0.01,]
+data[data$w3>0.01,]
+length(data[data$w1>0.01,]$w1)
+length(data[data$w2>0.01,]$w2)
+length(data[data$w3>0.01,]$w3)
+hist(data$w1)
+hist(data$w2)
+hist(data$w3)
 ##save(data,file="data_simulations.Rda")
 
 m.1x=weighted.mean(data$d1x,data$w)

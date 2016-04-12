@@ -246,20 +246,37 @@ weighted.mean = function(x,w){
 ## NORMAL
 ## d12,d13,d23,d14,d34 = simulateBranchLength.lik
 logJointDensity.norm = function(d12.n,d13.n,d23.n,d14.n,d34.n, verbose=FALSE){
-    ## logd = (d12.n$t-d12.n$mu)^2/d12.n$sigma^2 +
-    ##     (d13.n$t-d13.n$mu)^2/d13.n$sigma^2 +
-    ##         (d23.n$t-d23.n$mu)^2/d23.n$sigma^2 +
-    ##             (d14.n$t-d14.n$mu)^2/d14.n$sigma^2 +
-    ##                 (d34.n$t-d34.n$mu)^2/d34.n$sigma^2
-    ## logd = -0.5 * logd
-    logd = dnorm(d12.n$t, mean = d12.n$mu, sd = d12.n$sigma, log = TRUE)+
-        dnorm(d13.n$t, mean = d13.n$mu, sd = d13.n$sigma, log = TRUE)+
-            dnorm(d23.n$t, mean = d23.n$mu, sd = d23.n$sigma, log = TRUE)+
-                dnorm(d14.n$t, mean = d14.n$mu, sd = d14.n$sigma, log = TRUE)+
-                    dnorm(d34.n$t, mean = d34.n$mu, sd = d34.n$sigma, log = TRUE)
+    logd1 = (d12.n$t-d12.n$mu)^2/d12.n$sigma^2 +
+        (d13.n$t-d13.n$mu)^2/d13.n$sigma^2 +
+            (d23.n$t-d23.n$mu)^2/d23.n$sigma^2 +
+                (d14.n$t-d14.n$mu)^2/d14.n$sigma^2 +
+                    (d34.n$t-d34.n$mu)^2/d34.n$sigma^2
+    logd1 = -0.5 * logd1
+    logd2 = dnorm(d12.n$t, mean = d12.n$mu, sd = d12.n$sigma, log = FALSE)*
+        dnorm(d13.n$t, mean = d13.n$mu, sd = d13.n$sigma, log = FALSE)*
+            dnorm(d23.n$t, mean = d23.n$mu, sd = d23.n$sigma, log = FALSE)*
+                dnorm(d14.n$t, mean = d14.n$mu, sd = d14.n$sigma, log = FALSE)*
+                    dnorm(d34.n$t, mean = d34.n$mu, sd = d34.n$sigma, log = FALSE)
+    logd2 = log(logd2)
     if(verbose)
-        print(logd)
-    return ( logd )
+        print(logd1)
+    return ( list(logd1=logd1, logd2=logd2) )
+}
+
+## NORMAL
+## d12,d13,d23,d14,d34 = simulateBranchLength.lik
+logJointDensity.multinorm = function(d1x,d2x,dxy,d3y,d4y,d12.n,d13.n,d23.n,d14.n,d34.n, verbose=FALSE){
+    mu.d1x = 0.5*(d12.n$mu+d13.n$mu-d23.n$mu)
+    mu.d2x = 0.5*(d12.n$mu-d13.n$mu+d23.n$mu)
+    mu.dxy = 0.5*(-d12.n$mu+d23.n$mu+d14.n$mu-d34.n$mu)
+    mu.d3y = 0.5*(d13.n$mu-d14.n$mu+d34.n$mu)
+    mu.d4y = 0.5*(-d13.n$mu+d14.n$mu+d34.n$mu)
+    A = matrix(c(1/2,1/2,-1/2,0,0,1/2,-1/2,0,1/2,-1/2,-1/2,1/2,1/2,0,0,0,0,1/2,-1/2,1/2,0,0,-1/2,1/2,1/2),ncol=5)
+    S = diag(c(d12.n$sigma^2, d13.n$sigma^2, d23.n$sigma^2, d14.n$sigma^2, d34.n$sigma^2))
+    newS = A %*% S %*% t(A)
+    logd = dmvnorm(c(d1x,d2x,dxy,d3y,d4y), mean=c(mu.d1x,mu.d2x,mu.dxy,mu.d3y,mu.d4y), sigma = newS)
+    logd = log(logd)
+    return (logd)
 }
 
 ## JC beta
