@@ -396,3 +396,99 @@ simulateData = function(Q,branch.length, nsites, filename="simSeq.txt"){
 
     return ( d )
 }
+
+
+
+
+## -------------------------
+## 3D likelihood
+
+## p1 = P(A1|x1), column vector of size 4
+## p2 = P(A2|x2), column vector of size 4
+## p3 = P(A3|x3), column vector of size 4
+## returns fk, fk_prime1, fk_prime2, fk_prime3,
+## fk_doubleprime11, fk_doubleprime12, fk_doubleprime13, fk_doubleprime22,
+## fk_doubleprime23, fk_doubleprime33
+## fixit: matrix multiplication can be more efficient with eigenvector decomp
+fk = function(p1,p2,p3,Q,t1,t2,t3){
+    ## fixit: need to change this, and then loglik and findMLE
+    ## maybe we need three functions S1(t1), S2(t2), S3(t3) to give the three 4x1 vectors
+    S1=diag(S1(t1,p1,Q)) # fixit: need to do this functions
+    S2=diag(S2(t2,p2,Q))
+    S3=diag(S3(t3,p3,Q))
+    ## need S1prime, and S1doubleprime
+    fk = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% S3 %*% rep(1,4)
+    fk.pr1
+    fk.pr2
+    fk.pr3
+    fk.doublepr11
+    fk.doublepr12
+    fk.doublepr13
+    fk.doublepr22
+    fk.doublepr23
+    fk.doublepr33
+
+    return ( list(fk=as.numeric(fk), fk_pr1=as.numeric(fk.pr1),fk_pr2=as.numeric(fk.pr2),fk_pr3=as.numeric(fk.pr3),
+                  fk_doublepr11= as.numeric(fk.doublepr11),fk_doublepr12= as.numeric(fk.doublepr12),fk_doublepr13= as.numeric(fk.doublepr13),
+                  fk_doublepr22= as.numeric(fk.doublepr22),fk_doublepr23= as.numeric(fk.doublepr23),fk_doublepr33= as.numeric(fk.doublepr33)))
+}
+
+## returns loglik, llprime, lldoubleprime
+loglik = function(seq1.dist, seq2.dist, Q, t){
+    if(ncol(seq1.dist) != ncol(seq2.dist))
+        stop("wrong number of sites")
+    suma = 0
+    suma2 = 0
+    suma3 = 0
+    for(i in 1:ncol(seq1.dist)){
+        f = fk(seq1.dist[,i],seq2.dist[,i],Q,t)
+        suma = suma + log(f$fk)
+        suma2 = suma2 + f$fk_pr/f$fk
+        suma3 = suma3 + (f$fk*f$fk_doublepr - f$fk_pr*f$fk_pr)/(f$fk^2)
+    }
+    return ( list(ll=suma, ll_pr=suma2, ll_doublepr=suma3) )
+}
+
+## t0= starting point for Newton-Raphson
+findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000, verbose=FALSE){
+    if(verbose)
+        print("entering findMLE...")
+    t = rep(0,Nmax)
+    t[1] = t0 ## fixit: later do a binary search before choosing t0
+    error = 1
+    i = 1
+    while(error > tol & i < Nmax){
+        if(verbose)
+            print(t[i])
+        f =loglik(seq1.dist, seq2.dist, Q, t[i])
+        gap = f$ll_pr/f$ll_doublepr
+        t[i+1] = t[i] - gap
+        while(t[i+1]<0){ #avoid negative BL
+            gap = gap/2
+            if(verbose)
+                print("found negative candidate t[i+1]")
+            t[i+1] = t[i] - gap
+        }
+        ## after finding a positive candidate:
+        f2 =loglik(seq1.dist, seq2.dist, Q, t[i+1])
+        if(verbose){
+            print("f$ll, f2$ll")
+            print(f$ll)
+            print(f2$ll)
+        }
+        if(f$ll * f2$ll < 0){ #one positive, and one negative
+            while(abs(f2$ll) > 2*abs(f$ll)){ #t[i+1] too far from root
+                if(verbose)
+                    print("t[i+1] positive, but too far from root")
+                t[i+1] = t[i+1]/2
+                f2 =loglik(seq1.dist, seq2.dist, Q, t[i+1])
+            }
+        }
+        error = abs(t[i+1]-t[i])
+        i = i+1
+    }
+    t = t[which(t>0)]
+    if(i>=Nmax)
+        warning("Newton-Rapshon did not converge")
+    return ( list(t=t[length(t)], obsInfo=f2$ll_doublepr) )
+}
