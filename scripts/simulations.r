@@ -972,7 +972,7 @@ d1x0=0.1
 d2x0=0.1
 d3x0=0.1
 eta = 0.5
-nsites=150000
+nsites=1500
 nuc <- c('a','c','g','t')
 
 Q = randomQ(4,rescale=TRUE)
