@@ -483,7 +483,7 @@ loglik3D = function(seq1.dist, seq2.dist, seq3.dist,Q, t){
 }
 
 ## t0= starting point for Newton-Raphson
-## fixit: jumps could be farther from root, but no way to fix this in 3D
+## fixit: jumps could be farther from root, but no way to fix this in 3D (bret gave idea, need to code it)
 findMLE3D = function(seq1.dist, seq2.dist, seq3.dist, Q, t0=c(0.1,0.1,0.1), tol=0.0001, Nmax=10000, verbose=FALSE){
     if(verbose)
         print("entering findMLE...")
@@ -529,8 +529,116 @@ findMLE3D = function(seq1.dist, seq2.dist, seq3.dist, Q, t0=c(0.1,0.1,0.1), tol=
     return ( list(t=tnew, obsInfo=f2$hessian) )
 }
 
+## simulates d1x,d2x,d3x jointly
 simulateBranchLength.multinorm = function(nsim,seq1.dist,seq2.dist, seq3.dist, Q, t0, verbose=FALSE){
     mu = findMLE3D(seq1.dist, seq2.dist, seq3.dist,Q, t0, verbose=verbose)
+    Sigma = solve(mu$obsInfo)
+    w = rmvnorm(nsim, mu$t, -Sigma)
+    return ( list(t=w, mu=mu$t, sigma=-Sigma) )
+}
+
+## p1 = P(A1|x1), column vector of size 4
+## p2 = P(A2|x2), column vector of size 4
+## p3 = P(A3|x3), column vector of size 4
+## input t1,t2 and sum t1+t3=s13
+## returns fk, fk_prime1, fk_prime2, fk_prime3,
+## fk_doubleprime11, fk_doubleprime12, fk_doubleprime13, fk_doubleprime22,
+## fk_doubleprime23, fk_doubleprime33
+## fixit: matrix multiplication can be more efficient with eigenvector decomp
+fk2D = function(p1,p2,p3,Q,t1,t2,s13){
+    if(s13-t1<0)
+        stop("problem where sum is less than summand: t1+t3=s13")
+    S1fn = Sfn(t1,p1,Q)
+    S2fn = Sfn(t2,p2,Q)
+    S3fn = Sfn(s13-t1,p3,Q)
+    S1=diag(c(S1fn$S))
+    S2=diag(c(S2fn$S))
+    S3=diag(c(S3fn$S))
+    S1pr = diag(c(S1fn$Spr))
+    S2pr = diag(c(S2fn$Spr))
+    S3pr = (-1)*diag(c(S3fn$Spr))
+    S1doublepr = diag(c(S1fn$Sdoublepr))
+    S2doublepr = diag(c(S2fn$Sdoublepr))
+    S3doublepr = diag(c(S3fn$Sdoublepr))
+    fk = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% S3 %*% rep(1,4)
+    fk.pr1 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% S3 %*% rep(1,4)
+    fk.pr2 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2pr %*% S3 %*% rep(1,4)
+    fk.pr3 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% S3pr %*% rep(1,4)
+    fk.doublepr11 = rep(1,4) %*% diag(Q$p) %*% S1doublepr %*% S2 %*% S3 %*% rep(1,4)
+    fk.doublepr22 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2doublepr %*% S3 %*% rep(1,4)
+    fk.doublepr33 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% S3doublepr %*% rep(1,4)
+    fk.doublepr12 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2pr %*% S3 %*% rep(1,4)
+    fk.doublepr13 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% S3pr %*% rep(1,4)
+    fk.doublepr23 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2pr %*% S3pr %*% rep(1,4)
+
+    return ( list(fk=as.numeric(fk), fk_pr1=as.numeric(fk.pr1),fk_pr2=as.numeric(fk.pr2),fk_pr3=as.numeric(fk.pr3),
+                  fk_doublepr11= as.numeric(fk.doublepr11),fk_doublepr12= as.numeric(fk.doublepr12),fk_doublepr13= as.numeric(fk.doublepr13),
+                  fk_doublepr22= as.numeric(fk.doublepr22),fk_doublepr23= as.numeric(fk.doublepr23),fk_doublepr33= as.numeric(fk.doublepr33)))
+}
+
+
+## returns loglik, gradient (vector 2x1), hessian (matrix 2x2)
+## t = vector 2x1 t1,t2
+loglik2D = function(seqx.dist, seq3.dist, seq4.dist,Q, t, d3x){
+    if(ncol(seq3.dist) != ncol(seq4.dist))
+        stop("wrong number of sites")
+    logl = 0
+    dll1 = 0
+    dll2 = 0
+    d2ll_11 = 0
+    d2ll_12 = 0
+    d2ll_22 = 0
+    for(i in 1:ncol(seqx.dist)){
+        f = fk3D(seqx.dist[,i],seq4.dist[,i],seq3.dist[,i],Q,t[1],t[2],d3x) ## t1=dxy, t2=d4y, t3=d3y
+        logl = logl + log(f$fk)
+        dll1 = dll1 + (f$fk_pr1+f$fk_pr3)/f$fk
+        dll2 = dll2 + f$fk_pr2/f$fk
+        d2ll_11= d2ll_11 + (f$fk*(f$fk_doublepr11+2*f$fk_doublepr13+f$fk_doublepr33) - (f$fk_pr1+f$fk_pr3)^2)/(f$fk^2)
+        d2ll_12= d2ll_12 + (f$fk*(f$fk_doublepr12+f$fk_doublepr23) - f$fk_pr2*(f$fk_pr1+f$fk_pr3))/(f$fk^2)
+        d2ll_22= d2ll_22 + (f$fk*f$fk_doublepr22 - f$fk_pr2*f$fk_pr2)/(f$fk^2)
+    }
+    return ( list(ll=logl, gradient=c(dll1,dll2), hessian=matrix(c(d2ll_11, d2ll_12, d2ll_12, d2ll_22),ncol=2)) )
+}
+
+## t0= starting point for Newton-Raphson
+## fixit: jumps could be farther from root, but no way to fix this in 3D (bret gave idea, need to code it)
+findMLE2D = function(seqx.dist, seq3.dist, seq4.dist, Q, d3x, t0=c(0.1,0.1), tol=0.0001, Nmax=10000, verbose=FALSE){
+    if(verbose)
+        print("entering findMLE...")
+    tnew = rep(0,2) # will not save all sequence
+    told = t0 ## fixit: later do a binary search before choosing t0
+    error = 1
+    i = 1
+    while(error > tol & i < Nmax){
+        if(verbose)
+            print(told)
+        f =loglik2D(seqx.dist, seq3.dist, seq4.dist,Q, told, d3x)
+        gap = solve(f$hessian) %*% f$gradient
+        tnew = told - gap
+        while(any(tnew<0)){ #avoid negative BL
+            gap = gap/2
+            if(verbose)
+                print("found negative candidate tnew")
+            tnew = told - gap
+        }
+        ## after finding a positive candidate:
+        f2 =loglik2D(seqx.dist, seq3.dist, seq4.dist, Q, tnew, d3x)
+        error = max(abs(tnew-told))
+        if(verbose)
+            print(error)
+        i = i+1
+        told = tnew
+    }
+    if(i>=Nmax)
+        warning("Newton-Rapshon did not converge")
+    return ( list(t=tnew, obsInfo=f2$hessian) )
+}
+
+
+## simulates dxy,d4y because d3y is conditional on dxy+d3y=d3x
+## need the sum (d3x) as input
+simulateBranchLength.conditionalMultinorm = function(nsim,seqx.dist,seq3.dist, seq4.dist, Q, t0, d3x,verbose=FALSE){
+    mu = findMLE2D(seqx.dist, seq3.dist, seq4.dist,Q, d3x, t0, verbose=verbose)
     Sigma = solve(mu$obsInfo)
     w = rmvnorm(nsim, mu$t, -Sigma)
     return ( list(t=w, mu=mu$t, sigma=-Sigma) )
