@@ -123,8 +123,9 @@ for(nr in 1:nreps){
     d3y.t0 = (d34+d3x-d4x)/2
     d4y.t0 = (d34+d4x-d3x)/2
     dxy.t0 = (d3x+d4x-d34)/2
+    print(c(d1x.t0, d2x.t0, dxy.t0, d3y.t0, d4y.t0))
 
-    d = simulateBranchLength.multinorm5D(nsim=1,seq1.dist, seq2.dist, seq3.dist,seq4.dist,Q,t0=c(d1x.t0, d2x.t0, d3y.t0,d4y.t0, dxy.t0))
+    d = simulateBranchLength.multinorm5D(nsim=1,seq1.dist, seq2.dist, seq3.dist,seq4.dist,Q,t0=c(d1x.t0, d2x.t0, d3y.t0,d4y.t0, dxy.t0), verbose=FALSE)
     d1x[nr] = d$t[1]
     d2x[nr] = d$t[2]
     d3y[nr] = d$t[3]
@@ -154,6 +155,7 @@ data$w = exp(my.logw)/sum(exp(my.logw))
 data[data$w>0.01,]
 length(data[data$w>0.01,]$w)
 hist(data$w)
+save(data,file="data5D.Rda")
 
 hist(data$d1x)
 abline(v=d1x0, col="blue")

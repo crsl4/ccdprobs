@@ -677,6 +677,8 @@ fk5D = function(p1,p2,p3,p4,Q,t1,t2,t3,t4,t5){
     S2doublepr = diag(c(S2fn$Sdoublepr))
     S3doublepr = diag(c(S3fn$Sdoublepr))
     S4doublepr = diag(c(S4fn$Sdoublepr))
+    ##print("S4doublepr")
+    ##print(S4doublepr)
     Pxy = matrixExp(Q,t5)
     fk = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
     fk.pr1 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
@@ -690,6 +692,9 @@ fk5D = function(p1,p2,p3,p4,Q,t1,t2,t3,t4,t5){
     fk.doublepr33 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Pxy %*% S3doublepr %*% S4 %*% rep(1,4)
     fk.doublepr44 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Pxy %*% S3 %*% S4doublepr %*% rep(1,4)
     fk.doublepr55 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Q$Q %*% Q$Q %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+
+    ##print("fk.doublepr44")
+    ##print(fk.doublepr44)
 
     fk.doublepr12 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2pr %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
     fk.doublepr13 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% Pxy %*% S3pr %*% S4 %*% rep(1,4)
@@ -706,14 +711,15 @@ fk5D = function(p1,p2,p3,p4,Q,t1,t2,t3,t4,t5){
                   fk_doublepr11= as.numeric(fk.doublepr11),fk_doublepr12= as.numeric(fk.doublepr12),fk_doublepr13= as.numeric(fk.doublepr13),
                   fk_doublepr14= as.numeric(fk.doublepr14),fk_doublepr15= as.numeric(fk.doublepr15),
                   fk_doublepr22= as.numeric(fk.doublepr22),fk_doublepr23= as.numeric(fk.doublepr23),fk_doublepr24= as.numeric(fk.doublepr24),fk_doublepr25= as.numeric(fk.doublepr25),
-                  fk_doublepr33= as.numeric(fk.doublepr33), fk_doublepr34= as.numeric(fk.doublepr34), fk_doublepr35= as.numeric(fk.doublepr35),fk_doublepr45= as.numeric(fk.doublepr45)
+                  fk_doublepr33= as.numeric(fk.doublepr33), fk_doublepr34= as.numeric(fk.doublepr34), fk_doublepr35= as.numeric(fk.doublepr35),
+                  fk_doublepr44= as.numeric(fk.doublepr44),fk_doublepr45= as.numeric(fk.doublepr45),fk_doublepr55= as.numeric(fk.doublepr55)
                   )
             )
 }
 
 ## returns loglik, gradient (vector 5x1), hessian (matrix 5x5)
 ## t = vector 5x1 d1x,d2x,d3y,d4y,dxy
-loglik5D = function(seq1.dist, seq2.dist, seq3.dist,seq4.dist,Q, t){
+loglik5D = function(seq1.dist, seq2.dist, seq3.dist,seq4.dist,Q, t, verbose=FALSE){
     if(ncol(seq1.dist) != ncol(seq2.dist))
         stop("wrong number of sites")
     logl = 0
@@ -761,7 +767,70 @@ loglik5D = function(seq1.dist, seq2.dist, seq3.dist,seq4.dist,Q, t){
         d2ll_45= d2ll_45 + (f$fk*f$fk_doublepr45 - f$fk_pr4*f$fk_pr5)/(f$fk^2)
         d2ll_55= d2ll_55 + (f$fk*f$fk_doublepr55 - f$fk_pr5*f$fk_pr5)/(f$fk^2)
     }
-    return ( list(ll=logl, gradient=c(dll1,dll2,dll3,dll4,dll5), hessian=matrix(c(d2ll_11, d2ll_12, d2ll_13, d2ll_14,d2ll_15,d2ll_12, d2ll_22, d2ll_23, d2ll_24, d2ll_25, d2ll_13, d2ll_23, d2ll_33, d2ll_34, d2ll_35, d2ll_14, d2ll_24, d2ll_34, d2ll_44, d2ll_45, d2ll_15, d2ll_25, d2ll_35, d2ll_45, d2ll_55),ncol=5)) )
+    g = c(dll1,dll2,dll3,dll4,dll5)
+    M = matrix(c(d2ll_11, d2ll_12, d2ll_13, d2ll_14,d2ll_15,
+                      d2ll_12, d2ll_22, d2ll_23, d2ll_24, d2ll_25,
+                      d2ll_13, d2ll_23, d2ll_33, d2ll_34, d2ll_35,
+                      d2ll_14, d2ll_24, d2ll_34, d2ll_44, d2ll_45,
+                      d2ll_15, d2ll_25, d2ll_35, d2ll_45, d2ll_55),ncol=5)
+    if(verbose){
+        print("gradient")
+        print(g)
+        print("vector for hessian")
+        print("1")
+        print(d2ll_11)
+        print("2")
+        print(d2ll_12)
+        print("3")
+        print(d2ll_13)
+        print("4")
+        print(d2ll_14)
+        print("5")
+        print(d2ll_15)
+        print("6")
+        print(d2ll_12)
+        print("7")
+        print(d2ll_22)
+        print("8")
+        print(d2ll_23)
+        print("9")
+        print(d2ll_24)
+        print("10")
+        print(d2ll_25)
+        print("11")
+        print(d2ll_13)
+        print("12")
+        print(d2ll_23)
+        print("13")
+        print(d2ll_33)
+        print("14")
+        print(d2ll_34)
+        print("15")
+        print(d2ll_35)
+        print("16")
+        print(d2ll_14)
+        print("17")
+        print(d2ll_24)
+        print("18")
+        print(d2ll_34)
+        print("19")
+        print(d2ll_44)
+        print("20")
+        print(d2ll_45)
+        print("21")
+        print(d2ll_15)
+        print("22")
+        print(d2ll_25)
+        print("23")
+        print(d2ll_35)
+        print("24")
+        print(d2ll_45)
+        print("25")
+        print(d2ll_55)
+        print("hessian")
+        print(M)
+    }
+    return ( list(ll=logl, gradient=g, hessian=M) )
 }
 
 ## t0= starting point for Newton-Raphson
@@ -776,7 +845,7 @@ findMLE5D = function(seq1.dist, seq2.dist,seq3.dist, seq4.dist, Q, t0=rep(0.1,5)
     while(error > tol & i < Nmax){
         if(verbose)
             print(told)
-        f =loglik5D(seq1.dist, seq2.dist,seq3.dist, seq4.dist,Q, told)
+        f =loglik5D(seq1.dist, seq2.dist,seq3.dist, seq4.dist,Q, told, verbose=verbose)
         gap = solve(f$hessian) %*% f$gradient
         tnew = told - gap
         while(any(tnew<0)){ #avoid negative BL
@@ -802,6 +871,10 @@ findMLE5D = function(seq1.dist, seq2.dist,seq3.dist, seq4.dist, Q, t0=rep(0.1,5)
 simulateBranchLength.multinorm5D = function(nsim,seq1.dist,seq2.dist,seq3.dist, seq4.dist, Q, t0, verbose=FALSE){
     mu = findMLE5D(seq1.dist, seq2.dist,seq3.dist, seq4.dist,Q, t0, verbose=verbose)
     Sigma = solve(mu$obsInfo)
+    if(verbose){
+        print(mu$t)
+        print(Sigma)
+    }
     w = rmvnorm(nsim, mu$t, -Sigma)
     return ( list(t=w, mu=mu$t, sigma=-Sigma) )
 }
