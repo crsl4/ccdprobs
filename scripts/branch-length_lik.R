@@ -537,6 +537,9 @@ simulateBranchLength.multinorm = function(nsim,seq1.dist,seq2.dist, seq3.dist, Q
     return ( list(t=w, mu=mu$t, sigma=-Sigma) )
 }
 
+## ----------------------------------------------------
+## 2D conditional likelihood
+
 ## p1 = P(A1|x1), column vector of size 4
 ## p2 = P(A2|x2), column vector of size 4
 ## p3 = P(A3|x3), column vector of size 4
@@ -639,6 +642,165 @@ findMLE2D = function(seqx.dist, seq3.dist, seq4.dist, Q, d3x, t0=c(0.1,0.1), tol
 ## need the sum (d3x) as input
 simulateBranchLength.conditionalMultinorm = function(nsim,seqx.dist,seq3.dist, seq4.dist, Q, t0, d3x,verbose=FALSE){
     mu = findMLE2D(seqx.dist, seq3.dist, seq4.dist,Q, d3x, t0, verbose=verbose)
+    Sigma = solve(mu$obsInfo)
+    w = rmvnorm(nsim, mu$t, -Sigma)
+    return ( list(t=w, mu=mu$t, sigma=-Sigma) )
+}
+
+
+## ------------------------------------------------------------
+## 5D likelihood
+
+## p1 = P(A1|x1), column vector of size 4
+## p2 = P(A2|x2), column vector of size 4
+## p3 = P(A3|y3), column vector of size 4
+## p4 = P(A4|y4), column vector of size 4
+## order of bl: d1x,d2x,d3y,d4y,dxy
+## returns fk, fk_prime1, fk_prime2, fk_prime3, fk_prime4,fk_prime5,
+## fk_doubleprime11, fk_doubleprime12, fk_doubleprime13, fk_doubleprime22,
+## fk_doubleprime23, fk_doubleprime33
+## fixit: matrix multiplication can be more efficient with eigenvector decomp
+fk5D = function(p1,p2,p3,p4,Q,t1,t2,t3,t4,t5){
+    S1fn = Sfn(t1,p1,Q)
+    S2fn = Sfn(t2,p2,Q)
+    S3fn = Sfn(t3,p3,Q)
+    S4fn = Sfn(t4,p4,Q)
+    S1=diag(c(S1fn$S))
+    S2=diag(c(S2fn$S))
+    S3=diag(c(S3fn$S))
+    S4=diag(c(S4fn$S))
+    S1pr = diag(c(S1fn$Spr))
+    S2pr = diag(c(S2fn$Spr))
+    S3pr = diag(c(S3fn$Spr))
+    S4pr = diag(c(S4fn$Spr))
+    S1doublepr = diag(c(S1fn$Sdoublepr))
+    S2doublepr = diag(c(S2fn$Sdoublepr))
+    S3doublepr = diag(c(S3fn$Sdoublepr))
+    S4doublepr = diag(c(S4fn$Sdoublepr))
+    Pxy = matrixExp(Q,t5)
+    fk = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+    fk.pr1 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+    fk.pr2 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2pr %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+    fk.pr3 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Pxy %*% S3pr %*% S4 %*% rep(1,4)
+    fk.pr4 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Pxy %*% S3 %*% S4pr %*% rep(1,4)
+    fk.pr5 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Q$Q %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+
+    fk.doublepr11 = rep(1,4) %*% diag(Q$p) %*% S1doublepr %*% S2 %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+    fk.doublepr22 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2doublepr %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+    fk.doublepr33 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Pxy %*% S3doublepr %*% S4 %*% rep(1,4)
+    fk.doublepr44 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Pxy %*% S3 %*% S4doublepr %*% rep(1,4)
+    fk.doublepr55 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Q$Q %*% Q$Q %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+
+    fk.doublepr12 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2pr %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+    fk.doublepr13 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% Pxy %*% S3pr %*% S4 %*% rep(1,4)
+    fk.doublepr14 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% Pxy %*% S3 %*% S4pr %*% rep(1,4)
+    fk.doublepr15 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% Q$Q %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+    fk.doublepr23 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2pr %*% Pxy %*% S3pr %*% S4 %*% rep(1,4)
+    fk.doublepr24 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2pr %*% Pxy %*% S3 %*% S4pr %*% rep(1,4)
+    fk.doublepr25 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2pr %*% Q$Q %*% Pxy %*% S3 %*% S4 %*% rep(1,4)
+    fk.doublepr34 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Pxy %*% S3pr %*% S4pr %*% rep(1,4)
+    fk.doublepr35 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Q$Q %*% Pxy %*% S3pr %*% S4 %*% rep(1,4)
+    fk.doublepr45 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% Q$Q %*% Pxy %*% S3 %*% S4pr %*% rep(1,4)
+
+    return ( list(fk=as.numeric(fk), fk_pr1=as.numeric(fk.pr1),fk_pr2=as.numeric(fk.pr2),fk_pr3=as.numeric(fk.pr3), fk_pr4=as.numeric(fk.pr4), fk_pr5=as.numeric(fk.pr5),
+                  fk_doublepr11= as.numeric(fk.doublepr11),fk_doublepr12= as.numeric(fk.doublepr12),fk_doublepr13= as.numeric(fk.doublepr13),
+                  fk_doublepr14= as.numeric(fk.doublepr14),fk_doublepr15= as.numeric(fk.doublepr15),
+                  fk_doublepr22= as.numeric(fk.doublepr22),fk_doublepr23= as.numeric(fk.doublepr23),fk_doublepr24= as.numeric(fk.doublepr24),fk_doublepr25= as.numeric(fk.doublepr25),
+                  fk_doublepr33= as.numeric(fk.doublepr33), fk_doublepr34= as.numeric(fk.doublepr34), fk_doublepr35= as.numeric(fk.doublepr35),fk_doublepr45= as.numeric(fk.doublepr45)
+                  )
+            )
+}
+
+## returns loglik, gradient (vector 5x1), hessian (matrix 5x5)
+## t = vector 5x1 d1x,d2x,d3y,d4y,dxy
+loglik5D = function(seq1.dist, seq2.dist, seq3.dist,seq4.dist,Q, t){
+    if(ncol(seq1.dist) != ncol(seq2.dist))
+        stop("wrong number of sites")
+    logl = 0
+    dll1 = 0
+    dll2 = 0
+    dll3 = 0
+    dll4 = 0
+    dll5 = 0
+    d2ll_11 = 0
+    d2ll_12 = 0
+    d2ll_13 = 0
+    d2ll_14 = 0
+    d2ll_15 = 0
+    d2ll_22 = 0
+    d2ll_23 = 0
+    d2ll_24 = 0
+    d2ll_25 = 0
+    d2ll_33 = 0
+    d2ll_34 = 0
+    d2ll_35 = 0
+    d2ll_44 = 0
+    d2ll_45 = 0
+    d2ll_55 = 0
+    for(i in 1:ncol(seq1.dist)){
+        f = fk5D(seq1.dist[,i],seq2.dist[,i],seq3.dist[,i],seq4.dist[,i],Q,t[1],t[2],t[3],t[4],t[5])
+        logl = logl + log(f$fk)
+        dll1 = dll1 + f$fk_pr1/f$fk
+        dll2 = dll2 + f$fk_pr2/f$fk
+        dll3 = dll3 + f$fk_pr3/f$fk
+        dll4 = dll4 + f$fk_pr4/f$fk
+        dll5 = dll5 + f$fk_pr5/f$fk
+        d2ll_11= d2ll_11 + (f$fk*f$fk_doublepr11 - f$fk_pr1*f$fk_pr1)/(f$fk^2)
+        d2ll_12= d2ll_12 + (f$fk*f$fk_doublepr12 - f$fk_pr1*f$fk_pr2)/(f$fk^2)
+        d2ll_13= d2ll_13 + (f$fk*f$fk_doublepr13 - f$fk_pr1*f$fk_pr3)/(f$fk^2)
+        d2ll_14= d2ll_14 + (f$fk*f$fk_doublepr14 - f$fk_pr1*f$fk_pr4)/(f$fk^2)
+        d2ll_15= d2ll_15 + (f$fk*f$fk_doublepr15 - f$fk_pr1*f$fk_pr5)/(f$fk^2)
+        d2ll_22= d2ll_22 + (f$fk*f$fk_doublepr22 - f$fk_pr2*f$fk_pr2)/(f$fk^2)
+        d2ll_23= d2ll_23 + (f$fk*f$fk_doublepr23 - f$fk_pr2*f$fk_pr3)/(f$fk^2)
+        d2ll_24= d2ll_24 + (f$fk*f$fk_doublepr24 - f$fk_pr2*f$fk_pr4)/(f$fk^2)
+        d2ll_25= d2ll_25 + (f$fk*f$fk_doublepr25 - f$fk_pr2*f$fk_pr5)/(f$fk^2)
+        d2ll_33= d2ll_33 + (f$fk*f$fk_doublepr33 - f$fk_pr3*f$fk_pr3)/(f$fk^2)
+        d2ll_34= d2ll_34 + (f$fk*f$fk_doublepr34 - f$fk_pr3*f$fk_pr4)/(f$fk^2)
+        d2ll_35= d2ll_35 + (f$fk*f$fk_doublepr35 - f$fk_pr3*f$fk_pr5)/(f$fk^2)
+        d2ll_44= d2ll_44 + (f$fk*f$fk_doublepr44 - f$fk_pr4*f$fk_pr4)/(f$fk^2)
+        d2ll_45= d2ll_45 + (f$fk*f$fk_doublepr45 - f$fk_pr4*f$fk_pr5)/(f$fk^2)
+        d2ll_55= d2ll_55 + (f$fk*f$fk_doublepr55 - f$fk_pr5*f$fk_pr5)/(f$fk^2)
+    }
+    return ( list(ll=logl, gradient=c(dll1,dll2,dll3,dll4,dll5), hessian=matrix(c(d2ll_11, d2ll_12, d2ll_13, d2ll_14,d2ll_15,d2ll_12, d2ll_22, d2ll_23, d2ll_24, d2ll_25, d2ll_13, d2ll_23, d2ll_33, d2ll_34, d2ll_35, d2ll_14, d2ll_24, d2ll_34, d2ll_44, d2ll_45, d2ll_15, d2ll_25, d2ll_35, d2ll_45, d2ll_55),ncol=5)) )
+}
+
+## t0= starting point for Newton-Raphson
+## fixit: jumps could be farther from root, but no way to fix this in 3D (bret gave idea, need to code it)
+findMLE5D = function(seq1.dist, seq2.dist,seq3.dist, seq4.dist, Q, t0=rep(0.1,5), tol=0.0001, Nmax=10000, verbose=FALSE){
+    if(verbose)
+        print("entering findMLE...")
+    tnew = rep(0,5) # will not save all sequence
+    told = t0 ## fixit: later do a binary search before choosing t0
+    error = 1
+    i = 1
+    while(error > tol & i < Nmax){
+        if(verbose)
+            print(told)
+        f =loglik5D(seq1.dist, seq2.dist,seq3.dist, seq4.dist,Q, told)
+        gap = solve(f$hessian) %*% f$gradient
+        tnew = told - gap
+        while(any(tnew<0)){ #avoid negative BL
+            gap = gap/2
+            if(verbose)
+                print("found negative candidate tnew")
+            tnew = told - gap
+        }
+        ## after finding a positive candidate:
+        f2 =loglik5D(seq1.dist, seq2.dist,seq3.dist, seq4.dist, Q, tnew)
+        error = max(abs(tnew-told))
+        if(verbose)
+            print(error)
+        i = i+1
+        told = tnew
+    }
+    if(i>=Nmax)
+        warning("Newton-Rapshon did not converge")
+    return ( list(t=tnew, obsInfo=f2$hessian) )
+}
+
+## simulates d1x,d2x,d3y,d4y,dxy jointly
+simulateBranchLength.multinorm5D = function(nsim,seq1.dist,seq2.dist,seq3.dist, seq4.dist, Q, t0, verbose=FALSE){
+    mu = findMLE5D(seq1.dist, seq2.dist,seq3.dist, seq4.dist,Q, t0, verbose=verbose)
     Sigma = solve(mu$obsInfo)
     w = rmvnorm(nsim, mu$t, -Sigma)
     return ( list(t=w, mu=mu$t, sigma=-Sigma) )

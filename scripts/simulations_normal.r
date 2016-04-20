@@ -13,6 +13,171 @@ library(mvtnorm)
 
 ## ------------------
 ## Case (1,2)---(3,4)
+## Simulating (d1x,d2x,dxy,dey,d4y) jointly
+who="(1,2)---(3,4)"
+## d1x0=0.11
+## d2x0=0.078
+## dxy0 = 0.03
+## d3y0 = 0.091
+## d4y0 = 0.098
+d1x0=0.1
+d2x0=0.1
+dxy0 = 0.1
+d3y0 = 0.1
+d4y0 = 0.1
+eta = 0.5
+nsites=1500
+nuc <- c('a','c','g','t')
+Q = randomQ(4,rescale=TRUE)
+r=Q$r
+p=Q$p
+## simulate seqx
+seqx = sample(nuc,size=nsites,prob=Q$p,replace=TRUE)
+
+## simulate seq1
+P = matrixExp(Q,d1x0)
+seq1 = numeric(nsites)
+for ( i in 1:nsites )
+    seq1[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+## simulate seq2
+P = matrixExp(Q,d2x0)
+seq2 = numeric(nsites)
+for ( i in 1:nsites )
+    seq2[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+
+## simulate seqy
+P = matrixExp(Q,dxy0)
+seqy = numeric(nsites)
+for ( i in 1:nsites )
+    seqy[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+
+## simulate seq3
+P = matrixExp(Q,d3y0)
+seq3 = numeric(nsites)
+for ( i in 1:nsites )
+    seq3[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+## simulate seq4
+P = matrixExp(Q,d4y0)
+seq4 = numeric(nsites)
+for ( i in 1:nsites )
+    seq4[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+
+
+seq1.dist = seqMatrix(seq1)
+seq2.dist = seqMatrix(seq2)
+seq3.dist = seqMatrix(seq3)
+seq4.dist = seqMatrix(seq4)
+
+## gamma density
+out12 = countsMatrix(seq1,seq2)
+out13 = countsMatrix(seq1,seq3)
+out14 = countsMatrix(seq1,seq4)
+out23 = countsMatrix(seq2,seq3)
+out24 = countsMatrix(seq2,seq4)
+out34 = countsMatrix(seq3,seq4)
+
+nreps = 1000
+logwv = rep(0,nreps)
+logl = rep(0,nreps)
+logdens = rep(0,nreps)
+d1x=rep(0,nreps)
+d2x=rep(0,nreps)
+d3y=rep(0,nreps)
+d4y=rep(0,nreps)
+dxy=rep(0,nreps)
+
+for(nr in 1:nreps){
+    print(nr)
+    ## starting point BioNJ:
+    jc12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
+    jc13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
+    jc14 = simulateBranchLength.jc(nsim=1,out14,eta=eta)
+    jc23 = simulateBranchLength.jc(nsim=1,out23,eta=eta)
+    jc24 = simulateBranchLength.jc(nsim=1,out24,eta=eta)
+    jc34 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
+    t.lik12 = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=jc12$t,eta=eta)
+    t.lik13 = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=jc13$t,eta=eta)
+    t.lik14 = simulateBranchLength.lik(nsim=1, seq1.dist,seq4.dist,Q,t0=jc14$t,eta=eta)
+    t.lik23 = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=jc23$t,eta=eta)
+    t.lik24 = simulateBranchLength.lik(nsim=1, seq2.dist,seq4.dist,Q,t0=jc24$t,eta=eta)
+    t.lik34 = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=jc34$t,eta=eta)
+    d12 = t.lik12$t
+    d13 = t.lik13$t
+    d14 = t.lik14$t
+    d23 = t.lik23$t
+    d24 = t.lik24$t
+    d34 = t.lik34$t
+    v12 = d12
+    v13 = d13
+    v14 = d14
+    v23 = d23
+    v24 = d24
+    v34 = d34
+    s1 = d12+d13+d14
+    s2 = d12+d23+d24
+    d1x.t0 = (d12+1/2*(s1-s2))/2
+    d2x.t0 = (d12+1/2*(s2-s1))/2
+    lambda = 0.5 + ((v23-v13)+(v24-v14))/(2*2*v12)
+    d3x = (lambda*d13+(1-lambda)*d23-lambda*d1x.t0-(1-lambda)*d2x.t0)
+    d4x = (lambda*d14+(1-lambda)*d24-lambda*d1x.t0-(1-lambda)*d2x.t0)
+    d3y.t0 = (d34+d3x-d4x)/2
+    d4y.t0 = (d34+d4x-d3x)/2
+    dxy.t0 = (d3x+d4x-d34)/2
+
+    d = simulateBranchLength.multinorm5D(nsim=1,seq1.dist, seq2.dist, seq3.dist,seq4.dist,Q,t0=c(d1x.t0, d2x.t0, d3y.t0,d4y.t0, dxy.t0))
+    d1x[nr] = d$t[1]
+    d2x[nr] = d$t[2]
+    d3y[nr] = d$t[3]
+    d4y[nr] = d$t[4]
+    dxy[nr] = d$t[5]
+
+    if(d1x[nr]<0 || d2x[nr]<0 || d3y[nr]<0 || dxy[nr]<0 || d4y[nr]<0){
+        print("negative bl")
+    } else{
+        print("all positive")
+        print(paste(d1x[nr],d2x[nr], dxy[nr], d3y[nr], d4y[nr]))
+        logl[nr] = gtr.log.lik.all(d1x[nr],d2x[nr],dxy[nr],d3y[nr],d4y[nr],seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
+        logdens[nr] = log(dmvnorm(d$t,mean=d$mu, sigma=d$sigma))
+        logprior = logPriorExpDist(d1x[nr], d2x[nr], d3y[nr], d4y[nr], dxy[nr], m=0.1)
+        logwv[nr] = logprior + logl[nr] - logdens[nr]
+    }
+}
+
+data = data.frame(d1x,d2x,d3y,d4y,dxy,logwv, logl, logdens)
+head(data)
+summary(data)
+data[data$logwv==0,]
+length(data[data$logwv==0,]$logwv)
+data <- subset(data,logwv!=0)
+my.logw = data$logwv - mean(data$logwv)
+data$w = exp(my.logw)/sum(exp(my.logw))
+data[data$w>0.01,]
+length(data[data$w>0.01,]$w)
+hist(data$w)
+
+hist(data$d1x)
+abline(v=d1x0, col="blue")
+hist(data$d2x)
+abline(v=d2x0, col="red")
+hist(data$dxy)
+abline(v=dxy0, col="green")
+hist(data$d3y)
+abline(v=d3y0, col="green")
+hist(data$d4y)
+abline(v=d4y0, col="green")
+
+
+## ------------------
+## Case (1,2)---(3,4)
+## Simulating (d1x,d2x,d3x) and then (dxy,d3y,d4y)|d3y+dxy=d3x
+## First: using known seqx.dist
+## WEIGHTS: do not work well (~8/1000), still need to rule out
+## computation error
+## also, need to try with estimated seqx
+## BRANCHES: very bad, histograms not centered on true values
+## Second: using seqx.dist=P(1,2|x)
+## WEIGHTS: do not work (~11/1000)
+## BRANCHES: very bad, histograms not centered on true values
 who="(1,2)---(3,4)"
 ## d1x0=0.11
 ## d2x0=0.078
@@ -68,16 +233,16 @@ seq3.dist = seqMatrix(seq3)
 seq4.dist = seqMatrix(seq4)
 
 ## first, let's use the true seqx
-seqx.dist = seqMatrix(seqx)
+## seqx.dist = seqMatrix(seqx)
+## outx3 = countsMatrix(seqx,seq3)
+## outx4 = countsMatrix(seqx,seq4)
+
 
 ## gamma density
 out12 = countsMatrix(seq1,seq2)
 out13 = countsMatrix(seq1,seq3)
 out23 = countsMatrix(seq2,seq3)
 out34 = countsMatrix(seq3,seq4)
-
-outx3 = countsMatrix(seqx,seq3)
-outx4 = countsMatrix(seqx,seq4)
 
 nreps = 1000
 logwv = rep(0,nreps)
@@ -110,12 +275,14 @@ for(nr in 1:nreps){
     d2x[nr] = d$t[2]
     d3x = d$t[3]
 
-    jcx3 = simulateBranchLength.jc(nsim=1,outx3,eta=eta)
-    jcx4 = simulateBranchLength.jc(nsim=1,outx4,eta=eta)
+    seqx.dist = sequenceDist(d1x[nr], d2x[nr] ,seq1.dist, seq2.dist, Q)
+
+    jcx3 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
+    jcx4 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
     jc34 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
-    t.likx3 = simulateBranchLength.norm(nsim=1, seqx.dist,seq3.dist,Q,t0=jc12$t,eta=eta)
-    t.likx4 = simulateBranchLength.norm(nsim=1, seqx.dist,seq4.dist,Q,t0=jc13$t,eta=eta)
-    t.lik34 = simulateBranchLength.norm(nsim=1, seq3.dist,seq4.dist,Q,t0=jc23$t,eta=eta)
+    t.likx3 = simulateBranchLength.norm(nsim=1, seqx.dist,seq3.dist,Q,t0=jcx3$t,eta=eta)
+    t.likx4 = simulateBranchLength.norm(nsim=1, seqx.dist,seq4.dist,Q,t0=jcx4$t,eta=eta)
+    t.lik34 = simulateBranchLength.norm(nsim=1, seq3.dist,seq4.dist,Q,t0=jc34$t,eta=eta)
     d3x = t.likx3$t
     d4x = t.likx4$t
     d34 = t.lik34$t
@@ -294,19 +461,31 @@ plot(1:length(data$w.nj),cumsum(rev(data$w.nj)))
 plot(1:length(data$w.mn),cumsum(rev(data$w.mn)))
 save(data,file="data_njVSmn.Rda")
 
-m.1x=weighted.mean(data$d1x,data$w)
-m2.1x=weighted.mean(data$d1x^2,data$w)
+m.1x=weighted.mean(data$d1x.mn,data$w.mn)
+m2.1x=weighted.mean(data$d1x.mn^2,data$w.mn)
 v.1x=m2.1x-m.1x^2
 m.1x
 m.1x-2*sqrt(v.1x)
 m.1x+2*sqrt(v.1x)
 d1x0
-weighted.quantile(data$d1x,data$w,probs=0.025)
-weighted.quantile(data$d1x,data$w,probs=0.975)
-plot(data$d1x,data$w, main="red=true, blue=weighted mean")
+weighted.quantile(data$d1x.mn,data$w.mn,probs=0.025)
+weighted.quantile(data$d1x.mn,data$w.mn,probs=0.975)
+plot(data$d1x.mn,data$w.mn, main="MN red=true, blue=weighted mean")
 abline(v=d1x0, col="red")
 abline(v=m.1x,col="blue")
 
+m.1x=weighted.mean(data$d1x.nj,data$w.nj)
+m2.1x=weighted.mean(data$d1x.nj^2,data$w.nj)
+v.1x=m2.1x-m.1x^2
+m.1x
+m.1x-2*sqrt(v.1x)
+m.1x+2*sqrt(v.1x)
+d1x0
+weighted.quantile(data$d1x.nj,data$w.nj,probs=0.025)
+weighted.quantile(data$d1x.nj,data$w.nj,probs=0.975)
+plot(data$d1x.nj,data$w.nj, main="NJ red=true, blue=weighted mean")
+abline(v=d1x0, col="red")
+abline(v=m.1x,col="blue")
 
 m.2x=weighted.mean(data$d2x,data$w)
 m2.2x=weighted.mean(data$d2x^2,data$w)
@@ -337,15 +516,19 @@ abline(v=m.3x,col="blue")
 
 
 ## weighted histograms
-wtd.hist(data$d1x,weight=data$w)
+wtd.hist(data$d1x.mn,weight=data$w.mn)
 abline(v=d1x0, col="red")
 abline(v=m.1x,col="blue")
 
-wtd.hist(data$d2x,weight=data$w)
+wtd.hist(data$d1x.nj,weight=data$w.nj)
+abline(v=d1x0, col="red")
+abline(v=m.1x,col="blue")
+
+wtd.hist(data$d2x.mn,weight=data$w)
 abline(v=d2x0, col="red")
 abline(v=m.2x,col="blue")
 
-wtd.hist(data$d3x,weight=data$w)
+wtd.hist(data$d3x.mn,weight=data$w)
 abline(v=d3x0, col="red")
 abline(v=m.3x,col="blue")
 
