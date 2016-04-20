@@ -338,11 +338,8 @@ abline(v=d4y0, col="green")
 ## Since the case (1,2)--3 is well behaved, we expect the lik covariance
 ## to be well captured by the covariance from NJ formulas
 ## after checking gamma vs normal:
-## first we want MLE and Info but jointly
-## then we simulate jointly d1x,d2x,d3x, and everything stays the same
-## keep the matrices to compare, and keep the other procedure to compare also:
-## compare weights and covariance matrices
 ## WEIGHTS: they behave nice in both, but they look nicer in multinormal case
+## COV: both matrices are similar, in that all out of diagonal elements have the same size compared to the diagonal0
 who="Case (1,2)---3"
 d1x0=0.1
 d2x0=0.1
@@ -391,6 +388,8 @@ logwv.mn = rep(0,nreps)
 d1x.mn = rep(0,nreps)
 d2x.mn = rep(0,nreps)
 d3x.mn = rep(0,nreps)
+mat.nj <- c()
+mat.mn <- c()
 
 for(nr in 1:nreps){
     print(nr)
@@ -409,11 +408,20 @@ for(nr in 1:nreps){
     d1x.nj[nr] = (d12+d13-d23)/2
     d2x.nj[nr] = (d12+d23-d13)/2
     d3x.nj[nr] = (d13+d23-d12)/2
+    v1x = 0.25*(t.lik12$sigma^2+t.lik13$sigma^2+t.lik23$sigma^2)
+    v2x = 0.25*(t.lik12$sigma^2+t.lik13$sigma^2+t.lik23$sigma^2)
+    v3x = 0.25*(t.lik12$sigma^2+t.lik13$sigma^2+t.lik23$sigma^2)
+    v1x2x = 0.25*(t.lik12$sigma^2-t.lik13$sigma^2-t.lik23$sigma^2)
+    v1x3x = 0.25*(-t.lik12$sigma^2+t.lik13$sigma^2-t.lik23$sigma^2)
+    v2x3x = 0.25*(-t.lik12$sigma^2-t.lik13$sigma^2+t.lik23$sigma^2)
+
+    mat.nj[[nr]] <- matrix(c(v1x,v1x2x,v1x3x,v1x2x,v2x,v2x3x,v1x3x,v2x3x,v3x),ncol=3)
 
     d = simulateBranchLength.multinorm(nsim=1,seq1.dist, seq2.dist, seq3.dist,Q,t0=c(d1x.nj[nr], d2x.nj[nr], d3x.nj[nr]))
     d1x.mn[nr] = d$t[1]
     d2x.mn[nr] = d$t[2]
     d3x.mn[nr] = d$t[3]
+    mat.mn[[nr]] <- d$sigma
 
 
     if(d1x.nj[nr]<0 || d2x.nj[nr]<0 || d3x.nj[nr]<0){
@@ -460,6 +468,12 @@ hist(data$w.mn)
 plot(1:length(data$w.nj),cumsum(rev(data$w.nj)))
 plot(1:length(data$w.mn),cumsum(rev(data$w.mn)))
 save(data,file="data_njVSmn.Rda")
+save(mat.mn,mat.nj,file="matrices_njVSmn.Rda")
+
+i = 11
+mat.mn[[i]]/max(mat.mn[[i]])
+mat.nj[[i]]/max(mat.nj[[i]])
+## all out of diagonal are similar size
 
 m.1x=weighted.mean(data$d1x.mn,data$w.mn)
 m2.1x=weighted.mean(data$d1x.mn^2,data$w.mn)
