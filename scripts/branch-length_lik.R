@@ -542,7 +542,6 @@ simulateBranchLength.multinorm = function(nsim,seq1.dist,seq2.dist, seq3.dist, Q
 
 ## p1 = P(A1|x1), column vector of size 4
 ## p2 = P(A2|x2), column vector of size 4
-## p3 = P(A3|x3), column vector of size 4
 ## input t1,t2 and sum t1+t3=s13
 ## returns fk, fk_prime1, fk_prime2, fk_prime3,
 ## fk_doubleprime11, fk_doubleprime12, fk_doubleprime13, fk_doubleprime22,

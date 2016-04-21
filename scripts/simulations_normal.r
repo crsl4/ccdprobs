@@ -16,6 +16,10 @@ library(mvtnorm)
 ## ------------------
 ## Case (1,2)---(3,4)
 ## Simulating (d1x,d2x,dxy,d3y,d4y) jointly
+## WEIGHTS: joint > nj > cond
+## BRANCHES: nj are better centered around true values, but recall that the true likelihood was slightly shifted for 1500 sites
+## and we want to match the likelihood. cond are very off.
+## COV: cond cov matrix is very off, the variances in the diagonal should be similar, but they are not, and it has many zeros
 who="(1,2)---(3,4)"
 ## d1x0=0.11
 ## d2x0=0.078
@@ -163,7 +167,7 @@ for(nr in 1:nreps){
     } else{
         print("all positive")
         ##print(paste(d1x[nr],d2x[nr], dxy[nr], d3y[nr], d4y[nr]))
-        logl.joint[nr] = gtr.log.lik.all(d1x.joint[nr],d2x.joint[nr],dx.jointy[nr],d3y.joint[nr],d4y.joint[nr],seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
+        logl.joint[nr] = gtr.log.lik.all(d1x.joint[nr],d2x.joint[nr],dxy.joint[nr],d3y.joint[nr],d4y.joint[nr],seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
         logdens.joint[nr] = log(dmvnorm(d$t,mean=d$mu, sigma=d$sigma))
         logprior = logPriorExpDist(d1x.joint[nr], d2x.joint[nr], d3y.joint[nr], d4y.joint[nr], dxy.joint[nr], m=0.1)
         logwv.joint[nr] = logprior + logl.joint[nr] - logdens.joint[nr]
@@ -208,7 +212,12 @@ for(nr in 1:nreps){
     dxy.cond[nr] = d2$t[1]
     d4y.cond[nr] = d2$t[2]
     d3y.cond[nr] = d3x.cond - dxy.cond[nr]
-    mat.cond[[nr]]=## fixit, need to add here
+    mat.cond[[nr]]= matrix(c(d$sigma[1,1], d$sigma[1,2], d$sigma[1,3],0,0,
+                d$sigma[1,2], d$sigma[2,2], d$sigma[2,3],0,0,
+                d$sigma[1,3], d$sigma[2,3], d$sigma[3,3]+d2$sigma[1,1],(-1)*d2$sigma[2,1], (-1)*d2$sigma[1,1],
+                0,0,(-1)*d2$sigma[2,1], d2$sigma[2,2], d2$sigma[1,2],
+                0,0,(-1)*d2$sigma[1,1], d2$sigma[2,1], d2$sigma[1,1]),
+                ncol=5)
 
     if(d1x.cond[nr]<0 || d2x.cond[nr]<0 || d3y.cond[nr]<0 || dxy.cond[nr]<0 || d4y.cond[nr]<0){
         print("negative bl")
@@ -247,7 +256,10 @@ for(nr in 1:nreps){
     dxy.nj[nr] = (d14-d34-d12+d23)/2
     d3y.nj[nr] = (d13-d14+d34)/2
     d4y.nj[nr] = (d14-d13+d34)/2
-    mat.nj[[nr]]=## fixit!! add here
+    A = matrix(c(1/2,1/2,-1/2,0,0,1/2,-1/2,0,1/2,-1/2,-1/2,1/2,1/2,0,0,0,0,1/2,-1/2,1/2,0,0,-1/2,1/2,1/2),ncol=5)
+    S = diag(c(t.lik12$sigma^2, t.lik13$sigma^2, t.lik23$sigma^2, t.lik14$sigma^2, t.lik34$sigma^2))
+    mat.nj[[nr]] = A %*% S %*% t(A)
+
 
     if(d1x.nj[nr]<0 || d2x.nj[nr]<0 || d3y.nj[nr]<0 || d4y.nj[nr]<0 || dxy.nj[nr]<0){
         print("negative bl")
@@ -269,18 +281,47 @@ summary(data)
 my.logw.joint = data$logwv.joint - mean(data$logwv.joint)
 data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
 data[data$w.joint>0.01,]
-length(data[data$w.joint>0.01,]$w)
+length(data[data$w.joint>0.01,]$w.joint)
 hist(data$w.joint)
 my.logw.cond = data$logwv.cond - mean(data$logwv.cond)
 data$w.cond = exp(my.logw.cond)/sum(exp(my.logw.cond))
 data[data$w.cond>0.01,]
-length(data[data$w.cond>0.01,]$w)
+length(data[data$w.cond>0.01,]$w.cond)
 hist(data$w.cond)
 my.logw.nj = data$logwv.nj - mean(data$logwv.nj)
 data$w.nj = exp(my.logw.nj)/sum(exp(my.logw.nj))
 data[data$w.nj>0.01,]
-length(data[data$w.nj>0.01,]$w)
+length(data[data$w.nj>0.01,]$w.nj)
 hist(data$w.nj)
+
+save(data,file="data_5DcondNJ.Rda")
+save(mat.joint,mat.cond,mat.nj,file="mat_5DcondNJ.Rda")
+
+mat.joint[[1]]/max(mat.joint[[1]])
+mat.cond[[1]]/max(mat.cond[[1]])
+mat.nj[[1]]/max(mat.nj[[1]])
+
+hist(d1x.joint)
+abline(v=d1x0,col="red")
+hist(d1x.cond)
+abline(v=d1x0,col="red")
+hist(d1x.nj)
+abline(v=d1x0,col="red")
+
+hist(dxy.joint)
+abline(v=dxy0,col="red")
+hist(dxy.cond)
+abline(v=dxy0,col="red")
+hist(dxy.nj)
+abline(v=dxy0,col="red")
+
+hist(d3y.joint)
+abline(v=d3y0,col="red")
+hist(d3y.cond)
+abline(v=d3y0,col="red")
+hist(d3y.nj)
+abline(v=d3y0,col="red")
+
 
 
 ## ------------------
