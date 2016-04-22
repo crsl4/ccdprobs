@@ -591,7 +591,7 @@ loglik2D = function(seqx.dist, seq3.dist, seq4.dist,Q, t, d3x){
     d2ll_12 = 0
     d2ll_22 = 0
     for(i in 1:ncol(seqx.dist)){
-        f = fk3D(seqx.dist[,i],seq4.dist[,i],seq3.dist[,i],Q,t[1],t[2],d3x) ## t1=dxy, t2=d4y, t3=d3y
+        f = fk2D(seqx.dist[,i],seq4.dist[,i],seq3.dist[,i],Q,t[1],t[2],d3x) ## t1=dxy, t2=d4y, t3=d3y
         logl = logl + log(f$fk)
         dll1 = dll1 + (f$fk_pr1+f$fk_pr3)/f$fk
         dll2 = dll2 + f$fk_pr2/f$fk

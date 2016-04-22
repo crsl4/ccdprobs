@@ -16,10 +16,13 @@ library(mvtnorm)
 ## ------------------
 ## Case (1,2)---(3,4)
 ## Simulating (d1x,d2x,dxy,d3y,d4y) jointly
-## WEIGHTS: joint > nj > cond
-## BRANCHES: nj are better centered around true values, but recall that the true likelihood was slightly shifted for 1500 sites
+## WEIGHTS: joint >> nj >> cond
+## actually, nj not bad at all
+## BRANCHES: nj are better centered around true values, but recall that
+## the true likelihood was slightly shifted for 1500 sites
 ## and we want to match the likelihood. cond are very off.
-## COV: cond cov matrix is very off, the variances in the diagonal should be similar, but they are not, and it has many zeros
+## COV: cond cov matrix is very off, the variances in the diagonal
+## should be similar, but they are not, and it has many zeros
 who="(1,2)---(3,4)"
 ## d1x0=0.11
 ## d2x0=0.078
@@ -82,7 +85,7 @@ out23 = countsMatrix(seq2,seq3)
 out24 = countsMatrix(seq2,seq4)
 out34 = countsMatrix(seq3,seq4)
 
-nreps = 1000
+nreps = 100
 
 logwv.joint = rep(0,nreps)
 logl.joint = rep(0,nreps)
@@ -93,6 +96,7 @@ d3y.joint=rep(0,nreps)
 d4y.joint=rep(0,nreps)
 dxy.joint=rep(0,nreps)
 mat.joint <- c()
+mean.joint <- c()
 
 logwv.cond = rep(0,nreps)
 logl.cond = rep(0,nreps)
@@ -103,6 +107,8 @@ d3y.cond=rep(0,nreps)
 d4y.cond=rep(0,nreps)
 dxy.cond=rep(0,nreps)
 mat.cond <- c()
+mean1.cond <- c()
+mean2.cond <- c()
 
 logwv.nj = rep(0,nreps)
 logl.nj = rep(0,nreps)
@@ -161,6 +167,7 @@ for(nr in 1:nreps){
     d4y.joint[nr] = d$t[4]
     dxy.joint[nr] = d$t[5]
     mat.joint[[nr]] = d$sigma
+    mean.joint[[nr]] = d$mu
 
     if(d1x.joint[nr]<0 || d2x.joint[nr]<0 || d3y.joint[nr]<0 || dxy.joint[nr]<0 || d4y.joint[nr]<0){
         print("negative bl")
@@ -192,6 +199,7 @@ for(nr in 1:nreps){
     d1x.cond[nr] = d$t[1]
     d2x.cond[nr] = d$t[2]
     d3x.cond = d$t[3]
+    mean1.cond[[nr]] = d$mu
 
     seqx.dist = sequenceDist(d1x.cond[nr], d2x.cond[nr] ,seq1.dist, seq2.dist, Q)
 
@@ -218,6 +226,7 @@ for(nr in 1:nreps){
                 0,0,(-1)*d2$sigma[2,1], d2$sigma[2,2], d2$sigma[1,2],
                 0,0,(-1)*d2$sigma[1,1], d2$sigma[2,1], d2$sigma[1,1]),
                 ncol=5)
+    mean2.cond[[nr]] = d2$mu
 
     if(d1x.cond[nr]<0 || d2x.cond[nr]<0 || d3y.cond[nr]<0 || dxy.cond[nr]<0 || d4y.cond[nr]<0){
         print("negative bl")
@@ -283,23 +292,30 @@ data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
 data[data$w.joint>0.01,]
 length(data[data$w.joint>0.01,]$w.joint)
 hist(data$w.joint)
+plot(1:length(data$w.joint),cumsum(rev(data$w.joint)))
 my.logw.cond = data$logwv.cond - mean(data$logwv.cond)
 data$w.cond = exp(my.logw.cond)/sum(exp(my.logw.cond))
 data[data$w.cond>0.01,]
 length(data[data$w.cond>0.01,]$w.cond)
 hist(data$w.cond)
+plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
 my.logw.nj = data$logwv.nj - mean(data$logwv.nj)
 data$w.nj = exp(my.logw.nj)/sum(exp(my.logw.nj))
 data[data$w.nj>0.01,]
 length(data[data$w.nj>0.01,]$w.nj)
 hist(data$w.nj)
+plot(1:length(data$w.nj),cumsum(rev(sort(data$w.nj))))
 
 save(data,file="data_5DcondNJ.Rda")
-save(mat.joint,mat.cond,mat.nj,file="mat_5DcondNJ.Rda")
+save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_5DcondNJ.Rda")
+load("data_5DcondNJ.Rda")
+load("mat_5DcondNJ.Rda")
 
 mat.joint[[1]]/max(mat.joint[[1]])
 mat.cond[[1]]/max(mat.cond[[1]])
 mat.nj[[1]]/max(mat.nj[[1]])
+
+
 
 hist(d1x.joint)
 abline(v=d1x0,col="red")
@@ -310,7 +326,7 @@ abline(v=d1x0,col="red")
 
 hist(dxy.joint)
 abline(v=dxy0,col="red")
-hist(dxy.cond)
+hist(data$dxy.cond)
 abline(v=dxy0,col="red")
 hist(dxy.nj)
 abline(v=dxy0,col="red")
@@ -322,6 +338,41 @@ abline(v=d3y0,col="red")
 hist(d3y.nj)
 abline(v=d3y0,col="red")
 
+suma1=matrix(rep(0,25),ncol=5)
+suma2=matrix(rep(0,25),ncol=5)
+suma3=matrix(rep(0,25),ncol=5)
+for(i in 1:nreps){
+    suma1 = suma1+mat.joint[[i]]
+    suma2 = suma2+mat.cond[[i]]
+    suma3 = suma3+mat.nj[[i]]
+}
+mean.mat.joint = suma1/nreps
+mean.mat.cond = suma2/nreps
+mean.mat.nj = suma3/nreps
+
+mean.mat.joint
+mean.mat.cond
+mean.mat.nj
+mean.mat.joint/max(mean.mat.joint)
+mean.mat.cond/max(mean.mat.cond)
+mean.mat.nj/max(mean.mat.nj)
+
+suma1=rep(0,5)
+suma2=rep(0,3)
+suma3=rep(0,2)
+for(i in 1:nreps){
+    suma1 = suma1+mean.joint[[i]]
+    suma2 = suma2+mean1.cond[[i]]
+    suma3 = suma3+mean2.cond[[i]]
+}
+
+mean.mean.joint = suma1/nreps
+mean.mean1.cond = suma2/nreps
+mean.mean2.cond = suma3/nreps
+
+mean.mean.joint
+mean.mean1.cond
+mean.mean2.cond
 
 
 ## ------------------
