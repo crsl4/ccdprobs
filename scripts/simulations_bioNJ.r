@@ -11,6 +11,7 @@ library(weights)
 ## now, using bioNJ method
 ## bl seem closer to true values, but
 ## weights still ~17/1000 >0.01
+## but cumsum plot looks good
 who="(1,2)---(3,4)"
 ## d1x0=0.11
 ## d2x0=0.078
@@ -161,8 +162,10 @@ my.logw = data$logwv - mean(data$logwv)
 data$w = exp(my.logw)/sum(exp(my.logw))
 data[data$w>0.01,]
 length(data[data$w>0.01,]$w)
+plot(1:length(data$w),cumsum(rev(data$w)))
 hist(data$w)
 ##save(data,file="data_simulations.Rda")
+load("data_simulations.Rda")
 
 m.1x=weighted.mean(data$d1x,data$w)
 m2.1x=weighted.mean(data$d1x^2,data$w)
@@ -279,6 +282,8 @@ abline(v=m.xy,col="blue")
 ## first when using all distances to compute d1x,d2x,...
 ## instead of only one neighbor
 ## Conclusion: no, only 10 weights>0.01
+## but only one ~0.08, and all others ~0.01, so the cumsum
+## plot does not look so bad
 who="(1,2)---(3,4)"
 ## d1x0=0.11
 ## d2x0=0.078
@@ -420,7 +425,8 @@ data$w = exp(my.logw)/sum(exp(my.logw))
 data[data$w>0.01,]
 length(data[data$w>0.01,]$w)
 hist(data$w)
-##save(data,file="data_simulations.Rda")
+plot(1:length(data$w), cumsum(rev(data$w)))
+save(data,file="data_simulations2.Rda")
 
 m.1x=weighted.mean(data$d1x,data$w)
 m2.1x=weighted.mean(data$d1x^2,data$w)
