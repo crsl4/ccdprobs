@@ -11,8 +11,6 @@ library(ggplot2)
 library(weights)
 library(mvtnorm)
 
-## to do: need to add the cov matrices for nj and cond
-
 ## ------------------
 ## Case (1,2)---(3,4)
 ## Simulating (d1x,d2x,dxy,d3y,d4y) jointly
@@ -85,7 +83,7 @@ out23 = countsMatrix(seq2,seq3)
 out24 = countsMatrix(seq2,seq4)
 out34 = countsMatrix(seq3,seq4)
 
-nreps = 100
+nreps = 1000
 
 logwv.joint = rep(0,nreps)
 logl.joint = rep(0,nreps)
@@ -292,7 +290,7 @@ data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
 data[data$w.joint>0.01,]
 length(data[data$w.joint>0.01,]$w.joint)
 hist(data$w.joint)
-plot(1:length(data$w.joint),cumsum(rev(data$w.joint)))
+plot(1:length(data$w.joint),cumsum(rev(sort(data$w.joint))))
 my.logw.cond = data$logwv.cond - mean(data$logwv.cond)
 data$w.cond = exp(my.logw.cond)/sum(exp(my.logw.cond))
 data[data$w.cond>0.01,]
@@ -306,10 +304,10 @@ length(data[data$w.nj>0.01,]$w.nj)
 hist(data$w.nj)
 plot(1:length(data$w.nj),cumsum(rev(sort(data$w.nj))))
 
-save(data,file="data_5DcondNJ.Rda")
-save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_5DcondNJ.Rda")
-load("data_5DcondNJ.Rda")
-load("mat_5DcondNJ.Rda")
+save(data,file="data_5DcondNJ_fix.Rda")
+save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_5DcondNJ_fix.Rda")
+##load("data_5DcondNJ.Rda")
+##load("mat_5DcondNJ.Rda")
 
 mat.joint[[1]]/max(mat.joint[[1]])
 mat.cond[[1]]/max(mat.cond[[1]])
@@ -350,12 +348,12 @@ mean.mat.joint = suma1/nreps
 mean.mat.cond = suma2/nreps
 mean.mat.nj = suma3/nreps
 
-mean.mat.joint
-mean.mat.cond
-mean.mat.nj
-mean.mat.joint/max(mean.mat.joint)
-mean.mat.cond/max(mean.mat.cond)
-mean.mat.nj/max(mean.mat.nj)
+round(mean.mat.joint,5)
+round(mean.mat.cond,5)
+round(mean.mat.nj,5)
+round(mean.mat.joint/max(mean.mat.joint),4)
+round(mean.mat.cond/max(mean.mat.cond),4)
+round(mean.mat.nj/max(mean.mat.nj),4)
 
 suma1=rep(0,5)
 suma2=rep(0,3)
@@ -374,6 +372,12 @@ mean.mean.joint
 mean.mean1.cond
 mean.mean2.cond
 
+p1 <- ggplot(data,aes(dxy.joint,d4y.joint))+geom_point(color="blue")+geom_point(aes(dxy.cond,d4y.cond),data=data,colour="red")+
+    ggtitle("Blue=5D joint, Red= conditional")
+plot(p1)
+p2 <- ggplot(data,aes(d1x.joint,d2x.joint))+geom_point(color="blue")+geom_point(aes(d1x.cond,d2x.cond),data=data,colour="red")+
+    ggtitle("Blue=5D joint, Red= conditional")
+plot(p2)
 
 ## ------------------
 ## Case (1,2)---(3,4)
