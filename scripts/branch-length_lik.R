@@ -283,6 +283,8 @@ findMLE = function(seq1.dist, seq2.dist, Q, t0=0.1, tol=0.0001, Nmax=10000, verb
     if(verbose)
         print("entering findMLE...")
     t = rep(0,Nmax)
+    if(t0<0)
+        to=0.00001
     t[1] = t0 ## fixit: later do a binary search before choosing t0
     error = 1
     i = 1
@@ -488,6 +490,8 @@ findMLE3D = function(seq1.dist, seq2.dist, seq3.dist, Q, t0=c(0.1,0.1,0.1), tol=
     if(verbose)
         print("entering findMLE...")
     tnew = rep(0,3) # will not save all sequence
+    if(any(t0<0))
+        t0[which(t0<0)] = 0.0001
     told = t0 ## fixit: later do a binary search before choosing t0
     error = 1
     i = 1
@@ -608,6 +612,8 @@ findMLE2D = function(seqx.dist, seq3.dist, seq4.dist, Q, d3x, t0=c(0.1,0.1), tol
     if(verbose)
         print("entering findMLE...")
     tnew = rep(0,2) # will not save all sequence
+    if(any(t0<0))
+        t0[which(t0<0)] = 0.0001
     told = t0 ## fixit: later do a binary search before choosing t0
     error = 1
     i = 1
