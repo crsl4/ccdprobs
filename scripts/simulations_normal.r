@@ -14,24 +14,19 @@ library(mvtnorm)
 ## ------------------
 ## Case (1,2)---(3,4)
 ## Simulating (d1x,d2x,dxy,d3y,d4y) jointly
-## WEIGHTS: joint >> nj >> cond
-## actually, nj not bad at all
-## BRANCHES: nj are better centered around true values, but recall that
-## the true likelihood was slightly shifted for 1500 sites
-## and we want to match the likelihood. cond are very off.
-## COV: cond cov matrix is very off, the variances in the diagonal
-## should be similar, but they are not, and it has many zeros
+## WEIGHTS AND BRANCHES: work fine for cond!!
+## for d??0 = 0.1 for all
 who="(1,2)---(3,4)"
-## d1x0=0.11
-## d2x0=0.078
-## dxy0 = 0.03
-## d3y0 = 0.091
-## d4y0 = 0.098
-d1x0=0.1
-d2x0=0.1
-dxy0 = 0.1
-d3y0 = 0.1
-d4y0 = 0.1
+d1x0=0.11
+d2x0=0.078
+dxy0 = 0.03
+d3y0 = 0.091
+d4y0 = 0.098
+## d1x0=0.1
+## d2x0=0.1
+## dxy0 = 0.1
+## d3y0 = 0.1
+## d4y0 = 0.1
 eta = 0.5
 nsites=1500
 nuc <- c('a','c','g','t')
