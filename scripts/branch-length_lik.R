@@ -838,6 +838,8 @@ findMLE5D = function(seq1.dist, seq2.dist,seq3.dist, seq4.dist, Q, t0=rep(0.1,5)
     if(verbose)
         print("entering findMLE...")
     tnew = rep(0,5) # will not save all sequence
+    if(any(t0<0))
+        t0[which(t0<0)] = 0.0001
     told = t0 ## fixit: later do a binary search before choosing t0
     error = 1
     i = 1
