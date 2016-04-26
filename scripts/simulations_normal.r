@@ -214,7 +214,7 @@ for(nr in 1:nreps){
     d3y.t0 = (d34+d3x-d4x)/2
     d4y.t0 = (d34+d4x-d3x)/2
 
-    d2 = simulateBranchLength.conditionalMultinorm(nsim=1,seqx.dist, seq3.dist, seq4.dist,Q,t0=c(dxy.t0, d4y.t0),d3x)
+    d2 = simulateBranchLength.conditionalMultinorm(nsim=1,seqx.dist, seq3.dist, seq4.dist,Q,t0=c(dxy.t0, d4y.t0),d3x.cond)
     dxy.cond[nr] = d2$t[1]
     d4y.cond[nr] = d2$t[2]
     d3y.cond[nr] = d3x.cond - dxy.cond[nr]
@@ -306,14 +306,17 @@ plot(1:length(data$w.nj),cumsum(rev(sort(data$w.nj))))
 
 save(data,file="data_5DcondNJ_fix.Rda")
 save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_5DcondNJ_fix.Rda")
-##load("data_5DcondNJ.Rda")
-##load("mat_5DcondNJ.Rda")
+load("data_5DcondNJ_fix.Rda")
+load("mat_5DcondNJ_fix.Rda")
+
+## effective sample size:
+(1/sum(data$w.joint^2))/nreps
+(1/sum(data$w.cond^2))/nreps
+(1/sum(data$w.nj^2))/nreps
 
 mat.joint[[1]]/max(mat.joint[[1]])
 mat.cond[[1]]/max(mat.cond[[1]])
 mat.nj[[1]]/max(mat.nj[[1]])
-
-
 
 hist(d1x.joint)
 abline(v=d1x0,col="red")
