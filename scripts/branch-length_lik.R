@@ -885,3 +885,19 @@ simulateBranchLength.multinorm5D = function(nsim,seq1.dist,seq2.dist,seq3.dist, 
     w = rmvnorm(nsim, mu$t, -Sigma)
     return ( list(t=w, mu=mu$t, sigma=-Sigma) )
 }
+
+
+## ----------------------------------------------------------------------------------------------
+## 5 taxa case: conditional on two sums
+
+## simulates dyz from
+## need the sum (d3x) as input
+simulateBranchLength.conditionalNorm = function(nsim,seqx.dist,seq3.dist, seq4.dist, Q, t0, d3x,verbose=FALSE){
+    mu = findMLE2D(seqx.dist, seq3.dist, seq4.dist,Q, d3x, t0, verbose=verbose)
+    Sigma = solve(mu$obsInfo)
+    w = rmvnorm(nsim, mu$t, -Sigma)
+    return ( list(t=w, mu=mu$t, sigma=-Sigma) )
+}
+
+
+## aqui voy: tengo q hacer conditionalNorm, and later gtr.loglik.all.5taxa, then run and test

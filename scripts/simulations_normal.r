@@ -88,7 +88,7 @@ d2x.joint=rep(0,nreps)
 d3y.joint=rep(0,nreps)
 d4y.joint=rep(0,nreps)
 dxy.joint=rep(0,nreps)
-mat.joint <- c()
+mat.joint <- c() ## better: vector("list",nreps)
 mean.joint <- c()
 
 logwv.cond = rep(0,nreps)
