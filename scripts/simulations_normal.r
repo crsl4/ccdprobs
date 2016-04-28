@@ -280,6 +280,11 @@ data = data.frame(d1x.joint,d2x.joint,d3y.joint,d4y.joint,dxy.joint,logwv.joint,
     d1x.nj,d2x.nj,d3y.nj,d4y.nj,dxy.nj,logwv.nj, logl.nj, logdens.nj)
 head(data)
 summary(data)
+data[data$logwv.joint==0,]
+data[data$logwv.cond==0,]
+data[data$logwv.nj==0,]
+data <- subset(data,logwv.nj!=0)
+
 my.logw.joint = data$logwv.joint - mean(data$logwv.joint)
 data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
 data[data$w.joint>0.01,]
@@ -301,6 +306,8 @@ plot(1:length(data$w.nj),cumsum(rev(sort(data$w.nj))))
 
 save(data,file="data_5DcondNJ_fix.Rda")
 save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_5DcondNJ_fix.Rda")
+save(data,file="data_5DcondNJ_shortBL.Rda")
+save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_5DcondNJ_shortBL.Rda")
 load("data_5DcondNJ_fix.Rda")
 load("mat_5DcondNJ_fix.Rda")
 
