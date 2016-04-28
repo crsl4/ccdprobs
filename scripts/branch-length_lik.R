@@ -890,13 +890,77 @@ simulateBranchLength.multinorm5D = function(nsim,seq1.dist,seq2.dist,seq3.dist, 
 ## ----------------------------------------------------------------------------------------------
 ## 5 taxa case: conditional on two sums
 
+## returns loglik, llprime, lldoubleprime
+## for the conditionl case of dyz
+loglik1D = function(seqx.dist, seqz.dist, seq5.dist,Q, s1,s2,t){
+    if(ncol(seqx.dist) != ncol(seqz.dist))
+        stop("wrong number of sites")
+    suma = 0
+    suma2 = 0
+    suma3 = 0
+    for(i in 1:ncol(seqx.dist)){
+        f = fk1D(seqx.dist[,i],seqz.dist[,i],seq5.dist[,i],Q,s1,s2,t)
+        suma = suma + log(f$fk)
+        suma2 = suma2 + (f$fk_pr1+f$fk_pr2+f$fk_pr3)/f$fk
+        suma3 = suma3 + (f$fk*(f$fk_doublepr11 + 2*f$fk_doublepr12 + 2*f$fk_doublepr13 + 2*f$fk_doublepr23 + f$fk_doublepr22 + f$fk_doublepr33) - (f$fk_pr1 + f$fk_pr2+f$fk_pr3)^2/(f$fk^2)
+    }
+    return ( list(ll=suma, ll_pr=suma2, ll_doublepr=suma3) )
+}
+
+
+## t0= starting point for Newton-Raphson
+findMLE1D = function(seqx.dist, seqz.dist, seq5.dist, Q, s1,s2, t0=0.1, tol=0.0001, Nmax=10000, verbose=FALSE){
+    if(verbose)
+        print("entering findMLE...")
+    t = rep(0,Nmax)
+    if(t0<0)
+        to=0.00001
+    t[1] = t0 ## fixit: later do a binary search before choosing t0
+    error = 1
+    i = 1
+    while(error > tol & i < Nmax){
+        if(verbose)
+            print(t[i])
+        f =loglik1D(seqx.dist, seqz.dist, seq5.dist,Q, s1,s2,t[i])
+        gap = f$ll_pr/f$ll_doublepr
+        t[i+1] = t[i] - gap
+        while(t[i+1]<0){ #avoid negative BL
+            gap = gap/2
+            if(verbose)
+                print("found negative candidate t[i+1]")
+            t[i+1] = t[i] - gap
+        }
+        ## after finding a positive candidate:
+        f2 =loglik1D(seqx.dist, seqz.dist, seq5.dist,Q, s1,s2,t[i+1])
+        if(verbose){
+            print("f$ll, f2$ll")
+            print(f$ll)
+            print(f2$ll)
+        }
+        if(f$ll * f2$ll < 0){ #one positive, and one negative
+            while(abs(f2$ll) > 2*abs(f$ll)){ #t[i+1] too far from root
+                if(verbose)
+                    print("t[i+1] positive, but too far from root")
+                t[i+1] = t[i+1]/2
+                f2 =loglik(seq1.dist, seq2.dist, Q, t[i+1])
+            }
+        }
+        error = abs(t[i+1]-t[i])
+        i = i+1
+    }
+    t = t[which(t>0)]
+    if(i>=Nmax)
+        warning("Newton-Rapshon did not converge")
+    return ( list(t=t[length(t)], obsInfo=f2$ll_doublepr) )
+}
+
+
 ## simulates dyz from
 ## need the sum (d3x) as input
-simulateBranchLength.conditionalNorm = function(nsim,seqx.dist,seq3.dist, seq4.dist, Q, t0, d3x,verbose=FALSE){
-    mu = findMLE2D(seqx.dist, seq3.dist, seq4.dist,Q, d3x, t0, verbose=verbose)
-    Sigma = solve(mu$obsInfo)
-    w = rmvnorm(nsim, mu$t, -Sigma)
-    return ( list(t=w, mu=mu$t, sigma=-Sigma) )
+simulateBranchLength.conditionalNorm = function(nsim,seqx.dist,seqz.dist, seq5.dist, Q, t0, s1,s2,verbose=FALSE){
+    mu = findMLE1D(seqx.dist, seqz.dist, seq5.dist,Q, s1,s2, t0, verbose=verbose)
+    w = rnorm(nsim, mu$t, -1/mu$obsInfo)
+    return ( list(t=w, mu=mu$t, sigma=-1/mu$obsInfo) )
 }
 
 

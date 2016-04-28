@@ -143,6 +143,7 @@ for(nr in 1:nreps){
     d5z.cond[nr] = d2$t[3]
     mean2.cond[[nr]] = d2$mu
 
+    ## simulate dyz
     seqx.dist = sequenceDist(d1x.cond[nr], d2x.cond[nr] ,seq1.dist, seq2.dist, Q)
     seqz.dist = sequenceDist(d3z.cond[nr], d4z.cond[nr] ,seq3.dist, seq4.dist, Q)
 
