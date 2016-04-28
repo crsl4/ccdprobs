@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 //    tree.setSitePatterns(sequences);
 
     // log-likelihood calculation
-//    checkDistances(tree,alignment,model);
+    checkDistances(tree,alignment,model);
     tree.randomize(rng);
     cout << tree.makeTopologyNumbers() << endl;
     tree.generateBranchLengths(alignment,model);
