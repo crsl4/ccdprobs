@@ -1,0 +1,19 @@
+((1,2),((6,3),(5,4)),((12,11),(((7,8),9),10)));
+
+ 1 domestic_cat
+ 2 cheetah
+ 3 clouded_leopard
+ 4 snow_leopard
+ 5 leopard
+ 6 tiger
+ 7 domestic_dog
+ 8 gray_wolf
+ 9 coyote
+10 dhole
+11 red_fox
+12 raccoon_dog
+
+
+p = 0.267,0.2347,0.1817,0.3166
+
+q = 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519
