@@ -100,9 +100,25 @@ mean1.cond <- vector("list",nreps)
 mean2.cond <- vector("list",nreps)
 mean3.cond <- vector("list",nreps)
 
+logwv.cond2 = rep(0,nreps)
+logl.cond2 = rep(0,nreps)
+logdens.cond2 = rep(0,nreps)
+d1x.cond2=rep(0,nreps)
+d2x.cond2=rep(0,nreps)
+d3x.cond2=rep(0,nreps)
+d3z.cond2=rep(0,nreps)
+d4z.cond2=rep(0,nreps)
+dxz.cond2=rep(0,nreps)
+dxy.cond2=rep(0,nreps)
+dyz.cond2=rep(0,nreps)
+d5y.cond2=rep(0,nreps)
+mean1.cond2 <- vector("list",nreps)
+mean2.cond2 <- vector("list",nreps)
+mean3.cond2 <- vector("list",nreps)
+
 for(nr in 1:nreps){
     print(nr)
-    ## ----------------------- conditional ------------------------------------------
+    ## ----------------------- conditional: 2 sums ------------------------------------------
     ## simulate d1x,d2x,d3x
     jc12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
     jc13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
@@ -161,18 +177,96 @@ for(nr in 1:nreps){
         print("negative bl")
     } else{
         print("all positive")
-        print(d1x.cond[nr], d2x.cond[nr], d3z.cond[nr], d4z.cond[nr], dxy.cond[nr], dyz.cond[nr], d5y.cond[nr])
+        print(c(d1x.cond[nr], d2x.cond[nr], d3z.cond[nr], d4z.cond[nr], dxy.cond[nr], dyz.cond[nr], d5y.cond[nr]))
         logl.cond[nr] = gtr.log.lik.all.5taxa(d1x.cond[nr],d2x.cond[nr],dxy.cond[nr],dyz.cond[nr],d3z.cond[nr],d4z.cond[nr],d5y.cond[nr], seq1.dist, seq2.dist, seq3.dist, seq4.dist, seq5.dist, Q)
-        logdens.cond[nr] = log(dmvnorm(d$t,mean=d$mu, sigma=d$sigma))+log(dmvnorm(d2$t,mean=d2$mu,sigma=d2$sigma))+log(dnorm(d3$t,mean=d3$mean,sigma=d3$sigma))
+        logdens.cond[nr] = log(dmvnorm(d$t,mean=d$mu, sigma=d$sigma))+log(dmvnorm(d2$t,mean=d2$mu,sigma=d2$sigma))+log(dnorm(x=d3$t,mean=d3$mu,sd=sqrt(d3$sigma)))
         logprior = logPriorExpDist.5taxa(d1x.cond[nr],d2x.cond[nr],dxy.cond[nr],dyz.cond[nr],d3z.cond[nr],d4z.cond[nr],d5y.cond[nr],m=0.1)
         logwv.cond[nr] = logprior + logl.cond[nr] - logdens.cond[nr]
     }
+
+    ## ----------------------- conditional: 1 sum each time ------------------------------------------
+    ## simulate d1x,d2x,d3x
+    jc12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
+    jc13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
+    jc23 = simulateBranchLength.jc(nsim=1,out23,eta=eta)
+    t.lik12 = simulateBranchLength.norm(nsim=1, seq1.dist,seq2.dist,Q,t0=jc12$t,eta=eta)
+    t.lik13 = simulateBranchLength.norm(nsim=1, seq1.dist,seq3.dist,Q,t0=jc13$t,eta=eta)
+    t.lik23 = simulateBranchLength.norm(nsim=1, seq2.dist,seq3.dist,Q,t0=jc23$t,eta=eta)
+    d12 = t.lik12$t
+    d13 = t.lik13$t
+    d23 = t.lik23$t
+    d1x.t0 = (d12+d13-d23)/2
+    d2x.t0 = (d12+d23-d13)/2
+    d3x.t0 = (d13+d23-d12)/2
+
+    d = simulateBranchLength.multinorm(nsim=1,seq1.dist, seq2.dist, seq3.dist,Q,t0=c(d1x.t0, d2x.t0, d3x.t0))
+    d1x.cond2[nr] = d$t[1]
+    d2x.cond2[nr] = d$t[2]
+    d3x.cond2[nr] = d$t[3]
+    mean1.cond2[[nr]] = d$mu
+
+    ## simulate d3z,d4z,dxz
+    seqx.dist = sequenceDist(d1x.cond2[nr], d2x.cond2[nr] ,seq1.dist, seq2.dist, Q)
+
+    jcx3 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
+    jcx4 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
+    jc34 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
+    t.likx3 = simulateBranchLength.norm(nsim=1, seqx.dist,seq3.dist,Q,t0=jcx3$t,eta=eta)
+    t.likx4 = simulateBranchLength.norm(nsim=1, seqx.dist,seq4.dist,Q,t0=jcx4$t,eta=eta)
+    t.lik34 = simulateBranchLength.norm(nsim=1, seq3.dist,seq4.dist,Q,t0=jc34$t,eta=eta)
+    d3x = t.likx3$t
+    d4x = t.likx4$t
+    d34 = t.lik34$t
+    dxz.t0 = (d3x+d4x-d34)/2
+    d3z.t0 = (d34+d3x-d4x)/2
+    d4z.t0 = (d34+d4x-d3x)/2
+
+    d2 = simulateBranchLength.conditionalMultinorm(nsim=1,seqx.dist, seq3.dist, seq4.dist,Q,t0=c(dxz.t0, d4z.t0),d3x.cond2[nr])
+    dxz.cond2[nr] = d2$t[1]
+    d4z.cond2[nr] = d2$t[2]
+    d3z.cond2[nr] = d3x.cond2[nr] - dxz.cond2[nr]
+    mean2.cond2[[nr]] = d2$mu
+
+    ## simulate dxy,dyz,d5y
+    seqz.dist = sequenceDist(d3z.cond2[nr], d4z.cond2[nr] ,seq3.dist, seq4.dist, Q)
+
+    jcx5 = simulateBranchLength.jc(nsim=1,out34,eta=eta) #only works because we know they are similar, but in general?
+    jcz5 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
+    jcxz = simulateBranchLength.jc(nsim=1,out34,eta=eta)
+    t.likx5 = simulateBranchLength.norm(nsim=1, seqx.dist,seq5.dist,Q,t0=jcx5$t,eta=eta)
+    t.likz5 = simulateBranchLength.norm(nsim=1, seqz.dist,seq5.dist,Q,t0=jcz5$t,eta=eta)
+    t.likxz = simulateBranchLength.norm(nsim=1, seqx.dist,seqz.dist,Q,t0=jcxz$t,eta=eta)
+    d5x = t.likx5$t
+    d5z = t.likz5$t
+    dxz = t.likxz$t
+    dxy.t0 = (d5x+dxz-d5z)/2
+    dyz.t0 = (d5z+dxz-d5x)/2
+    d5y.t0 = (d5z+d5x-dxz)/2
+
+    d3 = simulateBranchLength.conditionalMultinorm(nsim=1,seqx.dist, seqz.dist, seq5.dist,Q,t0=c(dxy.t0, d5y.t0),dxz.cond2[nr])
+    dxy.cond2[nr] = d3$t[1]
+    d5y.cond2[nr] = d3$t[2]
+    dyz.cond2[nr] = dxz.cond2[nr] - dxy.cond2[nr]
+    mean3.cond2[[nr]] = d3$mu
+
+    if(d1x.cond2[nr]<0 || d2x.cond2[nr]<0 || d3z.cond2[nr]<0 || d4z.cond2[nr]<0 || dxy.cond2[nr]<0 || dyz.cond2[nr]<0 || d5y.cond2[nr]<0){
+        print("negative bl")
+    } else{
+        print("all positive")
+        print(c(d1x.cond2[nr], d2x.cond2[nr], d3z.cond2[nr], d4z.cond2[nr], dxy.cond2[nr], dyz.cond2[nr], d5y.cond2[nr]))
+        logl.cond2[nr] = gtr.log.lik.all.5taxa(d1x.cond2[nr],d2x.cond2[nr],dxy.cond2[nr],dyz.cond2[nr],d3z.cond2[nr],d4z.cond2[nr],d5y.cond2[nr], seq1.dist, seq2.dist, seq3.dist, seq4.dist, seq5.dist, Q)
+        logdens.cond2[nr] = log(dmvnorm(d$t,mean=d$mu, sigma=d$sigma))+log(dmvnorm(d2$t,mean=d2$mu,sigma=d2$sigma))+log(dmvnorm(d3$t,mean=d3$mu,sigma=sqrt(d3$sigma)))
+        logprior = logPriorExpDist.5taxa(d1x.cond2[nr],d2x.cond2[nr],dxy.cond2[nr],dyz.cond2[nr],d3z.cond2[nr],d4z.cond2[nr],d5y.cond2[nr],m=0.1)
+        logwv.cond2[nr] = logprior + logl.cond2[nr] - logdens.cond2[nr]
+    }
 }
 
-data = data.frame(d1x.cond,d2x.cond,d3x.cond,d3z.cond,d4z.cond,d5z.cond,dxy.cond,dyz.cond,d5y.cond,logwv.cond, logl.cond, logdens.cond)
+data = data.frame(d1x.cond,d2x.cond,d3x.cond,d3z.cond,d4z.cond,d5z.cond,dxy.cond,dyz.cond,d5y.cond,logwv.cond, logl.cond, logdens.cond,
+    d1x.cond2,d2x.cond2,d3x.cond2,d3z.cond2,d4z.cond2,dxz.cond2,dxy.cond2,dyz.cond2,d5y.cond2,logwv.cond2, logl.cond2, logdens.cond2)
 head(data)
 summary(data)
 data[data$logwv.cond==0,]
+data[data$logwv.cond2==0,]
 data <- subset(data,logwv.cond!=0)
 
 my.logw.cond = data$logwv.cond - mean(data$logwv.cond)
@@ -181,3 +275,16 @@ data[data$w.cond>0.01,]
 length(data[data$w.cond>0.01,]$w.cond)
 hist(data$w.cond)
 plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
+
+my.logw.cond2 = data$logwv.cond2 - mean(data$logwv.cond2)
+data$w.cond2 = exp(my.logw.cond2)/sum(exp(my.logw.cond2))
+data[data$w.cond2>0.01,]
+length(data[data$w.cond2>0.01,]$w.cond2)
+hist(data$w.cond2)
+plot(1:length(data$w.cond2),cumsum(rev(sort(data$w.cond2))))
+
+## effective sample size:
+(1/sum(data$w.cond^2))/nreps
+(1/sum(data$w.cond2^2))/nreps
+
+save(data,file="data_5taxa.Rda")

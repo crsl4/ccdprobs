@@ -208,6 +208,14 @@ logPriorExpDist = function(d1x,d2x,d3y,d4y,dxy,m, verbose=FALSE){
     return ( logp )
 }
 
+## m= mean
+logPriorExpDist.5taxa = function(d1x,d2x,dxy,dyz,d3z,d4z,d5y,m, verbose=FALSE){
+    logp = (-1/m)*(d1x+d2x+dxy+dyz+d3z+d4z+d5y)
+    if(verbose)
+        print(logp)
+    return ( logp )
+}
+
 
 weighted.quantile = function(x,w,probs=0.25){
     if(length(x) != length(w))

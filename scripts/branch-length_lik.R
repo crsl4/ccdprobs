@@ -890,6 +890,68 @@ simulateBranchLength.multinorm5D = function(nsim,seq1.dist,seq2.dist,seq3.dist, 
 ## ----------------------------------------------------------------------------------------------
 ## 5 taxa case: conditional on two sums
 
+
+## loglik ((1,2)x,(3,4)z,5)y
+## fixit: need to modify to use P(Ak|x) and P(Bk|y)
+## instead of d1x,d2x,dxy,dyz,d3z,d4z,d5y, seq?.dist
+## maybe create another function that calls this one
+gtr.log.lik.all.5taxa = function(d1x,d2x,dxy,dyz,d3z,d4z,d5y,seq1.dist,seq2.dist, seq3.dist,seq4.dist,seq5.dist,Q){
+    suma = 0
+    for(s in 1:ncol(seq1.dist)){
+        lik12 = siteLik(d1x,d2x,seq1.dist[,s],seq2.dist[,s],Q)
+        lik34 = siteLik(d3z,d4z,seq3.dist[,s],seq4.dist[,s],Q)
+        Pxy = matrixExp(Q,dxy)
+        Pyz = matrixExp(Q,dyz)
+        P5y = matrixExp(Q,d5y)
+        vx = Pxy %*% diag(lik12) %*% rep(1,4)
+        vz = Pyz %*% diag(lik34) %*% rep(1,4)
+        v5 = P5y %*% seq5.dist[,s]
+        fk = rep(1,4) %*% diag(Q$p) %*% diag(c(vx)) %*% diag(c(vz)) %*% diag(c(v5)) %*% rep(1,4)
+        suma = suma+log(fk)
+    }
+    return ( suma )
+}
+
+
+## p1 = P(A1|x1), column vector of size 4: seqx
+## p2 = P(A2|x2), column vector of size 4: seqz
+## p3 = P(A3|x3), column vector of size 4: seq5
+## s1=d3x-d3z, s2=d5z, t=dyz
+## returns fk, fk_prime1, fk_prime2, fk_prime3,
+## fk_doubleprime11, fk_doubleprime12, fk_doubleprime13, fk_doubleprime22,
+## fk_doubleprime23, fk_doubleprime33
+## fixit: matrix multiplication can be more efficient with eigenvector decomp
+fk1D = function(p1,p2,p3,Q,s1,s2,t){
+    if(s1<t || s2<t)
+        stop("error: sum smaller than summand")
+    S1fn = Sfn(s1-t,p1,Q)
+    S2fn = Sfn(t,p2,Q)
+    S3fn = Sfn(s2-t,p3,Q)
+    S1=diag(c(S1fn$S))
+    S2=diag(c(S2fn$S))
+    S3=diag(c(S3fn$S))
+    S1pr = diag(-c(S1fn$Spr))
+    S2pr = diag(c(S2fn$Spr))
+    S3pr = diag(-c(S3fn$Spr))
+    S1doublepr = diag(c(S1fn$Sdoublepr))
+    S2doublepr = diag(c(S2fn$Sdoublepr))
+    S3doublepr = diag(c(S3fn$Sdoublepr))
+    fk = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% S3 %*% rep(1,4)
+    fk.pr1 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% S3 %*% rep(1,4)
+    fk.pr2 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2pr %*% S3 %*% rep(1,4)
+    fk.pr3 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% S3pr %*% rep(1,4)
+    fk.doublepr11 = rep(1,4) %*% diag(Q$p) %*% S1doublepr %*% S2 %*% S3 %*% rep(1,4)
+    fk.doublepr22 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2doublepr %*% S3 %*% rep(1,4)
+    fk.doublepr33 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2 %*% S3doublepr %*% rep(1,4)
+    fk.doublepr12 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2pr %*% S3 %*% rep(1,4)
+    fk.doublepr13 = rep(1,4) %*% diag(Q$p) %*% S1pr %*% S2 %*% S3pr %*% rep(1,4)
+    fk.doublepr23 = rep(1,4) %*% diag(Q$p) %*% S1 %*% S2pr %*% S3pr %*% rep(1,4)
+
+    return ( list(fk=as.numeric(fk), fk_pr1=as.numeric(fk.pr1),fk_pr2=as.numeric(fk.pr2),fk_pr3=as.numeric(fk.pr3),
+                  fk_doublepr11= as.numeric(fk.doublepr11),fk_doublepr12= as.numeric(fk.doublepr12),fk_doublepr13= as.numeric(fk.doublepr13),
+                  fk_doublepr22= as.numeric(fk.doublepr22),fk_doublepr23= as.numeric(fk.doublepr23),fk_doublepr33= as.numeric(fk.doublepr33)))
+}
+
 ## returns loglik, llprime, lldoubleprime
 ## for the conditionl case of dyz
 loglik1D = function(seqx.dist, seqz.dist, seq5.dist,Q, s1,s2,t){
@@ -902,7 +964,7 @@ loglik1D = function(seqx.dist, seqz.dist, seq5.dist,Q, s1,s2,t){
         f = fk1D(seqx.dist[,i],seqz.dist[,i],seq5.dist[,i],Q,s1,s2,t)
         suma = suma + log(f$fk)
         suma2 = suma2 + (f$fk_pr1+f$fk_pr2+f$fk_pr3)/f$fk
-        suma3 = suma3 + (f$fk*(f$fk_doublepr11 + 2*f$fk_doublepr12 + 2*f$fk_doublepr13 + 2*f$fk_doublepr23 + f$fk_doublepr22 + f$fk_doublepr33) - (f$fk_pr1 + f$fk_pr2+f$fk_pr3)^2/(f$fk^2)
+        suma3 = suma3 + (f$fk*(f$fk_doublepr11 + 2*f$fk_doublepr12 + 2*f$fk_doublepr13 + 2*f$fk_doublepr23 + f$fk_doublepr22 + f$fk_doublepr33) - (f$fk_pr1 + f$fk_pr2+f$fk_pr3)^2)/(f$fk^2)
     }
     return ( list(ll=suma, ll_pr=suma2, ll_doublepr=suma3) )
 }
