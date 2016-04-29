@@ -272,9 +272,9 @@ data = data.frame(trees,d1x.joint,d2x.joint,d3y.joint,d4y.joint,dxy.joint,logwv.
     d1x.nj,d2x.nj,d3y.nj,d4y.nj,dxy.nj,logwv.nj, logl.nj, logdens.nj)
 head(data)
 summary(data)
-data[data$logwv.joint==0,]
-data[data$logwv.cond==0,]
-data[data$logwv.nj==0,]
+data[data$logwv.joint==0,] ##0
+data[data$logwv.cond==0,] ##0
+data[data$logwv.nj==0,] ## too many!!
 data <- subset(data,logwv.nj!=0)
 
 my.logw.joint = data$logwv.joint - mean(data$logwv.joint)
@@ -289,12 +289,11 @@ data[data$w.cond>0.01,]
 length(data[data$w.cond>0.01,]$w.cond)
 hist(data$w.cond)
 plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
-my.logw.nj = data$logwv.nj - mean(data$logwv.nj)
-data$w.nj = exp(my.logw.nj)/sum(exp(my.logw.nj))
-data[data$w.nj>0.01,]
-length(data[data$w.nj>0.01,]$w.nj)
-hist(data$w.nj)
-plot(1:length(data$w.nj),cumsum(rev(sort(data$w.nj))))
+
 
 save(data,file=paste0("data_normal_",who,".Rda"))
+
+## effective sample size:
+(1/sum(data$w.joint^2))/nreps
+(1/sum(data$w.cond^2))/nreps
 
