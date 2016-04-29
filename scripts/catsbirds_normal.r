@@ -69,6 +69,7 @@ for(nr in 1:nreps){
     print(nr)
     t=sampleTopQuartet(dat.tre)
     tre = t$tre
+    trees[nr] = write.tree(t$tre)
     leaves = tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]] #works only for unrooted quartet
     leaves = as.numeric(leaves)
     sis = leaves
