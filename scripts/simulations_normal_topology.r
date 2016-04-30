@@ -1,6 +1,5 @@
-## same as simulations_normal.r but with cats/birds data
-## with topology uncertainty
-## Claudia April 2016
+## same as simulations_normal.r but with topology uncertainty
+## Claudia Abril 2016
 
 library(ape)
 source('branch-length_lik.r')
@@ -9,24 +8,86 @@ library(ggplot2)
 library(weights)
 library(mvtnorm)
 
+## problem: no topology uncertainty with simulated data
+## ------------------
+## Case (1,2)---(3,4)
+## simulating data, but also getting bootstrap NJ clade dist
+## for topology uncertainty
+seed = 1208
+set.seed(seed)
+who="(1,2)---(3,4)"
+## d1x0=0.11
+## d2x0=0.078
+## dxy0 = 0.03
+## d3y0 = 0.091
+## d4y0 = 0.098
+d1x0=0.03
+d2x0=0.1
+dxy0 = 0.03
+d3y0 = 0.03
+d4y0 = 0.5
+eta = 0.5
+nsites=1500
+nuc <- c('a','c','g','t')
+Q = randomQ(4,rescale=TRUE)
+r=Q$r
+p=Q$p
+## simulate seqx
+seqx = sample(nuc,size=nsites,prob=Q$p,replace=TRUE)
 
-who = "cats"
-dat=read.dna("../datasets/4taxa-cats.phy") #needs to be 4 taxa
-dat.tre=read.table("../datasets/4taxa-cats_ccdprobs.out", header=FALSE)
-r=c(2.815,51.982,1.903,1.275,65.402,1.000)
-p=c(0.2590,0.2379,0.1900,0.3131);
-den = r[6]
-r = r/den
-Q = makeQ(r,p,4, rescale=TRUE)
+## simulate seq1
+P = matrixExp(Q,d1x0)
+seq1 = numeric(nsites)
+for ( i in 1:nsites )
+    seq1[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+## simulate seq2
+P = matrixExp(Q,d2x0)
+seq2 = numeric(nsites)
+for ( i in 1:nsites )
+    seq2[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
 
-who = "birds"
-dat=read.dna("../datasets/birds4-clean.phy") #needs to be 4 taxa
-dat.tre=read.table("../datasets/birds4-clean_ccdprobs.out", header=FALSE)
-r = c(0.2463,0.1764,0.1231,0.0187,0.4185,0.0170)
-p = c(0.2776,0.2937,0.1612,0.2675)
-den = r[6]
-r = r/den
-Q = makeQ(r,p,4, rescale=TRUE)
+## simulate seqy
+P = matrixExp(Q,dxy0)
+seqy = numeric(nsites)
+for ( i in 1:nsites )
+    seqy[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+
+## simulate seq3
+P = matrixExp(Q,d3y0)
+seq3 = numeric(nsites)
+for ( i in 1:nsites )
+    seq3[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+## simulate seq4
+P = matrixExp(Q,d4y0)
+seq4 = numeric(nsites)
+for ( i in 1:nsites )
+    seq4[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+
+## write to file:
+rootname = paste0("simulation_normal_topology_4taxa",seed)
+filename = paste0(rootname,".phy")
+l1 = paste(" 4",nsites)
+l2 = paste("1",paste0(seq1,collapse=""))
+l3 = paste("2",paste0(seq2,collapse=""))
+l4 = paste("3",paste0(seq3,collapse=""))
+l5 = paste("4",paste0(seq4,collapse=""))
+
+write(l1,file=filename)
+write("",file=filename, append=TRUE)
+write(l2,file=filename, append=TRUE)
+write(l3,file=filename, append=TRUE)
+write(l4,file=filename, append=TRUE)
+write(l5,file=filename, append=TRUE)
+
+## now, run
+## perl seq2ccdprobs.pl -phylip rootname.phy
+## to get rootname_ccdprobs.out
+
+## problem: no topology uncertainty with simulated data,
+## so, did not do following
+
+dat.tre=read.table(paste0(rootname,"_ccdprobs.out"), header=FALSE)
+dat = read.dna(filename)
 
 nreps = 1000
 trees = rep(NA,nreps)
@@ -58,6 +119,7 @@ dxy.cond=rep(0,nreps)
 mat.cond <- vector("list",nreps)
 mean1.cond <- vector("list",nreps)
 mean2.cond <- vector("list",nreps)
+
 
 logwv.nj = rep(0,nreps)
 logl.nj = rep(0,nreps)
@@ -299,100 +361,10 @@ length(data[data$w.cond>0.01,]$w.cond)
 hist(data$w.cond)
 plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
 
+save(data,file=paste0("simulations_normal_topology",seed,".Rda"))
+save(mean.joint, mat.joint, mean1.cond, mean2.cond, mat.cond, mat.nj, file=paste0("simulations_normal_topology_meanmat",seed,".Rda"))
 
-save(data,file=paste0("data_normal_",who,".Rda"))
-save(mean.joint, mat.joint, mean1.cond, mean2.cond, mat.cond, file=paste0("meanmat_normal_",who,".Rda"))
-load("data_normal_birds.Rda")
 
 ## effective sample size:
 (1/sum(data$w.joint^2))/nreps
 (1/sum(data$w.cond^2))/nreps
-
-bigw = data[data$w.cond>0.01,]
-subset(bigw,select=c(trees,tx1,tx2,tx3,tx4,d1x.cond, d2x.cond, d3y.cond, d4y.cond, dxy.cond, w.cond))
-summary(bigw)
-
-summary(data)
-data1 = data[data$trees=="((1,2),3,4);",]
-data2 = data[data$trees=="((1,3),2,4);",]
-data3 = data[data$trees=="(1,(2,3),4);",]
-
-## to do: check summary statistics (weighted) and compare to MB for birds,
-## see where there are shifts
-## see weighted frequency for each tree also
-
-## first tree (1,2)
-## MB freq: 0.6819
-sum(data1$w.joint) ## 0.5432
-sum(data1$w.cond) ## 0.5172
-w1.joint = data1$w.joint/sum(data1$w.joint)
-w1.cond = data1$w.cond/sum(data1$w.cond)
-## mean MB dxy: 0.0261
-mm = weighted.mean(data1$dxy.joint,w1.joint) ## 0.0261
-weighted.mean(data1$dxy.cond,w1.cond) ## 0.0251
-## quartiles:
-weighted.quantile(data1$dxy.joint,w1.joint,probs=0.25) ## 0.02164
-weighted.quantile(data1$dxy.cond,w1.cond,probs=0.25) ## 0.02125
-weighted.quantile(data1$dxy.joint,w1.joint,probs=0.75) ## 0.02998
-weighted.quantile(data1$dxy.cond,w1.cond,probs=0.75) ## 0.02921
-
-summary(data1$w.joint)
-summary(data1$w.cond)
-
-wtd.hist(data1$dxy.joint, weight=w1.joint)
-abline(v=mm, col="red")
-wtd.hist(data1$dxy.cond, weight=w1.cond)
-abline(v=mm, col="red")
-
-## d1x does not mean the same across rows, need to see who is tx1
-summary(data1$d1x.joint)
-summary(data1$d1x.cond)
-
-plot(data1$dxy.joint, data1$dxy.cond)
-
-data1.1 = subset(data1,tx1 == 1)
-summary(data1.1)
-plot(data1.1$d1x.joint, data1.1$d1x.cond)
-head(data1.1)
-## mean MB d1x: 0.1108
-w1.1.joint = data1.1$w.joint/sum(data1.1$w.joint)
-w1.1.cond = data1.1$w.cond/sum(data1.1$w.cond)
-weighted.mean(data1.1$d1x.joint,w1.1.joint) ## 0.1100
-weighted.mean(data1.1$d1x.cond,w1.1.cond) ## 0.1105
-## mean MB d2x: 0.0779
-weighted.mean(data1.1$d2x.joint,w1.1.joint) ## 0.0778
-weighted.mean(data1.1$d2x.cond,w1.1.cond) ## 0.0748
-## mean MB d3y: 0.0909
-weighted.mean(data1.1$d3y.joint,w1.1.joint) ## 0.0901
-weighted.mean(data1.1$d3y.cond,w1.1.cond) ## 0.0883
-## mean MB d4y: 0.0983
-weighted.mean(data1.1$d4y.joint,w1.1.joint) ## 0.0988
-weighted.mean(data1.1$d4y.cond,w1.1.cond) ## 0.0999
-## mean MB dxy: 0.0261
-weighted.mean(data1.1$dxy.joint,w1.1.joint) ## 0.0264
-weighted.mean(data1.1$dxy.cond,w1.1.cond) ## 0.0236
-
-
-
-data1.1 = subset(data1,tx1 == 3)
-plot(data1.1$d1x.joint, data1.1$d1x.cond)
-head(data1.1)
-## mean MB d3y: 0.0909
-w1.1.joint = data1.1$w.joint/sum(data1.1$w.joint)
-w1.1.cond = data1.1$w.cond/sum(data1.1$w.cond)
-weighted.mean(data1.1$d1x.joint,w1.1.joint) ## 0.0908
-weighted.mean(data1.1$d1x.cond,w1.1.cond) ## 0.0930
-## mean MB d4y: 0.0983
-weighted.mean(data1.1$d2x.joint,w1.1.joint) ## 0.0981
-weighted.mean(data1.1$d2x.cond,w1.1.cond) ## 0.1006
-## mean MB d1x: 0.1108
-weighted.mean(data1.1$d3y.joint,w1.1.joint) ## 0.1105
-weighted.mean(data1.1$d3y.cond,w1.1.cond) ## 0.1011
-## mean MB d2x: 0.0779
-weighted.mean(data1.1$d4y.joint,w1.1.joint) ## 0.0786
-weighted.mean(data1.1$d4y.cond,w1.1.cond) ## 0.0815
-## mean MB dxy: 0.0261
-weighted.mean(data1.1$dxy.joint,w1.1.joint) ## 0.0258
-weighted.mean(data1.1$dxy.cond,w1.1.cond) ## 0.02705
-
-## fill out a birds-comparison with this info
