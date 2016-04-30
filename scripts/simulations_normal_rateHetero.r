@@ -1,5 +1,5 @@
-## same as simulations_normal.r but with topology uncertainty
-## Claudia Abril 2016
+## same as simulations_normal.r but with rate heterogeneity
+## Claudia April 2016
 
 library(ape)
 source('branch-length_lik.r')
@@ -8,91 +8,78 @@ library(ggplot2)
 library(weights)
 library(mvtnorm)
 
-## for topology uncertainty, dxy has to be much smaller than the others
 ## ------------------
 ## Case (1,2)---(3,4)
-## simulating data, but also getting bootstrap NJ clade dist
-## for topology uncertainty
-seed = 1208
-set.seed(seed)
+## Simulating (d1x,d2x,dxy,d3y,d4y) jointly
+## WEIGHTS AND BRANCHES: work fine for cond!!
+## for d??0 = 0.1 for all
+## and for same bl as birds
 who="(1,2)---(3,4)"
-## d1x0=0.11
-## d2x0=0.078
-## dxy0 = 0.03
-## d3y0 = 0.091
-## d4y0 = 0.098
-d1x0=0.5
-d2x0=0.5
+d1x0=0.11
+d2x0=0.078
 dxy0 = 0.03
-d3y0 = 0.5
-d4y0 = 0.5
+d3y0 = 0.091
+d4y0 = 0.098
+## d1x0=0.1
+## d2x0=0.1
+## dxy0 = 0.1
+## d3y0 = 0.1
+## d4y0 = 0.1
 eta = 0.5
 nsites=1500
 nuc <- c('a','c','g','t')
 Q = randomQ(4,rescale=TRUE)
+a =qgamma(p=seq(1,7,2)/8,0.3,0.3)
+a.scale = a/mean(a)
+wh.a = sample(a.scale,size=nsites,prob=rep(0.25,4),replace=TRUE)
 r=Q$r
 p=Q$p
 ## simulate seqx
 seqx = sample(nuc,size=nsites,prob=Q$p,replace=TRUE)
 
-## simulate seq1
-P = matrixExp(Q,d1x0)
+## simulate seq1,seq2,seqy
 seq1 = numeric(nsites)
-for ( i in 1:nsites )
-    seq1[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
-## simulate seq2
-P = matrixExp(Q,d2x0)
 seq2 = numeric(nsites)
-for ( i in 1:nsites )
-    seq2[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
-
-## simulate seqy
-P = matrixExp(Q,dxy0)
 seqy = numeric(nsites)
-for ( i in 1:nsites )
-    seqy[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+for ( i in 1:nsites ){
+    newQ = wh.a[i]*Q
+    P1 = matrixExp(newQ,d1x0)
+    P2 = matrixExp(newQ,d2x0)
+    Py = matrixExp(newQ,dxy0)
+    seq1[i] = sample(nuc,size=1,prob=P1[which(nuc==seqx[i]),])
+    seq2[i] = sample(nuc,size=1,prob=P2[which(nuc==seqx[i]),])
+    seqy[i] = sample(nuc,size=1,prob=Py[which(nuc==seqx[i]),])
+}
+
 
 ## simulate seq3
-P = matrixExp(Q,d3y0)
+
 seq3 = numeric(nsites)
-for ( i in 1:nsites )
-    seq3[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
-## simulate seq4
-P = matrixExp(Q,d4y0)
 seq4 = numeric(nsites)
-for ( i in 1:nsites )
-    seq4[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+for ( i in 1:nsites ){
+    newQ = wh.a[i]*Q
+    P3 = matrixExp(newQ,d3y0)
+    P4 = matrixExp(newQ,d4y0)
+    seq3[i] = sample(nuc,size=1,prob=P3[which(nuc==seqy[i]),])
+    seq4[i] = sample(nuc,size=1,prob=P4[which(nuc==seqy[i]),])
+}
 
-## write to file:
-rootname = paste0("simulation_normal_topology_4taxa",seed)
-filename = paste0(rootname,".phy")
-l1 = paste(" 4",nsites)
-l2 = paste("1",paste0(seq1,collapse=""))
-l3 = paste("2",paste0(seq2,collapse=""))
-l4 = paste("3",paste0(seq3,collapse=""))
-l5 = paste("4",paste0(seq4,collapse=""))
+## aqui voy, hay q doublecheck q las seq se simulen bien, y correr todo igual
 
-write(l1,file=filename)
-write("",file=filename, append=TRUE)
-write(l2,file=filename, append=TRUE)
-write(l3,file=filename, append=TRUE)
-write(l4,file=filename, append=TRUE)
-write(l5,file=filename, append=TRUE)
+seq1.dist = seqMatrix(seq1)
+seq2.dist = seqMatrix(seq2)
+seq3.dist = seqMatrix(seq3)
+seq4.dist = seqMatrix(seq4)
 
-## now, run
-## perl seq2ccdprobs.pl -phylip rootname.phy
-## to get rootname_ccdprobs.out
-
-dat.tre=read.table(paste0(rootname,"_ccdprobs.out"), header=FALSE)
-dat = read.dna(filename)
+## gamma density
+out12 = countsMatrix(seq1,seq2)
+out13 = countsMatrix(seq1,seq3)
+out14 = countsMatrix(seq1,seq4)
+out23 = countsMatrix(seq2,seq3)
+out24 = countsMatrix(seq2,seq4)
+out34 = countsMatrix(seq3,seq4)
 
 nreps = 1000
-trees = rep(NA,nreps)
-tx1 = rep(NA,nreps)
-tx2 = rep(NA,nreps)
-tx3 = rep(NA,nreps)
-tx4 = rep(NA,nreps)
-eta = 0.5
 
 logwv.joint = rep(0,nreps)
 logl.joint = rep(0,nreps)
@@ -102,8 +89,8 @@ d2x.joint=rep(0,nreps)
 d3y.joint=rep(0,nreps)
 d4y.joint=rep(0,nreps)
 dxy.joint=rep(0,nreps)
-mat.joint <- vector("list",nreps)
-mean.joint <- vector("list",nreps)
+mat.joint <- c() ## better: vector("list",nreps)
+mean.joint <- c()
 
 logwv.cond = rep(0,nreps)
 logl.cond = rep(0,nreps)
@@ -113,10 +100,9 @@ d2x.cond=rep(0,nreps)
 d3y.cond=rep(0,nreps)
 d4y.cond=rep(0,nreps)
 dxy.cond=rep(0,nreps)
-mat.cond <- vector("list",nreps)
-mean1.cond <- vector("list",nreps)
-mean2.cond <- vector("list",nreps)
-
+mat.cond <- c()
+mean1.cond <- c()
+mean2.cond <- c()
 
 logwv.nj = rep(0,nreps)
 logl.nj = rep(0,nreps)
@@ -126,56 +112,11 @@ d2x.nj=rep(0,nreps)
 d3y.nj=rep(0,nreps)
 d4y.nj=rep(0,nreps)
 dxy.nj=rep(0,nreps)
-mat.nj <- vector("list",nreps)
+mat.nj <- c()
 
 for(nr in 1:nreps){
     print(nr)
-    t=sampleTopQuartet(dat.tre)
-    tre = t$tre
-    trees[nr] = write.tree(t$tre)
-    leaves = tre$tip.label[tre$edge[which(tre$edge[,1]==sample(c(5,6),1) & tre$edge[,2] < 5),2]] #works only for unrooted quartet
-    leaves = as.numeric(leaves)
-    sis = leaves
-    fth = setdiff(1:4,sis)
-    print(paste("sis",sis))
-    print(paste("fth",fth))
-    tx1[nr] = sis[1]
-    tx2[nr] = sis[2]
-    tx3[nr] = fth[1]
-    tx4[nr] = fth[2]
-    seq1 = as.vector(unname(as.character(dat[sis[1],])))
-    seq2 = as.vector(unname(as.character(dat[sis[2],])))
-    seq3 = as.vector(unname(as.character(dat[fth[1],])))
-    seq4 = as.vector(unname(as.character(dat[fth[2],])))
-    # remove missing:
-    s1 <-seq1!="-"
-    s2 <- seq2!="-"
-    s3 <- seq3!="-"
-    s4 <- seq4!="-"
-    seq1 <- seq1[s1&s2&s3&s4]
-    seq2 <- seq2[s1&s2&s3&s4]
-    seq3 <- seq3[s1&s2&s3&s4]
-    seq4 <- seq4[s1&s2&s3&s4]
-
-    nsites = length(seq1)
-    if(length(seq2) != nsites && length(seq3) != nsites){
-        stop("error in number of sites seq1,seq2,seq3")
-    }
-
-    seq1.dist = seqMatrix(seq1)
-    seq2.dist = seqMatrix(seq2)
-    seq3.dist = seqMatrix(seq3)
-    seq4.dist = seqMatrix(seq4)
-
-    ## gamma density
-    out12 = countsMatrix(seq1,seq2)
-    out13 = countsMatrix(seq1,seq3)
-    out14 = countsMatrix(seq1,seq4)
-    out23 = countsMatrix(seq2,seq3)
-    out24 = countsMatrix(seq2,seq4)
-    out34 = countsMatrix(seq3,seq4)
-
-        ## ----------------- joint ---------------------------------------------
+    ## ----------------- joint ---------------------------------------------
     ## starting point BioNJ:
     jc12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
     jc13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
@@ -335,15 +276,15 @@ for(nr in 1:nreps){
     }
 }
 
-data = data.frame(trees,tx1,tx2,tx3,tx4,d1x.joint,d2x.joint,d3y.joint,d4y.joint,dxy.joint,logwv.joint, logl.joint, logdens.joint,
+data = data.frame(d1x.joint,d2x.joint,d3y.joint,d4y.joint,dxy.joint,logwv.joint, logl.joint, logdens.joint,
     d1x.cond,d2x.cond,d3y.cond,d4y.cond,dxy.cond,logwv.cond, logl.cond, logdens.cond,
     d1x.nj,d2x.nj,d3y.nj,d4y.nj,dxy.nj,logwv.nj, logl.nj, logdens.nj)
 head(data)
 summary(data)
-data[data$logwv.joint==0,] ##0
-data[data$logwv.cond==0,] ##0
-data[data$logwv.nj==0,] ## too many!!
-##data <- subset(data,logwv.nj!=0)
+data[data$logwv.joint==0,]
+data[data$logwv.cond==0,]
+data[data$logwv.nj==0,]
+data <- subset(data,logwv.nj!=0)
 
 my.logw.joint = data$logwv.joint - mean(data$logwv.joint)
 data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
@@ -357,11 +298,10 @@ data[data$w.cond>0.01,]
 length(data[data$w.cond>0.01,]$w.cond)
 hist(data$w.cond)
 plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
+my.logw.nj = data$logwv.nj - mean(data$logwv.nj)
+data$w.nj = exp(my.logw.nj)/sum(exp(my.logw.nj))
+data[data$w.nj>0.01,]
+length(data[data$w.nj>0.01,]$w.nj)
+hist(data$w.nj)
+plot(1:length(data$w.nj),cumsum(rev(sort(data$w.nj))))
 
-save(data,file=paste0("simulations_normal_topology",seed,".Rda"))
-save(mean.joint, mat.joint, mean1.cond, mean2.cond, mat.cond, mat.nj, file=paste0("simulations_normal_topology_meanmat",seed,".Rda"))
-
-
-## effective sample size:
-(1/sum(data$w.joint^2))/nreps
-(1/sum(data$w.cond^2))/nreps
