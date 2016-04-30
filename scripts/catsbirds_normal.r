@@ -293,6 +293,7 @@ plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
 
 
 save(data,file=paste0("data_normal_",who,".Rda"))
+load("data_normal_birds.Rda")
 
 ## effective sample size:
 (1/sum(data$w.joint^2))/nreps
