@@ -291,12 +291,14 @@ data[data$w.joint>0.01,]
 length(data[data$w.joint>0.01,]$w.joint)
 hist(data$w.joint)
 plot(1:length(data$w.joint),cumsum(rev(sort(data$w.joint))))
+
 my.logw.cond = data$logwv.cond - mean(data$logwv.cond)
 data$w.cond = exp(my.logw.cond)/sum(exp(my.logw.cond))
 data[data$w.cond>0.01,]
 length(data[data$w.cond>0.01,]$w.cond)
 hist(data$w.cond)
 plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
+
 my.logw.nj = data$logwv.nj - mean(data$logwv.nj)
 data$w.nj = exp(my.logw.nj)/sum(exp(my.logw.nj))
 data[data$w.nj>0.01,]
@@ -304,6 +306,13 @@ length(data[data$w.nj>0.01,]$w.nj)
 hist(data$w.nj)
 plot(1:length(data$w.nj),cumsum(rev(sort(data$w.nj))))
 
+## effective sample size:
+(1/sum(data$w.joint^2))/nreps
+(1/sum(data$w.cond^2))/nreps
+(1/sum(data$w.nj^2))/nreps
+
+save(data,file="data_sim_rateHetero.Rda")
+save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_sim_rateHetero.Rda")
 
 
 

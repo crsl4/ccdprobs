@@ -436,7 +436,7 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
     m = patternToProbMap.find(pattern);
     if ( m == patternToProbMap.end() ) // first time this pattern calculated
     {
-      patternToProbMap[ pattern ] = pair<double,Vector4d> (0,translate(base));
+      patternToProbMap[ pattern ] = pair<double,Vector4d> (0,translate(base)); //clau: translate->4 probs
     }
     return;
   }
@@ -447,7 +447,7 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
     {
       if ( recurse )
         getNeighbor(*e)->calculate(site,alignment,*e,recurse);
-      pattern += getNeighbor(*e)->getPattern();
+      pattern += getNeighbor(*e)->getPattern(); //clau: pattern of int node is the concatenation of pattern of children
     }
   }
   m = patternToProbMap.find(pattern);
@@ -812,13 +812,22 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     }
     else //clau: p parent not root
     {
-      x = *p++; //clau: dont understand here, need to print order of nodes: modify depthFirstNodeList to print, and here
+      // cout << "*p is " << (*p)->getNumber();
+      // cout << endl;
+      x = *p++; //question: dont understand here, seems like *p==*p++, I think it means take *p and move
       y = *p++;
       par = x->getNodeParent();
       z = par->closeRelative();
+      // cout << "*p is " << (*p)->getNumber();
+      // cout << endl;
     }
+    // cout << "x is " << x->getNumber();
+    // cout << ", y is " << y->getNumber();
+    // cout << ", z is " << z->getNumber();
+    // cout << ", par is " << par->getNumber();
+    // cout << endl;
     // do calculations
-    x->calculateEdges(qmatrix);
+    x->calculateEdges(qmatrix); //question: why do we do this? aren't bl meaningless at this point?
     y->calculateEdges(qmatrix);
     z->calculateEdges(qmatrix);
     for ( int k=0; k<alignment.getNumSites(); ++k )
@@ -826,8 +835,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
       x->calculate(k,alignment,x->getEdgeParent(),false);
       y->calculate(k,alignment,y->getEdgeParent(),false);
       z->calculate(k,alignment,z->getEdgeParent(),false);
-    }
-
+    } //clau: after this, we have in each node the patternProb map, but we dont know how many different patterns, do we? (question)
+    // aqui voy: to do, finish studying generateBL function
 //    cerr << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << " " << par->getNumber() << endl;
     map<pair<int,int>,double>::iterator m;
     double dxy, dxz, dyz;
