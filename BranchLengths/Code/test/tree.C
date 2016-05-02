@@ -18,7 +18,7 @@
 using namespace std;
 using namespace Eigen;
 
-void Node::print(ostream& f) 
+void Node::print(ostream& f)
 {
   f << setw(3) << number << ": " << name << ": " << level << ": ";
   f << "Edges:";
@@ -130,10 +130,10 @@ void Tree::readSubtree(istringstream& s,Node* parent,vector<Node*>& leafNodes,ve
   Edge* e = new Edge(); // edge connecting n to parent
   edges.push_back(e);
 
-  e->setNodes(n,parent);  
+  e->setNodes(n,parent);
   n->addEdge(e);
   parent->addEdge(e);
-	  
+
   char c = s.peek();
 
   if ( c=='(' )
@@ -179,12 +179,12 @@ void Tree::readSubtree(istringstream& s,Node* parent,vector<Node*>& leafNodes,ve
 // Names are treated as strings.
 // The function relabelTree() will change node numbers and names to match the sequences.
 
-Tree::Tree(string line) 
+Tree::Tree(string line)
 {
   // Create the tree from parenthetic representation in line.
   // Create new nodes and edges on the fly.
   // Leaf node and internal node pointers placed in separate vectors.  Combine to vector nodes at end.
-	
+
   numTaxa = 0;
   treeString = line;
 
@@ -199,15 +199,15 @@ Tree::Tree(string line)
     checkTreeEnd(s);
     return;
   }
-  
+
   // string begins with '(', so tree is not trivial
   vector<Node*> leafNodes;
   vector<Node*> internalNodes;
- 
+
   internalNodes.push_back(new Node(false));
   root = internalNodes[0];
   s >> c; // read in left parenthesis
-  
+
   while ( true ) {
     readSubtree(s,root,leafNodes,internalNodes);
     c = readOneTreeCharacter(s);
@@ -238,7 +238,7 @@ Tree::Tree(string line)
   numEdges = edges.size();
 
   setNodeLevels();
-  
+
   leafNodes.resize(0);
   internalNodes.resize(0);
 }
@@ -253,7 +253,7 @@ void Tree::relabel(Alignment& alignment)
   {
     if ( !(*p)->getLeaf() )
       continue;
-    
+
     string name = (*p)->getName();
     if ( isdigit( name[0] ) )
     {
@@ -455,7 +455,7 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
   {
     double scale=0;
     Vector4d tempProb(1,1,1,1);
-    
+
     for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     {
       if ( (*e) != parent )
@@ -718,6 +718,7 @@ void Tree::depthFirstNodeList(list<Node*>& nodeList)
   root->depthFirstNodeList(nodeList,NULL);
 }
 
+// clau: set attribute nodeParent, edgeParent for Node
 void Node::setActiveChildrenAndNodeParents(Edge* parent)
 {
   if ( parent != NULL )
@@ -732,14 +733,14 @@ void Node::setActiveChildrenAndNodeParents(Edge* parent)
   }
   if ( leaf )
     return;
-  activeChildren.clear();
-  for ( vector<Edge*>::iterator e=edges.begin(); e!= edges.end(); ++e )
+  activeChildren.clear(); // clau: activeChildren is vector of nodes of Node
+  for ( vector<Edge*>::iterator e=edges.begin(); e!= edges.end(); ++e ) //clau: edges is vector of edges of Node
   {
-    if ( (*e) != parent )
+    if ( (*e) != parent ) // clau: go to all children
     {
-      Node* n = getNeighbor(*e);
-      activeChildren.push_back(n);
-      n->setActiveChildrenAndNodeParents(*e);
+      Node* n = getNeighbor(*e); //clau: *e = pointer to e
+      activeChildren.push_back(n); //clau: make n an active child
+      n->setActiveChildrenAndNodeParents(*e); //clau: n->bla ~ n.bla (conceptually)
     }
   }
 }
@@ -783,10 +784,10 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
   list<Node*> nodeList;
   depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents();
-//   cout << "Node List:";
-//   for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-//     cout << " " << (*p)->getNumber();
-//   cout << endl;
+  cout << "Node List:";
+  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+    cout << " " << (*p)->getNumber();
+  cout << endl;
 
   list<Node*>::iterator p=nodeList.begin();
   while ( true )
@@ -794,10 +795,10 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     Node* x;
     Node* y;
     Node* z;
-    Node* par;
-    if ( (*p)->getNodeParent() == root )
+    Node* par; //clau: parent of x,y,z
+    if ( (*p)->getNodeParent() == root ) //clau: if p parent is root
     {
-      if ( root->getActiveChildrenSize() != 3)
+      if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
       {
         cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
         cerr << root->getActiveChild(0)->getNumber() << endl;
@@ -809,9 +810,9 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
       y = *p++;
       z = *p;
     }
-    else
+    else //clau: p parent not root
     {
-      x = *p++;
+      x = *p++; //clau: dont understand here, need to print order of nodes: modify depthFirstNodeList to print, and here
       y = *p++;
       par = x->getNodeParent();
       z = par->closeRelative();
@@ -826,7 +827,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
       y->calculate(k,alignment,y->getEdgeParent(),false);
       z->calculate(k,alignment,z->getEdgeParent(),false);
     }
-    
+
 //    cerr << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << " " << par->getNumber() << endl;
     map<pair<int,int>,double>::iterator m;
     double dxy, dxz, dyz;
@@ -855,14 +856,14 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     if ( lengthY < 0 )
     {
       cerr << "Warning: fix negative edge length." << endl;
-      lengthY = 0;      
+      lengthY = 0;
     }
     x->getEdgeParent()->setLength( lengthX );
     y->getEdgeParent()->setLength( lengthY );
     double lengthZ = (dxz + dyz - dxy)*0.5;
     if ( lengthZ < 0 )
     {
-      cerr << "Warning: fix negative edge length." << endl;        
+      cerr << "Warning: fix negative edge length." << endl;
       lengthZ = 0;
     }
     if ( par==root )
@@ -874,7 +875,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     par->deactivateChild(1);
     par->deactivateChild(0);
   }
-  
+
   for ( map<pair<int,int>,double>::iterator m=distanceMap.begin(); m!= distanceMap.end(); ++m )
     cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
 }
