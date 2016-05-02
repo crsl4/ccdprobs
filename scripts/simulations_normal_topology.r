@@ -13,6 +13,8 @@ library(mvtnorm)
 ## Case (1,2)---(3,4)
 ## simulating data, but also getting bootstrap NJ clade dist
 ## for topology uncertainty
+## CONCLUSION: methods still work, but we have more negative BL problems
+## ESS ~50%
 seed = 1208
 set.seed(seed)
 who="(1,2)---(3,4)"
@@ -340,28 +342,35 @@ data = data.frame(trees,tx1,tx2,tx3,tx4,d1x.joint,d2x.joint,d3y.joint,d4y.joint,
     d1x.nj,d2x.nj,d3y.nj,d4y.nj,dxy.nj,logwv.nj, logl.nj, logdens.nj)
 head(data)
 summary(data)
-data[data$logwv.joint==0,] ##0
-data[data$logwv.cond==0,] ##0
-data[data$logwv.nj==0,] ## too many!!
-##data <- subset(data,logwv.nj!=0)
-
-my.logw.joint = data$logwv.joint - mean(data$logwv.joint)
-data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
-data[data$w.joint>0.01,]
-length(data[data$w.joint>0.01,]$w.joint)
-hist(data$w.joint)
-plot(1:length(data$w.joint),cumsum(rev(sort(data$w.joint))))
-my.logw.cond = data$logwv.cond - mean(data$logwv.cond)
-data$w.cond = exp(my.logw.cond)/sum(exp(my.logw.cond))
-data[data$w.cond>0.01,]
-length(data[data$w.cond>0.01,]$w.cond)
-hist(data$w.cond)
-plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
+data[data$logwv.joint==0,]
+length(data[data$logwv.joint==0,]$logwv.joint) ## 279
+data[data$logwv.cond==0,]
+length(data[data$logwv.cond==0,]$logwv.cond) ## 276
+data[data$logwv.nj==0,]
+length(data[data$logwv.nj==0,]$logwv.nj) ## 415
 
 save(data,file=paste0("simulations_normal_topology",seed,".Rda"))
 save(mean.joint, mat.joint, mean1.cond, mean2.cond, mat.cond, mat.nj, file=paste0("simulations_normal_topology_meanmat",seed,".Rda"))
 
+data.joint <- subset(data,logwv.joint!=0)
+data.cond <- subset(data,logwv.cond!=0)
+
+my.logw.joint = data.joint$logwv.joint - mean(data.joint$logwv.joint)
+data.joint$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
+data.joint[data.joint$w.joint>0.01,]
+length(data.joint[data.joint$w.joint>0.01,]$w.joint) ## 1, 0.0117
+hist(data.joint$w.joint)
+plot(1:length(data.joint$w.joint),cumsum(rev(sort(data.joint$w.joint))))
+
+my.logw.cond = data.cond$logwv.cond - mean(data.cond$logwv.cond)
+data.cond$w.cond = exp(my.logw.cond)/sum(exp(my.logw.cond))
+data.cond[data.cond$w.cond>0.01,]
+length(data.cond[data.cond$w.cond>0.01,]$w.cond) ## 0
+hist(data.cond$w.cond)
+plot(1:length(data.cond$w.cond),cumsum(rev(sort(data.cond$w.cond))))
+
+
 
 ## effective sample size:
-(1/sum(data$w.joint^2))/nreps
-(1/sum(data$w.cond^2))/nreps
+(1/sum(data.joint$w.joint^2))/nreps
+(1/sum(data.cond$w.cond^2))/nreps
