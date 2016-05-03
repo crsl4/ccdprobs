@@ -548,7 +548,6 @@ void Tree::randomize(mt19937_64& rng)
   root->randomize(rng,NULL);
   setNodeLevels();
 }
-
 void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl,bool recurse)
 {
   Matrix4d P = qmatrix.getTransitionMatrix(t);
@@ -579,6 +578,93 @@ void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* 
   }
 }
 
+void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector3d& gradient,Matrix3d& hessian,bool recurse)
+{
+  Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
+  Matrix4d QP1 = qmatrix.getQP(t[0]);
+  Matrix4d QQP1 = qmatrix.getQQP(t[0]);
+  Matrix4d P2 = qmatrix.getTransitionMatrix(t[1]);
+  Matrix4d QP2 = qmatrix.getQP(t[1]);
+  Matrix4d QQP2 = qmatrix.getQQP(t[1]);
+  Matrix4d P3 = qmatrix.getTransitionMatrix(t[2]);
+  Matrix4d QP3 = qmatrix.getQP(t[2]);
+  Matrix4d QQP3 = qmatrix.getQQP(t[2]);
+  Vector4d vq = qmatrix.getStationaryP();
+  Vector4d ones(1,1,1,1);
+
+  int numSites = alignment.getNumSites();
+
+  logl = 0;
+  double dll1 = 0;
+  double dll2 = 0;
+  double dll3 = 0;
+  double d2ll_11 = 0;
+  double d2ll_12 = 0;
+  double d2ll_13 = 0;
+  double d2ll_22 = 0;
+  double d2ll_23 = 0;
+  double d2ll_33 = 0;
+
+  for ( int k=0; k<numSites; ++k )
+  {
+    nx->calculate(k,alignment,ex,recurse); // set pattern and put probability in map if not already there
+    ny->calculate(k,alignment,ey,recurse);
+    nz->calculate(k,alignment,ez,recurse);
+    pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
+    pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
+    pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
+
+    Vector4d S1 = P1 * px.second.asDiagonal() * ones; //question: do i need to save px.second as a variable?
+    Vector4d S2 = P2 * py.second.asDiagonal() * ones;
+    Vector4d S3 = P3 * pz.second.asDiagonal() * ones;
+    Vector4d S1pr = QP1 * px.second.asDiagonal() * ones;
+    Vector4d S2pr = QP2 * py.second.asDiagonal() * ones;
+    Vector4d S3pr = QP3 * pz.second.asDiagonal() * ones;
+    Vector4d S1doublepr = QQP1 * px.second.asDiagonal() * ones;
+    Vector4d S2doublepr = QQP2 * py.second.asDiagonal() * ones;
+    Vector4d S3doublepr = QQP3 * pz.second.asDiagonal() * ones;
+
+    //    cout << "vq as diagonal " << vq.asDiagonal() << ", S1 as diagonal " << S1.asDiagonal() << endl;
+
+    //question: matrix product error
+    // double fk = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkpr1 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkpr2 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkpr3 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
+    // double fkdoublepr11 = (vq.asDiagonal() * S1doublepr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkdoublepr22 = (vq.asDiagonal() * S1.asDiagonal() * S2doublepr.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkdoublepr33 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3doublepr.asDiagonal()).sum();
+    // double fkdoublepr12 = (vq.asDiagonal() * S1pr.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkdoublepr13 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
+    // double fkdoublepr23 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3pr.asDiagonal()).sum();
+
+    double fk = 0.1 ;
+    double fkpr1 = 0.1;
+    double fkpr2 = 0.1;
+    double fkpr3 = 0.1;
+    double fkdoublepr11 = 0.1;
+    double fkdoublepr22 = 0.1;
+    double fkdoublepr33 = 0.1;
+    double fkdoublepr12 = 0.1;
+    double fkdoublepr13 = 0.1;
+    double fkdoublepr23 = 0.1;
+
+
+    logl += px.first + py.first + pz.first + log( fk ); //question: scaling correct?
+    dll1 += fkpr1/fk;
+    dll2 += fkpr2/fk;
+    dll3 += fkpr3/fk;
+    d2ll_11 += (fk*fkdoublepr11 - fkpr1*fkpr1)/(fk*fk);
+    d2ll_12 += (fk*fkdoublepr12 - fkpr1*fkpr2)/(fk*fk);
+    d2ll_13 += (fk*fkdoublepr13 - fkpr1*fkpr3)/(fk*fk);
+    d2ll_22 += (fk*fkdoublepr22 - fkpr2*fkpr2)/(fk*fk);
+    d2ll_23 += (fk*fkdoublepr23 - fkpr2*fkpr3)/(fk*fk);
+    d2ll_33 += (fk*fkdoublepr33 - fkpr3*fkpr3)/(fk*fk);
+  }
+  gradient << dll1, dll2, dll3; //question: set vector and matrix like this?
+  hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33;
+}
+
 //clau: I dont think we need these 3 functions
 double Tree::pathLogLikelihood(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,bool recurse)
 {
@@ -607,6 +693,12 @@ void mleError(Node* na,Node* nb,double curr,double prop,double curr_dlogl,double
   cerr << "Error: too many iterations in mleDistance." << endl;
   cerr << "Nodes " << na->getNumber() << " and " << nb->getNumber() << endl;
   cerr << "Derivative = " << curr_dlogl << " and " << prop_dlogl << endl;
+  exit(1);
+}
+void mleErrorJoint(Node* nx,Node* ny,Node* nz)
+{
+  cerr << "Error: too many iterations in mleDistanceJoint." << endl;
+  cerr << "Nodes " << nx->getNumber() << ", " << ny->getNumber() << ", and " << nz->getNumber() << endl;
   exit(1);
 }
 // Find mle distance from node a to b through a path that uses edges ea and eb.
@@ -682,6 +774,66 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
   } while ( fabs(curr - prop) > 1.0e-8);
   return prop;
 }
+
+// Find joint mle distance between nodes nx,ny,nz with edges ex,ey,ez
+// Conditon on data in subtrees through other edges.
+// Assumes that edge lengths in these subtrees exist
+// and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
+// it calls different functions depending on the number of sums known
+// question: double& to modify inside?
+void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng)
+{
+  if ( sxy + sxz + syz == 0) //not conditional
+    {
+      mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng);
+      return;
+    }
+}
+
+// Find joint mle distance between nodes nx,ny,nz with edges ex,ey,ez
+// Conditon on data in subtrees through other edges.
+// Assumes that edge lengths in these subtrees exist
+// and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
+void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng)
+{
+  bool recurse=true; //question: not sure this should be true, need to think
+  int iter=0;
+  Vector3d curr(lx,ly,lz);
+  double curr_logl;
+  Vector3d curr_gradient; //question: declare like this?
+  Matrix3d curr_hessian;
+  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+  Vector3d prop = curr; //question: how to make equal to curr?
+  double prop_logl = curr_logl;
+  Vector3d prop_gradient = curr_gradient; //question: how to make vectors/matrices equal?
+  Matrix3d prop_hessian = curr_hessian;
+  do
+  {
+    curr = prop;
+    partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
+    if ( ++iter > 100 )
+      mleErrorJoint(nx,ny,nz);
+    //    Vector3d delta = curr_hessian.llt() * curr_gradient; //question: inverse(hessian) * gradient?
+    Vector3d delta(0.01,0.01,0.01);
+    prop = curr - delta;
+    while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0) //question: better way?
+    {
+      delta = 0.5*delta;
+      prop = curr - delta;
+    }
+    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
+    if ( ++iter > 100 )
+      mleErrorJoint(nx,ny,nz);
+  } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8 || fabs(curr[2] - prop[2]) >1.0e-8 ); //question: better way?
+
+  //Matrix3d cov = -prop_hessian.llt(); //question: how to take inverse? error here
+  Vector3d bl = multivariateNormal(prop,cov,rng);
+  lx = bl[0]; //question: better input as vector?
+  ly = bl[1];
+  lz = bl[2];
+}
+
+
 
 void Node::setLevel(Edge* parent)
 {
@@ -779,7 +931,7 @@ pair<int,int> getPair(int x,int y)
   return pair<int,int> (x,y);
 }
 
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng) //clau: added seed
 {
   map<pair<int,int>,double> distanceMap;
   list<Node*> nodeList;
@@ -813,20 +965,11 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     }
     else //clau: p parent not root
     {
-      // cout << "*p is " << (*p)->getNumber();
-      // cout << endl;
-      x = *p++; //question: dont understand here, seems like *p==*p++, I think it means take *p and move right
+      x = *p++; //it means take *p and move right
       y = *p++;
       par = x->getNodeParent();
       z = par->closeRelative();
-      // cout << "*p is " << (*p)->getNumber();
-      // cout << endl;
     }
-    // cout << "x is " << x->getNumber();
-    // cout << ", y is " << y->getNumber();
-    // cout << ", z is " << z->getNumber();
-    // cout << ", par is " << par->getNumber();
-    // cout << endl;
     // do calculations
     x->calculateEdges(qmatrix); //question: why do we do this? aren't bl meaningless at this point?
     y->calculateEdges(qmatrix);
@@ -836,7 +979,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
       x->calculate(k,alignment,x->getEdgeParent(),false); //clau: recurse=false
       y->calculate(k,alignment,y->getEdgeParent(),false);
       z->calculate(k,alignment,z->getEdgeParent(),false);
-    } //clau: after this, we have in each node the patternProb map, but we dont know how many different patterns, do we? (question) no, we search the pattern in mleDistance
+    } //clau: after this, we have in each node the patternProb map, but we dont know how many different patterns, do we? no, we search the pattern in mleDistance
 
 //    cerr << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << " " << par->getNumber() << endl;
     map<pair<int,int>,double>::iterator m;
@@ -889,36 +1032,35 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     }
     //cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
 
-    //to do: add here what is simulate multinormal
     double lx = lengthX0;
     double ly = lengthY0;
     double lz = lengthZ0;
     double sxy = 0;
     double sxz = 0;
     double syz = 0;
+    if ( foundxy + foundxz + foundyz == 3 ) //all found, error
+      {
+	cerr << "Error: three sums found, cannot condition on three sums" << endl;
+	exit(1);
+      }
     if ( foundxy )
       sxy = dxy;
     if ( foundxz )
       sxz = dxz;
     if ( foundyz )
       syz = dyz;
-    if ( foundxy + foundxz + foundyz == 3 ) //all found, error
-      {
-	cerr << "Error: three sums found, cannot condition on three sums" << endl;
-	return; //question: how to throw an error here
-      }
     cout << "sxy " << sxy << ", sxz " << sxz << ", syz " << syz << endl;
-    //mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz);
-    // aqui voy: crear mleDistanceJoint
-    x->getEdgeParent()->setLength( lengthX0 );
-    y->getEdgeParent()->setLength( lengthY0 );
+    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng);
+
+    x->getEdgeParent()->setLength( lx );
+    y->getEdgeParent()->setLength( ly );
 
     if ( par==root )
     {
-      z->getEdgeParent()->setLength( lengthZ0 );
+      z->getEdgeParent()->setLength( lz );
       break;
     }
-    distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lengthZ0; //question: why it seems you are only putting lengthZ in distanceMap? dont we need to input X,Y?
+    distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lz; //question: why it seems you are only putting lengthZ in distanceMap? dont we need to input X,Y?
                                                                         // is it because dist X,par and Y,par is always one edge only? will it be?
                                                                         // clau: I think yes, we only need lengthZ because that is more than 1 edge
     par->deactivateChild(1);

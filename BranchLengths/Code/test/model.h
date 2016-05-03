@@ -42,5 +42,5 @@ public:
   Vector6d getSymmetricQP() const { return symmetricQP; }
   Vector4d getStatP() const { return stationaryP; }
 };
-  
+
 #endif

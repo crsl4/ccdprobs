@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     checkDistances(tree,alignment,model);
     tree.randomize(rng);
     cout << tree.makeTopologyNumbers() << endl;
-    tree.generateBranchLengths(alignment,model);
+    tree.generateBranchLengths(alignment,model,rng);
     tree.print(cout);
   }
   return 0;

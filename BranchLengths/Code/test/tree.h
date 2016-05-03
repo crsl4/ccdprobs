@@ -152,14 +152,17 @@ public:
   void randomize(mt19937_64&);
   void clearProbMaps();
   void partialPathCalculations(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double&,double&,double&,bool);
-  double pathLogLikelihood(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool); //clau: i dont think we need these 3 functions
+  void partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector3d& gradient,Matrix3d& hessian,bool recurse);
+  double pathLogLikelihood(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool);
   double pathLogLikelihoodDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool);
   double pathLogLikelihoodSecondDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool);
   double mleDistance(Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&);
+  void mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng);
+  void mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng);
   void setNodeLevels();
   void depthFirstNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
-  void generateBranchLengths(Alignment&,QMatrix&);
+  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64& rng);
 };
 
 #endif
