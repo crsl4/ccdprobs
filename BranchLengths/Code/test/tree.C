@@ -562,11 +562,11 @@ void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* 
   for ( int k=0; k<numSites; ++k )
   {
     na->calculate(k,alignment,ea,recurse); // set pattern and put probability in map if not already there
-    nb->calculate(k,alignment,eb,recurse);
+    nb->calculate(k,alignment,eb,recurse); //clau: i think we are doing this twice (before calling mleDistance, and here)
     pair<double,Vector4d> pa = na->patternToProbMap[na->getPattern()];
     pair<double,Vector4d> pb = nb->patternToProbMap[nb->getPattern()];
     Vector4d va = pa.second;
-    Vector4d vq = qmatrix.getStationaryP();
+    Vector4d vq = qmatrix.getStationaryP(); //question: do we need to do this inside for each site?
     for ( int i=0; i<4; ++i )
       va(i) *= vq(i);
     Vector4d vb = pb.second;
@@ -579,6 +579,7 @@ void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* 
   }
 }
 
+//clau: I dont think we need these 3 functions
 double Tree::pathLogLikelihood(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,bool recurse)
 {
   double logl,dlogl,ddlogl;
@@ -614,7 +615,7 @@ void mleError(Node* na,Node* nb,double curr,double prop,double curr_dlogl,double
 // and that the patternToProbMaps are accurate if edges ea and eb head toward the root.
 double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
 {
-  bool recurse=true;
+  bool recurse=true; //question: not sure this should be true, need to think
   int iter=0;
   double curr = 0.05;
   // get a decent starting point
@@ -814,7 +815,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     {
       // cout << "*p is " << (*p)->getNumber();
       // cout << endl;
-      x = *p++; //question: dont understand here, seems like *p==*p++, I think it means take *p and move
+      x = *p++; //question: dont understand here, seems like *p==*p++, I think it means take *p and move right
       y = *p++;
       par = x->getNodeParent();
       z = par->closeRelative();
@@ -832,55 +833,94 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     z->calculateEdges(qmatrix);
     for ( int k=0; k<alignment.getNumSites(); ++k )
     {
-      x->calculate(k,alignment,x->getEdgeParent(),false);
+      x->calculate(k,alignment,x->getEdgeParent(),false); //clau: recurse=false
       y->calculate(k,alignment,y->getEdgeParent(),false);
       z->calculate(k,alignment,z->getEdgeParent(),false);
-    } //clau: after this, we have in each node the patternProb map, but we dont know how many different patterns, do we? (question)
-    // aqui voy: to do, finish studying generateBL function
+    } //clau: after this, we have in each node the patternProb map, but we dont know how many different patterns, do we? (question) no, we search the pattern in mleDistance
+
 //    cerr << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << " " << par->getNumber() << endl;
     map<pair<int,int>,double>::iterator m;
     double dxy, dxz, dyz;
+    bool foundxy = false; //clau: depending on which bl are found it is condition on 1 or 2 sums
+    bool foundyz = false;
+    bool foundxz = false;
     m = distanceMap.find( getPair(x->getNumber(),y->getNumber()) );
-    if ( m == distanceMap.end() )
+    if ( m == distanceMap.end() ) //clau: did not find x,y; when do you put them inside distanceMap? at the end here
       dxy = mleDistance(alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),qmatrix);
     else
-      dxy = m->second;
+      {
+	dxy = m->second;
+	foundxy = true;
+      }
     m = distanceMap.find( getPair(x->getNumber(),z->getNumber()) );
     if ( m == distanceMap.end() )
       dxz = mleDistance(alignment,x,x->getEdgeParent(),z,z->getEdgeParent(),qmatrix);
     else
-      dxz = m->second;
+      {
+	dxz = m->second;
+	foundxz = true;
+      }
     m = distanceMap.find( getPair(y->getNumber(),z->getNumber()) );
     if ( m == distanceMap.end() )
       dyz = mleDistance(alignment,y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix);
     else
-      dyz = m->second;
-    double lengthX = (dxy + dxz - dyz)*0.5;
-    if ( lengthX < 0 )
+      {
+	dyz = m->second;
+	foundyz = true;
+      }
+    //clau: lengthX0, lengthY0, lengthZ0 (from NJ) are starting points for joint N-R:
+    double lengthX0 = (dxy + dxz - dyz)*0.5;
+    if ( lengthX0 < 0 )
     {
       cerr << "Warning: fix negative edge length." << endl;
-      lengthX = 0;
+      lengthX0 = 0.0001; //clau: does not work very well starting point of 0
     }
-    double lengthY = (dxy + dyz - dxz)*0.5;
-    if ( lengthY < 0 )
+    double lengthY0 = (dxy + dyz - dxz)*0.5;
+    if ( lengthY0 < 0 )
     {
       cerr << "Warning: fix negative edge length." << endl;
-      lengthY = 0;
+      lengthY0 = 0.0001;
     }
-    x->getEdgeParent()->setLength( lengthX );
-    y->getEdgeParent()->setLength( lengthY );
-    double lengthZ = (dxz + dyz - dxy)*0.5;
-    if ( lengthZ < 0 )
+    double lengthZ0 = (dxz + dyz - dxy)*0.5;
+    if ( lengthZ0 < 0 )
     {
       cerr << "Warning: fix negative edge length." << endl;
-      lengthZ = 0;
+      lengthZ0 = 0.0001;
     }
+    //cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
+
+    //to do: add here what is simulate multinormal
+    double lx = lengthX0;
+    double ly = lengthY0;
+    double lz = lengthZ0;
+    double sxy = 0;
+    double sxz = 0;
+    double syz = 0;
+    if ( foundxy )
+      sxy = dxy;
+    if ( foundxz )
+      sxz = dxz;
+    if ( foundyz )
+      syz = dyz;
+    if ( foundxy + foundxz + foundyz == 3 ) //all found, error
+      {
+	cerr << "Error: three sums found, cannot condition on three sums" << endl;
+	return; //question: how to throw an error here
+      }
+    cout << "sxy " << sxy << ", sxz " << sxz << ", syz " << syz << endl;
+    //mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz);
+    // aqui voy: crear mleDistanceJoint
+    x->getEdgeParent()->setLength( lengthX0 );
+    y->getEdgeParent()->setLength( lengthY0 );
+
     if ( par==root )
     {
-      z->getEdgeParent()->setLength( lengthZ );
+      z->getEdgeParent()->setLength( lengthZ0 );
       break;
     }
-    distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lengthZ;
+    distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lengthZ0; //question: why it seems you are only putting lengthZ in distanceMap? dont we need to input X,Y?
+                                                                        // is it because dist X,par and Y,par is always one edge only? will it be?
+                                                                        // clau: I think yes, we only need lengthZ because that is more than 1 edge
     par->deactivateChild(1);
     par->deactivateChild(0);
   }
