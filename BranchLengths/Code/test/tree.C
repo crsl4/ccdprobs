@@ -752,6 +752,97 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
   hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22;
 }
 
+//todo: finish partialpathcalculations1D, still not started
+// and then finish mledistancejoint, and compile
+//later make list of our usual examples?
+
+// similar to partialPathCalculations3D, t=(t1,t2), sum=s-t1
+// warning: need to be careful in the order of t
+// gradient and hessian are 2d now
+void Tree::partialPathCalculations1D(Vector2d t, double sum,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector2d& gradient,Matrix2d& hessian,bool recurse)
+{
+  if (sum < t[0])
+    {
+      cerr << "Sum smaller than summand in partialPathCalculations2D" << endl;
+      exit(1);
+    }
+  Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
+  Matrix4d QP1 = qmatrix.getQP(t[0]);
+  Matrix4d QQP1 = qmatrix.getQQP(t[0]);
+  Matrix4d P2 = qmatrix.getTransitionMatrix(t[1]);
+  Matrix4d QP2 = qmatrix.getQP(t[1]);
+  Matrix4d QQP2 = qmatrix.getQQP(t[1]);
+  Matrix4d P3 = qmatrix.getTransitionMatrix(sum-t[0]);
+  Matrix4d QP3 = qmatrix.getQP(sum-t[0]);
+  Matrix4d QQP3 = qmatrix.getQQP(sum-t[0]);
+  Vector4d vq = qmatrix.getStationaryP();
+  Vector4d ones(1,1,1,1);
+
+  int numSites = alignment.getNumSites();
+
+  logl = 0;
+  double dll1 = 0;
+  double dll2 = 0;
+  double d2ll_11 = 0;
+  double d2ll_12 = 0;
+  double d2ll_22 = 0;
+
+  for ( int k=0; k<numSites; ++k )
+  {
+    nx->calculate(k,alignment,ex,recurse); // set pattern and put probability in map if not already there
+    ny->calculate(k,alignment,ey,recurse);
+    nz->calculate(k,alignment,ez,recurse);
+    pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
+    pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
+    pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
+
+    Vector4d S1 = P1 * px.second.asDiagonal() * ones; //question: do i need to save px.second as a variable?
+    Vector4d S2 = P2 * py.second.asDiagonal() * ones;
+    Vector4d S3 = P3 * pz.second.asDiagonal() * ones;
+    Vector4d S1pr = QP1 * px.second.asDiagonal() * ones;
+    Vector4d S2pr = QP2 * py.second.asDiagonal() * ones;
+    Vector4d S3pr = (-1) * QP3 * pz.second.asDiagonal() * ones; //question: can we multiply by constant?
+    Vector4d S1doublepr = QQP1 * px.second.asDiagonal() * ones;
+    Vector4d S2doublepr = QQP2 * py.second.asDiagonal() * ones;
+    Vector4d S3doublepr = QQP3 * pz.second.asDiagonal() * ones;
+
+    //    cout << "vq as diagonal " << vq.asDiagonal() << ", S1 as diagonal " << S1.asDiagonal() << endl;
+
+    //question: matrix product error
+    // double fk = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkpr1 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkpr2 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkpr3 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
+    // double fkdoublepr11 = (vq.asDiagonal() * S1doublepr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkdoublepr22 = (vq.asDiagonal() * S1.asDiagonal() * S2doublepr.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkdoublepr33 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3doublepr.asDiagonal()).sum();
+    // double fkdoublepr12 = (vq.asDiagonal() * S1pr.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
+    // double fkdoublepr13 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
+    // double fkdoublepr23 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3pr.asDiagonal()).sum();
+
+    double fk = 0.1 ;
+    double fkpr1 = 0.1;
+    double fkpr2 = 0.1;
+    double fkpr3 = 0.1;
+    double fkdoublepr11 = 0.1;
+    double fkdoublepr22 = 0.1;
+    double fkdoublepr33 = 0.1;
+    double fkdoublepr12 = 0.1;
+    double fkdoublepr13 = 0.1;
+    double fkdoublepr23 = 0.1;
+
+
+    logl += px.first + py.first + pz.first + log( fk ); //question: scaling correct?
+    dll1 += (fkpr1+fkpr3)/fk;
+    dll2 += fkpr2/fk;
+    d2ll_11 += (fk*(fkdoublepr11+2*fkdoublepr13+fkdoublepr33) - (fkpr1+fkpr3)*(fkpr1+fkpr3))/(fk*fk);
+    d2ll_12 += (fk*(fkdoublepr12+fkdoublepr23) - fkpr2*(fkpr1+fkpr3))/(fk*fk);
+    d2ll_22 += (fk*fkdoublepr22 - fkpr2*fkpr2)/(fk*fk);
+  }
+  gradient << dll1, dll2; //question: set vector and matrix like this?
+  hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22;
+}
+
 //clau: I dont think we need these 3 functions
 double Tree::pathLogLikelihood(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,bool recurse)
 {
@@ -861,6 +952,87 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
   } while ( fabs(curr - prop) > 1.0e-8);
   return prop;
 }
+// Find mle distance between nodes nx,ny,nz with edges ex,ey,ez
+// conditional on two sums: t1,s1-t1,s2-t1
+// warning: input t1,t2,t3,s1,s2
+// Conditon on data in subtrees through other edges.
+// Assumes that edge lengths in these subtrees exist
+// and that the patternToProbMaps are accurate if edges ea and eb head toward the root.
+void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum1, double& sum2, mt19937_64& rng)
+{
+  if(sum1 < t1 || sum2 < t1)
+    {
+      cerr << "Sum smaller than summand in mle distance1D" << endl;
+      exit(1);
+    }
+  bool recurse=true; //question: not sure this should be true, need to think
+  int iter=0;
+  double curr = t1;
+  double curr_logl,curr_dlogl,curr_ddlogl;
+  partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
+  double prop = curr;
+  double prop_logl = curr_logl;
+  double prop_dlogl = curr_dlogl;
+  double prop_ddlogl = curr_ddlogl;
+  if ( curr_dlogl > 0 )
+  {
+    do
+    {
+      curr = prop;
+      curr_logl = prop_logl;
+      curr_dlogl = prop_dlogl;
+      curr_ddlogl = prop_ddlogl;
+      prop = 2*curr;
+      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+      if ( ++iter > 100 )
+        mleErrorJoint(nx,ny,nz);
+    } while ( prop_dlogl > 0);
+  }
+  else
+  {
+    do
+    {
+      curr = prop;
+      curr_logl = prop_logl;
+      curr_dlogl = prop_dlogl;
+      curr_ddlogl = prop_ddlogl;
+      prop = 0.5*curr;
+      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+      if ( ++iter > 100 )
+        mleErrorJoint(nx,ny,nz);
+    } while ( prop_dlogl < 0 );
+  }
+  // switch to protected Newton-Raphson
+  prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
+  do
+  {
+    curr = prop;
+    partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
+    if ( ++iter > 100 )
+      mleErrorJoint(nx,ny,nz);
+    double delta = -curr_dlogl / curr_ddlogl;
+    prop = curr + delta;
+    while ( prop < 0 )
+    {
+      delta = 0.5*delta;
+      prop = curr + delta;
+    }
+    partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+    if ( ++iter > 100 )
+      mleErrorJoint(nx,ny,nz);
+    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
+    {
+      delta = 0.5*delta;
+      prop = curr + delta;
+      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+      if ( ++iter > 100 )
+        mleErrorJoint(nx,ny,nz);
+    }
+  } while ( fabs(curr - prop) > 1.0e-8);
+  t1 = prop; //question: need normal with mean prop, variance -prop_ddlogl
+  t2 = s1-t1;
+  t3 = s2-t1;
+}
 
 // Find joint mle distance between nodes nx,ny,nz with edges ex,ey,ez
 // Conditon on data in subtrees through other edges.
@@ -933,7 +1105,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   //Matrix3d cov = -prop_hessian.llt(); //question: how to take inverse? error here
   //Vector3d bl = multivariateNormal(prop,cov,rng);
   Vector3d bl = prop;
-  lx = bl[0]; //question: better input as vector?
+  lx = bl[0];
   ly = bl[1];
   lz = bl[2];
 }
@@ -985,7 +1157,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   //Matrix2d cov = -prop_hessian.llt(); //question: how to take inverse? error here
   //Vector2d bl = multivariateNormal(prop,cov,rng);
   Vector2d bl = prop;
-  t1 = bl[0]; //question: better input as vector?
+  t1 = bl[0];
   t2 = bl[1];
   t3 = sum-bl[0];
 }
