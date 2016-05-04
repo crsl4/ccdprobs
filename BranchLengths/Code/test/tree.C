@@ -665,7 +665,7 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
   hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33;
 }
 
-// similar to partialPathCalculations3D, t=(t1,t2), sum=s-t1
+// similar to partialPathCalculations3D, t=(t1,t2), sum: t3=sum-t1
 // warning: need to be careful in the order of t
 // gradient and hessian are 2d now
 void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector2d& gradient,Matrix2d& hessian,bool recurse)
@@ -756,36 +756,31 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
 // and then finish mledistancejoint, and compile
 //later make list of our usual examples?
 
-// similar to partialPathCalculations3D, t=(t1,t2), sum=s-t1
-// warning: need to be careful in the order of t
-// gradient and hessian are 2d now
-void Tree::partialPathCalculations1D(Vector2d t, double sum,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector2d& gradient,Matrix2d& hessian,bool recurse)
+// similar to partialPathCalculations2D, t=t1, sum1,sum2
+  void Tree::partialPathCalculations1D(double t1, double sum1, double sum2, Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl,bool recurse)
 {
-  if (sum < t[0])
+  if (sum1 < t1 || sum2 < t1)
     {
-      cerr << "Sum smaller than summand in partialPathCalculations2D" << endl;
+      cerr << "Sum smaller than summand in partialPathCalculations1D" << endl;
       exit(1);
     }
-  Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
-  Matrix4d QP1 = qmatrix.getQP(t[0]);
-  Matrix4d QQP1 = qmatrix.getQQP(t[0]);
-  Matrix4d P2 = qmatrix.getTransitionMatrix(t[1]);
-  Matrix4d QP2 = qmatrix.getQP(t[1]);
-  Matrix4d QQP2 = qmatrix.getQQP(t[1]);
-  Matrix4d P3 = qmatrix.getTransitionMatrix(sum-t[0]);
-  Matrix4d QP3 = qmatrix.getQP(sum-t[0]);
-  Matrix4d QQP3 = qmatrix.getQQP(sum-t[0]);
+  Matrix4d P1 = qmatrix.getTransitionMatrix(t1);
+  Matrix4d QP1 = qmatrix.getQP(t1);
+  Matrix4d QQP1 = qmatrix.getQQP(t1);
+  Matrix4d P2 = qmatrix.getTransitionMatrix(sum1-t1);
+  Matrix4d QP2 = qmatrix.getQP(sum1-t1);
+  Matrix4d QQP2 = qmatrix.getQQP(sum1-t1);
+  Matrix4d P3 = qmatrix.getTransitionMatrix(sum2-t1);
+  Matrix4d QP3 = qmatrix.getQP(sum2-t1);
+  Matrix4d QQP3 = qmatrix.getQQP(sum2-t1);
   Vector4d vq = qmatrix.getStationaryP();
   Vector4d ones(1,1,1,1);
 
   int numSites = alignment.getNumSites();
 
   logl = 0;
-  double dll1 = 0;
-  double dll2 = 0;
-  double d2ll_11 = 0;
-  double d2ll_12 = 0;
-  double d2ll_22 = 0;
+  dlogl = 0;
+  ddlogl = 0;
 
   for ( int k=0; k<numSites; ++k )
   {
@@ -800,7 +795,7 @@ void Tree::partialPathCalculations1D(Vector2d t, double sum,Alignment& alignment
     Vector4d S2 = P2 * py.second.asDiagonal() * ones;
     Vector4d S3 = P3 * pz.second.asDiagonal() * ones;
     Vector4d S1pr = QP1 * px.second.asDiagonal() * ones;
-    Vector4d S2pr = QP2 * py.second.asDiagonal() * ones;
+    Vector4d S2pr = (-1) * QP2 * py.second.asDiagonal() * ones;
     Vector4d S3pr = (-1) * QP3 * pz.second.asDiagonal() * ones; //question: can we multiply by constant?
     Vector4d S1doublepr = QQP1 * px.second.asDiagonal() * ones;
     Vector4d S2doublepr = QQP2 * py.second.asDiagonal() * ones;
@@ -833,14 +828,9 @@ void Tree::partialPathCalculations1D(Vector2d t, double sum,Alignment& alignment
 
 
     logl += px.first + py.first + pz.first + log( fk ); //question: scaling correct?
-    dll1 += (fkpr1+fkpr3)/fk;
-    dll2 += fkpr2/fk;
-    d2ll_11 += (fk*(fkdoublepr11+2*fkdoublepr13+fkdoublepr33) - (fkpr1+fkpr3)*(fkpr1+fkpr3))/(fk*fk);
-    d2ll_12 += (fk*(fkdoublepr12+fkdoublepr23) - fkpr2*(fkpr1+fkpr3))/(fk*fk);
-    d2ll_22 += (fk*fkdoublepr22 - fkpr2*fkpr2)/(fk*fk);
+    dlogl += (fkpr1+fkpr2+fkpr3)/fk;
+    ddlogl += (fk*(fkdoublepr11+2*fkdoublepr12+2*fkdoublepr13+2*fkdoublepr23+fkdoublepr22+fkdoublepr33) - (fkpr1+fkpr2+fkpr3)*(fkpr1+fkpr2+fkpr3))/(fk*fk);
   }
-  gradient << dll1, dll2; //question: set vector and matrix like this?
-  hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22;
 }
 
 //clau: I dont think we need these 3 functions
@@ -1030,8 +1020,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     }
   } while ( fabs(curr - prop) > 1.0e-8);
   t1 = prop; //question: need normal with mean prop, variance -prop_ddlogl
-  t2 = s1-t1;
-  t3 = s2-t1;
+  t2 = sum1-t1;
+  t3 = sum2-t1;
 }
 
 // Find joint mle distance between nodes nx,ny,nz with edges ex,ey,ez
@@ -1043,6 +1033,11 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng)
 {
   cout << "Entering mleDistanceJoint" << endl;
+  if(sxy > 0 && sxz > 0 && syz > 0)
+    {
+      cerr << "Trying to condition al all three sums, impossible!" << endl;
+      exit(1);
+    }
   if ( sxy + sxz + syz == 0) //not conditional
     {
       mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng);
@@ -1061,6 +1056,21 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
   if( syz > 0 && sxz + sxy == 0) //conditional on syz
     {
       mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,ly,lx,lz,syz,rng); //warning in order branches
+      return;
+    }
+  if( sxy > 0 && sxz > 0) //conditional on sxy,sxz
+    {
+      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz, sxy, sxz, rng);
+      return;
+    }
+  if( sxy > 0 && syz > 0) //conditional on sxy,syz
+    {
+      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, ly, lx, lz, sxy, syz, rng);
+      return;
+    }
+  if( sxz > 0 && syz > 0) //conditional on sxz,syz
+    {
+      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lz, lx, ly, sxz, syz, rng);
       return;
     }
 }
@@ -1121,7 +1131,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   cout << "Entering mleDistance2D" << endl;
   if (sum < t1)
     {
-      cerr << "Sum smaller than summand" << endl;
+      cerr << "Sum smaller than summand in mleDistance2D" << endl;
       exit(1);
     }
   bool recurse=true; //question: not sure this should be true, need to think
