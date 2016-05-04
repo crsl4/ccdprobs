@@ -15,9 +15,10 @@ using namespace std;
 void checkDistances(Tree& tree,Alignment& alignment,QMatrix& model)
 {
   cout << tree.makeTopologyNumbers() << endl;
-  for ( int i=0; i<11; ++i )
+  int numTaxa = alignment.getNumTaxa();
+  for ( int i=0; i < numTaxa-1; ++i )
   {
-    for ( int j=i+1; j<12; ++j )
+    for ( int j=i+1; j<numTaxa; ++j )
     {
       Node* na = tree.getNode(i);
       Edge* ea = na->getEdge(i);
@@ -65,12 +66,12 @@ int main(int argc, char* argv[])
   {
     Tree tree(parameters.getTopology());
     tree.relabel(alignment);
-    tree.randomBranchLengths(rng,20); // only here to test likelihood calculations
+//    tree.randomBranchLengths(rng,20); // only here to test likelihood calculations
 //    tree.print(cout);
 //    tree.setSitePatterns(sequences);
 
     // log-likelihood calculation
-//    checkDistances(tree,alignment,model);
+    checkDistances(tree,alignment,model);
     tree.randomize(rng);
     cout << tree.makeTopologyNumbers() << endl;
     tree.generateBranchLengths(alignment,model);

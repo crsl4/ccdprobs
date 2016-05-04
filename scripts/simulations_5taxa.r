@@ -288,3 +288,4 @@ plot(1:length(data$w.cond2),cumsum(rev(sort(data$w.cond2))))
 (1/sum(data$w.cond2^2))/nreps
 
 save(data,file="data_5taxa.Rda")
+load("data_5taxa.Rda")

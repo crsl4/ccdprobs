@@ -30,6 +30,10 @@ Q = makeQ(r,p,4, rescale=TRUE)
 
 nreps = 1000
 trees = rep(NA,nreps)
+tx1 = rep(NA,nreps)
+tx2 = rep(NA,nreps)
+tx3 = rep(NA,nreps)
+tx4 = rep(NA,nreps)
 eta = 0.5
 
 logwv.joint = rep(0,nreps)
@@ -76,6 +80,10 @@ for(nr in 1:nreps){
     fth = setdiff(1:4,sis)
     print(paste("sis",sis))
     print(paste("fth",fth))
+    tx1[nr] = sis[1]
+    tx2[nr] = sis[2]
+    tx3[nr] = fth[1]
+    tx4[nr] = fth[2]
     seq1 = as.vector(unname(as.character(dat[sis[1],])))
     seq2 = as.vector(unname(as.character(dat[sis[2],])))
     seq3 = as.vector(unname(as.character(dat[fth[1],])))
@@ -268,7 +276,7 @@ for(nr in 1:nreps){
     }
 }
 
-data = data.frame(trees,d1x.joint,d2x.joint,d3y.joint,d4y.joint,dxy.joint,logwv.joint, logl.joint, logdens.joint,
+data = data.frame(trees,tx1,tx2,tx3,tx4,d1x.joint,d2x.joint,d3y.joint,d4y.joint,dxy.joint,logwv.joint, logl.joint, logdens.joint,
     d1x.cond,d2x.cond,d3y.cond,d4y.cond,dxy.cond,logwv.cond, logl.cond, logdens.cond,
     d1x.nj,d2x.nj,d3y.nj,d4y.nj,dxy.nj,logwv.nj, logl.nj, logdens.nj)
 head(data)
@@ -292,9 +300,174 @@ hist(data$w.cond)
 plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
 
 
-save(data,file=paste0("data_normal_",who,"2.Rda"))
+save(data,file=paste0("data_normal_",who,".Rda"))
+save(mean.joint, mat.joint, mean1.cond, mean2.cond, mat.cond, file=paste0("meanmat_normal_",who,".Rda"))
+load("data_normal_birds.Rda")
 
 ## effective sample size:
 (1/sum(data$w.joint^2))/nreps ## 56%
 (1/sum(data$w.cond^2))/nreps ## 5%
+
+bigw = data[data$w.cond>0.01,]
+subset(bigw,select=c(trees,tx1,tx2,tx3,tx4,d1x.cond, d2x.cond, d3y.cond, d4y.cond, dxy.cond, w.cond))
+summary(bigw)
+
+load("data_normal_birds.Rda")
+summary(data)
+data1 = data[data$trees=="((1,2),3,4);",]
+data2 = data[data$trees=="((1,3),2,4);",]
+data3 = data[data$trees=="(1,(2,3),4);",]
+
+## to do: check summary statistics (weighted) and compare to MB for birds,
+## see where there are shifts
+## see weighted frequency for each tree also
+
+
+## INTERNAL BL -----------------------------------------------------------------
+## first tree (1,2)
+## MB freq: 0.6819
+sum(data1$w.joint) ## 0.5432
+sum(data1$w.cond) ## 0.5172
+w1.joint = data1$w.joint/sum(data1$w.joint)
+w1.cond = data1$w.cond/sum(data1$w.cond)
+## mean MB dxy: 0.0261
+mm = weighted.mean(data1$dxy.joint,w1.joint) ## 0.0261
+weighted.mean(data1$dxy.cond,w1.cond) ## 0.0251
+## quartiles:
+weighted.quantile(data1$dxy.joint,w1.joint,probs=0.25) ## 0.02164
+weighted.quantile(data1$dxy.cond,w1.cond,probs=0.25) ## 0.02125
+weighted.quantile(data1$dxy.joint,w1.joint,probs=0.75) ## 0.02998
+weighted.quantile(data1$dxy.cond,w1.cond,probs=0.75) ## 0.02921
+
+summary(data1$w.joint)
+summary(data1$w.cond)
+
+wtd.hist(data1$dxy.joint, weight=w1.joint)
+abline(v=mm, col="red")
+wtd.hist(data1$dxy.cond, weight=w1.cond)
+abline(v=mm, col="red")
+
+## second tree (1,3)
+## MB freq: 0.0178
+sum(data2$w.joint) ## 0.00839
+sum(data2$w.cond) ## 0.0104
+w2.joint = data2$w.joint/sum(data2$w.joint)
+w2.cond = data2$w.cond/sum(data2$w.cond)
+## mean MB dxy: 0.0213
+mm = weighted.mean(data2$dxy.joint,w2.joint) ## 0.0212
+weighted.mean(data2$dxy.cond,w2.cond) ## 0.01732
+## quartiles:
+weighted.quantile(data2$dxy.joint,w2.joint,probs=0.25) ## 0.0172
+weighted.quantile(data2$dxy.cond,w2.cond,probs=0.25) ## 0.01472
+weighted.quantile(data2$dxy.joint,w2.joint,probs=0.75) ## 0.02418
+weighted.quantile(data2$dxy.cond,w2.cond,probs=0.75) ## 0.02066
+
+summary(data2$w.joint)
+summary(data2$w.cond)
+
+wtd.hist(data2$dxy.joint, weight=w2.joint)
+abline(v=mm, col="red")
+wtd.hist(data2$dxy.cond, weight=w2.cond)
+abline(v=mm, col="red")
+
+## third tree (2,3)
+## MB freq: 0.3003
+sum(data3$w.joint) ## 0.4484
+sum(data3$w.cond) ## 0.4723
+w3.joint = data3$w.joint/sum(data3$w.joint)
+w3.cond = data3$w.cond/sum(data3$w.cond)
+## mean MB dxy: 0.0255
+mm = weighted.mean(data3$dxy.joint,w3.joint) ## 0.0254
+weighted.mean(data3$dxy.cond,w3.cond) ## 0.0257
+## quartiles:
+weighted.quantile(data3$dxy.joint,w3.joint,probs=0.25) ## 0.0214
+weighted.quantile(data3$dxy.cond,w3.cond,probs=0.25) ## 0.02043
+weighted.quantile(data3$dxy.joint,w3.joint,probs=0.75) ## 0.02937
+weighted.quantile(data3$dxy.cond,w3.cond,probs=0.75) ## 0.03017
+
+summary(data3$w.joint)
+summary(data3$w.cond)
+
+wtd.hist(data3$dxy.joint, weight=w3.joint)
+abline(v=mm, col="red")
+wtd.hist(data3$dxy.cond, weight=w3.cond)
+abline(v=mm, col="red")
+
+
+## EXTERNAL BL --------------------------------------------------------
+## d1x does not mean the same across rows, need to see who is tx1
+summary(data1$d1x.joint)
+summary(data1$d1x.cond)
+
+plot(data1$dxy.joint, data1$dxy.cond)
+
+data1.1 = subset(data1,tx1 == 1)
+summary(data1.1)
+plot(data1.1$d1x.joint, data1.1$d1x.cond)
+head(data1.1)
+## mean MB d1x: 0.1108
+w1.1.joint = data1.1$w.joint/sum(data1.1$w.joint)
+w1.1.cond = data1.1$w.cond/sum(data1.1$w.cond)
+weighted.mean(data1.1$d1x.joint,w1.1.joint) ## 0.1100
+weighted.mean(data1.1$d1x.cond,w1.1.cond) ## 0.1105
+## mean MB d2x: 0.0779
+weighted.mean(data1.1$d2x.joint,w1.1.joint) ## 0.0778
+weighted.mean(data1.1$d2x.cond,w1.1.cond) ## 0.0748
+## mean MB d3y: 0.0909
+weighted.mean(data1.1$d3y.joint,w1.1.joint) ## 0.0901
+weighted.mean(data1.1$d3y.cond,w1.1.cond) ## 0.0883
+## mean MB d4y: 0.0983
+weighted.mean(data1.1$d4y.joint,w1.1.joint) ## 0.0988
+weighted.mean(data1.1$d4y.cond,w1.1.cond) ## 0.0999
+## mean MB dxy: 0.0261
+weighted.mean(data1.1$dxy.joint,w1.1.joint) ## 0.0264
+weighted.mean(data1.1$dxy.cond,w1.1.cond) ## 0.0236
+
+data2.1 = subset(data2,tx1 == 1)
+summary(data2.1)
+plot(data2.1$d1x.joint, data2.1$d1x.cond)
+head(data2.1)
+## mean MB d1x: 0.1119
+w2.1.joint = data2.1$w.joint/sum(data2.1$w.joint)
+w2.1.cond = data2.1$w.cond/sum(data2.1$w.cond)
+weighted.mean(data2.1$d1x.joint,w2.1.joint) ## 0.1109
+weighted.mean(data2.1$d1x.cond,w2.1.cond) ## 0.1119
+## mean MB d2x: 0.0909
+weighted.mean(data2.1$d2x.joint,w2.1.joint) ## 0.0931
+weighted.mean(data2.1$d2x.cond,w2.1.cond) ## 0.08833
+## mean MB d3y: 0.0813
+weighted.mean(data2.1$d3y.joint,w2.1.joint) ## 0.081
+weighted.mean(data2.1$d3y.cond,w2.1.cond) ## 0.0723
+## mean MB d4y: 0.103
+weighted.mean(data2.1$d4y.joint,w2.1.joint) ## 0.1009
+weighted.mean(data2.1$d4y.cond,w2.1.cond) ## 0.105
+## mean MB dxy: 0.0213
+weighted.mean(data2.1$dxy.joint,w2.1.joint) ## 0.0219
+weighted.mean(data2.1$dxy.cond,w2.1.cond) ## 0.0202
+
+
+
+data1.1 = subset(data1,tx1 == 3)
+plot(data1.1$d1x.joint, data1.1$d1x.cond)
+head(data1.1)
+## mean MB d3y: 0.0909
+w1.1.joint = data1.1$w.joint/sum(data1.1$w.joint)
+w1.1.cond = data1.1$w.cond/sum(data1.1$w.cond)
+weighted.mean(data1.1$d1x.joint,w1.1.joint) ## 0.0908
+weighted.mean(data1.1$d1x.cond,w1.1.cond) ## 0.0930
+## mean MB d4y: 0.0983
+weighted.mean(data1.1$d2x.joint,w1.1.joint) ## 0.0981
+weighted.mean(data1.1$d2x.cond,w1.1.cond) ## 0.1006
+## mean MB d1x: 0.1108
+weighted.mean(data1.1$d3y.joint,w1.1.joint) ## 0.1105
+weighted.mean(data1.1$d3y.cond,w1.1.cond) ## 0.1011
+## mean MB d2x: 0.0779
+weighted.mean(data1.1$d4y.joint,w1.1.joint) ## 0.0786
+weighted.mean(data1.1$d4y.cond,w1.1.cond) ## 0.0815
+## mean MB dxy: 0.0261
+weighted.mean(data1.1$dxy.joint,w1.1.joint) ## 0.0258
+weighted.mean(data1.1$dxy.cond,w1.1.cond) ## 0.02705
+
+## fill out a birds-comparison with this info
+
 

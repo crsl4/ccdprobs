@@ -1,0 +1,4 @@
+compile: make
+
+run:
+bl dataset -t tree -r rates -p statProbs

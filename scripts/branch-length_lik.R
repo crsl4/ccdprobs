@@ -41,6 +41,29 @@ makeQ = function(r,p,n,rescale=FALSE,symmetric=TRUE) {
   return( list(Q=Q,V=V,Vinv=Vinv,lambda=lambda,p=p,r=r) )
 }
 
+makeQscale = function(Q0,scale,p,rescale=FALSE,symmetric=TRUE) {
+  Q = scale * Q0
+  if ( rescale ) {
+      mu = sum( -p*diag(Q) )
+      Q = Q/mu
+  }
+  if ( symmetric ) {
+      p.sqrt = sqrt(p)
+      S = diag(p.sqrt) %*% Q %*% diag(1/p.sqrt)
+      eig = eigen(S,symmetric=TRUE) ## Error in eigen(S, symmetric = TRUE) (from branch-length.R#27) : infinite or missing values in 'x'
+      V = diag(1/p.sqrt) %*% eig$vectors
+      lambda = eig$values
+      Vinv = t(eig$vectors) %*% diag(p.sqrt)
+  }
+  else {
+      eig = eigen(Q)
+      V = eig$vectors
+      lambda = eig$values
+      Vinv = solve(V)
+  }
+  return( list(Q=Q,V=V,Vinv=Vinv,lambda=lambda,p=p,r=r) )
+}
+
 
 ##
 matrixExp = function(Q,s)   {
