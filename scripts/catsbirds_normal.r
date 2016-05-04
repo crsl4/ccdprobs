@@ -276,7 +276,7 @@ summary(data)
 data[data$logwv.joint==0,] ##0
 data[data$logwv.cond==0,] ##0
 data[data$logwv.nj==0,] ## too many!!
-data <- subset(data,logwv.nj!=0)
+##data <- subset(data,logwv.nj!=0)
 
 my.logw.joint = data$logwv.joint - mean(data$logwv.joint)
 data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
@@ -292,9 +292,9 @@ hist(data$w.cond)
 plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
 
 
-save(data,file=paste0("data_normal_",who,".Rda"))
+save(data,file=paste0("data_normal_",who,"2.Rda"))
 
 ## effective sample size:
-(1/sum(data$w.joint^2))/nreps
-(1/sum(data$w.cond^2))/nreps
+(1/sum(data$w.joint^2))/nreps ## 56%
+(1/sum(data$w.cond^2))/nreps ## 5%
 
