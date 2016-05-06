@@ -2,7 +2,7 @@
 # To compile, type "make" or make "all"
 # To remove files, type "make clean"
 #
-OBJS = parameter.o sequence.o tree.o model.o
+OBJS = parameter.o sequence.o random.o tree.o model.o
 TARGET = all
 
 CC = g++
@@ -13,7 +13,7 @@ CFLAGS = -O3 -I.
 
 all: bl
 
-bl: main.C parameter.h sequence.h tree.h model.h $(OBJS)
+bl: main.C parameter.h sequence.h random.h tree.h model.h $(OBJS)
 	$(CC) $(CFLAGS) -o bl main.C $(OBJS)
 
 .C.o:

@@ -1,0 +1,14 @@
+- cov matrix is negative, does not make sense:
+./bl -f "../../Data/cats-dogs.fasta" -t
+"((1,2),((6,3),(5,4)),((12,11),(((7,8),9),10)));" -p
+0.267,0.2347,0.1817,0.3166 -q
+0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519
+
+
+- very big bl in prop 2D, 1D: ~100.
+
+
+To do:
+- put things in functions to make code nicer
+- run simulation examples to see if we have the same two issues
+- add protective newton raphson to avoid going far off

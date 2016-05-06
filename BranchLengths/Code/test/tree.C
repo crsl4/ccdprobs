@@ -14,6 +14,7 @@
 #include "Eigen/Eigenvalues"
 
 #include "tree.h"
+#include "random.h"
 
 using namespace std;
 using namespace Eigen;
@@ -565,7 +566,7 @@ void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* 
     pair<double,Vector4d> pa = na->patternToProbMap[na->getPattern()];
     pair<double,Vector4d> pb = nb->patternToProbMap[nb->getPattern()];
     Vector4d va = pa.second;
-    Vector4d vq = qmatrix.getStationaryP(); //question: do we need to do this inside for each site?
+    Vector4d vq = qmatrix.getStationaryP(); //fixit: do we need to do this inside for each site?
     for ( int i=0; i<4; ++i )
       va(i) *= vq(i);
     Vector4d vb = pb.second;
@@ -614,7 +615,7 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
     pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
     pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
 
-    Vector4d S1 = P1 * px.second.asDiagonal() * ones; //question: do i need to save px.second as a variable?
+    Vector4d S1 = P1 * px.second.asDiagonal() * ones;
     Vector4d S2 = P2 * py.second.asDiagonal() * ones;
     Vector4d S3 = P3 * pz.second.asDiagonal() * ones;
     Vector4d S1pr = QP1 * px.second.asDiagonal() * ones;
@@ -624,33 +625,19 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
     Vector4d S2doublepr = QQP2 * py.second.asDiagonal() * ones;
     Vector4d S3doublepr = QQP3 * pz.second.asDiagonal() * ones;
 
-    //    cout << "vq as diagonal " << vq.asDiagonal() << ", S1 as diagonal " << S1.asDiagonal() << endl;
+    //fixt: make a function of this
+    double fk = vectorProduct4D(vq,S1,S2,S3);
+    double fkpr1 = vectorProduct4D(vq,S1pr,S2,S3);
+    double fkpr2 = vectorProduct4D(vq,S1,S2pr,S3);
+    double fkpr3 = vectorProduct4D(vq,S1,S2,S3pr);
+    double fkdoublepr11 = vectorProduct4D(vq,S1doublepr,S2,S3);
+    double fkdoublepr22 = vectorProduct4D(vq,S1,S2doublepr,S3);
+    double fkdoublepr33 = vectorProduct4D(vq,S1,S2,S3doublepr);
+    double fkdoublepr12 = vectorProduct4D(vq,S1pr,S2pr,S3);
+    double fkdoublepr13 = vectorProduct4D(vq,S1pr,S2,S3pr);
+    double fkdoublepr23 = vectorProduct4D(vq,S1,S2pr,S3pr);
 
-    //question: matrix product error
-    // double fk = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkpr1 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkpr2 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkpr3 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
-    // double fkdoublepr11 = (vq.asDiagonal() * S1doublepr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkdoublepr22 = (vq.asDiagonal() * S1.asDiagonal() * S2doublepr.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkdoublepr33 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3doublepr.asDiagonal()).sum();
-    // double fkdoublepr12 = (vq.asDiagonal() * S1pr.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkdoublepr13 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
-    // double fkdoublepr23 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3pr.asDiagonal()).sum();
-
-    double fk = 0.1 ;
-    double fkpr1 = 0.1;
-    double fkpr2 = 0.1;
-    double fkpr3 = 0.1;
-    double fkdoublepr11 = 0.1;
-    double fkdoublepr22 = 0.1;
-    double fkdoublepr33 = 0.1;
-    double fkdoublepr12 = 0.1;
-    double fkdoublepr13 = 0.1;
-    double fkdoublepr23 = 0.1;
-
-
-    logl += px.first + py.first + pz.first + log( fk ); //question: scaling correct?
+    logl += px.first + py.first + pz.first + log( fk );
     dll1 += fkpr1/fk;
     dll2 += fkpr2/fk;
     dll3 += fkpr3/fk;
@@ -661,8 +648,8 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
     d2ll_23 += (fk*fkdoublepr23 - fkpr2*fkpr3)/(fk*fk);
     d2ll_33 += (fk*fkdoublepr33 - fkpr3*fkpr3)/(fk*fk);
   }
-  gradient << dll1, dll2, dll3; //question: set vector and matrix like this?
-  hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33;
+  gradient << dll1, dll2, dll3;
+  hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33; //row-wise
 }
 
 // similar to partialPathCalculations3D, t=(t1,t2), sum: t3=sum-t1
@@ -705,56 +692,40 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
     pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
     pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
 
-    Vector4d S1 = P1 * px.second.asDiagonal() * ones; //question: do i need to save px.second as a variable?
+    Vector4d S1 = P1 * px.second.asDiagonal() * ones;
     Vector4d S2 = P2 * py.second.asDiagonal() * ones;
     Vector4d S3 = P3 * pz.second.asDiagonal() * ones;
     Vector4d S1pr = QP1 * px.second.asDiagonal() * ones;
     Vector4d S2pr = QP2 * py.second.asDiagonal() * ones;
-    Vector4d S3pr = (-1) * QP3 * pz.second.asDiagonal() * ones; //question: can we multiply by constant?
+    Vector4d S3pr = (-1) * QP3 * pz.second.asDiagonal() * ones;
     Vector4d S1doublepr = QQP1 * px.second.asDiagonal() * ones;
     Vector4d S2doublepr = QQP2 * py.second.asDiagonal() * ones;
     Vector4d S3doublepr = QQP3 * pz.second.asDiagonal() * ones;
 
     //    cout << "vq as diagonal " << vq.asDiagonal() << ", S1 as diagonal " << S1.asDiagonal() << endl;
 
-    //question: matrix product error
-    // double fk = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkpr1 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkpr2 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkpr3 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
-    // double fkdoublepr11 = (vq.asDiagonal() * S1doublepr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkdoublepr22 = (vq.asDiagonal() * S1.asDiagonal() * S2doublepr.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkdoublepr33 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3doublepr.asDiagonal()).sum();
-    // double fkdoublepr12 = (vq.asDiagonal() * S1pr.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkdoublepr13 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
-    // double fkdoublepr23 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3pr.asDiagonal()).sum();
-
-    double fk = 0.1 ;
-    double fkpr1 = 0.1;
-    double fkpr2 = 0.1;
-    double fkpr3 = 0.1;
-    double fkdoublepr11 = 0.1;
-    double fkdoublepr22 = 0.1;
-    double fkdoublepr33 = 0.1;
-    double fkdoublepr12 = 0.1;
-    double fkdoublepr13 = 0.1;
-    double fkdoublepr23 = 0.1;
+    double fk = vectorProduct4D(vq,S1,S2,S3);
+    double fkpr1 = vectorProduct4D(vq,S1pr,S2,S3);
+    double fkpr2 = vectorProduct4D(vq,S1,S2pr,S3);
+    double fkpr3 = vectorProduct4D(vq,S1,S2,S3pr);
+    double fkdoublepr11 = vectorProduct4D(vq,S1doublepr,S2,S3);
+    double fkdoublepr22 = vectorProduct4D(vq,S1,S2doublepr,S3);
+    double fkdoublepr33 = vectorProduct4D(vq,S1,S2,S3doublepr);
+    double fkdoublepr12 = vectorProduct4D(vq,S1pr,S2pr,S3);
+    double fkdoublepr13 = vectorProduct4D(vq,S1pr,S2,S3pr);
+    double fkdoublepr23 = vectorProduct4D(vq,S1,S2pr,S3pr);
 
 
-    logl += px.first + py.first + pz.first + log( fk ); //question: scaling correct?
+    logl += px.first + py.first + pz.first + log( fk );
     dll1 += (fkpr1+fkpr3)/fk;
     dll2 += fkpr2/fk;
     d2ll_11 += (fk*(fkdoublepr11+2*fkdoublepr13+fkdoublepr33) - (fkpr1+fkpr3)*(fkpr1+fkpr3))/(fk*fk);
     d2ll_12 += (fk*(fkdoublepr12+fkdoublepr23) - fkpr2*(fkpr1+fkpr3))/(fk*fk);
     d2ll_22 += (fk*fkdoublepr22 - fkpr2*fkpr2)/(fk*fk);
   }
-  gradient << dll1, dll2; //question: set vector and matrix like this?
-  hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22;
+  gradient << dll1, dll2;
+  hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22; //row-wise
 }
-
-//todo: finish partialpathcalculations1D, still not started
-// and then finish mledistancejoint, and compile
-//later make list of our usual examples?
 
 // similar to partialPathCalculations2D, t=t1, sum1,sum2
   void Tree::partialPathCalculations1D(double t1, double sum1, double sum2, Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl,bool recurse)
@@ -791,43 +762,29 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
     pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
     pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
 
-    Vector4d S1 = P1 * px.second.asDiagonal() * ones; //question: do i need to save px.second as a variable?
+    Vector4d S1 = P1 * px.second.asDiagonal() * ones;
     Vector4d S2 = P2 * py.second.asDiagonal() * ones;
     Vector4d S3 = P3 * pz.second.asDiagonal() * ones;
     Vector4d S1pr = QP1 * px.second.asDiagonal() * ones;
     Vector4d S2pr = (-1) * QP2 * py.second.asDiagonal() * ones;
-    Vector4d S3pr = (-1) * QP3 * pz.second.asDiagonal() * ones; //question: can we multiply by constant?
+    Vector4d S3pr = (-1) * QP3 * pz.second.asDiagonal() * ones;
     Vector4d S1doublepr = QQP1 * px.second.asDiagonal() * ones;
     Vector4d S2doublepr = QQP2 * py.second.asDiagonal() * ones;
     Vector4d S3doublepr = QQP3 * pz.second.asDiagonal() * ones;
 
     //    cout << "vq as diagonal " << vq.asDiagonal() << ", S1 as diagonal " << S1.asDiagonal() << endl;
+    double fk = vectorProduct4D(vq,S1,S2,S3);
+    double fkpr1 = vectorProduct4D(vq,S1pr,S2,S3);
+    double fkpr2 = vectorProduct4D(vq,S1,S2pr,S3);
+    double fkpr3 = vectorProduct4D(vq,S1,S2,S3pr);
+    double fkdoublepr11 = vectorProduct4D(vq,S1doublepr,S2,S3);
+    double fkdoublepr22 = vectorProduct4D(vq,S1,S2doublepr,S3);
+    double fkdoublepr33 = vectorProduct4D(vq,S1,S2,S3doublepr);
+    double fkdoublepr12 = vectorProduct4D(vq,S1pr,S2pr,S3);
+    double fkdoublepr13 = vectorProduct4D(vq,S1pr,S2,S3pr);
+    double fkdoublepr23 = vectorProduct4D(vq,S1,S2pr,S3pr);
 
-    //question: matrix product error
-    // double fk = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkpr1 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkpr2 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkpr3 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
-    // double fkdoublepr11 = (vq.asDiagonal() * S1doublepr.asDiagonal() * S2.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkdoublepr22 = (vq.asDiagonal() * S1.asDiagonal() * S2doublepr.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkdoublepr33 = (vq.asDiagonal() * S1.asDiagonal() * S2.asDiagonal() * S3doublepr.asDiagonal()).sum();
-    // double fkdoublepr12 = (vq.asDiagonal() * S1pr.asDiagonal() * S2pr.asDiagonal() * S3.asDiagonal()).sum();
-    // double fkdoublepr13 = (vq.asDiagonal() * S1pr.asDiagonal() * S2.asDiagonal() * S3pr.asDiagonal()).sum();
-    // double fkdoublepr23 = (vq.asDiagonal() * S1.asDiagonal() * S2pr.asDiagonal() * S3pr.asDiagonal()).sum();
-
-    double fk = 0.1 ;
-    double fkpr1 = 0.1;
-    double fkpr2 = 0.1;
-    double fkpr3 = 0.1;
-    double fkdoublepr11 = 0.1;
-    double fkdoublepr22 = 0.1;
-    double fkdoublepr33 = 0.1;
-    double fkdoublepr12 = 0.1;
-    double fkdoublepr13 = 0.1;
-    double fkdoublepr23 = 0.1;
-
-
-    logl += px.first + py.first + pz.first + log( fk ); //question: scaling correct?
+    logl += px.first + py.first + pz.first + log( fk );
     dlogl += (fkpr1+fkpr2+fkpr3)/fk;
     ddlogl += (fk*(fkdoublepr11+2*fkdoublepr12+2*fkdoublepr13+2*fkdoublepr23+fkdoublepr22+fkdoublepr33) - (fkpr1+fkpr2+fkpr3)*(fkpr1+fkpr2+fkpr3))/(fk*fk);
   }
@@ -875,7 +832,7 @@ void mleErrorJoint(Node* nx,Node* ny,Node* nz)
 // and that the patternToProbMaps are accurate if edges ea and eb head toward the root.
 double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
 {
-  bool recurse=true; //question: not sure this should be true, need to think
+  bool recurse=false;
   int iter=0;
   double curr = 0.05;
   // get a decent starting point
@@ -955,7 +912,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cerr << "Sum smaller than summand in mle distance1D" << endl;
       exit(1);
     }
-  bool recurse=true; //question: not sure this should be true, need to think
+  bool recurse=false;
   int iter=0;
   double curr = t1;
   double curr_logl,curr_dlogl,curr_ddlogl;
@@ -1019,7 +976,9 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
         mleErrorJoint(nx,ny,nz);
     }
   } while ( fabs(curr - prop) > 1.0e-8);
-  t1 = prop; //question: need normal with mean prop, variance -prop_ddlogl
+  t1 = normal(prop,-prop_ddlogl,rng);
+  cout << "Normal 1D mean: " << prop << ", variance: " << -prop_ddlogl << endl;
+  cout << "Sample 1D bl: " << t1 << endl;
   t2 = sum1-t1;
   t3 = sum2-t1;
 }
@@ -1029,7 +988,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
 // it calls different functions depending on the number of sums known
-// question: double& to modify inside?
+// double& to modify inside? yes
+// warning: this would break if a sum is in fact 0, but i don't think this would happen
 void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng)
 {
   cout << "Entering mleDistanceJoint" << endl;
@@ -1082,16 +1042,16 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
 void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng)
 {
   cout << "Entering mleDistance3D" << endl;
-  bool recurse=true; //question: not sure this should be true, need to think
+  bool recurse=false;
   int iter=0;
   Vector3d curr(lx,ly,lz);
   double curr_logl;
-  Vector3d curr_gradient; //question: declare like this?
+  Vector3d curr_gradient;
   Matrix3d curr_hessian;
   partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
-  Vector3d prop = curr; //question: how to make equal to curr?
+  Vector3d prop = curr;
   double prop_logl = curr_logl;
-  Vector3d prop_gradient = curr_gradient; //question: how to make vectors/matrices equal?
+  Vector3d prop_gradient = curr_gradient;
   Matrix3d prop_hessian = curr_hessian;
   do
   {
@@ -1099,10 +1059,9 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-    //    Vector3d delta = curr_hessian.llt() * curr_gradient; //question: inverse(hessian) * gradient?
-    Vector3d delta(0.01,0.01,0.01);
+    Vector3d delta = curr_hessian.inverse() * curr_gradient;
     prop = curr - delta;
-    while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0) //question: better way?
+    while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
     {
       delta = 0.5*delta;
       prop = curr - delta;
@@ -1110,11 +1069,13 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-  } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8 || fabs(curr[2] - prop[2]) >1.0e-8 ); //question: better way?
+  } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8 || fabs(curr[2] - prop[2]) >1.0e-8 );
 
-  //Matrix3d cov = -prop_hessian.llt(); //question: how to take inverse? error here
-  //Vector3d bl = multivariateNormal(prop,cov,rng);
-  Vector3d bl = prop;
+  Matrix3d cov = (-1) * prop_hessian.inverse(); //problem: negative! how to check pdf?
+  Vector3d bl = multivariateNormal(prop,cov,rng);
+  cout << "Normal 3D mean: " << prop << ", cov matrix: " << cov << endl;
+  cout << "Sample bl 3D: "<< bl << endl;
+  //Vector3d bl = prop;
   lx = bl[0];
   ly = bl[1];
   lz = bl[2];
@@ -1134,16 +1095,16 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cerr << "Sum smaller than summand in mleDistance2D" << endl;
       exit(1);
     }
-  bool recurse=true; //question: not sure this should be true, need to think
+  bool recurse=false;
   int iter=0;
   Vector2d curr(t1, t2);
   double curr_logl;
-  Vector2d curr_gradient; //question: declare like this?
+  Vector2d curr_gradient;
   Matrix2d curr_hessian;
   partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
-  Vector2d prop = curr; //question: how to make equal to curr?
+  Vector2d prop = curr;
   double prop_logl = curr_logl;
-  Vector2d prop_gradient = curr_gradient; //question: how to make vectors/matrices equal?
+  Vector2d prop_gradient = curr_gradient;
   Matrix2d prop_hessian = curr_hessian;
   do
   {
@@ -1151,10 +1112,9 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-    //    Vector2d delta = curr_hessian.llt() * curr_gradient; //question: inverse(hessian) * gradient?
-    Vector2d delta(0.01,0.01);
+    Vector2d delta = curr_hessian.inverse() * curr_gradient;
     prop = curr - delta;
-    while ( prop[0] < 0 || prop[1] < 0) //question: better way?
+    while ( prop[0] < 0 || prop[1] < 0)
     {
       delta = 0.5*delta;
       prop = curr - delta;
@@ -1162,11 +1122,13 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-  } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8); //question: better way?
+  } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8);
 
-  //Matrix2d cov = -prop_hessian.llt(); //question: how to take inverse? error here
-  //Vector2d bl = multivariateNormal(prop,cov,rng);
-  Vector2d bl = prop;
+  Matrix2d cov = (-1) * prop_hessian.inverse();
+  Vector2d bl = multivariateNormal(prop,cov,rng);
+  cout << "Normal 2D mean: " << prop << ", cov matrix: " << cov << endl;
+  cout << "Sample 2D bl: " << bl << endl;
+  //Vector2d bl = prop;
   t1 = bl[0];
   t2 = bl[1];
   t3 = sum-bl[0];
@@ -1309,8 +1271,10 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       par = x->getNodeParent();
       z = par->closeRelative();
     }
+    cout << "------------- Sample branch lengths for nodes:------------------" << endl;
+    cout << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << " " << par->getNumber() << endl;
     // do calculations
-    x->calculateEdges(qmatrix); //question: why do we do this? aren't bl meaningless at this point?
+    x->calculateEdges(qmatrix); //ignores the parent edge, only for children edges
     y->calculateEdges(qmatrix);
     z->calculateEdges(qmatrix);
     for ( int k=0; k<alignment.getNumSites(); ++k )
@@ -1320,7 +1284,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       z->calculate(k,alignment,z->getEdgeParent(),false);
     } //clau: after this, we have in each node the patternProb map, but we dont know how many different patterns, do we? no, we search the pattern in mleDistance
 
-//    cerr << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << " " << par->getNumber() << endl;
+
     map<pair<int,int>,double>::iterator m;
     double dxy, dxz, dyz;
     bool foundxy = false; //clau: depending on which bl are found it is condition on 1 or 2 sums
@@ -1354,19 +1318,19 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     double lengthX0 = (dxy + dxz - dyz)*0.5;
     if ( lengthX0 < 0 )
     {
-      cerr << "Warning: fix negative edge length." << endl;
+      cerr << "Warning: fix negative edge length in starting point." << endl;
       lengthX0 = 0.0001; //clau: does not work very well starting point of 0
     }
     double lengthY0 = (dxy + dyz - dxz)*0.5;
     if ( lengthY0 < 0 )
     {
-      cerr << "Warning: fix negative edge length." << endl;
+      cerr << "Warning: fix negative edge length in starting point." << endl;
       lengthY0 = 0.0001;
     }
     double lengthZ0 = (dxz + dyz - dxy)*0.5;
     if ( lengthZ0 < 0 )
     {
-      cerr << "Warning: fix negative edge length." << endl;
+      cerr << "Warning: fix negative edge length in starting point." << endl;
       lengthZ0 = 0.0001;
     }
     //cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
@@ -1391,6 +1355,23 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     cout << "sxy " << sxy << ", sxz " << sxz << ", syz " << syz << endl;
     mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng);
 
+    if ( lx < 0 ) //fixit: make a function of this
+    {
+      cerr << "Warning: fix negative edge length." << endl;
+      lx = 0.0; //clau: does not work very well starting point of 0
+    }
+    if ( ly < 0 )
+    {
+      cerr << "Warning: fix negative edge length." << endl;
+      ly = 0.0;
+    }
+    if ( lz < 0 )
+    {
+      cerr << "Warning: fix negative edge length." << endl;
+      lz = 0.0;
+    }
+
+
     x->getEdgeParent()->setLength( lx );
     y->getEdgeParent()->setLength( ly );
 
@@ -1399,7 +1380,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       z->getEdgeParent()->setLength( lz );
       break;
     }
-    distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lz; //question: why it seems you are only putting lengthZ in distanceMap? dont we need to input X,Y?
+    distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lz; //why it seems you are only putting lengthZ in distanceMap? dont we need to input X,Y?
                                                                         // is it because dist X,par and Y,par is always one edge only? will it be?
                                                                         // clau: I think yes, we only need lengthZ because that is more than 1 edge
     par->deactivateChild(1);
@@ -1408,4 +1389,28 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
   for ( map<pair<int,int>,double>::iterator m=distanceMap.begin(); m!= distanceMap.end(); ++m )
     cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
+}
+
+
+double vectorProduct(vector<Vector4d> v)
+{
+  double sum = 0;
+  for(  vector<Vector4d>::iterator m = v.begin(); m!=v.end(); m++)
+    {
+      double product = 1;
+      for(int i=0;i<4;i++)
+	product *= (*m)(i);
+      sum += product;
+    }
+  return sum;
+}
+
+double vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
+{
+  vector<Vector4d> v;
+  v.push_back(v1);
+  v.push_back(v2);
+  v.push_back(v3);
+  v.push_back(v4);
+  return vectorProduct(v);
 }

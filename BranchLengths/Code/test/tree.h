@@ -169,4 +169,7 @@ public:
   void generateBranchLengths(Alignment&,QMatrix&,mt19937_64& rng);
 };
 
+double vectorProduct(vector<Vector4d> v);
+double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
+
 #endif
