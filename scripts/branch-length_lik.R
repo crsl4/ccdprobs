@@ -553,6 +553,8 @@ findMLE3D = function(seq1.dist, seq2.dist, seq3.dist, Q, t0=c(0.1,0.1,0.1), tol=
     }
     if(i>=Nmax)
         warning("Newton-Rapshon did not converge")
+    print("Gradient at the end:")
+    print(f2$gradient)
     return ( list(t=tnew, obsInfo=f2$hessian) )
 }
 

@@ -1053,7 +1053,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   double curr_logl;
   Vector3d curr_gradient;
   Matrix3d curr_hessian;
-  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
+  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true); //true in original mleDist
   Vector3d prop = curr;
   double prop_logl = curr_logl;
   Vector3d prop_gradient = curr_gradient;
