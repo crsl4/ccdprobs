@@ -626,6 +626,7 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
     Vector4d S3doublepr = QQP3 * pz.second.asDiagonal() * ones;
 
     //fixt: make a function of this
+    // question: how to make a function to return many things?
     double fk = vectorProduct4D(vq,S1,S2,S3);
     double fkpr1 = vectorProduct4D(vq,S1pr,S2,S3);
     double fkpr2 = vectorProduct4D(vq,S1,S2pr,S3);
@@ -703,7 +704,7 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
     Vector4d S3doublepr = QQP3 * pz.second.asDiagonal() * ones;
 
     //    cout << "vq as diagonal " << vq.asDiagonal() << ", S1 as diagonal " << S1.asDiagonal() << endl;
-
+    // question: how to make a function here?
     double fk = vectorProduct4D(vq,S1,S2,S3);
     double fkpr1 = vectorProduct4D(vq,S1pr,S2,S3);
     double fkpr2 = vectorProduct4D(vq,S1,S2pr,S3);
@@ -773,6 +774,7 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
     Vector4d S3doublepr = QQP3 * pz.second.asDiagonal() * ones;
 
     //    cout << "vq as diagonal " << vq.asDiagonal() << ", S1 as diagonal " << S1.asDiagonal() << endl;
+    // question: how to make a function here?
     double fk = vectorProduct4D(vq,S1,S2,S3);
     double fkpr1 = vectorProduct4D(vq,S1pr,S2,S3);
     double fkpr2 = vectorProduct4D(vq,S1,S2pr,S3);
@@ -824,7 +826,7 @@ void mleErrorJoint(Node* nx,Node* ny,Node* nz)
 {
   cerr << "Error: too many iterations in mleDistanceJoint." << endl;
   cerr << "Nodes " << nx->getNumber() << ", " << ny->getNumber() << ", and " << nz->getNumber() << endl;
-  exit(1);
+  //exit(1); //question: had to comment this
 }
 // Find mle distance from node a to b through a path that uses edges ea and eb.
 // Conditon on data in subtrees through other edges.
@@ -925,6 +927,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   {
     do
     {
+      cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
       curr = prop;
       curr_logl = prop_logl;
       curr_dlogl = prop_dlogl;
@@ -1055,6 +1058,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   Matrix3d prop_hessian = curr_hessian;
   do
   {
+    cout << "mleDistance3D Newton-Raphson curr: " << curr << endl;
     curr = prop;
     partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
     if ( ++iter > 100 )
@@ -1108,6 +1112,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   Matrix2d prop_hessian = curr_hessian;
   do
   {
+    cout << "mleDistance2D Newton-Raphson curr: " << curr << endl;
     curr = prop;
     partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
     if ( ++iter > 100 )
@@ -1414,3 +1419,4 @@ double vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
   v.push_back(v4);
   return vectorProduct(v);
 }
+
