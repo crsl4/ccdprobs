@@ -68,7 +68,7 @@ if(d3x.t0 < 0)
 print(c(d1x.t0,d2x.t0,d3x.t0))
 
 
-tmle = findMLE3D(seq1.dist, seq2.dist, seq3.dist, Q, t0=c(d1x.t0,d2x.t0,d3x.t0))
+tmle = findMLE3D(seq1.dist, seq2.dist, seq3.dist, Q, t0=c(d1x.t0,d2x.t0,d3x.t0), verbose=TRUE)
 print(tmle$t)
 print(tmle$obsInfo)
 

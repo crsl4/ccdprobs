@@ -522,6 +522,10 @@ findMLE3D = function(seq1.dist, seq2.dist, seq3.dist, Q, t0=c(0.1,0.1,0.1), tol=
         if(verbose)
             print(told)
         f =loglik3D(seq1.dist, seq2.dist, seq3.dist,Q, told)
+        if(verbose){
+            print(f$gradient)
+            print(f$hessian)
+        }
         gap = solve(f$hessian) %*% f$gradient
         tnew = told - gap
         while(any(tnew<0)){ #avoid negative BL
@@ -547,7 +551,7 @@ findMLE3D = function(seq1.dist, seq2.dist, seq3.dist, Q, t0=c(0.1,0.1,0.1), tol=
         ## }
         error = max(abs(tnew-told))
         if(verbose)
-            print(error)
+            print(paste("Error: ", error))
         i = i+1
         told = tnew
     }
