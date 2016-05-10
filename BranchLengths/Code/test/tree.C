@@ -651,6 +651,8 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
   }
   gradient << dll1, dll2, dll3;
   hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33; //row-wise
+  MatrixXd L( hessian.llt().matrixL() );
+  cerr << "LLT of Hessian 3D: " << endl << L << endl;
 }
 
 // similar to partialPathCalculations3D, t=(t1,t2), sum: t3=sum-t1
@@ -1051,34 +1053,49 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   double curr_logl;
   Vector3d curr_gradient;
   Matrix3d curr_hessian;
-  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
   Vector3d prop = curr;
   double prop_logl = curr_logl;
   Vector3d prop_gradient = curr_gradient;
   Matrix3d prop_hessian = curr_hessian;
+  // find starting point: we want a good prop
   do
   {
-    cout << "mleDistance3D Newton-Raphson curr: " << curr << endl;
     curr = prop;
     partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
+    cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
+    cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+    cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     Vector3d delta = curr_hessian.inverse() * curr_gradient;
     prop = curr - delta;
     while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
     {
+      cerr << "found negative" << endl;
       delta = 0.5*delta;
       prop = curr - delta;
     }
+    cerr << "Delta " << delta.transpose() << endl;
     partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
+    while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
+      {
+	cerr << "found bigger step" << endl;
+	delta = 0.5 *delta;
+	prop = curr - delta;
+	partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
+	if ( ++iter > 100 )
+	  mleErrorJoint(nx,ny,nz);
+      }
   } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8 || fabs(curr[2] - prop[2]) >1.0e-8 );
 
   Matrix3d cov = (-1) * prop_hessian.inverse(); //problem: negative! how to check pdf?
   Vector3d bl = multivariateNormal(prop,cov,rng);
-  cout << "Normal 3D mean: " << prop << ", cov matrix: " << cov << endl;
-  cout << "Sample bl 3D: "<< bl << endl;
+  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+  cout << "Normal 3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
+  cout << "Sample bl 3D: "<< bl.transpose() << endl;
   //Vector3d bl = prop;
   lx = bl[0];
   ly = bl[1];

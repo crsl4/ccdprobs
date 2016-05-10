@@ -8,6 +8,4 @@
 
 
 To do:
-- put things in functions to make code nicer
-- run simulation examples to see if we have the same two issues
-- add protective newton raphson to avoid going far off
+- modify 2D and 1D similar to mleDistance3D
