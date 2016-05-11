@@ -828,7 +828,7 @@ void mleErrorJoint(Node* nx,Node* ny,Node* nz)
 {
   cerr << "Error: too many iterations in mleDistanceJoint." << endl;
   cerr << "Nodes " << nx->getNumber() << ", " << ny->getNumber() << ", and " << nz->getNumber() << endl;
-  //exit(1); //question: had to comment this
+  exit(1); //question: had to comment this
 }
 // Find mle distance from node a to b through a path that uses edges ea and eb.
 // Conditon on data in subtrees through other edges.
@@ -916,16 +916,17 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cerr << "Sum smaller than summand in mle distance1D" << endl;
       exit(1);
     }
+  cout << "Entering mleDistance1D" << endl;
   bool recurse=false;
   int iter=0;
   double curr = t1;
   double curr_logl,curr_dlogl,curr_ddlogl;
-  partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
+  partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true); //true un original mleDist
   double prop = curr;
   double prop_logl = curr_logl;
   double prop_dlogl = curr_dlogl;
   double prop_ddlogl = curr_ddlogl;
-  if ( curr_dlogl > 0 )
+  if ( curr_dlogl > 0 ) //to find a good starting point
   {
     do
     {
@@ -960,29 +961,35 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   {
     curr = prop;
     partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
+    cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
+    cout << "mleDistance1D Newton-Raphson dlogl: " << curr_dlogl << endl;
+    cout << "mleDistance1D Newton-Raphson ddlogl: " << endl << curr_ddlogl << endl;
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-    double delta = -curr_dlogl / curr_ddlogl;
-    prop = curr + delta;
+    double delta = curr_dlogl / curr_ddlogl;
+    prop = curr - delta;
     while ( prop < 0 )
     {
+      cerr << "found negative" << endl;
       delta = 0.5*delta;
-      prop = curr + delta;
+      prop = curr - delta;
     }
+    cerr << "Delta " << delta << endl;
     partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
     {
+      cerr << "found bigger step" << endl;
       delta = 0.5*delta;
-      prop = curr + delta;
+      prop = curr - delta;
       partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
       if ( ++iter > 100 )
         mleErrorJoint(nx,ny,nz);
     }
   } while ( fabs(curr - prop) > 1.0e-8);
-  t1 = normal(prop,-prop_ddlogl,rng);
-  cout << "Normal 1D mean: " << prop << ", variance: " << -prop_ddlogl << endl;
+  t1 = normal(prop,-1/prop_ddlogl,rng);
+  cout << "Normal 1D mean: " << prop << ", variance: " << -1/prop_ddlogl << endl;
   cout << "Sample 1D bl: " << t1 << endl;
   t2 = sum1-t1;
   t3 = sum2-t1;
@@ -1091,7 +1098,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       }
   } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8 || fabs(curr[2] - prop[2]) >1.0e-8 );
 
-  Matrix3d cov = (-1) * prop_hessian.inverse(); //problem: negative! how to check pdf?
+  Matrix3d cov = (-1) * prop_hessian.inverse(); 
   Vector3d bl = multivariateNormal(prop,cov,rng);
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
   cout << "Normal 3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
@@ -1122,34 +1129,49 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   double curr_logl;
   Vector2d curr_gradient;
   Matrix2d curr_hessian;
-  partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+  partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true); //true in original mleDist
   Vector2d prop = curr;
   double prop_logl = curr_logl;
   Vector2d prop_gradient = curr_gradient;
   Matrix2d prop_hessian = curr_hessian;
+  // find a starting point
   do
   {
-    cout << "mleDistance2D Newton-Raphson curr: " << curr << endl;
     curr = prop;
     partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
+    cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
+    cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+    cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     Vector2d delta = curr_hessian.inverse() * curr_gradient;
     prop = curr - delta;
     while ( prop[0] < 0 || prop[1] < 0)
     {
+      cerr << "found negative" << endl;
       delta = 0.5*delta;
       prop = curr - delta;
     }
+    cerr << "Delta " << delta.transpose() << endl;
     partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
+    while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
+      {
+	cerr << "found bigger step" << endl;
+	delta = 0.5 *delta;
+	prop = curr - delta;
+	partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
+	if ( ++iter > 100 )
+	  mleErrorJoint(nx,ny,nz);
+      }
   } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8);
 
   Matrix2d cov = (-1) * prop_hessian.inverse();
   Vector2d bl = multivariateNormal(prop,cov,rng);
-  cout << "Normal 2D mean: " << prop << ", cov matrix: " << cov << endl;
-  cout << "Sample 2D bl: " << bl << endl;
+  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+  cout << "Normal 2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
+  cout << "Sample 2D bl: " << bl.transpose() << endl;
   //Vector2d bl = prop;
   t1 = bl[0];
   t2 = bl[1];
@@ -1374,7 +1396,11 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       sxz = dxz;
     if ( foundyz )
       syz = dyz;
+    cout << "dxy " << dxy << ", dxz " << dxz << ", dyz " << dyz << endl;
     cout << "sxy " << sxy << ", sxz " << sxz << ", syz " << syz << endl;
+    cout << "Starting points: " << endl;
+    cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
+
     mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng);
 
     if ( lx < 0 ) //fixit: make a function of this
