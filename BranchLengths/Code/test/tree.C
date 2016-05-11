@@ -1413,17 +1413,18 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
 }
 
-
 double vectorProduct(vector<Vector4d> v)
 {
   double sum = 0;
-  for(  vector<Vector4d>::iterator m = v.begin(); m!=v.end(); m++)
+  for ( int i=0; i<4; ++i )
+  {
+    double product = 1;
+    for(  vector<Vector4d>::iterator m = v.begin(); m!=v.end(); m++)
     {
-      double product = 1;
-      for(int i=0;i<4;i++)
-	product *= (*m)(i);
-      sum += product;
+      product *= (*m)(i);
     }
+    sum += product;
+  }
   return sum;
 }
 
