@@ -19,3 +19,12 @@ are all ok). try in R first?
   curr_dlogl>0, then we double prop=2*curr, and if prop_dlogl is still
   >0, but prop_logl is not bigger than curr_logl, we are going in the
   wrong direction (we don't trust the derivative).
+  maybe choose two starting point? instead of only 0.05
+
+  problem: the picture does not add up. it seems that it is not
+  unimodal because the derivative at 0.05 should be negative
+  otherwise. should we plot it?
+  start with two points and make sure that logl and dlogl are
+  consistent to what we believe
+
+** first thing: do the plot 
