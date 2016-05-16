@@ -1,11 +1,21 @@
-- cov matrix is negative, does not make sense:
 ./bl -f "../../Data/cats-dogs.fasta" -t "((1,2),((6,3),(5,4)),((12,11),(((7,8),9),10)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519
-
-- very big bl in prop 2D, 1D: ~100.
-
-- cov negative and nan even in simulated data and birds
-
 
 
 To do:
 - modify 2D and 1D similar to mleDistance3D (creo q ya hice esto)
+- print many intermediate steps for mleDistance and
+partialPathCalculations (original bret functions) to understand when
+nan appears
+- implement the new gamma/beta approach (double check exp, var and cov
+are all ok). try in R first?
+- add check for negative mean in gamma
+- bret: send new proposal.R with plots and new parameters?
+
+- nan problem: seems to be the starting point for the mle search (for
+  two sequences), specially when one is internal node: so problem, how
+  to find starting point for mle search. we are getting mle distance
+  between each 2 sequences (out of 3).
+  we can check besides the dlogl for curr=0.05, but also the logl.
+  curr_dlogl>0, then we double prop=2*curr, and if prop_dlogl is still
+  >0, but prop_logl is not bigger than curr_logl, we are going in the
+  wrong direction (we don't trust the derivative).
