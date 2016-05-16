@@ -27,4 +27,10 @@ are all ok). try in R first?
   start with two points and make sure that logl and dlogl are
   consistent to what we believe
 
-** first thing: do the plot 
+** first thing: do the plot
+
+
+---------
+To do after:
+
+- figure out how to generate beta, and modify code

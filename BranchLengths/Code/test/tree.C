@@ -1002,7 +1002,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       delta = 0.5*delta;
       prop = curr - delta;
     }
-    cerr << "Delta " << delta << endl;
+    //cerr << "Delta " << delta << endl;
     partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
@@ -1016,8 +1016,15 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
         mleErrorJoint(nx,ny,nz);
     }
   } while ( fabs(curr - prop) > 1.0e-8);
-  t1 = normal(prop,-1/prop_ddlogl,rng);
-  cout << "Normal 1D mean: " << prop << ", variance: " << -1/prop_ddlogl << endl;
+  double mu = prop;
+  double var = -1/prop_ddlogl;
+  double s = min(sum1,sum2);
+  double part1 = (mu * mu * (s-mu)) / (s * var);
+  double a =  part1 - mu / s;
+  double b = part1 - (s - mu) / s;
+  //t1 = beta(a,b,rng);
+  t1 = a/b; //temporarily while we create beta generator r.v.
+  cout << "1D mean: " << mu << ", variance: " << var << endl;
   cout << "Sample 1D bl: " << t1 << endl;
   t2 = sum1-t1;
   t3 = sum2-t1;
@@ -1033,6 +1040,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng)
 {
   cout << "Entering mleDistanceJoint" << endl;
+  cout << "lx,ly,lz: " << lx << ", " << ly << ", " << lz << endl;
+  cout << "sxy,sxz,syz: " << sxy << ", " << sxz << ", " << syz << endl;
   if(sxy > 0 && sxz > 0 && syz > 0)
     {
       cerr << "Trying to condition al all three sums, impossible!" << endl;
@@ -1126,10 +1135,10 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       }
   } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8 || fabs(curr[2] - prop[2]) >1.0e-8 );
 
-  Matrix3d cov = (-1) * prop_hessian.inverse(); 
+  Matrix3d cov = (-1) * prop_hessian.inverse();
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
-  cout << "Normal 3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
-  Vector3d bl = multivariateGamma3D(prop,cov,rng); 
+  cout << "3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
+  Vector3d bl = multivariateGamma3D(prop,cov,rng);
   cout << "Sample bl 3D: "<< bl.transpose() << endl;
   //Vector3d bl = prop;
   lx = bl[0];
@@ -1180,7 +1189,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       delta = 0.5*delta;
       prop = curr - delta;
     }
-    cerr << "Delta " << delta.transpose() << endl;
+    //cerr << "Delta " << delta.transpose() << endl;
     partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
@@ -1196,14 +1205,13 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8);
 
   Matrix2d cov = (-1) * prop_hessian.inverse();
-  Vector2d bl = multivariateNormal(prop,cov,rng);
+  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng); //t3=sum-t1
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
-  cout << "Normal 2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
+  cout << "2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
   cout << "Sample 2D bl: " << bl.transpose() << endl;
-  //Vector2d bl = prop;
   t1 = bl[0];
   t2 = bl[1];
-  t3 = sum-bl[0];
+  t3 = bl[2];
 }
 
 
@@ -1410,6 +1418,9 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     double lx = lengthX0;
     double ly = lengthY0;
     double lz = lengthZ0;
+    dxy = lengthX0 + lengthY0; //need to redo this because of negative bl
+    dxz = lengthZ0 + lengthX0;
+    dyz = lengthY0 + lengthZ0;
     double sxy = 0;
     double sxz = 0;
     double syz = 0;
@@ -1434,7 +1445,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     if ( lx < 0 ) //fixit: make a function of this
     {
       cerr << "Warning: fix negative edge length." << endl;
-      lx = 0.0; //clau: does not work very well starting point of 0
+      lx = 0.0;
     }
     if ( ly < 0 )
     {
