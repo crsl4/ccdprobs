@@ -8,4 +8,4 @@
 
 
 To do:
-- modify 2D and 1D similar to mleDistance3D
+- modify 2D and 1D similar to mleDistance3D (creo q ya hice esto)
