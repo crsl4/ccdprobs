@@ -1,5 +1,6 @@
 #include <random>
 #include <iostream>
+#include <iomanip>
 
 #include "Eigen/Core"
 #include "Eigen/Eigenvalues"
@@ -44,18 +45,21 @@ double normal(double mu, double vc, mt19937_64& rng)
   return rnorm( rng );
 }
 
-double gamma(double alpha, double beta, mt19937_64& rng)
+double gamma(double alpha, double b, mt19937_64& rng)
 {
-  gamma_distribution<double> gam1(alpha,beta);
+  gamma_distribution<double> gam1(alpha,b);
   return gam1(rng);
 }
 
-// double beta(double alpha, double beta, mt19937_64& rng)
-// {
-//   beta_distribution<double> gam1(alpha,beta);
-//   return gam1(rng);
-// }
 
+double beta(double alpha,double b,mt19937_64& rng)
+{
+  gamma_distribution<double> rgammaA(alpha,1);
+  gamma_distribution<double> rgammaB(b,1);
+  double x1 = rgammaA(rng);
+  double x2 = rgammaB(rng);
+  return( x1/(x1+x2) );
+ }
 
 Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng)
 {
@@ -108,8 +112,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng)
        cerr << "Alpha or beta negative in multivariate2D" << endl;
        exit(1);
      }
-   //  double b = beta(alpha1,beta1,rng); //fixit
-   double b = alpha1/beta1;
+   double b = beta(alpha1,beta1,rng);
+   //double b = alpha1/beta1;
    bl[0] = sum * b; //t1
    bl[2] = sum *(1-b); //t3
    // ------------ t2 ------------------

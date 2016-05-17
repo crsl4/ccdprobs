@@ -663,6 +663,8 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
   if (sum < t[0])
     {
       cerr << "Sum smaller than summand in partialPathCalculations2D" << endl;
+      cerr << "t: " << t.transpose() << endl;
+      cerr << "sum: " << sum << endl;
       exit(1);
     }
   Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
@@ -1022,8 +1024,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   double part1 = (mu * mu * (s-mu)) / (s * var);
   double a =  part1 - mu / s;
   double b = part1 - (s - mu) / s;
-  //t1 = beta(a,b,rng);
-  t1 = a/b; //temporarily while we create beta generator r.v.
+  t1 = beta(a,b,rng);
+  //t1 = a/b; //temporarily while we create beta generator r.v.
   cout << "1D mean: " << mu << ", variance: " << var << endl;
   cout << "Sample 1D bl: " << t1 << endl;
   t2 = sum1-t1;
