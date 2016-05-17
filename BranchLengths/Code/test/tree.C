@@ -1511,20 +1511,20 @@ double vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
 
 // // function just to write grid for logl, dlogl, ddlogl to plot it
 // fixit: does not work
-void gridPlotFile(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
-{
-  ofstream currfile;
-  double curr = 0.0001;
-  double curr_logl,curr_dlogl,curr_ddlogl;
-  currfile.open ("currfile.txt"); 
-  while(curr < 1.0)
-    {
-      partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
-      currfile << curr << " " << curr_logl << " " << curr_dlogl << " " << curr_ddlogl << endl;
-      curr = 2 * curr;
-    }
-  currfile.close();
-}
+// void gridPlotFile(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
+// {
+//   ofstream currfile;
+//   double curr = 0.0001;
+//   double curr_logl,curr_dlogl,curr_ddlogl;
+//   currfile.open ("currfile.txt"); 
+//   while(curr < 1.0)
+//     {
+//       partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
+//       currfile << curr << " " << curr_logl << " " << curr_dlogl << " " << curr_ddlogl << endl;
+//       curr = 2 * curr;
+//     }
+//   currfile.close();
+// }
 
 // void gridPlotScreen(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
 // {

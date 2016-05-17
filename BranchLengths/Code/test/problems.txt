@@ -6,7 +6,11 @@ To do:
 - sum smaller than summand in partialPathCalculations2D: 
   prop = curr+delta, and now it is bigger than sum		 
 
+- typo in birds4: still sum<summand, and should not happen
 
+- need to develop algorithm for a
+  internal node, to find a leaf, and do mleDistance on two leaves,
+  keeping track of length to substract at the end
 
 - nan problem: seems to be the starting point for the mle search (for
   two sequences), specially when one is internal node: so problem, how
