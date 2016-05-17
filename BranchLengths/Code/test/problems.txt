@@ -25,10 +25,15 @@ To do:
   consistent to what we believe
 
 
+--------
+bret:
+- cannot write to file: gridPlotFile/gridPlotScreen, did not compile
+
 
 ---------
 To do after:
 
-- figure out how to generate beta, and modify code
 - double check theory of gamma/beta (correct exp, var,cov) and
-- doublecheck code
+  doublecheck code
+- check if after fixing starting point, we still get sum<summand in
+  partialPathCalc2D

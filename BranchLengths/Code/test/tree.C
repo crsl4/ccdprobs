@@ -841,7 +841,9 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
   //cout << "Nodes " << na->getNumber() << ", " << nb->getNumber() << endl;
   bool recurse=false;
   int iter=0;
-  double curr = 0.005;
+  double curr = 0.05;   
+  // if(!(na->getLeaf()) || !(nb->getLeaf())) //fixit: does not compile
+  //   gridPlotFile(alignment,na,ea,nb,eb,qmatrix);
   // get a decent starting point
   double curr_logl,curr_dlogl,curr_ddlogl;
   partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
@@ -863,6 +865,7 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
       // cout << "curr_dlogl in mleDistance for curr_dlogl>0: " << curr_dlogl << endl;
       // cout << "curr_ddlogl in mleDistance for curr_dlogl>0: " << curr_ddlogl << endl;
       prop = 2*curr;
+      cout << "double starting point in mleDistance because curr_dlogl>0" << endl;
       partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
       // cout << "prop in mleDistance for curr_dlogl>0: " << prop << endl;
       // cout << "prop_logl in mleDistance for curr_dlogl>0: " << prop_logl << endl;
@@ -885,6 +888,7 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
       // cout << "curr_dlogl in mleDistance for curr_dlogl<0: " << curr_dlogl << endl;
       // cout << "curr_ddlogl in mleDistance for curr_dlogl<0: " << curr_ddlogl << endl;
       prop = 0.5*curr;
+      cout << "half starting point in mleDistance because curr_dlogl<0" << endl;
       partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
       // cout << "prop in mleDistance for curr_dlogl<0: " << prop << endl;
       // cout << "prop_logl in mleDistance for curr_dlogl<0: " << prop_logl << endl;
@@ -1505,3 +1509,31 @@ double vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
   return vectorProduct(v);
 }
 
+// // function just to write grid for logl, dlogl, ddlogl to plot it
+// fixit: does not work
+void gridPlotFile(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
+{
+  ofstream currfile;
+  double curr = 0.0001;
+  double curr_logl,curr_dlogl,curr_ddlogl;
+  currfile.open ("currfile.txt"); 
+  while(curr < 1.0)
+    {
+      partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
+      currfile << curr << " " << curr_logl << " " << curr_dlogl << " " << curr_ddlogl << endl;
+      curr = 2 * curr;
+    }
+  currfile.close();
+}
+
+// void gridPlotScreen(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
+// {
+//   double curr;
+//   double curr_logl,curr_dlogl,curr_ddlogl;
+//   while(curr < 1.0)
+//     {
+//       partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
+//       cout << curr << " " << curr_logl << " " << curr_dlogl << " " << curr_ddlogl << endl;
+//       curr = 2 * curr;
+//     }
+// } 

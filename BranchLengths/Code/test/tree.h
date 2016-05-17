@@ -171,5 +171,7 @@ public:
 
 double vectorProduct(vector<Vector4d> v);
 double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
+//void gridPlotFile(Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&) //fixit: does not work
+//void gridPlotScreen(Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&) //fixit: does not work
 
 #endif

@@ -32,6 +32,58 @@ t.all = cbind(t1,t2,t3)
 m = apply(t.all,2,mean)
 v = cov(t.all)
 
+require(ggplot2)
+ggplot(data.frame(t.all),aes(x=t1,y=t2)) + geom_point(alpha=0.1) + theme_bw()
+ggplot(data.frame(t.all),aes(x=t1,y=t3)) + geom_point(alpha=0.1) + theme_bw()
+ggplot(data.frame(t.all),aes(x=t2,y=t3)) + geom_point(alpha=0.1) + theme_bw()
 
+print(vc)
+print(cov(t.all))
 
+v = sqrt(diag(vc))
+print(diag(1/v) %*% vc %*% diag(1/v) )
+print(cor(t.all))
 
+## change order of 1 and 2, see if it matters
+ord = c(2,1,3)
+mu = mu[ord]
+vc = vc[ord,ord]
+L = t(chol(vc))
+
+a1 = mu[1]^2/L[1,1]^2
+b1 = mu[1]/L[1,1]^2
+
+t1 = rgamma(n,a1,b1)
+
+z1 = (t1-mu[1])/L[1,1]
+
+a2 = (mu[2] + L[2,1]*z1)^2/L[2,2]^2
+b2 = (mu[2] + L[2,1]*z1)/L[2,2]^2
+
+t2 = rgamma(n,a2,b2)
+
+z2 = (t2 - mu[2] - L[2,1]*z1)/L[2,2]
+
+a3 = (mu[3] + L[3,1]*z1 + L[3,2]*z2)^2/L[3,3]^2
+b3 = (mu[3] + L[3,1]*z1 + L[3,2]*z2)/L[3,3]^2
+
+t3 = rgamma(n,a3,b3)
+
+t.all = cbind(t1,t2,t3)
+m = apply(t.all,2,mean)
+v = cov(t.all)
+
+require(ggplot2)
+ggplot(data.frame(t.all),aes(x=t1,y=t2)) + geom_point(alpha=0.1) + theme_bw()
+ggplot(data.frame(t.all),aes(x=t1,y=t3)) + geom_point(alpha=0.1) + theme_bw()
+ggplot(data.frame(t.all),aes(x=t2,y=t3)) + geom_point(alpha=0.1) + theme_bw()
+
+print(vc)
+print(cov(t.all))
+
+v = sqrt(diag(vc))
+print(diag(1/v) %*% vc %*% diag(1/v) )
+print(cor(t.all))
+
+gm2 = mu[2] + L[2,1]*z1
+range(gm2)
