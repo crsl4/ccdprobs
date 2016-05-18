@@ -163,6 +163,7 @@ public:
   void mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum, mt19937_64& rng);
   void mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng);
   void mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum1, double& sum2, mt19937_64& rng);
+  double maxPosteriorDistance(Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double);
   void setNodeLevels();
   void depthFirstNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
