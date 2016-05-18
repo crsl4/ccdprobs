@@ -838,16 +838,16 @@ void mleErrorJoint(Node* nx,Node* ny,Node* nz)
 // and that the patternToProbMaps are accurate if edges ea and eb head toward the root.
 double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
 {
-  //cout << "Nodes " << na->getNumber() << ", " << nb->getNumber() << endl;
+  cout << "mleDistance for nodes " << na->getNumber() << ", " << nb->getNumber() << endl;
   bool recurse=false;
   int iter=0;
-  double curr = 0.05;   
+  double curr = 0.05;
   // if(!(na->getLeaf()) || !(nb->getLeaf())) //fixit: does not compile
   //   gridPlotFile(alignment,na,ea,nb,eb,qmatrix);
   // get a decent starting point
   double curr_logl,curr_dlogl,curr_ddlogl;
   partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
-  //  cout << "Starting at curr="<<curr << ", logl, dlogl and ddlogl: " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
+  cout << "Starting at curr="<<curr << ", logl, dlogl and ddlogl: " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
   double prop = curr;
   double prop_logl = curr_logl;
   double prop_dlogl = curr_dlogl;
@@ -867,10 +867,10 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
       prop = 2*curr;
       cout << "double starting point in mleDistance because curr_dlogl>0" << endl;
       partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      // cout << "prop in mleDistance for curr_dlogl>0: " << prop << endl;
-      // cout << "prop_logl in mleDistance for curr_dlogl>0: " << prop_logl << endl;
-      // cout << "prop_dlogl in mleDistance for curr_dlogl>0: " << prop_dlogl << endl;
-      // cout << "prop_ddlogl in mleDistance for curr_dlogl>0: " << prop_ddlogl << endl;
+      cout << "prop in mleDistance for curr_dlogl>0: " << prop << endl;
+      cout << "prop_logl in mleDistance for curr_dlogl>0: " << prop_logl << endl;
+      cout << "prop_dlogl in mleDistance for curr_dlogl>0: " << prop_dlogl << endl;
+      cout << "prop_ddlogl in mleDistance for curr_dlogl>0: " << prop_ddlogl << endl;
       if ( ++iter > 100 )
         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
     } while ( prop_dlogl > 0);
@@ -890,21 +890,24 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
       prop = 0.5*curr;
       cout << "half starting point in mleDistance because curr_dlogl<0" << endl;
       partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      // cout << "prop in mleDistance for curr_dlogl<0: " << prop << endl;
-      // cout << "prop_logl in mleDistance for curr_dlogl<0: " << prop_logl << endl;
-      // cout << "prop_dlogl in mleDistance for curr_dlogl<0: " << prop_dlogl << endl;
-      // cout << "prop_ddlogl in mleDistance for curr_dlogl<0: " << prop_ddlogl << endl;
+      cout << "prop in mleDistance for curr_dlogl<0: " << prop << endl;
+      cout << "prop_logl in mleDistance for curr_dlogl<0: " << prop_logl << endl;
+      cout << "prop_dlogl in mleDistance for curr_dlogl<0: " << prop_dlogl << endl;
+      cout << "prop_ddlogl in mleDistance for curr_dlogl<0: " << prop_ddlogl << endl;
       if ( ++iter > 100 )
         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
     } while ( prop_dlogl < 0 );
   }
   // switch to protected Newton-Raphson
-  // cout << "Two points to interpolate: " << curr << ", " << prop << endl;
-  // cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
+  cout << "Two points to interpolate: " << curr << ", " << prop << endl;
+  cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
-  // cout << "Starting prop: " << prop << endl;
+  partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+  cout << "Starting prop: " << prop << endl;
+  cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
   do
   {
+    cout << "entered while" << endl;
     curr = prop;
     partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
     // cout << "curr in mleDistance: " << curr << endl;
@@ -934,7 +937,9 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
       if ( ++iter > 100 )
         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
     }
-  } while ( fabs(curr - prop) > 1.0e-8);
+  } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8); //clau: added stopping rule dlogl~0g
+  cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+  cout << "-----" << endl;
   return prop;
 }
 // Find mle distance between nodes nx,ny,nz with edges ex,ey,ez
@@ -990,7 +995,12 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     } while ( prop_dlogl < 0 );
   }
   // switch to protected Newton-Raphson
+  cout << "Two points to interpolate: " << curr << ", " << prop << endl;
+  cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
+  partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+  cout << "Starting prop: " << prop << endl;
+  cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
   do
   {
     curr = prop;
@@ -1021,7 +1031,9 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       if ( ++iter > 100 )
         mleErrorJoint(nx,ny,nz);
     }
-  } while ( fabs(curr - prop) > 1.0e-8);
+  } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8);
+  cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+  cout << "-----" << endl;
   double mu = prop;
   double var = -1/prop_ddlogl;
   double s = min(sum1,sum2);
@@ -1108,6 +1120,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   double prop_logl = curr_logl;
   Vector3d prop_gradient = curr_gradient;
   Matrix3d prop_hessian = curr_hessian;
+  Vector3d delta = curr - prop;
   // find starting point: we want a good prop
   do
   {
@@ -1118,7 +1131,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-    Vector3d delta = curr_hessian.inverse() * curr_gradient;
+    delta = curr_hessian.inverse() * curr_gradient;
     prop = curr - delta;
     while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
     {
@@ -1139,8 +1152,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	if ( ++iter > 100 )
 	  mleErrorJoint(nx,ny,nz);
       }
-  } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8 || fabs(curr[2] - prop[2]) >1.0e-8 );
-
+  } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.0e-8);
   Matrix3d cov = (-1) * prop_hessian.inverse();
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
   cout << "3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
@@ -1177,9 +1189,11 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   double prop_logl = curr_logl;
   Vector2d prop_gradient = curr_gradient;
   Matrix2d prop_hessian = curr_hessian;
-  // find a starting point
+  Vector2d delta = curr - prop;
+  // still need to find a starting point
   do
   {
+    cout << "entered while" << endl;
     curr = prop;
     partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
     cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
@@ -1187,8 +1201,10 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-    Vector2d delta = curr_hessian.inverse() * curr_gradient;
+    delta = curr_hessian.inverse() * curr_gradient;
     prop = curr - delta;
+    cout << "New proposed: " << prop.transpose() << endl;
+    cout << "with sum: " << sum << endl;
     while ( prop[0] < 0 || prop[1] < 0)
     {
       cerr << "found negative" << endl;
@@ -1208,8 +1224,8 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	if ( ++iter > 100 )
 	  mleErrorJoint(nx,ny,nz);
       }
-  } while ( fabs(curr[0] - prop[0]) >1.0e-8 || fabs(curr[1] - prop[1]) >1.0e-8);
-
+  } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.e-8 ); //question?
+  cout << "Finally converged" << endl;
   Matrix2d cov = (-1) * prop_hessian.inverse();
   Vector3d bl = multivariateGamma2D(prop,cov,sum,rng); //t3=sum-t1
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
@@ -1516,7 +1532,7 @@ double vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
 //   ofstream currfile;
 //   double curr = 0.0001;
 //   double curr_logl,curr_dlogl,curr_ddlogl;
-//   currfile.open ("currfile.txt"); 
+//   currfile.open ("currfile.txt");
 //   while(curr < 1.0)
 //     {
 //       partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
@@ -1536,4 +1552,4 @@ double vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
 //       cout << curr << " " << curr_logl << " " << curr_dlogl << " " << curr_ddlogl << endl;
 //       curr = 2 * curr;
 //     }
-// } 
+// }

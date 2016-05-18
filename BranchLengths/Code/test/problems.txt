@@ -3,10 +3,13 @@
 
 To do:
 - modify 2D and 1D similar to mleDistance3D (creo q ya hice esto)
-- sum smaller than summand in partialPathCalculations2D: 
-  prop = curr+delta, and now it is bigger than sum		 
+- sum smaller than summand in partialPathCalculations2D:
+  prop = curr+delta, and now it is bigger than sum
+- birds4: still sum<summand, and should not happen: need restricted NR
 
-- typo in birds4: still sum<summand, and should not happen
+- should add a check for gradient close to zero in 2D, 3D. for the
+ birds case, we start with a curr with gradient very close to zero,
+ and we keep searching! (done, need to discuss with bret)
 
 - need to develop algorithm for a
   internal node, to find a leaf, and do mleDistance on two leaves,
