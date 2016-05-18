@@ -109,7 +109,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng)
    double beta1 = part1 - ((sum - mu[0]) / sum);
    if(alpha1 < 0 || beta1 < 0 )
      {
-       cerr << "Alpha or beta negative in multivariate2D" << endl;
+       cerr << "Alpha or beta negative in multivariate2D: " << alpha1<< ", " << beta1 << endl;
        exit(1);
      }
    double b = beta(alpha1,beta1,rng);
