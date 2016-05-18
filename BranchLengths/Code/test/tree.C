@@ -581,13 +581,13 @@ void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* 
 
 // May 18, 2016
 // Assumes Exponential( lambda ) prior on t
-void Tree::partialMaxPosteriorPathCalculations(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,
-					       double& logl,double& dlogl,double& ddlogl,double lambda,bool recurse)
-{
-  partialPathCalculations(t,alignment,na,ea,nb,eb,qmatrix,logl,dlogl,ddlogl,recurse);
-  logl += ( log(lambda) - lambda*t);
-  dlogl -= lambda;
-}
+// void Tree::partialMaxPosteriorPathCalculations(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,
+// 					       double& logl,double& dlogl,double& ddlogl,double lambda,bool recurse)
+// {
+//   partialPathCalculations(t,alignment,na,ea,nb,eb,qmatrix,logl,dlogl,ddlogl,recurse);
+//   logl += ( log(lambda) - lambda*t);
+//   dlogl -= lambda;
+// }
 
 void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector3d& gradient,Matrix3d& hessian,bool recurse)
 {
@@ -863,7 +863,7 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
   //   gridPlotFile(alignment,na,ea,nb,eb,qmatrix);
   // get a decent starting point
   double curr_logl,curr_dlogl,curr_ddlogl;
-  partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
+  partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
   cout << "Starting at curr="<<curr << ", logl, dlogl and ddlogl: " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
   double prop = curr;
   double prop_logl = curr_logl;
@@ -960,103 +960,103 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
   return prop;
 }
 
-double Tree::maxPosteriorDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double lambda)
-{
-  cerr << "maxPosteriorDistance for nodes " << na->getNumber() << ", " << nb->getNumber() << endl;
-  bool recurse=false;
-  int iter=0;
-  double curr = 0.05;
-  // get a decent starting point
-  double curr_logl,curr_dlogl,curr_ddlogl;
-  partialMaxPosteriorPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,lambda,false);
-  cerr << "Starting at curr="<<curr << ", logl, dlogl and ddlogl: " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
-  double prop = curr;
-  double prop_logl = curr_logl;
-  double prop_dlogl = curr_dlogl;
-  double prop_ddlogl = curr_ddlogl;
-  if ( curr_dlogl > 0 ) // clau: this is for a good starting point
-  {
-    do
-    {
-      curr = prop;
-      curr_logl = prop_logl;
-      curr_dlogl = prop_dlogl;
-      curr_ddlogl = prop_ddlogl;
-      prop = 2*curr;
-      cerr << "double starting point in mleDistance because curr_dlogl>0" << endl;
-      partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
-      cerr << "prop in mleDistance for curr_dlogl>0: " << prop << endl;
-      cerr << "prop_logl in mleDistance for curr_dlogl>0: " << prop_logl << endl;
-      cerr << "prop_dlogl in mleDistance for curr_dlogl>0: " << prop_dlogl << endl;
-      cerr << "prop_ddlogl in mleDistance for curr_dlogl>0: " << prop_ddlogl << endl;
-      if ( ++iter > 100 )
-        mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    } while ( prop_dlogl > 0);
-  }
-  else
-  {
-    do
-    {
-      curr = prop;
-      curr_logl = prop_logl;
-      curr_dlogl = prop_dlogl;
-      curr_ddlogl = prop_ddlogl;
-      prop = 0.5*curr;
-      cerr << "half starting point in mleDistance because curr_dlogl<0" << endl;
-      partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
-      cerr << "prop in mleDistance for curr_dlogl<0: " << prop << endl;
-      cerr << "prop_logl in mleDistance for curr_dlogl<0: " << prop_logl << endl;
-      cerr << "prop_dlogl in mleDistance for curr_dlogl<0: " << prop_dlogl << endl;
-      cerr << "prop_ddlogl in mleDistance for curr_dlogl<0: " << prop_ddlogl << endl;
-      if ( ++iter > 100 )
-        mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    } while ( prop_dlogl < 0 );
-  }
-  // switch to protected Newton-Raphson
-  cerr << "Two points to interpolate: " << curr << ", " << prop << endl;
-  cerr << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
-  prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
-  partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
-  cerr << "Starting prop: " << prop << endl;
-  cerr << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
-  do
-  {
-    cerr << "entered while" << endl;
-    curr = prop;
-    partialMaxPosteriorPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,lambda,recurse);
+// double Tree::maxPosteriorDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double lambda)
+// {
+//   cerr << "maxPosteriorDistance for nodes " << na->getNumber() << ", " << nb->getNumber() << endl;
+//   bool recurse=false;
+//   int iter=0;
+//   double curr = 0.05;
+//   // get a decent starting point
+//   double curr_logl,curr_dlogl,curr_ddlogl;
+//   partialMaxPosteriorPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,lambda,false);
+//   cerr << "Starting at curr="<<curr << ", logl, dlogl and ddlogl: " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
+//   double prop = curr;
+//   double prop_logl = curr_logl;
+//   double prop_dlogl = curr_dlogl;
+//   double prop_ddlogl = curr_ddlogl;
+//   if ( curr_dlogl > 0 ) // clau: this is for a good starting point
+//   {
+//     do
+//     {
+//       curr = prop;
+//       curr_logl = prop_logl;
+//       curr_dlogl = prop_dlogl;
+//       curr_ddlogl = prop_ddlogl;
+//       prop = 2*curr;
+//       cerr << "double starting point in mleDistance because curr_dlogl>0" << endl;
+//       partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
+//       cerr << "prop in mleDistance for curr_dlogl>0: " << prop << endl;
+//       cerr << "prop_logl in mleDistance for curr_dlogl>0: " << prop_logl << endl;
+//       cerr << "prop_dlogl in mleDistance for curr_dlogl>0: " << prop_dlogl << endl;
+//       cerr << "prop_ddlogl in mleDistance for curr_dlogl>0: " << prop_ddlogl << endl;
+//       if ( ++iter > 100 )
+//         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     } while ( prop_dlogl > 0);
+//   }
+//   else
+//   {
+//     do
+//     {
+//       curr = prop;
+//       curr_logl = prop_logl;
+//       curr_dlogl = prop_dlogl;
+//       curr_ddlogl = prop_ddlogl;
+//       prop = 0.5*curr;
+//       cerr << "half starting point in mleDistance because curr_dlogl<0" << endl;
+//       partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
+//       cerr << "prop in mleDistance for curr_dlogl<0: " << prop << endl;
+//       cerr << "prop_logl in mleDistance for curr_dlogl<0: " << prop_logl << endl;
+//       cerr << "prop_dlogl in mleDistance for curr_dlogl<0: " << prop_dlogl << endl;
+//       cerr << "prop_ddlogl in mleDistance for curr_dlogl<0: " << prop_ddlogl << endl;
+//       if ( ++iter > 100 )
+//         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     } while ( prop_dlogl < 0 );
+//   }
+//   // switch to protected Newton-Raphson
+//   cerr << "Two points to interpolate: " << curr << ", " << prop << endl;
+//   cerr << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
+//   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
+//   partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
+//   cerr << "Starting prop: " << prop << endl;
+//   cerr << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+//   do
+//   {
+//     cerr << "entered while" << endl;
+//     curr = prop;
+//     partialMaxPosteriorPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,lambda,recurse);
 
-    // cout << "curr in mleDistance: " << curr << endl;
-    if ( ++iter > 100 )
-      mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    double delta = -curr_dlogl / curr_ddlogl;
-    // cout << "Delta in mleDistance: " << delta << endl;
-    prop = curr + delta;
-    // cout << "prop in mleDistance: " << prop << endl;
-    while ( prop < 0 )
-    {
-      // cout << "found negative" << endl;
-      delta = 0.5*delta;
-      // cout << "Delta: " << delta << endl;
-      prop = curr + delta;
-    }
-    partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
-    if ( ++iter > 100 )
-      mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
-    {
-      // cout << "found big jump" << endl;
-      delta = 0.5*delta;
-      // cout << "Delta: " << delta << endl;
-      prop = curr + delta;
-      partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
-      if ( ++iter > 100 )
-        mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    }
-  } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8); //clau: added stopping rule dlogl~0g
-  cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
-  cout << "-----" << endl;
-  return prop;
-}
+//     // cout << "curr in mleDistance: " << curr << endl;
+//     if ( ++iter > 100 )
+//       mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     double delta = -curr_dlogl / curr_ddlogl;
+//     // cout << "Delta in mleDistance: " << delta << endl;
+//     prop = curr + delta;
+//     // cout << "prop in mleDistance: " << prop << endl;
+//     while ( prop < 0 )
+//     {
+//       // cout << "found negative" << endl;
+//       delta = 0.5*delta;
+//       // cout << "Delta: " << delta << endl;
+//       prop = curr + delta;
+//     }
+//     partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
+//     if ( ++iter > 100 )
+//       mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
+//     {
+//       // cout << "found big jump" << endl;
+//       delta = 0.5*delta;
+//       // cout << "Delta: " << delta << endl;
+//       prop = curr + delta;
+//       partialMaxPosteriorPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,lambda,recurse);
+//       if ( ++iter > 100 )
+//         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     }
+//   } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8); //clau: added stopping rule dlogl~0g
+//   cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+//   cout << "-----" << endl;
+//   return prop;
+// }
 
 // Find mle distance between nodes nx,ny,nz with edges ex,ey,ez
 // conditional on two sums: t1,s1-t1,s2-t1
@@ -1076,7 +1076,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   int iter=0;
   double curr = t1;
   double curr_logl,curr_dlogl,curr_ddlogl;
-  partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true); //true un original mleDist
+  partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse); //true un original mleDist
   double prop = curr;
   double prop_logl = curr_logl;
   double prop_dlogl = curr_dlogl;
@@ -1164,106 +1164,106 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   t3 = sum2-t1;
 }
 
-void Tree::maxPosteriorDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double lambda,
-				  double& t1, double& t2, double& t3, double& sum1, double& sum2, mt19937_64& rng)
-{
-  if (sum1 < t1 || sum2 < t1)
-    {
-      cerr << "Sum smaller than summand in mle distance1D" << endl;
-      exit(1);
-    }
-  cout << "Entering mleDistance1D" << endl;
-  bool recurse=false;
-  int iter=0;
-  double curr = t1;
-  double curr_logl,curr_dlogl,curr_ddlogl;
-  partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true); //true un original mleDist
-  double prop = curr;
-  double prop_logl = curr_logl;
-  double prop_dlogl = curr_dlogl;
-  double prop_ddlogl = curr_ddlogl;
-  if ( curr_dlogl > 0 ) //to find a good starting point
-  {
-    do
-    {
-      cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
-      curr = prop;
-      curr_logl = prop_logl;
-      curr_dlogl = prop_dlogl;
-      curr_ddlogl = prop_ddlogl;
-      prop = 2*curr;
-      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      if ( ++iter > 100 )
-        mleErrorJoint(nx,ny,nz);
-    } while ( prop_dlogl > 0);
-  }
-  else
-  {
-    do
-    {
-      curr = prop;
-      curr_logl = prop_logl;
-      curr_dlogl = prop_dlogl;
-      curr_ddlogl = prop_ddlogl;
-      prop = 0.5*curr;
-      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      if ( ++iter > 100 )
-        mleErrorJoint(nx,ny,nz);
-    } while ( prop_dlogl < 0 );
-  }
-  // switch to protected Newton-Raphson
-  cout << "Two points to interpolate: " << curr << ", " << prop << endl;
-  cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
-  prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
-  partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-  cout << "Starting prop: " << prop << endl;
-  cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
-  do
-  {
-    curr = prop;
-    partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
-    cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
-    cout << "mleDistance1D Newton-Raphson dlogl: " << curr_dlogl << endl;
-    cout << "mleDistance1D Newton-Raphson ddlogl: " << endl << curr_ddlogl << endl;
-    if ( ++iter > 100 )
-      mleErrorJoint(nx,ny,nz);
-    double delta = curr_dlogl / curr_ddlogl;
-    prop = curr - delta;
-    while ( prop < 0 )
-    {
-      cerr << "found negative" << endl;
-      delta = 0.5*delta;
-      prop = curr - delta;
-    }
-    //cerr << "Delta " << delta << endl;
-    partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-    if ( ++iter > 100 )
-      mleErrorJoint(nx,ny,nz);
-    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
-    {
-      cerr << "found bigger step" << endl;
-      delta = 0.5*delta;
-      prop = curr - delta;
-      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      if ( ++iter > 100 )
-        mleErrorJoint(nx,ny,nz);
-    }
-  } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8);
-  cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
-  cout << "-----" << endl;
-  double mu = prop;
-  double var = -1/prop_ddlogl;
-  double s = min(sum1,sum2);
-  double part1 = (mu * mu * (s-mu)) / (s * var);
-  double a =  part1 - mu / s;
-  double b = part1 - (s - mu) / s;
-  t1 = beta(a,b,rng);
-  //t1 = a/b; //temporarily while we create beta generator r.v.
-  cout << "1D mean: " << mu << ", variance: " << var << endl;
-  cout << "Sample 1D bl: " << t1 << endl;
-  t2 = sum1-t1;
-  t3 = sum2-t1;
-}
+// void Tree::maxPosteriorDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double lambda,
+// 				  double& t1, double& t2, double& t3, double& sum1, double& sum2, mt19937_64& rng)
+// {
+//   if (sum1 < t1 || sum2 < t1)
+//     {
+//       cerr << "Sum smaller than summand in mle distance1D" << endl;
+//       exit(1);
+//     }
+//   cout << "Entering mleDistance1D" << endl;
+//   bool recurse=false;
+//   int iter=0;
+//   double curr = t1;
+//   double curr_logl,curr_dlogl,curr_ddlogl;
+//   partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true); //true un original mleDist
+//   double prop = curr;
+//   double prop_logl = curr_logl;
+//   double prop_dlogl = curr_dlogl;
+//   double prop_ddlogl = curr_ddlogl;
+//   if ( curr_dlogl > 0 ) //to find a good starting point
+//   {
+//     do
+//     {
+//       cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
+//       curr = prop;
+//       curr_logl = prop_logl;
+//       curr_dlogl = prop_dlogl;
+//       curr_ddlogl = prop_ddlogl;
+//       prop = 2*curr;
+//       partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+//       if ( ++iter > 100 )
+//         mleErrorJoint(nx,ny,nz);
+//     } while ( prop_dlogl > 0);
+//   }
+//   else
+//   {
+//     do
+//     {
+//       curr = prop;
+//       curr_logl = prop_logl;
+//       curr_dlogl = prop_dlogl;
+//       curr_ddlogl = prop_ddlogl;
+//       prop = 0.5*curr;
+//       partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+//       if ( ++iter > 100 )
+//         mleErrorJoint(nx,ny,nz);
+//     } while ( prop_dlogl < 0 );
+//   }
+//   // switch to protected Newton-Raphson
+//   cout << "Two points to interpolate: " << curr << ", " << prop << endl;
+//   cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
+//   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
+//   partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+//   cout << "Starting prop: " << prop << endl;
+//   cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+//   do
+//   {
+//     curr = prop;
+//     partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
+//     cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
+//     cout << "mleDistance1D Newton-Raphson dlogl: " << curr_dlogl << endl;
+//     cout << "mleDistance1D Newton-Raphson ddlogl: " << endl << curr_ddlogl << endl;
+//     if ( ++iter > 100 )
+//       mleErrorJoint(nx,ny,nz);
+//     double delta = curr_dlogl / curr_ddlogl;
+//     prop = curr - delta;
+//     while ( prop < 0 )
+//     {
+//       cerr << "found negative" << endl;
+//       delta = 0.5*delta;
+//       prop = curr - delta;
+//     }
+//     //cerr << "Delta " << delta << endl;
+//     partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+//     if ( ++iter > 100 )
+//       mleErrorJoint(nx,ny,nz);
+//     while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
+//     {
+//       cerr << "found bigger step" << endl;
+//       delta = 0.5*delta;
+//       prop = curr - delta;
+//       partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+//       if ( ++iter > 100 )
+//         mleErrorJoint(nx,ny,nz);
+//     }
+//   } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8);
+//   cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+//   cout << "-----" << endl;
+//   double mu = prop;
+//   double var = -1/prop_ddlogl;
+//   double s = min(sum1,sum2);
+//   double part1 = (mu * mu * (s-mu)) / (s * var);
+//   double a =  part1 - mu / s;
+//   double b = part1 - (s - mu) / s;
+//   t1 = beta(a,b,rng);
+//   //t1 = a/b; //temporarily while we create beta generator r.v.
+//   cout << "1D mean: " << mu << ", variance: " << var << endl;
+//   cout << "Sample 1D bl: " << t1 << endl;
+//   t2 = sum1-t1;
+//   t3 = sum2-t1;
+// }
 
 // Find joint mle distance between nodes nx,ny,nz with edges ex,ey,ez
 // Conditon on data in subtrees through other edges.
@@ -1332,7 +1332,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   double curr_logl;
   Vector3d curr_gradient;
   Matrix3d curr_hessian;
-  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true); //true in original mleDist
+  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse); //true in original mleDist
   Vector3d prop = curr;
   double prop_logl = curr_logl;
   Vector3d prop_gradient = curr_gradient;
@@ -1402,7 +1402,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   double curr_logl;
   Vector2d curr_gradient;
   Matrix2d curr_hessian;
-  partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true); //true in original mleDist
+  partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse); //true in original mleDist
   cout << "Starting point in mleDistance2D" << endl; 
   cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
   cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
@@ -1638,39 +1638,58 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	dyz = m->second;
 	foundyz = true;
       }
-    cout << "after mleDistance or map, dxy,dxz,dyz " << dxy << ", " << dxz << ", " << dyz << endl; 
-    //clau: lengthX0, lengthY0, lengthZ0 (from NJ) are starting points for joint N-R:
-    double lengthX0 = (dxy + dxz - dyz)*0.5;
-    double lengthY0 = (dxy + dyz - dxz)*0.5;
-    double lengthZ0 = (dxz + dyz - dxy)*0.5;
-    cout << "lengthX0: " << lengthX0 << endl;
-    if ( lengthX0 < 0 )
-    {
-      cerr << "Warning: fix negative edge length in starting point." << endl;
-      lengthX0 = 0.0001; //clau: does not work very well starting point of 0
-    }
-    cout << "lengthY0: " << lengthY0 << endl;
-    if ( lengthY0 < 0 )
-    {
-      cerr << "Warning: fix negative edge length in starting point." << endl;
-      lengthY0 = 0.0001;
-    }
-
-    cout << "lengthZ0: " << lengthZ0 << endl;
-    if ( lengthZ0 < 0 )
-    {
-      cerr << "Warning: fix negative edge length in starting point." << endl;
-      lengthZ0 = 0.0001;
-    }
-    //cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
-    double sxy = 0;
-    double sxz = 0;
-    double syz = 0;
     if ( foundxy + foundxz + foundyz == 3 ) //all found, error
       {
 	cerr << "Error: three sums found, cannot condition on three sums" << endl;
 	exit(1);
       }
+
+    cout << "after mleDistance or map, dxy,dxz,dyz " << dxy << ", " << dxz << ", " << dyz << endl; 
+    //clau: lengthX0, lengthY0, lengthZ0 (from NJ) are starting points for joint N-R:
+    //fixit: need to make a function of this
+    double lengthX0 = (dxy + dxz - dyz)*0.5;
+    double lengthY0 = (dxy + dyz - dxz)*0.5;
+    double lengthZ0 = (dxz + dyz - dxy)*0.5;
+    cout << "lengthX0: " << lengthX0 << endl;
+    cout << "lengthY0: " << lengthY0 << endl;
+    cout << "lengthZ0: " << lengthZ0 << endl;
+    // question: could it be that two or more are negative?
+    if ( lengthX0 < 0 )
+    {
+      cerr << "Warning: fix negative edge length in starting point." << endl;
+      lengthX0 = 0.0001; //clau: does not work very well starting point of 0
+      if (foundxy)
+	lengthY0 = dxy - lengthX0;
+      if (foundxz)
+      	lengthZ0 = dxz - lengthX0;	
+    }
+    if ( lengthY0 < 0 )
+    {
+      cerr << "Warning: fix negative edge length in starting point." << endl;
+      lengthY0 = 0.0001;
+      if (foundxy)
+	lengthX0 = dxy - lengthY0;
+      if (foundyz)
+      	lengthZ0 = dyz - lengthY0;	
+    }
+    if ( lengthZ0 < 0 )
+    {
+      cerr << "Warning: fix negative edge length in starting point." << endl;
+      lengthZ0 = 0.0001;
+      if (foundxz)
+	lengthX0 = dxz - lengthZ0;
+      if (foundyz)
+      	lengthY0 = dyz - lengthZ0;	
+    }
+    if(lengthX0 < 0 || lengthY0 < 0 || lengthZ0 < 0)
+      {
+	cerr << "after fixing negative bl, still found negative" << endl;
+	exit(1);
+      }
+    //cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
+    double sxy = 0;
+    double sxz = 0;
+    double syz = 0;
     if ( foundxy )
 	sxy = dxy;
     if ( foundxz )
@@ -1687,6 +1706,9 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
 
     mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng);
+
+    cout << "after mleDistanceJoint: " << endl;
+    cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
 
     if ( lx < 0 ) //fixit: make a function of this
     {
@@ -1716,6 +1738,14 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lz; //why it seems you are only putting lengthZ in distanceMap? dont we need to input X,Y?
                                                                         // is it because dist X,par and Y,par is always one edge only? will it be?
                                                                         // clau: I think yes, we only need lengthZ because that is more than 1 edge
+    // for ( int k=0; k<alignment.getNumSites(); ++k )
+    // {
+    //   if ( par == root)
+    // 	par->calculate(k,alignment,NULL,false);
+    //   else
+    // 	par->calculate(k,alignment,par->getEdgeParent(),false);
+    // }
+    
     par->deactivateChild(1);
     par->deactivateChild(0);
   }

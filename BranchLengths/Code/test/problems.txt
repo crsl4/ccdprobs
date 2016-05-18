@@ -1,7 +1,17 @@
 ./bl -f "../../Data/cats-dogs.fasta" -t "((1,2),((6,3),(5,4)),((12,11),(((7,8),9),10)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519
 
 
+
+./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q
+0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p
+0.2776,0.2937,0.1612,0.2675
+
 To do:
+- when starting negative bl, we need to substract from the other bl,
+or the sum is not respected
+
+
+
 
 - sum smaller than summand in partialPathCalculations2D:
   prop = curr+delta, and now it is bigger than sum
@@ -14,11 +24,6 @@ To do:
 
 - when we get a negative bl at the beginning, the sum no longer adds
   up; we need a better starting point not relying on NJ
-
-- recurse=true and false are giving different gradient in partialPathCalc2D
-
-** recurse=true fixes everything on birds4! need to add calculate on
-   the parent after setting the bl
 
 
 - should add a check for gradient close to zero in 2D, 3D. for the
