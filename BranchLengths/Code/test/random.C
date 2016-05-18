@@ -54,6 +54,11 @@ double gamma(double alpha, double b, mt19937_64& rng)
 
 double beta(double alpha,double b,mt19937_64& rng)
 {
+  if(alpha<0 || b< 0)
+    {
+      cerr << "Trying to generate beta rv with negative arguments" << endl;
+      exit(1);
+    }
   gamma_distribution<double> rgammaA(alpha,1);
   gamma_distribution<double> rgammaB(b,1);
   double x1 = rgammaA(rng);

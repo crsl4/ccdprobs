@@ -1159,9 +1159,15 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   t1 = beta(a,b,rng);
   //t1 = a/b; //temporarily while we create beta generator r.v.
   cout << "1D mean: " << mu << ", variance: " << var << endl;
+  cout << "sum1, sum2 " << sum1 << ", " << sum2 << endl;
   cout << "Sample 1D bl: " << t1 << endl;
   t2 = sum1-t1;
   t3 = sum2-t1;
+  if(t1<0 || t2<0 || t3<0)
+    {
+      cerr << "Sampled negative branches in mleDistance1D" << endl;
+      exit(1);
+    }
 }
 
 // void Tree::maxPosteriorDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double lambda,
@@ -1380,6 +1386,11 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   lx = bl[0];
   ly = bl[1];
   lz = bl[2];
+  if( lx<0 || ly<0 || lz<0)
+    {
+      cerr << "Sampled negative bl in mleDistance3D" << endl;
+      exit(1);
+    }
 }
 
 // Find joint mle distance between nodes nx,ny,nz with edges ex,ey,ez
@@ -1456,6 +1467,11 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   t1 = bl[0];
   t2 = bl[1];
   t3 = bl[2];
+  if(t1<0 || t2<0 || t3<0)
+    {
+      cerr << "Sampled negative bl in mleDistance2D" << endl;
+      exit(1);
+    }
 }
 
 
@@ -1643,6 +1659,16 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	cerr << "Error: three sums found, cannot condition on three sums" << endl;
 	exit(1);
       }
+    cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
+    double sxy = 0;
+    double sxz = 0;
+    double syz = 0;
+    if ( foundxy )
+	sxy = dxy;
+    if ( foundxz )
+      sxz = dxz;
+    if ( foundyz )
+      syz = dyz;
 
     cout << "after mleDistance or map, dxy,dxz,dyz " << dxy << ", " << dxz << ", " << dyz << endl; 
     //clau: lengthX0, lengthY0, lengthZ0 (from NJ) are starting points for joint N-R:
@@ -1686,16 +1712,6 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	cerr << "after fixing negative bl, still found negative" << endl;
 	exit(1);
       }
-    //cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
-    double sxy = 0;
-    double sxz = 0;
-    double syz = 0;
-    if ( foundxy )
-	sxy = dxy;
-    if ( foundxz )
-      sxz = dxz;
-    if ( foundyz )
-      syz = dyz;
 
     double lx = lengthX0;
     double ly = lengthY0;

@@ -7,48 +7,34 @@
 0.2776,0.2937,0.1612,0.2675
 
 To do:
-- when starting negative bl, we need to substract from the other bl,
-or the sum is not respected
+- problems with beta 1D, not respecting the limits with the two sums
+- need to double check the theory:
+1D mean: 0.00978933, variance: 1.92673e-06
+sum1, sum2 0.0162055, 0.210062
+Sample 1D bl: 0.469128
+Sampled negative branches in mleDistance1D
+** why sampled so far from mean??
+
+- in newton-raphson, proposing jump too big and mu1>sum:
+entered while
+mleDistance2D Newton-Raphson curr: 0.0271119  0.194765
+mleDistance2D Newton-Raphson gradient: -9125.76 -775.194
+mleDistance2D Newton-Raphson inverse hessian: 
+2.5455e-06 0.00031892
+0.00031892  0.0230049
+New proposed: 0.297566  20.9384
+with sum: 0.0421828
+Sum smaller than summand in partialPathCalculations2D
+t: 0.297566  20.9384
+sum: 0.0421828
 
 
 
+----
+Bret:
+- check calculate parent at the end of generateBL, it does not work,
+we get nan again with recurse=true or false
 
-- sum smaller than summand in partialPathCalculations2D:
-  prop = curr+delta, and now it is bigger than sum
-
-- birds4: still sum<summand, and should not happen: need restricted NR
-  usually we need maximum (MLE): mu1,mu2. But now we need maximum
-  restricted to mu1<sum. what to do? make mu1=sum?
-  mu1=sum does not work, close to sum like 90% we can try.
-  or adding a exp prior.
-
-- when we get a negative bl at the beginning, the sum no longer adds
-  up; we need a better starting point not relying on NJ
-
-
-- should add a check for gradient close to zero in 2D, 3D. for the
- birds case, we start with a curr with gradient very close to zero,
- and we keep searching! (done, need to discuss with bret)
-
-- need to develop algorithm for a
-  internal node, to find a leaf, and do mleDistance on two leaves,
-  keeping track of length to substract at the end
-
-- nan problem: seems to be the starting point for the mle search (for
-  two sequences), specially when one is internal node: so problem, how
-  to find starting point for mle search. we are getting mle distance
-  between each 2 sequences (out of 3).
-  we can check besides the dlogl for curr=0.05, but also the logl.
-  curr_dlogl>0, then we double prop=2*curr, and if prop_dlogl is still
-  >0, but prop_logl is not bigger than curr_logl, we are going in the
-  wrong direction (we don't trust the derivative).
-  maybe choose two starting point? instead of only 0.05
-
-  problem: the picture does not add up. it seems that it is not
-  unimodal because the derivative at 0.05 should be negative
-  otherwise. should we plot it?
-  start with two points and make sure that logl and dlogl are
-  consistent to what we believe
 
 
 --------
@@ -56,10 +42,4 @@ bret:
 - cannot write to file: gridPlotFile/gridPlotScreen, did not compile
 
 
----------
-To do after:
 
-- double check theory of gamma/beta (correct exp, var,cov) and
-  doublecheck code
-- check if after fixing starting point, we still get sum<summand in
-  partialPathCalc2D
