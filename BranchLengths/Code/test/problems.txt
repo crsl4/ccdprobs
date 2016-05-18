@@ -2,10 +2,24 @@
 
 
 To do:
-- modify 2D and 1D similar to mleDistance3D (creo q ya hice esto)
+
 - sum smaller than summand in partialPathCalculations2D:
   prop = curr+delta, and now it is bigger than sum
+
 - birds4: still sum<summand, and should not happen: need restricted NR
+  usually we need maximum (MLE): mu1,mu2. But now we need maximum
+  restricted to mu1<sum. what to do? make mu1=sum?
+  mu1=sum does not work, close to sum like 90% we can try.
+  or adding a exp prior.
+
+- when we get a negative bl at the beginning, the sum no longer adds
+  up; we need a better starting point not relying on NJ
+
+- recurse=true and false are giving different gradient in partialPathCalc2D
+
+** recurse=true fixes everything on birds4! need to add calculate on
+   the parent after setting the bl
+
 
 - should add a check for gradient close to zero in 2D, 3D. for the
  birds case, we start with a curr with gradient very close to zero,

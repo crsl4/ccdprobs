@@ -696,6 +696,11 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
     pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
     pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
     pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
+    
+    // cout << "Inside partialPathCalc2D" << endl;
+    // cout << "site " << k << ", recurse " << recurse << endl;
+    // cout << "Nodes " << nx->getNumber() << ", " << ny->getNumber() << ", " << nz->getNumber() << endl;
+    // cout << "Probs" << px.second << ", " << py.second << ", " << pz.second << endl;
 
     Vector4d S1 = P1 * px.second.asDiagonal() * ones;
     Vector4d S2 = P2 * py.second.asDiagonal() * ones;
@@ -839,7 +844,7 @@ void mleErrorJoint(Node* nx,Node* ny,Node* nz)
 double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
 {
   cout << "mleDistance for nodes " << na->getNumber() << ", " << nb->getNumber() << endl;
-  bool recurse=false;
+  bool recurse=true;
   int iter=0;
   double curr = 0.05;
   // if(!(na->getLeaf()) || !(nb->getLeaf())) //fixit: does not compile
@@ -904,7 +909,7 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
   partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
   cout << "Starting prop: " << prop << endl;
-  cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+  cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
   do
   {
     cout << "entered while" << endl;
@@ -956,7 +961,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       exit(1);
     }
   cout << "Entering mleDistance1D" << endl;
-  bool recurse=false;
+  bool recurse=true;
   int iter=0;
   double curr = t1;
   double curr_logl,curr_dlogl,curr_ddlogl;
@@ -1000,7 +1005,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
   partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
   cout << "Starting prop: " << prop << endl;
-  cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+  cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
   do
   {
     curr = prop;
@@ -1109,7 +1114,7 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
 void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng)
 {
   cout << "Entering mleDistance3D" << endl;
-  bool recurse=false;
+  bool recurse=true;
   int iter=0;
   Vector3d curr(lx,ly,lz);
   double curr_logl;
@@ -1154,6 +1159,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       }
   } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.0e-8);
   Matrix3d cov = (-1) * prop_hessian.inverse();
+  cout << "Finally converged to" << endl;
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
   cout << "3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
   Vector3d bl = multivariateGamma3D(prop,cov,rng);
@@ -1178,13 +1184,17 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cerr << "Sum smaller than summand in mleDistance2D" << endl;
       exit(1);
     }
-  bool recurse=false;
+  bool recurse=true;
   int iter=0;
   Vector2d curr(t1, t2);
   double curr_logl;
   Vector2d curr_gradient;
   Matrix2d curr_hessian;
   partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true); //true in original mleDist
+  cout << "Starting point in mleDistance2D" << endl; 
+  cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
+  cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+  cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
   Vector2d prop = curr;
   double prop_logl = curr_logl;
   Vector2d prop_gradient = curr_gradient;
@@ -1227,9 +1237,9 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.e-8 ); //question?
   cout << "Finally converged" << endl;
   Matrix2d cov = (-1) * prop_hessian.inverse();
-  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng); //t3=sum-t1
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
   cout << "2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
+  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng); //t3=sum-t1
   cout << "Sample 2D bl: " << bl.transpose() << endl;
   t1 = bl[0];
   t2 = bl[1];
@@ -1416,33 +1426,31 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	dyz = m->second;
 	foundyz = true;
       }
+    cout << "after mleDistance or map, dxy,dxz,dyz " << dxy << ", " << dxz << ", " << dyz << endl; 
     //clau: lengthX0, lengthY0, lengthZ0 (from NJ) are starting points for joint N-R:
     double lengthX0 = (dxy + dxz - dyz)*0.5;
+    double lengthY0 = (dxy + dyz - dxz)*0.5;
+    double lengthZ0 = (dxz + dyz - dxy)*0.5;
+    cout << "lengthX0: " << lengthX0 << endl;
     if ( lengthX0 < 0 )
     {
       cerr << "Warning: fix negative edge length in starting point." << endl;
       lengthX0 = 0.0001; //clau: does not work very well starting point of 0
     }
-    double lengthY0 = (dxy + dyz - dxz)*0.5;
+    cout << "lengthY0: " << lengthY0 << endl;
     if ( lengthY0 < 0 )
     {
       cerr << "Warning: fix negative edge length in starting point." << endl;
       lengthY0 = 0.0001;
     }
-    double lengthZ0 = (dxz + dyz - dxy)*0.5;
+
+    cout << "lengthZ0: " << lengthZ0 << endl;
     if ( lengthZ0 < 0 )
     {
       cerr << "Warning: fix negative edge length in starting point." << endl;
       lengthZ0 = 0.0001;
     }
     //cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
-
-    double lx = lengthX0;
-    double ly = lengthY0;
-    double lz = lengthZ0;
-    dxy = lengthX0 + lengthY0; //need to redo this because of negative bl
-    dxz = lengthZ0 + lengthX0;
-    dyz = lengthY0 + lengthZ0;
     double sxy = 0;
     double sxz = 0;
     double syz = 0;
@@ -1452,11 +1460,15 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	exit(1);
       }
     if ( foundxy )
-      sxy = dxy;
+	sxy = dxy;
     if ( foundxz )
       sxz = dxz;
     if ( foundyz )
       syz = dyz;
+
+    double lx = lengthX0;
+    double ly = lengthY0;
+    double lz = lengthZ0;
     cout << "dxy " << dxy << ", dxz " << dxz << ", dyz " << dyz << endl;
     cout << "sxy " << sxy << ", sxz " << sxz << ", syz " << syz << endl;
     cout << "Starting points: " << endl;
