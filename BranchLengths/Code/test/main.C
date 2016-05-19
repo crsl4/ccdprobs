@@ -62,6 +62,8 @@ int main(int argc, char* argv[])
   }
   mt19937_64 rng(parameters.getSeed());
 
+  cerr << "Seed: " << parameters.getSeed() << endl;
+
   // set up Q matrix
   QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
 
