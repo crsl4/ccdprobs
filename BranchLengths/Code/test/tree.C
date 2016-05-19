@@ -1425,6 +1425,8 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   Vector2d prop_gradient = curr_gradient;
   Matrix2d prop_hessian = curr_hessian;
   Vector2d delta = curr - prop;
+  bool keepZero1 = false; //whether to change that entry
+  bool keepZero2 = false;
   // still need to find a starting point
   do
   {
@@ -1437,30 +1439,83 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     delta = curr_hessian.inverse() * curr_gradient;
+    if(keepZero1)
+      delta[0] = 0;
+    if(keepZero2)
+      delta[1] = 0;
+    cout << "First delta: " << delta.transpose() << endl;
     prop = curr - delta;
     cout << "New proposed: " << prop.transpose() << endl;
     cout << "with sum: " << sum << endl;
-    while ( prop[0] < 0 || prop[1] < 0)
-    {
-      cerr << "found negative" << endl;
-      delta = 0.5*delta;
-      prop = curr - delta;
-    }
+    if(curr[0] > 1.0e-5 && curr[1] > 1.0e-5)
+      {
+	while ( prop[0] < 0 || prop[1] < 0)
+	  {
+	    cerr << "found negative with curr big, will shrink delta" << endl;
+	    if(prop[0] < 0)
+	      delta[0] = 0.5* delta[0];
+	    if(prop[1] < 0)
+	      delta[1] = 0.5* delta[1];
+	    cerr << "new delta: " << delta.transpose() << endl;
+	    prop = curr - delta;
+	  }
+      }
     //cerr << "Delta " << delta.transpose() << endl;
+    if(prop[0] < 0 && curr[0] < 1.0e-5) 
+      {
+    	cerr << "found negative for 1st element with curr small, will set to zero" << endl;
+    	prop[0] = 0;
+	keepZero1 = true;
+      }
+    if(prop[1] < 0 && curr[1] < 1.0e-5)
+      {
+    	cerr << "found negative for 2nd element with curr small, will set to zero" << endl;
+    	prop[1] = 0;
+	keepZero2 = true;
+      }
+    cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
     partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-    while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
+    if(!keepZero1 && !keepZero2)
       {
-	cerr << "found bigger step" << endl;
-	delta = 0.5 *delta;
-	prop = curr - delta;
-	partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
-	if ( ++iter > 100 )
-	  mleErrorJoint(nx,ny,nz);
+	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
+	  {
+	    cerr << "found bigger step" << endl;
+	    if(keepZero1)
+	      {
+		delta[0] = 0;
+		delta[1] = 0.5*delta[1];
+	      }
+	    if(keepZero2)
+	      {
+		delta[1] = 0;
+		delta[0] = 0.5 *delta[0];
+	      }
+	    if(!keepZero1 && !keepZero2)
+	      delta = delta*0.5;
+	    cerr << "new delta: " << delta.transpose() << endl;
+	    prop = curr - delta;
+	    cout << "prop befofe partialPathCalculations2D inside check for bigger step: " << prop.transpose() << endl;
+	    partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
+	    if ( ++iter > 100 )
+	      mleErrorJoint(nx,ny,nz);
+	  }
       }
-  } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.e-8 ); //question?
+  } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.e-8 ); 
   cout << "Finally converged" << endl;
+  if(prop[0] < 0)
+    {
+      cout << "after while, we need to fix one negative" << endl;
+      prop[0] = 0;
+      partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
+    }
+  if(prop[1] < 0)
+    {
+      cout << "after while, we need to fix one negative" << endl;
+      prop[1] = 0 ;
+      partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
+    }
   Matrix2d cov = (-1) * prop_hessian.inverse();
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
   cout << "2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
