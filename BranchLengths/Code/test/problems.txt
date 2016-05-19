@@ -2,9 +2,7 @@
 
 
 
-./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q
-0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p
-0.2776,0.2937,0.1612,0.2675
+./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
 
 To do:
 - problems with beta 1D, not respecting the limits with the two sums

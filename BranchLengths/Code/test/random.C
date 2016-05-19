@@ -110,8 +110,9 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng)
    Matrix2d L( vc.llt().matrixL() );
    //------------------ B ------------------------
    double part1 = (mu[0] * mu[0] * (sum-mu[0])) / (sum * L(0,0) * L(0,0));
+   double part2 = (mu[0] * (sum-mu[0])*(sum-mu[0])) / (sum * L(0,0) * L(0,0));
    double alpha1 = part1 - (mu[0] / sum);
-   double beta1 = part1 - ((sum - mu[0]) / sum);
+   double beta1 = part2 - ((sum - mu[0]) / sum);
    if(alpha1 < 0 || beta1 < 0 )
      {
        cerr << "Alpha or beta negative in multivariate2D: " << alpha1<< ", " << beta1 << endl;

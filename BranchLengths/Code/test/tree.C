@@ -1154,8 +1154,9 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   double var = -1/prop_ddlogl;
   double s = min(sum1,sum2);
   double part1 = (mu * mu * (s-mu)) / (s * var);
+  double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
   double a =  part1 - mu / s;
-  double b = part1 - (s - mu) / s;
+  double b = part2 - (s - mu) / s;
   t1 = beta(a,b,rng);
   //t1 = a/b; //temporarily while we create beta generator r.v.
   cout << "1D mean: " << mu << ", variance: " << var << endl;
