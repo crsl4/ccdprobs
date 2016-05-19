@@ -19,6 +19,11 @@ Sum smaller than summand in partialPathCalculations2D
 t: 0.297566  20.9384
 sum: 0.0421828
 
+** also found in partialPathCal1D!! record this.
+
+- finish logdensity new attribute in tree, and check that it works,
+  maybe not because it is private attribute, maybe we need to do in
+  two steps
 
 
 ----

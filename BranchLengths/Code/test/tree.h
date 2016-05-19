@@ -123,6 +123,7 @@ private:
   vector<Node*> nodes;
   vector<Edge*> edges;
   Node* root;
+  double logdensity;
 public:
   Tree(string);
   ~Tree() {

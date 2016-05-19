@@ -187,6 +187,7 @@ Tree::Tree(string line)
   // Leaf node and internal node pointers placed in separate vectors.  Combine to vector nodes at end.
 
   numTaxa = 0;
+  logdensity = 0;
   treeString = line;
 
   istringstream s(line);
@@ -1170,6 +1171,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cerr << "Sampled negative branches in mleDistance1D" << endl;
       exit(1);
     }
+  logdensity += (a-1)*log(t1)+(b-1)*log((1/s)-t1);
 }
 
 // void Tree::maxPosteriorDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double lambda,
@@ -1382,7 +1384,8 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   cout << "Finally converged to" << endl;
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
   cout << "3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
-  Vector3d bl = multivariateGamma3D(prop,cov,rng);
+  //  double logdensity = 0; //fixit: needs to be the attribute saved until this point
+  Vector3d bl = multivariateGamma3D(prop,cov,rng, logdensity);
   cout << "Sample bl 3D: "<< bl.transpose() << endl;
   //Vector3d bl = prop;
   lx = bl[0];
@@ -1464,7 +1467,8 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   Matrix2d cov = (-1) * prop_hessian.inverse();
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
   cout << "2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
-  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng); //t3=sum-t1
+  //  double logdensity = 0; //fixit: needs to be the logdensity saved until this point
+  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng, logdensity); //t3=sum-t1
   cout << "Sample 2D bl: " << bl.transpose() << endl;
   t1 = bl[0];
   t2 = bl[1];
