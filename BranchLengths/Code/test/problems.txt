@@ -11,16 +11,6 @@ seeds:
 
 To do:
 
-
-** solution: need another derivation. we want to set the curr = 0 if it
-   is close to zero and gradient still negative, and we want to keep
-   optimizing for the other one, and not what we have now where we keep wanting to change the 0
-(change to multinormal case while fixing this new N-R)
-
-** need to do this for mleDistance3D also?
-** do for 3D and 1D also
-
-
 ** beta: if mu=0, then set alpha=1, if mu=sum, then set beta=1, and figure out the other parameter depending on the variance.
 
 ** also found in partialPathCal1D!! record this.

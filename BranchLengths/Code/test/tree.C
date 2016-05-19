@@ -1348,6 +1348,10 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   Vector3d prop_gradient = curr_gradient;
   Matrix3d prop_hessian = curr_hessian;
   Vector3d delta = curr - prop;
+  bool keepZero1 = false; //whether to keep that entry at 0
+  bool keepZero2 = false;
+  bool keepZero3 = false;
+
   // find starting point: we want a good prop
   do
   {
@@ -1359,25 +1363,68 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     delta = curr_hessian.inverse() * curr_gradient;
+    if(keepZero1)
+      delta[0] = 0;
+    if(keepZero2)
+      delta[1] = 0;
+    if(keepZero3)
+      delta[2] = 0;
     prop = curr - delta;
-    while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
-    {
-      cerr << "found negative" << endl;
-      delta = 0.5*delta;
-      prop = curr - delta;
-    }
+    if(curr[0] > 1.0e-5 && curr[1] > 1.0e-5 && curr[2] > 1.0e-5)
+      {
+	while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
+	  {
+	    cerr << "found negative with big curr, will shrink delta" << endl;
+	    if(prop[0] < 0)
+	      delta[0] = 0.5* delta[0];
+	    if(prop[1] < 0)
+	      delta[1] = 0.5* delta[1];
+	    if(prop[2] < 0)
+	      delta[2] = 0.5* delta[2];
+	    prop = curr - delta;
+	  }
+      }
     //    cerr << "Delta " << delta.transpose() << endl;
+    if(prop[0] < 0 && curr[0] < 1.0e-5) 
+      {
+    	cerr << "found negative for 1st element with curr small, will set to zero" << endl;
+    	prop[0] = 0;
+	keepZero1 = true;
+      }
+    if(prop[1] < 0 && curr[1] < 1.0e-5)
+      {
+    	cerr << "found negative for 2nd element with curr small, will set to zero" << endl;
+    	prop[1] = 0;
+	keepZero2 = true;
+      }
+    if(prop[2] < 0 && curr[2] < 1.0e-5)
+      {
+    	cerr << "found negative for 3rd element with curr small, will set to zero" << endl;
+    	prop[2] = 0;
+	keepZero3 = true;
+      }
+    cout << "prop befofe partialPathCalculations3D: " << prop.transpose() << endl;
+
     partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-    while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
+    if(!keepZero1 && !keepZero2 && !keepZero3)
       {
-	cerr << "found bigger step" << endl;
-	delta = 0.5 *delta;
-	prop = curr - delta;
-	partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
-	if ( ++iter > 100 )
-	  mleErrorJoint(nx,ny,nz);
+	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
+	  {
+	    cerr << "found bigger step" << endl;
+	    if(keepZero1)
+		delta[0] = 0;
+	    if(keepZero2)
+		delta[1] = 0;
+	    if(keepZero3)
+		delta[2] = 0;
+	    delta = 0.5 *delta;
+	    prop = curr - delta;
+	    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
+	    if ( ++iter > 100 )
+	      mleErrorJoint(nx,ny,nz);
+	  }
       }
   } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.0e-8);
   Matrix3d cov = (-1) * prop_hessian.inverse();
@@ -1428,7 +1475,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   Vector2d prop_gradient = curr_gradient;
   Matrix2d prop_hessian = curr_hessian;
   Vector2d delta = curr - prop;
-  bool keepZero1 = false; //whether to change that entry
+  bool keepZero1 = false; //whether to keep that entry at 0
   bool keepZero2 = false;
   // still need to find a starting point
   do
@@ -1486,17 +1533,10 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	  {
 	    cerr << "found bigger step" << endl;
 	    if(keepZero1)
-	      {
 		delta[0] = 0;
-		delta[1] = 0.5*delta[1];
-	      }
 	    if(keepZero2)
-	      {
 		delta[1] = 0;
-		delta[0] = 0.5 *delta[0];
-	      }
-	    if(!keepZero1 && !keepZero2)
-	      delta = delta*0.5;
+	    delta = delta*0.5;
 	    cerr << "new delta: " << delta.transpose() << endl;
 	    prop = curr - delta;
 	    cout << "prop befofe partialPathCalculations2D inside check for bigger step: " << prop.transpose() << endl;
