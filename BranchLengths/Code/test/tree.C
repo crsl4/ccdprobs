@@ -1152,7 +1152,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   cout << "-----" << endl;
   double mu = prop;
   double var = -1/prop_ddlogl;
-  double s = min(sum1,sum2);
+  double s = 1/min(sum1,sum2);
   double part1 = (mu * mu * (s-mu)) / (s * var);
   double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
   double a =  part1 - mu / s;
@@ -1162,6 +1162,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   cout << "1D mean: " << mu << ", variance: " << var << endl;
   cout << "sum1, sum2 " << sum1 << ", " << sum2 << endl;
   cout << "Sample 1D bl: " << t1 << endl;
+  cout << "a/(a+b)" << a/(a+b) << endl;
   t2 = sum1-t1;
   t3 = sum2-t1;
   if(t1<0 || t2<0 || t3<0)

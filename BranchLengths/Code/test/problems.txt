@@ -12,6 +12,8 @@ sum1, sum2 0.0162055, 0.210062
 Sample 1D bl: 0.469128
 Sampled negative branches in mleDistance1D
 ** why sampled so far from mean??
+** because in this case a/a+b = mu/s, not mu*s
+** fixed with s=1/min
 
 - in newton-raphson, proposing jump too big and mu1>sum:
 entered while
