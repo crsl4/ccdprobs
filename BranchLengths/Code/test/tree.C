@@ -1152,7 +1152,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   cout << "-----" << endl;
   double mu = prop;
   double var = -1/prop_ddlogl;
-  double s = 1/min(sum1,sum2);
+  double s = 1/min(sum1,sum2); // derivation has scale as mu/s
   double part1 = (mu * mu * (s-mu)) / (s * var);
   double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
   double a =  part1 - mu / s;

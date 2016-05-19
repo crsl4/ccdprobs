@@ -79,6 +79,8 @@ int main(int argc, char* argv[])
     tree.randomize(rng);
     cout << tree.makeTopologyNumbers() << endl;
     tree.generateBranchLengths(alignment,model,rng);
+    double loglik = tree.calculate(alignment,model);
+    cout << "Loglik for tree: " << loglik << endl;
     tree.print(cout);
   }
   return 0;

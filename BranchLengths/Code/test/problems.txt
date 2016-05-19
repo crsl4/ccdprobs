@@ -5,15 +5,6 @@
 ./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
 
 To do:
-- problems with beta 1D, not respecting the limits with the two sums
-- need to double check the theory:
-1D mean: 0.00978933, variance: 1.92673e-06
-sum1, sum2 0.0162055, 0.210062
-Sample 1D bl: 0.469128
-Sampled negative branches in mleDistance1D
-** why sampled so far from mean??
-** because in this case a/a+b = mu/s, not mu*s
-** fixed with s=1/min
 
 - in newton-raphson, proposing jump too big and mu1>sum:
 entered while
@@ -33,8 +24,10 @@ sum: 0.0421828
 ----
 Bret:
 - check calculate parent at the end of generateBL, it does not work,
-we get nan again with recurse=true or false
-
+we get nan again with recurse=true or false: will leave for later,
+first weights:
+- need to calculate as we go, not all at the end, where to keep it?
+attribute in tree to do dens += whatever?
 
 
 --------
