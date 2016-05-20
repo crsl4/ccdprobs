@@ -68,6 +68,11 @@ double beta(double alpha,double b,mt19937_64& rng)
 
 Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& logdensity)
 {
+  if( mu[0] == 0)
+    {
+      cerr << "Cannot handle mu1==0 in multivariateGamma3D" << endl;
+      exit(1);
+    }
   Vector3d bl;
   Matrix3d L( vc.llt().matrixL() );
   // ------------ T1 ------------------
@@ -107,6 +112,11 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   // t1,t2,sum-t1; so mu, vc are for t1,t2
 Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng, double& logdensity)
  {
+   if( mu[0] == 0)
+     {
+       cerr << "Cannot handle mu1==0 in multivariateGamma2D" << endl;
+       exit(1);
+     }
    Vector3d bl;
    Matrix2d L( vc.llt().matrixL() );
    //------------------ B ------------------------
