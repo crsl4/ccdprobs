@@ -16,5 +16,6 @@ double gamma(double, double, mt19937_64&);
 double beta(double, double, mt19937_64&);
 Vector3d multivariateGamma3D(Vector3d,Matrix3d,mt19937_64&, double&);
 Vector3d multivariateGamma2D(Vector2d,Matrix2d,double,mt19937_64&, double&);
+Vector3d multivariateGamma1D(double,double,double,double,mt19937_64&, double&);
 
 #endif

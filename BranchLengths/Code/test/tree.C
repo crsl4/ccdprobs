@@ -753,7 +753,7 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
 {
   if (sum1 < t1 || sum2 < t1)
     {
-      cerr << "Sum smaller than summand in partialPathCalculations1D" << endl;
+      cerr << "Sum " << sum1 << " or " << sum2 << "smaller than summand " << t1 << " in partialPathCalculations1D" << endl;
       exit(1);
     }
   Matrix4d P1 = qmatrix.getTransitionMatrix(t1);
@@ -857,7 +857,7 @@ void mleErrorJoint(Node* nx,Node* ny,Node* nz)
 double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
 {
   cout << "mleDistance for nodes " << na->getNumber() << ", " << nb->getNumber() << endl;
-  bool recurse=true;
+  bool recurse=true; //warning: need to keep true
   int iter=0;
   double curr = 0.05;
   // if(!(na->getLeaf()) || !(nb->getLeaf())) //fixit: does not compile
@@ -1073,7 +1073,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       exit(1);
     }
   cout << "Entering mleDistance1D" << endl;
-  bool recurse=true;
+  bool recurse=true; //warning: need to keep true
   int iter=0;
   double curr = t1;
   double curr_logl,curr_dlogl,curr_ddlogl;
@@ -1092,6 +1092,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       curr_dlogl = prop_dlogl;
       curr_ddlogl = prop_ddlogl;
       prop = 2*curr;
+      while ( prop > min(sum1,sum2) )
+	prop = (prop+curr)/2;
       partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
       if ( ++iter > 100 )
         mleErrorJoint(nx,ny,nz);
@@ -1124,7 +1126,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
     cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
     cout << "mleDistance1D Newton-Raphson dlogl: " << curr_dlogl << endl;
-    cout << "mleDistance1D Newton-Raphson ddlogl: " << endl << curr_ddlogl << endl;
+    cout << "mleDistance1D Newton-Raphson ddlogl: " << curr_ddlogl << endl;
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     double delta = curr_dlogl / curr_ddlogl;
@@ -1135,6 +1137,12 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       delta = 0.5*delta;
       prop = curr - delta;
     }
+    while ( prop > min(sum1,sum2))
+      {
+	cerr << "found jump bigger than sum" << endl;
+	delta = 0.5*delta;
+	prop = curr - delta;
+      }
     //cerr << "Delta " << delta << endl;
     partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
     if ( ++iter > 100 )
@@ -1153,35 +1161,46 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   cout << "-----" << endl;
   double mu = prop;
   double var = -1/prop_ddlogl;
-  double s = min(sum1,sum2);
-  if( mu == 0)
-    {
-      cerr << "Cannot handle mu==0 in mleDistance1D" << endl;
-      exit(1);
-    }
-  if( mu == s)
-    {
-      cerr << "Cannot handle mu==s in mleDistance1D" << endl;
-      exit(1);
-    }
-  double part1 = (mu * mu * (s-mu)) / (s * var);
-  double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
-  double a =  part1 - mu / s;
-  double b = part2 - (s - mu) / s;
-  double rbeta = beta(a,b,rng);
-  t1 = rbeta * s;
-  cout << "1D mean: " << mu << ", variance: " << var << endl;
-  cout << "sum1, sum2 " << sum1 << ", " << sum2 << endl;
-  cout << "Sample 1D bl: " << t1 << endl;
-  cout << "a/(a+b) " << a/(a+b) << endl;
-  t2 = sum1-t1;
-  t3 = sum2-t1;
+  // double s = min(sum1,sum2);
+  // if( mu == 0) //fixit: need to make multivariateGamma1D work
+  //   {
+  //     cerr << "Cannot handle mu==0 in mleDistance1D" << endl;
+  //     exit(1);
+  //   }
+  // if( mu == s)
+  //   {
+  //     cerr << "Cannot handle mu==s in mleDistance1D" << endl;
+  //     exit(1);
+  //   }
+  // double part1 = (mu * mu * (s-mu)) / (s * var);
+  // double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
+  // double a =  part1 - mu / s;
+  // double b = part2 - (s - mu) / s;
+  // cout << "a,b " << a << " , " << b << endl;
+  // double rbeta = beta(a,b,rng);
+  // t1 = rbeta * s;
+  // cout << "1D mean: " << mu << ", variance: " << var << endl;
+  // cout << "sum1, sum2 " << sum1 << ", " << sum2 << endl;
+  // cout << "Sample 1D bl: " << t1 << endl;
+  // cout << "a/(a+b) " << a/(a+b) << endl;
+  // t2 = sum1-t1;
+  // t3 = sum2-t1;
+  // if(t1<0 || t2<0 || t3<0)
+  //   {
+  //     cerr << "Sampled negative branches in mleDistance1D" << endl;
+  //     exit(1);
+  //   }
+  // logdensity += (a-1)*log(t1)+(b-1)*log(s-t1);
+  Vector3d bl = multivariateGamma1D(mu,var,sum1,sum2,rng, logdensity);
+  cout << "bl after multivariateGamma1D: " << bl.transpose() << endl;
+  t1 = bl[0];
+  t2 = bl[1];
+  t3 = bl[2];
   if(t1<0 || t2<0 || t3<0)
     {
       cerr << "Sampled negative branches in mleDistance1D" << endl;
       exit(1);
     }
-  logdensity += (a-1)*log(t1)+(b-1)*log(s-t1);
 }
 
 // void Tree::maxPosteriorDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double lambda,
@@ -1346,7 +1365,7 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
 void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng)
 {
   cout << "Entering mleDistance3D" << endl;
-  bool recurse=true;
+  bool recurse=true; //warning: need to keep true
   int iter=0;
   Vector3d curr(lx,ly,lz);
   double curr_logl;
@@ -1469,7 +1488,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cerr << "Sum smaller than summand in mleDistance2D" << endl;
       exit(1);
     }
-  bool recurse=true;
+  bool recurse=true; //warning: need to keep true
   int iter=0;
   Vector2d curr(t1, t2);
   double curr_logl;

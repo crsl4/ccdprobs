@@ -2,28 +2,36 @@
 
 ./bl -f "../../Data/cats-dogs.fasta" -t "((1,2),((6,3),(5,4)),((12,11),(((7,8),9),10)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519 -s 1234
 
-seeds:
+bad seeds:
+- case mu1==0 in multivariateGamma2D
 1971738958
-
-
+- sum smaller than summand in partialPathCalculations1D (fixed)
+2932679102
+- does not converge mleDistance2D (t1~0): alpha,beta<0
+1431284585
+3341796260
 
 ./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
 
 To do:
 - check theory for gamma (correct mean, var and cov)
-** beta: if mu=0, then set alpha=1, if mu=sum, then set beta=1, and
-figure out the other parameter depending on the variance, also for gamma
+- still need checks for t==sum in mleDistance?D, when to set it ==sum?
 
 ----
 Bret:
-first weights:
-- need to calculate logdensity as we go, not all at the end, where to keep it?
-attribute in tree to do dens += whatever?
+ - weights done
+ - check pathological cases: for beta, problem! does not do anything, gets stuck!
 
 pathological cases:
 - 3D gamma: problem when mu1==0, mu2+L21z1<=0, m3+L31z1+L32z2<=0; 2D
 mu1==0 or mu1==sum, mu3+L21z1<=0; 1D mu1==0 or mu1==s
 
+- also, should we check for close to 0? or only exactly 0? close to
+  zero causes problems also: changed to close to 0
+  but this does not fix things, alpha and beta can still be negative
+  with these fixes: mu(sum-mu) < sigma2 case, we control it with
+  mu==0,sum, but it could also come from big sigma? only seen now with
+  mu~0.
 
 --------
 bret (later):
