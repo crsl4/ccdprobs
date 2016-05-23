@@ -707,7 +707,7 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
     pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
     pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
     pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
-    
+
     // cout << "Inside partialPathCalc2D" << endl;
     // cout << "site " << k << ", recurse " << recurse << endl;
     // cout << "Nodes " << nx->getNumber() << ", " << ny->getNumber() << ", " << nz->getNumber() << endl;
@@ -1153,17 +1153,27 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   cout << "-----" << endl;
   double mu = prop;
   double var = -1/prop_ddlogl;
-  double s = 1/min(sum1,sum2); // derivation has scale as mu/s
+  double s = min(sum1,sum2);
+  if( mu == 0)
+    {
+      cerr << "Cannot handle mu==0 in mleDistance1D" << endl;
+      exit(1);
+    }
+  if( mu == s)
+    {
+      cerr << "Cannot handle mu==s in mleDistance1D" << endl;
+      exit(1);
+    }
   double part1 = (mu * mu * (s-mu)) / (s * var);
   double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
   double a =  part1 - mu / s;
   double b = part2 - (s - mu) / s;
-  t1 = beta(a,b,rng);
-  //t1 = a/b; //temporarily while we create beta generator r.v.
+  double rbeta = beta(a,b,rng);
+  t1 = rbeta * s;
   cout << "1D mean: " << mu << ", variance: " << var << endl;
   cout << "sum1, sum2 " << sum1 << ", " << sum2 << endl;
   cout << "Sample 1D bl: " << t1 << endl;
-  cout << "a/(a+b)" << a/(a+b) << endl;
+  cout << "a/(a+b) " << a/(a+b) << endl;
   t2 = sum1-t1;
   t3 = sum2-t1;
   if(t1<0 || t2<0 || t3<0)
@@ -1171,7 +1181,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cerr << "Sampled negative branches in mleDistance1D" << endl;
       exit(1);
     }
-  logdensity += (a-1)*log(t1)+(b-1)*log((1/s)-t1);
+  logdensity += (a-1)*log(t1)+(b-1)*log(s-t1);
 }
 
 // void Tree::maxPosteriorDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double lambda,
@@ -1385,7 +1395,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	  }
       }
     //    cerr << "Delta " << delta.transpose() << endl;
-    if(prop[0] < 0 && curr[0] < 1.0e-5) 
+    if(prop[0] < 0 && curr[0] < 1.0e-5)
       {
     	cerr << "found negative for 1st element with curr small, will set to zero" << endl;
     	prop[0] = 0;
@@ -1466,7 +1476,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   Vector2d curr_gradient;
   Matrix2d curr_hessian;
   partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse); //true in original mleDist
-  cout << "Starting point in mleDistance2D" << endl; 
+  cout << "Starting point in mleDistance2D" << endl;
   cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
   cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
   cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
@@ -1511,7 +1521,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	  }
       }
     //cerr << "Delta " << delta.transpose() << endl;
-    if(prop[0] < 0 && curr[0] < 1.0e-5) 
+    if(prop[0] < 0 && curr[0] < 1.0e-5)
       {
     	cerr << "found negative for 1st element with curr small, will set to zero" << endl;
     	prop[0] = 0;
@@ -1545,7 +1555,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	      mleErrorJoint(nx,ny,nz);
 	  }
       }
-  } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.e-8 ); 
+  } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.e-8 );
   cout << "Finally converged" << endl;
   if(prop[0] < 0)
     {
@@ -1771,7 +1781,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     if ( foundyz )
       syz = dyz;
 
-    cout << "after mleDistance or map, dxy,dxz,dyz " << dxy << ", " << dxz << ", " << dyz << endl; 
+    cout << "after mleDistance or map, dxy,dxz,dyz " << dxy << ", " << dxz << ", " << dyz << endl;
     //clau: lengthX0, lengthY0, lengthZ0 (from NJ) are starting points for joint N-R:
     //fixit: need to make a function of this
     double lengthX0 = (dxy + dxz - dyz)*0.5;
@@ -1788,7 +1798,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       if (foundxy)
 	lengthY0 = dxy - lengthX0;
       if (foundxz)
-      	lengthZ0 = dxz - lengthX0;	
+      	lengthZ0 = dxz - lengthX0;
     }
     if ( lengthY0 < 0 )
     {
@@ -1797,7 +1807,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       if (foundxy)
 	lengthX0 = dxy - lengthY0;
       if (foundyz)
-      	lengthZ0 = dyz - lengthY0;	
+      	lengthZ0 = dyz - lengthY0;
     }
     if ( lengthZ0 < 0 )
     {
@@ -1806,7 +1816,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       if (foundxz)
 	lengthX0 = dxz - lengthZ0;
       if (foundyz)
-      	lengthY0 = dyz - lengthZ0;	
+      	lengthY0 = dyz - lengthZ0;
     }
     if(lengthX0 < 0 || lengthY0 < 0 || lengthZ0 < 0)
       {
@@ -1862,7 +1872,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     //   else
     // 	par->calculate(k,alignment,par->getEdgeParent(),false);
     // }
-    
+
     par->deactivateChild(1);
     par->deactivateChild(0);
   }
@@ -1870,6 +1880,30 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   for ( map<pair<int,int>,double>::iterator m=distanceMap.begin(); m!= distanceMap.end(); ++m )
     cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
 }
+
+
+double Tree::logPriorExp(double mean)
+{
+  double logprior = 0;
+  for(vector<Edge*>::iterator e=edges.begin();e!=edges.end();e++)
+      logprior += (*e)->getLength();
+  logprior = (1/mean) * logprior;
+  return logprior;
+}
+
+double Tree::calculateWeight(const Alignment& alignment,QMatrix& qmatrix, double mean)
+{
+  double loglik = calculate(alignment,qmatrix);
+  double logprior = logPriorExp(mean);
+  double logdens = getLogdensity();
+  cout << "Loglik for tree: " << loglik << endl;
+  cout << "LogDensity for tree: " <<  logdens << endl;
+  cout << "LogPrior for tree: " << logprior << endl;
+  double weight = logprior + loglik - logdens;
+  cout << "Weight: " << weight << endl;
+  return weight;
+}
+
 
 double vectorProduct(vector<Vector4d> v)
 {

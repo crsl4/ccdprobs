@@ -140,6 +140,7 @@ public:
   Node* getNode(int n) { return nodes[n]; }
   Edge* getEdge(int n) { return edges[n]; }
   string getTreeString() { return treeString; }
+  double getLogdensity() { return logdensity; }
   void readSubtree(istringstream&,Node*,int);
   void setNumbers(Node*);
   void print(ostream&);
@@ -169,6 +170,8 @@ public:
   void depthFirstNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
   void generateBranchLengths(Alignment&,QMatrix&,mt19937_64& rng);
+  double logPriorExp(double);
+  double calculateWeight(const Alignment&,QMatrix&, double);
 };
 
 double vectorProduct(vector<Vector4d> v);

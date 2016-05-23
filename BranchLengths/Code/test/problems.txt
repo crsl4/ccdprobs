@@ -10,27 +10,26 @@ seeds:
 ./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
 
 To do:
-
-** beta: if mu=0, then set alpha=1, if mu=sum, then set beta=1, and figure out the other parameter depending on the variance.
-
-** also found in partialPathCal1D!! record this.
-
-- finish logdensity new attribute in tree, and check that it works,
-  maybe not because it is private attribute, maybe we need to do in
-  two steps
-
+- check theory for gamma (correct mean, var and cov)
+** beta: if mu=0, then set alpha=1, if mu=sum, then set beta=1, and
+figure out the other parameter depending on the variance, also for gamma
 
 ----
 Bret:
-- check calculate parent at the end of generateBL, it does not work,
-we get nan again with recurse=true or false: will leave for later,
 first weights:
-- need to calculate as we go, not all at the end, where to keep it?
+- need to calculate logdensity as we go, not all at the end, where to keep it?
 attribute in tree to do dens += whatever?
+
+pathological cases:
+- 3D gamma: problem when mu1==0, mu2+L21z1<=0, m3+L31z1+L32z2<=0; 2D
+mu1==0 or mu1==sum, mu3+L21z1<=0; 1D mu1==0 or mu1==s
 
 
 --------
-bret:
+bret (later):
+- check calculate parent at the end of generateBL, it does not work,
+we get nan again with recurse=true or false: will leave for later,
+
 - cannot write to file: gridPlotFile/gridPlotScreen, did not compile
 
 

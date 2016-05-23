@@ -83,9 +83,9 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   // ------------ T2 ------------------
   double z1 = (bl[0] - mu[0]) / L(0,0);
   double num = mu[1] + L(1,0)*z1;
-  if( num < 0)
+  if( num <= 0)
     {
-      cerr << "mu2 + L21*z1 in multivariateGamma3D is negative" << endl;
+      cerr << "mu2 + L21*z1 in multivariateGamma3D is not positive" << endl;
       exit(1);
     }
   double alpha2 = (num * num) / (L(1,1) * L(1,1));
@@ -95,9 +95,9 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   // ------------ T3 ------------------
   double z2 = (bl[1] - mu[1] - L(1,0)*z1) / L(1,1);
   num = mu[2] + L(2,0)*z1 + L(2,1)*z2;
-  if( num < 0)
+  if( num <= 0)
     {
-      cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is negative" << endl;
+      cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is not positive" << endl;
       exit(1);
     }
   double alpha3 = (num * num) / (L(2,2) * L(2,2));
@@ -115,6 +115,11 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
    if( mu[0] == 0)
      {
        cerr << "Cannot handle mu1==0 in multivariateGamma2D" << endl;
+       exit(1);
+     }
+   if( mu[0] == sum)
+     {
+       cerr << "Cannot handle mu1==sum in multivariateGamma2D" << endl;
        exit(1);
      }
    Vector3d bl;
@@ -136,6 +141,11 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
    // ------------ t2 ------------------
    double z1 = (bl[0] - mu[0]) / L(0,0);
    double num = mu[1] + L(1,0)*z1;
+  if( num <= 0)
+    {
+      cerr << "mu2+L21*z1 in multivariateGamma2D is not positive" << endl;
+      exit(1);
+    }
    double alpha2 = (num * num) / (L(1,1) * L(1,1));
    double lambda2 = num / (L(1,1) * L(1,1));
    bl[1] = gamma(alpha2,1/lambda2,rng); //c++ gamma has different parametrization
