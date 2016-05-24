@@ -67,6 +67,10 @@ int main(int argc, char* argv[])
   // set up Q matrix
   QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
 
+  // create vector of weights
+  int sampleSize = 1000; //fixit: make it an argument
+  VectorXd logw(sampleSize);
+
   // create tree
   if ( !parameters.getTopology().empty() )
   {
@@ -80,9 +84,39 @@ int main(int argc, char* argv[])
     //checkDistances(tree,alignment,model);
     tree.randomize(rng);
     cout << tree.makeTopologyNumbers() << endl;
-    tree.generateBranchLengths(alignment,model,rng);
-    double weight = tree.calculateWeight(alignment, model, 0.05);
-    tree.print(cout);
+    int errors = 0;
+    for(int i = 0; i < sampleSize; i++)
+      {
+	try
+	  {
+	    tree.generateBranchLengths(alignment,model,rng);
+	    double weight = tree.calculateWeight(alignment, model, 0.05);
+	    logw(i) = weight;
+	    tree.print(cout);
+	  }
+	catch ( int e )
+	  {
+	    cerr << "Found error in replicate number: " << i << endl;
+	    errors++;
+	  }
+      }
+    // normalize vector
+    double suma = 0;
+    for(int i = 0; i < sampleSize; i++)
+      {
+	suma += log(i);
+      }
+
+    logw = logw / suma;
+    double ess = 0;
+    for(int i = 0; i < sampleSize; i++)
+      {
+	ess += log(i)*logw(i);
+      }
+    ess = 1/ess;
+    ess = ess/sampleSize;
+    cout << "Effective sample size: " << ess << endl;
+    cout << "Errors: " << errors << endl;
   }
   return 0;
 }

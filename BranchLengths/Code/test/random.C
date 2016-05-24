@@ -78,14 +78,14 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       cerr << "Error with mu1<0 in multivariateGamma3D" << endl;
       exit(1);
     }
-  if( mu[0] < 1.0e-5)
+  if( mu[0] < TOL)
     {
       cerr << "Case mu1==0 in multivariateGamma3D" << endl;
-      exit(1);
+      //exit(1);
       alpha1 = 1;
       lambda1 = 1/L(0,0);
     }
-  if( mu[0] > 1.0e-5)
+  if( mu[0] > TOL)
     {
       alpha1 = mu[0]*mu[0] / (L(0,0) * L(0,0));
       lambda1 = mu[0] / (L(0,0) * L(0,0));
@@ -103,14 +103,14 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       cerr << "mu2 + L21*z1 in multivariateGamma3D is negative" << endl;
       exit(1);
     }
-  if( num < 1.0e-5)
+  if( num < TOL)
     {
       cerr << "mu2 + L21*z1 in multivariateGamma3D is zero" << endl;
-      exit(1);
+      //exit(1);
       alpha2 = 1;
       lambda2 = 1/L(1,1);
     }
-  if( num > 1.0e-5)
+  if( num > TOL)
     {
       alpha2 = (num * num) / (L(1,1) * L(1,1));
       lambda2 = num / (L(1,1) * L(1,1));
@@ -127,14 +127,14 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is negative" << endl;
       exit(1);
     }
-  if( num < 1.0e-5)
+  if( num < TOL)
     {
       cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is zero" << endl;
-      exit(1);
+      //exit(1);
       alpha3 = 1;
       lambda3 = 1/L(1,1);
     }
-  if( num > 1.0e-5)
+  if( num > TOL)
     {
       alpha3 = (num * num) / (L(2,2) * L(2,2));
       lambda3 = num / (L(2,2) * L(2,2));
@@ -163,26 +163,15 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
      {
        cerr << "Case mu1==0 in multivariateGamma2D" << endl;
        //exit(1);
-       alpha1 = 1;
-       double v = L(0,0); //fixit: check steps: make zero if close to zero
-       double ct = v*v*v*v*v + 11*v*v*v*v - v*v*v;
-       if( ct < TOL)
-	 ct = 0;
-       cerr << "thing inside sqrt: " << ct << endl;
-       cerr << "thing inside cbrt: " << -v*v*v - 18*v*v +3*sqrt(3)*sqrt(ct) << endl;
-       double den = cbrt(-v*v*v - 18*v*v +3*sqrt(3)*sqrt(ct));
-       beta1 = fabs((v+3)/(3*den) + den/(3*v) - (4/3.0)); // made positive always
+       pathologicalBetaPar(L(0,0),alpha1,beta1);
      }
-   if( mu[0] > sum - TOL) //fixit: how to make it close to the sum?
+   if( mu[0] > sum - TOL) 
      {
        cerr << "Case mu1==sum in multivariateGamma2D" << endl;
-       exit(1);
-       beta1 = 1;
-       double v = L(0,0); //fixit: just as the previous case
-       double den = cbrt(-v*v*v - 18*v*v +3*sqrt(3)*sqrt(v*v*v*v*v + 11*v*v*v*v - v*v*v));
-       alpha1 = (v+3)/(3*den) + den/(3*v) - (4/3.0);
+       //exit(1);
+       pathologicalBetaPar(L(0,0),beta1,alpha1);
      }
-   if( mu[0] > TOL && mu[0] != sum)
+   if( mu[0] > TOL && mu[0] <= sum - TOL)
      {
        if( mu[0]*(sum-mu[0]) <= (L(0,0)*L(0,0)))
 	 {
@@ -194,9 +183,9 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
        alpha1 = part1 - (mu[0] / sum);
        beta1 = part2 - ((sum - mu[0]) / sum);
      }
-   if(alpha1 < 0 || beta1 < 0 )
+   if(alpha1 < TOL || beta1 < TOL )
      {
-       cerr << "Alpha or beta negative in multivariate2D: " << alpha1<< ", " << beta1 << endl;
+       cerr << "Alpha or beta negative or too close to zero in multivariate2D: " << alpha1<< ", " << beta1 << endl;
        exit(1);
      }
    //------------------ B ------------------------
@@ -213,14 +202,14 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
        cerr << "mu2+L21*z1 in multivariateGamma2D is negative" << endl;
        exit(1);
      }
-   if( num < 1.0e-5)
+   if( num < TOL)
      {
        cerr << "mu2+L21*z1 in multivariateGamma2D is zero" << endl;
-       exit(1);
+       //exit(1);
        alpha2 = 1;
        lambda2 = 1/L(1,1);
      }
-   if( num > 1.0e-5)
+   if( num > TOL)
      {
        alpha2 = (num * num) / (L(1,1) * L(1,1));
        lambda2 = num / (L(1,1) * L(1,1));
@@ -244,25 +233,19 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
        cerr << "Error with mu<0 in multivariateGamma1D" << endl;
        exit(1);
      }
-   if( mu < 1.0e-5)
+   if( mu < TOL)
      {
        cerr << "Case mu==0 in multivariateGamma1D" << endl;
-       exit(1);
-       a = 1;
-       double v = var;
-       double den = cbrt(-v*v*v - 18*v*v +3*sqrt(3)*sqrt(v*v*v*v*v + 11*v*v*v*v - v*v*v));
-       b = (v+3)/(3*den) + den/(3*v) - (4/3);
+       //exit(1);
+       pathologicalBetaPar(var,a,b);
      }
-   if( mu == s) //fixit: how to make it close to the sum?
+   if( mu > s - TOL) 
      {
        cerr << "Case mu==sum in multivariateGamma1D" << endl;
-       exit(1);
-       b = 1;
-       double v = var;
-       double den = cbrt(-v*v*v - 18*v*v +3*sqrt(3)*sqrt(v*v*v*v*v + 11*v*v*v*v - v*v*v));
-       a = (v+3)/(3*den) + den/(3*v) - (4/3);
+       //exit(1);
+       pathologicalBetaPar(var,b,a);
      }
-   if( mu > 1.0e-5 && mu != s)
+   if( mu > TOL && mu <= s - TOL)
      {
        if( mu*(s-mu) <= var)
 	 {
@@ -275,7 +258,7 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
        b = part2 - (s - mu) / s;
        cout << "a,b in multivariateGamma1D" << a << " , " << b << endl;
      }
-   if(a < 1.0e-8 || b < 1.0e-8 )
+   if(a < TOL || b < TOL )
      {
        cerr << "Alpha or beta negative or too close to zero in multivariate1D: " << a<< ", " << b << endl;
        exit(1);
@@ -293,3 +276,22 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
    cout << "after mleDistance1D, bl: " << bl.transpose() << endl;
    return bl;
  }
+
+// set alpha=1, and beta=long expression
+void pathologicalBetaPar(double v,double& alpha,double& beta)
+{
+  alpha = 1;
+  double ct = v*v*v*v*v + 11*v*v*v*v - v*v*v;
+  if( ct < TOL)
+    ct = 0;
+  double cb = -v*v*v - 18*v*v +3*sqrt(3)*sqrt(ct);
+  if( cb < 0)
+    {
+      cerr << "made inside of cbrt positive in pathologicalBetaPar: " << cb << endl;
+      cb = fabs(cb);
+    }
+  cerr << "thing inside sqrt: " << ct << endl;
+  cerr << "thing inside cbrt: " << cb  << endl;
+  double den = cbrt(cb);
+  beta = (v+3)/(3*den) + den/(3*v) - (4/3.0); // made positive always
+}

@@ -17,26 +17,16 @@ To do:
 - check theory for gamma (correct mean, var and cov)
 - still need checks for t==sum in mleDistance?D, when to set it ==sum?
 
-- change to TOL
-- weights in a vector
-- check pathological cases steps, to make sure things work
-- double check abs value in beta
+- weights in a vector: check 4taxa case, compare to R:
+* find a way to write the logweights to file
+* put sample size as argument
+* find simulated data where everything worked, and test this
+* find birds/cats data for 4 taxa and test. recall that we did not
+have a good ess in R on these examples, we suspected because the
+normal was not good fit when bl~0.
+* save individual seed per run with error to replicate errors
 
-----
-Bret:
- - weights done
- - check pathological cases: for beta, problem! does not do anything, gets stuck!
 
-pathological cases:
-- 3D gamma: problem when mu1==0, mu2+L21z1<=0, m3+L31z1+L32z2<=0; 2D
-mu1==0 or mu1==sum, mu3+L21z1<=0; 1D mu1==0 or mu1==s
-
-- also, should we check for close to 0? or only exactly 0? close to
-  zero causes problems also: changed to close to 0
-  but this does not fix things, alpha and beta can still be negative
-  with these fixes: mu(sum-mu) < sigma2 case, we control it with
-  mu==0,sum, but it could also come from big sigma? only seen now with
-  mu~0.
 
 --------
 bret (later):

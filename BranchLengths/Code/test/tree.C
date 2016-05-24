@@ -1919,7 +1919,7 @@ double Tree::calculateWeight(const Alignment& alignment,QMatrix& qmatrix, double
   cout << "LogDensity for tree: " <<  logdens << endl;
   cout << "LogPrior for tree: " << logprior << endl;
   double weight = logprior + loglik - logdens;
-  cout << "Weight: " << weight << endl;
+  cout << "LogWeight: " << weight << endl;
   return weight;
 }
 
