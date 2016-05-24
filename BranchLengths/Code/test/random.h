@@ -1,6 +1,8 @@
 #ifndef __RANDOM_H
 #define __RANDOM_H
 
+#define TOL 1.0e-4
+
 #include <random>
 #include <iostream>
 

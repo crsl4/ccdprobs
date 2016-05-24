@@ -3,11 +3,11 @@
 ./bl -f "../../Data/cats-dogs.fasta" -t "((1,2),((6,3),(5,4)),((12,11),(((7,8),9),10)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519 -s 1234
 
 bad seeds:
-- case mu1==0 in multivariateGamma2D
+- case mu1==0 in multivariateGamma2D (fixed)
 1971738958
 - sum smaller than summand in partialPathCalculations1D (fixed)
 2932679102
-- does not converge mleDistance2D (t1~0): alpha,beta<0
+- does not converge mleDistance2D (t1~0): alpha,beta<0 (fixed)
 1431284585
 3341796260
 
@@ -16,6 +16,11 @@ bad seeds:
 To do:
 - check theory for gamma (correct mean, var and cov)
 - still need checks for t==sum in mleDistance?D, when to set it ==sum?
+
+- change to TOL
+- weights in a vector
+- check pathological cases steps, to make sure things work
+- double check abs value in beta
 
 ----
 Bret:

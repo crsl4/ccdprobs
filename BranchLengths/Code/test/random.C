@@ -6,6 +6,7 @@
 #include "Eigen/Eigenvalues"
 
 #include "random.h"
+#include <cmath> // cbrt
 
 using namespace std;
 using namespace Eigen;
@@ -158,25 +159,30 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
        cerr << "Error with mu1<0 in multivariateGamma2D" << endl;
        exit(1);
      }
-   if( mu[0] < 1.0e-5)
+   if( mu[0] < TOL)
      {
        cerr << "Case mu1==0 in multivariateGamma2D" << endl;
-       exit(1);
+       //exit(1);
        alpha1 = 1;
-       double v = L(0,0);
-       double den = cbrt(-v*v*v - 18*v*v +3*sqrt(3)*sqrt(v*v*v*v*v + 11*v*v*v*v - v*v*v));
-       beta1 = (v+3)/(3*den) + den/(3*v) - (4/3);
+       double v = L(0,0); //fixit: check steps: make zero if close to zero
+       double ct = v*v*v*v*v + 11*v*v*v*v - v*v*v;
+       if( ct < TOL)
+	 ct = 0;
+       cerr << "thing inside sqrt: " << ct << endl;
+       cerr << "thing inside cbrt: " << -v*v*v - 18*v*v +3*sqrt(3)*sqrt(ct) << endl;
+       double den = cbrt(-v*v*v - 18*v*v +3*sqrt(3)*sqrt(ct));
+       beta1 = fabs((v+3)/(3*den) + den/(3*v) - (4/3.0)); // made positive always
      }
-   if( mu[0] == sum) //fixit: how to make it close to the sum?
+   if( mu[0] > sum - TOL) //fixit: how to make it close to the sum?
      {
        cerr << "Case mu1==sum in multivariateGamma2D" << endl;
        exit(1);
        beta1 = 1;
-       double v = L(0,0);
+       double v = L(0,0); //fixit: just as the previous case
        double den = cbrt(-v*v*v - 18*v*v +3*sqrt(3)*sqrt(v*v*v*v*v + 11*v*v*v*v - v*v*v));
-       alpha1 = (v+3)/(3*den) + den/(3*v) - (4/3);
+       alpha1 = (v+3)/(3*den) + den/(3*v) - (4/3.0);
      }
-   if( mu[0] > 1.0e-5 && mu[0] != sum)
+   if( mu[0] > TOL && mu[0] != sum)
      {
        if( mu[0]*(sum-mu[0]) <= (L(0,0)*L(0,0)))
 	 {
