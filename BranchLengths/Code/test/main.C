@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 #include <random>
+#include <fstream>
+#include <sstream>
 
 #include "parameter.h"
 #include "sequence.h"
@@ -18,6 +20,7 @@ using namespace Eigen;
 
 void checkDistances(Tree& tree,Alignment& alignment,QMatrix& model)
 {
+  bool verbose = true;
   cout << tree.makeTopologyNumbers() << endl;
   int numTaxa = alignment.getNumTaxa();
   for ( int i=0; i < numTaxa-1; ++i )
@@ -28,7 +31,7 @@ void checkDistances(Tree& tree,Alignment& alignment,QMatrix& model)
       Edge* ea = na->getEdge(i);
       Node* nb = tree.getNode(j);
       Edge* eb = nb->getEdge(j);
-      double t = tree.mleDistance(alignment,na,ea,nb,eb,model);
+      double t = tree.mleDistance(alignment,na,ea,nb,eb,model, verbose);
       double logl,dlogl,ddlogl;
       tree.partialPathCalculations(t,alignment,na,ea,nb,eb,model,logl,dlogl,ddlogl,true);
       cout << setw(3) << i
@@ -68,7 +71,17 @@ int main(int argc, char* argv[])
   QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
 
   // create vector of weights
-  int sampleSize = 1000; //fixit: make it an argument
+  unsigned int sampleSize;
+  if ( parameters.getSampleSize() == 0 )
+    sampleSize = 1000;
+  else
+    sampleSize = parameters.getSampleSize();
+
+  bool verbose = parameters.getVerbose();
+  cout << "Verbose: " << verbose << endl;
+
+  cout << "Sample size: " << sampleSize << endl;
+
   VectorXd logw(sampleSize);
 
   // create tree
@@ -89,33 +102,55 @@ int main(int argc, char* argv[])
       {
 	try
 	  {
-	    tree.generateBranchLengths(alignment,model,rng);
+	    tree.generateBranchLengths(alignment,model,rng, verbose);
 	    double weight = tree.calculateWeight(alignment, model, 0.05);
 	    logw(i) = weight;
 	    tree.print(cout);
 	  }
-	catch ( int e )
+	catch ( ... )
 	  {
 	    cerr << "Found error in replicate number: " << i << endl;
 	    errors++;
+	    logw(i) = 0;
 	  }
       }
-    // normalize vector
-    double suma = 0;
+    ofstream logwfile;
+    logwfile.open("logw.txt");
     for(int i = 0; i < sampleSize; i++)
       {
-	suma += log(i);
+	logwfile << logw(i) << endl;
       }
+    logwfile.close();
+    // double average = 0;
+    // for(int i = 0; i < sampleSize; i++)
+    //   {
+    // 	average += logw(i);
+    //   }
+    // average = average / sampleSize;
+    // cout << "Average logw: " << average << endl;
 
-    logw = logw / suma;
-    double ess = 0;
-    for(int i = 0; i < sampleSize; i++)
-      {
-	ess += log(i)*logw(i);
-      }
-    ess = 1/ess;
-    ess = ess/sampleSize;
-    cout << "Effective sample size: " << ess << endl;
+    // // normalize vector
+    // for(int i = 0; i < sampleSize; i++)
+    //   {
+    // 	logw(i) = logw(i) - average;
+    // 	logw(i) = exp(logw(i));
+    //   }
+
+    // double suma = 0;
+    // for(int i = 0; i < sampleSize; i++)
+    //   {
+    // 	suma += logw(i);
+    //   }
+
+    // logw = logw / suma;
+    // double ess = 0;
+    // for(int i = 0; i < sampleSize; i++)
+    //   {
+    // 	ess += log(i)*logw(i);
+    //   }
+    // ess = 1/ess;
+    // ess = ess/sampleSize;
+    // cout << "Effective sample size: " << ess << endl;
     cout << "Errors: " << errors << endl;
   }
   return 0;

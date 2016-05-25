@@ -16,6 +16,8 @@ private:
   vector<double> stationaryP;
   vector<double> symmetricQP;
   unsigned int seed;
+  unsigned int sampleSize;
+  bool verbose;
 public:
   Parameter()
   {
@@ -32,6 +34,10 @@ public:
   vector<double> getSymmetricQP() const { return symmetricQP; }
   void setSeed(unsigned int x) { seed = x; }
   unsigned int getSeed() const { return seed; }
+  void setSampleSize(unsigned int x) { sampleSize = x; }
+  unsigned int getSampleSize() const { return sampleSize; }
+  void setVerbose(bool b) { verbose = b; }
+  bool getVerbose() const {return verbose; }
 };
 
 #endif

@@ -14,19 +14,28 @@ bad seeds:
 ./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
 
 To do:
-- check theory for gamma (correct mean, var and cov)
-- still need checks for t==sum in mleDistance?D, when to set it ==sum?
-
 - weights in a vector: check 4taxa case, compare to R:
-* find a way to write the logweights to file
-* put sample size as argument
-* find simulated data where everything worked, and test this
+* still remove some things with verbose!!
+* find simulated data where everything worked, and test this (see if
+weights behave better)
 * find birds/cats data for 4 taxa and test. recall that we did not
 have a good ess in R on these examples, we suspected because the
-normal was not good fit when bl~0.
+normal was not good fit when bl~0. rerun in R to compare dist of
+weights.
+* go back to normal dist to see if it works on 4 taxa
+
+- for more than 4 taxa:
 * save individual seed per run with error to replicate errors
+* try/catch not working: need to change exit(1) to throw(...)
 
+Bret:
+- 4taxa birds: weights too big! imposible to get exp(.), problem logdensity huge, why?
+- not really fast: still recurse=true, printing everything
 
+-------
+To do (later):
+- check theory for gamma (correct mean, var and cov)
+- still need checks for t==sum in mleDistance?D, when to set it ==sum?
 
 --------
 bret (later):
