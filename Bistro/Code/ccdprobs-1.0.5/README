@@ -1,0 +1,41 @@
+README file for ccdprobs, version 1.0.5
+Bret Larget
+University of Wisconsin, Madison
+
+ccdprobs is a program that takes as input the summary of a MrBayes .t file produced with mbsum from BUCKy
+and calculates for each input tree the conditional clade probability distribution estimated tree probability.
+
+COPYRIGHT:
+This software is copyrighted under the Gnu General Public License, version 3.
+
+INSTALLATION:
+
+ccdprobs is written in ANSI C++. If you have GNU's g++ installed, you ought to be able to compile the code
+from the terminal with the command:
+
+  make
+
+assuming that you are in the directory $CCDPROBS/src where $CCDPROBS is whereever you put the distribution on your local computer.
+This command produces the programs
+
+  ccdprobs
+  distance
+  mbsum
+
+If these instructions are not detailed enough, please find a local expert or wait for a future version with more user-friendly help.
+
+RUNNING THE PROGRAM:
+
+Type
+
+  ccdprobs --help
+
+for detailed instructions.  A typical analysis begins using the mbsum program to summarize the output from a run of MrBayes.
+The required arguments to ccdprobs follow the flags --out and --in.  The argument after --out is the root file name of multiple output files.
+If you use --out example, then the output files example.out, example.log, example.smap, and example.tmap will all be created.
+
+EXAMPLE:
+
+  mbsum --skip 1001 --out example.in example.nex.run1.t
+  ccdprobs --in example.in --out example
+

@@ -1,0 +1,6 @@
+ccdprobs version 1.0.5
+
+  produced at Thu May 19 16:34:40 2016
+
+Call: ../src/ccdprobs -i short.t -o short.in
+
