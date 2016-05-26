@@ -2,10 +2,12 @@
 ## after ./bl ....
 ## Claudia May 2016
 
-dat = read.table("logw.txt")
+seed = 646
+dat = read.table(paste0("logw",seed,".txt"))
 head(dat)
 summary(dat$V1)
 mean(dat$V1)
 
 logw = dat$V1 - mean(dat$V1)
 summary(logw)
+hist(logw)
