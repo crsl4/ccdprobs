@@ -4,14 +4,29 @@ d2x0 = 0.078
 dxy0 = 0.03
 d3y0 = 0.091
 d4y0 = 0.098
+
+* gamma/beta
 ./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q  0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965
 mv logw.txt logw646.txt
 then studyWeights.r:
 summary(dat$V1)
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
   -2021  342400  686100  686000 1030000 1374000
-and compare to scripts/simulations_normal.r with same seed:
-CONCLUSION:
+
+* multinormal
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal
+mv logw.txt logw646_norm.txt
+then studyWeights.r:
+> summary(dat$V1)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+  -3350   -3349   -3349   -3349   -3348   -3343
+> length(w[w>0.01])
+[1] 12
+> (1/sum(w^2))/1000
+[1] 0.04139058
+
+* multinormal in R
+Compare to scripts/simulations_normal.r with same seed:
 > summary(data$logwv.cond)
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
   -3201   -3195   -3194   -3195   -3194   -3191
