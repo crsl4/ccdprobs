@@ -18,6 +18,7 @@ private:
   unsigned int seed;
   unsigned int sampleSize;
   bool verbose;
+  bool mvnormal;
 public:
   Parameter()
   {
@@ -38,6 +39,8 @@ public:
   unsigned int getSampleSize() const { return sampleSize; }
   void setVerbose(bool b) { verbose = b; }
   bool getVerbose() const {return verbose; }
+  void setMvnormal(bool b) { mvnormal = b; }
+  bool getMvnormal() const {return mvnormal; }
 };
 
 #endif

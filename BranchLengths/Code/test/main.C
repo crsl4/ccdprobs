@@ -78,6 +78,7 @@ int main(int argc, char* argv[])
     sampleSize = parameters.getSampleSize();
 
   bool verbose = parameters.getVerbose();
+  bool mvnormal = parameters.getMvnormal();
   //cout << "Verbose: " << verbose << endl;
 
   cout << "Sample size: " << sampleSize << endl;
@@ -104,7 +105,7 @@ int main(int argc, char* argv[])
 	cout << "------------- rep " << i << " -------------" << endl;
 	try
 	  {
-	    tree.generateBranchLengths(alignment,model,rng, verbose);
+	    tree.generateBranchLengths(alignment,model,rng, verbose, mvnormal);
 	    double weight = tree.calculateWeight(alignment, model, 0.05);
 	    logw(i) = weight;
 	    tree.print(cout);

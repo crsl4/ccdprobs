@@ -27,15 +27,21 @@ using namespace Eigen;
 // For the final implementation if we really will only use 2by2 and 3by3 matrices,
 //   we may want different functions for each case
 //   because the small matrices are optimized in the Eigen library
-VectorXd multivariateNormal(VectorXd mu,MatrixXd vc,mt19937_64& rng)
+VectorXd multivariateNormal(VectorXd mu,MatrixXd vc,mt19937_64& rng, double& logdensity)
 {
   int r = vc.rows();
   VectorXd v( r );
   MatrixXd L( vc.llt().matrixL() );
 
   normal_distribution<double> rnorm;
+  double rss = 0;
   for ( int i=0; i<r; ++i )
-    v( i ) = rnorm( rng );
+    {
+      v( i ) = rnorm( rng );
+      rss += v(i)*v(i);
+    }
+
+  logdensity = -0.5*rss;
 
   return mu + L * v;
 }
@@ -173,7 +179,7 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
        //exit(1);
        pathologicalBetaPar(L(0,0),alpha1,beta1);
      }
-   if( mu[0] > sum - TOL) 
+   if( mu[0] > sum - TOL)
      {
        if(verbose)
 	 cerr << "Case mu1==sum in multivariateGamma2D" << endl;
@@ -186,7 +192,7 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
 	 {
 	   cerr << "mu(s-mu)<sigma2 in multivariateGamma2D" << endl;
 	   exit(1);
-	 } 
+	 }
        double part1 = (mu[0] * mu[0] * (sum-mu[0])) / (sum * L(0,0) * L(0,0));
        double part2 = (mu[0] * (sum-mu[0])*(sum-mu[0])) / (sum * L(0,0) * L(0,0));
        alpha1 = part1 - (mu[0] / sum);
@@ -251,7 +257,7 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
        //exit(1);
        pathologicalBetaPar(var,a,b);
      }
-   if( mu > s - TOL) 
+   if( mu > s - TOL)
      {
        if(verbose)
 	 cerr << "Case mu==sum in multivariateGamma1D" << endl;
@@ -264,7 +270,7 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
 	 {
 	   cerr << "mu(s-mu)<sigma2 in multivariateGamma1D" << endl;
 	   exit(1);
-	 } 
+	 }
        double part1 = (mu * mu * (s-mu)) / (s * var);
        double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
        a =  part1 - mu / s;
@@ -320,4 +326,4 @@ void pathologicalBetaPar(double v,double& alpha,double& beta)
   beta = (v+3)/(3*den) + den/(3*v) - (4/3.0); // made positive always
 }
 
-  
+

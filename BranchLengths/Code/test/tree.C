@@ -1085,7 +1085,7 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ea and eb head toward the root.
-void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum1, double& sum2, mt19937_64& rng, bool verbose)
+void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum1, double& sum2, mt19937_64& rng, bool verbose, bool mvnormal)
 {
   if(sum1 < t1 || sum2 < t1)
     {
@@ -1198,12 +1198,24 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     }
   double mu = prop;
   double var = -1/prop_ddlogl;
-  Vector3d bl = multivariateGamma1D(mu,var,sum1,sum2,rng, logdensity, verbose);
-  if(verbose)
-    cout << "bl after multivariateGamma1D: " << bl.transpose() << endl;
-  t1 = bl[0];
-  t2 = bl[1];
-  t3 = bl[2];
+  if(mvnormal)
+    {
+      normal_distribution<double> rnorm;
+      double z = rnorm(rng);
+      t1 = mu + sqrt(var)*z;
+      t2 = sum1 - t1;
+      t3 = sum2 - t1;
+      logdensity += -0.5*z*z;
+    }
+  else
+    {
+      Vector3d bl = multivariateGamma1D(mu,var,sum1,sum2,rng, logdensity, verbose);
+      if(verbose)
+	cout << "bl after multivariateGamma1D: " << bl.transpose() << endl;
+      t1 = bl[0];
+      t2 = bl[1];
+      t3 = bl[2];
+    }
   if(t1<0 || t2<0 || t3<0)
     {
       cerr << "Sampled negative branches in mleDistance1D" << endl;
@@ -1319,7 +1331,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // it calls different functions depending on the number of sums known
 // double& to modify inside? yes
 // warning: this would break if a sum is in fact 0, but i don't think this would happen
-void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng, bool verbose)
+void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng, bool verbose, bool mvnormal)
 {
   if(verbose)
     {
@@ -1334,37 +1346,37 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
     }
   if ( sxy + sxz + syz == 0) //not conditional
     {
-      mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng, verbose);
+      mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng, verbose,mvnormal);
       return;
     }
   if( sxy > 0 && sxz + syz == 0) //conditional on sxy
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,lz,ly,sxy,rng, verbose); //warning in order branches
+      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,lz,ly,sxy,rng, verbose,mvnormal); //warning in order branches
       return;
     }
   if( sxz > 0 && sxy + syz == 0) //conditional on sxz
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,ly,lz,sxz,rng, verbose); //warning in order branches
+      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,ly,lz,sxz,rng, verbose,mvnormal); //warning in order branches
       return;
     }
   if( syz > 0 && sxz + sxy == 0) //conditional on syz
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,ly,lx,lz,syz,rng, verbose); //warning in order branches
+      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,ly,lx,lz,syz,rng, verbose,mvnormal); //warning in order branches
       return;
     }
   if( sxy > 0 && sxz > 0) //conditional on sxy,sxz
     {
-      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz, sxy, sxz, rng, verbose);
+      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz, sxy, sxz, rng, verbose,mvnormal);
       return;
     }
   if( sxy > 0 && syz > 0) //conditional on sxy,syz
     {
-      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, ly, lx, lz, sxy, syz, rng, verbose);
+      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, ly, lx, lz, sxy, syz, rng, verbose,mvnormal);
       return;
     }
   if( sxz > 0 && syz > 0) //conditional on sxz,syz
     {
-      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lz, lx, ly, sxz, syz, rng, verbose);
+      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lz, lx, ly, sxz, syz, rng, verbose,mvnormal);
       return;
     }
 }
@@ -1373,7 +1385,7 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
-void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng, bool verbose)
+void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng, bool verbose, bool mvnormal)
 {
   if(verbose)
     cout << "Entering mleDistance3D" << endl;
@@ -1481,7 +1493,11 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cout << "Gradient " << endl << prop_gradient.transpose() << endl;
       cout << "3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
     }
-  Vector3d bl = multivariateGamma3D(prop,cov,rng, logdensity, verbose);
+  Vector3d bl;
+  if(mvnormal)
+    bl = multivariateNormal(prop,cov,rng, logdensity);
+  else
+    bl = multivariateGamma3D(prop,cov,rng, logdensity, verbose);
   if(verbose)
     cout << "Sample bl 3D: "<< bl.transpose() << endl;
   //Vector3d bl = prop;
@@ -1501,7 +1517,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
-void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum, mt19937_64& rng, bool verbose)
+void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum, mt19937_64& rng, bool verbose, bool mvnormal)
 {
   if(verbose)
     cout << "Entering mleDistance2D" << endl;
@@ -1639,7 +1655,16 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cout << "2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
     }
   //  double logdensity = 0; //fixit: needs to be the logdensity saved until this point
-  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng, logdensity, verbose); //t3=sum-t1
+  Vector3d bl;
+  if(mvnormal)
+    {
+      Vector2d bl12 = multivariateNormal(prop,cov,rng, logdensity); //t3=sum-t1
+      bl[0] = bl12[0];
+      bl[1] = bl12[1];
+      bl[2] = sum - bl[0];
+    }
+  else
+    bl = multivariateGamma2D(prop,cov,sum,rng, logdensity, verbose); //t3=sum-t1
   if(verbose)
     cout << "Sample 2D bl: " << bl.transpose() << endl;
   t1 = bl[0];
@@ -1750,7 +1775,7 @@ pair<int,int> getPair(int x,int y)
   return pair<int,int> (x,y);
 }
 
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, bool verbose) //clau: added seed, verbose
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, bool verbose, bool mvnormal) //clau: added seed, verbose, mvnormal
 {
   //cout << "Starting generateBL with verbose: " << verbose << endl;
   map<pair<int,int>,double> distanceMap;
@@ -1918,8 +1943,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
       }
 
-    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng, verbose);
-    //change to pass the parent 
+    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng, verbose, mvnormal);
+    //change to pass the parent
     if(verbose)
       {
 	cout << "after mleDistanceJoint: " << endl;

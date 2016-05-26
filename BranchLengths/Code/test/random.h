@@ -12,7 +12,7 @@
 using namespace std;
 using namespace Eigen;
 
-VectorXd multivariateNormal(VectorXd,MatrixXd,mt19937_64&);
+VectorXd multivariateNormal(VectorXd,MatrixXd,mt19937_64&, double&);
 double normal(double, double, mt19937_64&);
 double gamma(double, double, mt19937_64&);
 double beta(double, double, mt19937_64&);

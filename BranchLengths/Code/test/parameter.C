@@ -18,7 +18,8 @@ void usage(ostream& f)
   f << "    -q symmetric-q-parameters      |  six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -s seed                        |  positive integer random seed (machine chosen if not provided)" << endl;
   f << "    -n sample-size                 |  positive integer sample size (1000 if not provided)" << endl;
-  f << "    --verbose                       |  print comments" << endl;
+  f << "    --verbose                      |  print comments" << endl;
+  f << "    --mvnormal                     |  use multivariate normal instead of gamma/beta" << endl;
   f << "    -h || --help                   |  print this help message" << endl;
   exit(1);
 }
@@ -54,6 +55,7 @@ void Parameter::processCommandLine(int argc,char* argv[])
 
   int k=0;
   verbose = false; //false by default
+  mvnormal = false;
   while ( ++k < argc )
   {
     if ( strcmp(argv[k],"-h") == 0 || strcmp(argv[k],"--help") == 0 )
@@ -117,6 +119,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--verbose") == 0 )
     {
       verbose = true;
+    }
+    else if ( strcmp(argv[k],"--mvnormal") == 0 )
+    {
+      mvnormal = true;
     }
     else if ( strcmp(argv[k],"-p") == 0 )
     {

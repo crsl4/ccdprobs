@@ -34,6 +34,7 @@ weights
 * try/catch not working: need to change exit(1) to throw(...)
 
 Bret:
+- correct computation of logdensity for mvnormal case
 - 4taxa birds: weights too big! imposible to get exp(.), problem logdensity huge, why?
 - set seed per replicate how? create vector of seeds?
 - how to save bl? not always in the same order: although for 4 birds
