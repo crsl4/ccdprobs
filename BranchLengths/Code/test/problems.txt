@@ -16,13 +16,12 @@ bad seeds:
 
 To do:
 - weights in a vector: check 4taxa case, compare to R:
-* find simulated data where everything worked, and test this (see if
-weights behave better): in particular, wait for seed=646 in R to save
-data for future comparison, complete simulatedData.txt notes
+1) write loglik and gamma parameters to file: compare plots in R
+2) implement gamma/beta in R, see if it works
 
 * go back to normal dist to see if it works on 4 taxa: compare weights
 and logdens,loglik in c++
-* implement gamma/beta in R, see if it works
+
 
 
 * find birds/cats data for 4 taxa and test. recall that we did not

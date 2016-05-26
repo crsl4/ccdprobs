@@ -319,3 +319,5 @@ void pathologicalBetaPar(double v,double& alpha,double& beta)
     }
   beta = (v+3)/(3*den) + den/(3*v) - (4/3.0); // made positive always
 }
+
+  

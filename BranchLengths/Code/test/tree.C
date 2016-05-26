@@ -1481,7 +1481,6 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cout << "Gradient " << endl << prop_gradient.transpose() << endl;
       cout << "3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
     }
-  //  double logdensity = 0; //fixit: needs to be the attribute saved until this point
   Vector3d bl = multivariateGamma3D(prop,cov,rng, logdensity, verbose);
   if(verbose)
     cout << "Sample bl 3D: "<< bl.transpose() << endl;
@@ -1920,7 +1919,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       }
 
     mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng, verbose);
-
+    //change to pass the parent 
     if(verbose)
       {
 	cout << "after mleDistanceJoint: " << endl;
