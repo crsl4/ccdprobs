@@ -17,6 +17,8 @@ void usage(ostream& f)
   f << "    -p stationary-distribution     |  four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
   f << "    -q symmetric-q-parameters      |  six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -s seed                        |  positive integer random seed (machine chosen if not provided)" << endl;
+  f << "    -n sample-size                 |  positive integer sample size (1000 if not provided)" << endl;
+  f << "    --verbose                       |  print comments" << endl;
   f << "    -h || --help                   |  print this help message" << endl;
   exit(1);
 }
@@ -49,13 +51,14 @@ void Parameter::processCommandLine(int argc,char* argv[])
 {
   if ( argc==1 )
     usage(cerr);
-  
+
   int k=0;
+  verbose = false; //false by default
   while ( ++k < argc )
   {
     if ( strcmp(argv[k],"-h") == 0 || strcmp(argv[k],"--help") == 0 )
       usage(cerr);
-    
+
     if ( strcmp(argv[k],"-f") == 0 )
     {
       if ( ++k < argc )
@@ -93,9 +96,27 @@ void Parameter::processCommandLine(int argc,char* argv[])
       }
       else
       {
-        cerr << "Error: flag `-t' not followed by a topology string" << endl;
+        cerr << "Error: flag `-s' not followed by a int seed" << endl;
         usage(cerr);
       }
+    }
+    else if ( strcmp(argv[k],"-n") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> sampleSize;
+      }
+      else
+      {
+        cerr << "Error: flag `-n' not followed by a int sample size" << endl;
+        usage(cerr);
+      }
+    }
+    else if ( strcmp(argv[k],"--verbose") == 0 )
+    {
+      verbose = true;
     }
     else if ( strcmp(argv[k],"-p") == 0 )
     {

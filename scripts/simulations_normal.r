@@ -17,6 +17,10 @@ library(mvtnorm)
 ## WEIGHTS AND BRANCHES: work fine for cond!!
 ## for d??0 = 0.1 for all
 ## and for same bl as birds
+
+seed = 0646 ## only for comparison with BranchLength/Code/test/bl
+set.seed(seed) ## only for comparison with BranchLength/Code/test/bl
+
 who="(1,2)---(3,4)"
 d1x0=0.11
 d2x0=0.078
@@ -284,7 +288,7 @@ summary(data)
 data[data$logwv.joint==0,]
 data[data$logwv.cond==0,]
 data[data$logwv.nj==0,]
-data <- subset(data,logwv.nj!=0)
+##data <- subset(data,logwv.nj!=0)
 
 my.logw.joint = data$logwv.joint - mean(data$logwv.joint)
 data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
@@ -305,12 +309,17 @@ length(data[data$w.nj>0.01,]$w.nj)
 hist(data$w.nj)
 plot(1:length(data$w.nj),cumsum(rev(sort(data$w.nj))))
 
-save(data,file="data_5DcondNJ_fix.Rda")
-save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_5DcondNJ_fix.Rda")
-save(data,file="data_5DcondNJ_shortBL.Rda")
-save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_5DcondNJ_shortBL.Rda")
-load("data_5DcondNJ_fix.Rda")
-load("mat_5DcondNJ_fix.Rda")
+name1 = "data_5DcondNJ_fix.Rda"
+name2 = "mat_5DcondNJ_fix.Rda"
+
+name1 = "simDataR.Rda"
+name2 = "simDataR_mat.Rda"
+save(data,file=name1)
+save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file=name2)
+##save(data,file="data_5DcondNJ_shortBL.Rda")
+##save(mat.joint,mat.cond,mat.nj,mean.joint, mean1.cond, mean2.cond, file="mat_5DcondNJ_shortBL.Rda")
+load(name1)
+load(name2)
 
 ## effective sample size:
 (1/sum(data$w.joint^2))/nreps

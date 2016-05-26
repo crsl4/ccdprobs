@@ -67,7 +67,7 @@ double beta(double alpha,double b,mt19937_64& rng)
   return( x1/(x1+x2) );
  }
 
-Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& logdensity)
+Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& logdensity, bool verbose)
 {
   Vector3d bl;
   Matrix3d L( vc.llt().matrixL() );
@@ -80,7 +80,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   if( mu[0] < TOL)
     {
-      cerr << "Case mu1==0 in multivariateGamma3D" << endl;
+      if(verbose)
+	cerr << "Case mu1==0 in multivariateGamma3D" << endl;
       //exit(1);
       alpha1 = 1;
       lambda1 = 1/L(0,0);
@@ -92,7 +93,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   // ------------ T1 ------------------
   bl[0] = gamma(alpha1,1/lambda1,rng); //c++ gamma has different parametrization
-  cout << "T1: " << bl[0] << endl;
+  if(verbose)
+    cout << "T1: " << bl[0] << endl;
   // ------------ T2 ------------------
   double z1 = (bl[0] - mu[0]) / L(0,0);
   double num = mu[1] + L(1,0)*z1;
@@ -105,7 +107,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   if( num < TOL)
     {
-      cerr << "mu2 + L21*z1 in multivariateGamma3D is zero" << endl;
+      if(verbose)
+	cerr << "mu2 + L21*z1 in multivariateGamma3D is zero" << endl;
       //exit(1);
       alpha2 = 1;
       lambda2 = 1/L(1,1);
@@ -116,7 +119,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       lambda2 = num / (L(1,1) * L(1,1));
     }
   bl[1] = gamma(alpha2,1/lambda2,rng); //c++ gamma has different parametrization
-  cout << "T2: " << bl[1] << endl;
+  if(verbose)
+    cout << "T2: " << bl[1] << endl;
   // ------------ T3 ------------------
   double z2 = (bl[1] - mu[1] - L(1,0)*z1) / L(1,1);
   num = mu[2] + L(2,0)*z1 + L(2,1)*z2;
@@ -129,7 +133,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   if( num < TOL)
     {
-      cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is zero" << endl;
+      if(verbose)
+	cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is zero" << endl;
       //exit(1);
       alpha3 = 1;
       lambda3 = 1/L(1,1);
@@ -140,16 +145,18 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       lambda3 = num / (L(2,2) * L(2,2));
     }
   bl[2] = gamma(alpha3,1/lambda3,rng); //c++ gamma has different parametrization
-  cout << "T3: " << bl[2] << endl;
+  if(verbose)
+    cout << "T3: " << bl[2] << endl;
   logdensity += (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1]+(alpha3-1)*log(bl[2])-lambda3*bl[2];
   return bl;
  }
 
 
   // t1,t2,sum-t1; so mu, vc are for t1,t2
-Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng, double& logdensity)
+Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng, double& logdensity, bool verbose)
  {
-   cout << "multivariateGamma2D with mu: " << mu.transpose() << endl;
+   if(verbose)
+     cout << "multivariateGamma2D with mu: " << mu.transpose() << endl;
    double alpha1;
    double beta1;
    Vector3d bl;
@@ -161,13 +168,15 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
      }
    if( mu[0] < TOL)
      {
-       cerr << "Case mu1==0 in multivariateGamma2D" << endl;
+       if(verbose)
+	 cerr << "Case mu1==0 in multivariateGamma2D" << endl;
        //exit(1);
        pathologicalBetaPar(L(0,0),alpha1,beta1);
      }
    if( mu[0] > sum - TOL) 
      {
-       cerr << "Case mu1==sum in multivariateGamma2D" << endl;
+       if(verbose)
+	 cerr << "Case mu1==sum in multivariateGamma2D" << endl;
        //exit(1);
        pathologicalBetaPar(L(0,0),beta1,alpha1);
      }
@@ -204,7 +213,8 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
      }
    if( num < TOL)
      {
-       cerr << "mu2+L21*z1 in multivariateGamma2D is zero" << endl;
+       if(verbose)
+	 cerr << "mu2+L21*z1 in multivariateGamma2D is zero" << endl;
        //exit(1);
        alpha2 = 1;
        lambda2 = 1/L(1,1);
@@ -221,9 +231,10 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
 
 
   // t1,sum1-t1,sum2-t1
-Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19937_64& rng, double& logdensity)
+Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19937_64& rng, double& logdensity, bool verbose)
  {
-   cout << "multivariateGamma1D with mu: " << mu << endl;
+   if(verbose)
+     cout << "multivariateGamma1D with mu: " << mu << endl;
    double a;
    double b;
    double s = min(sum1,sum2);
@@ -235,13 +246,15 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
      }
    if( mu < TOL)
      {
-       cerr << "Case mu==0 in multivariateGamma1D" << endl;
+       if(verbose)
+	 cerr << "Case mu==0 in multivariateGamma1D" << endl;
        //exit(1);
        pathologicalBetaPar(var,a,b);
      }
    if( mu > s - TOL) 
      {
-       cerr << "Case mu==sum in multivariateGamma1D" << endl;
+       if(verbose)
+	 cerr << "Case mu==sum in multivariateGamma1D" << endl;
        //exit(1);
        pathologicalBetaPar(var,b,a);
      }
@@ -256,24 +269,30 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
        double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
        a =  part1 - mu / s;
        b = part2 - (s - mu) / s;
-       cout << "a,b in multivariateGamma1D" << a << " , " << b << endl;
+       if(verbose)
+	 cout << "a,b in multivariateGamma1D" << a << " , " << b << endl;
      }
    if(a < TOL || b < TOL )
      {
        cerr << "Alpha or beta negative or too close to zero in multivariate1D: " << a<< ", " << b << endl;
        exit(1);
      }
-   cout << "a,b in multivariateGamma1D" << a << " , " << b << endl;
-   cout << "1D mean: " << mu << ", variance: " << var << endl;
-   cout << "sum1, sum2 " << sum1 << ", " << sum2 << endl;
-   cout << "min sum: " << s << endl;
+   if(verbose)
+     {
+       cout << "a,b in multivariateGamma1D" << a << " , " << b << endl;
+       cout << "1D mean: " << mu << ", variance: " << var << endl;
+       cout << "sum1, sum2 " << sum1 << ", " << sum2 << endl;
+       cout << "min sum: " << s << endl;
+     }
    double rbeta = beta(a,b,rng);
-   cout << "rbeta: " << rbeta << " with a,b " << a << " , " << b << endl;
+   if(verbose)
+     cout << "rbeta: " << rbeta << " with a,b " << a << " , " << b << endl;
    bl[0] = rbeta * s;
    bl[1] = sum1-bl[0];
    bl[2] = sum2-bl[0];
    logdensity += (a-1)*log(bl[0])+(b-1)*log(s-bl[0]);
-   cout << "after mleDistance1D, bl: " << bl.transpose() << endl;
+   if(verbose)
+     cout << "after mleDistance1D, bl: " << bl.transpose() << endl;
    return bl;
  }
 
@@ -287,11 +306,16 @@ void pathologicalBetaPar(double v,double& alpha,double& beta)
   double cb = -v*v*v - 18*v*v +3*sqrt(3)*sqrt(ct);
   if( cb < 0)
     {
-      cerr << "made inside of cbrt positive in pathologicalBetaPar: " << cb << endl;
+      //cerr << "made inside of cbrt positive in pathologicalBetaPar: " << cb << endl;
       cb = fabs(cb);
     }
-  cerr << "thing inside sqrt: " << ct << endl;
-  cerr << "thing inside cbrt: " << cb  << endl;
+  //cerr << "thing inside sqrt: " << ct << endl;
+  //cerr << "thing inside cbrt: " << cb  << endl;
   double den = cbrt(cb);
+  if( den < TOL)
+    {
+      cerr << "denominator for pathologicalBetaPar is too close to zero: " << den << endl;
+      exit(1);
+    }
   beta = (v+3)/(3*den) + den/(3*v) - (4/3.0); // made positive always
 }

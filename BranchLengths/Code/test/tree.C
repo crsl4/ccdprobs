@@ -854,9 +854,10 @@ void mleErrorJoint(Node* nx,Node* ny,Node* nz)
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ea and eb head toward the root.
-double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
+double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix, bool verbose)
 {
-  cout << "mleDistance for nodes " << na->getNumber() << ", " << nb->getNumber() << endl;
+  if(verbose)
+    cout << "mleDistance for nodes " << na->getNumber() << ", " << nb->getNumber() << endl;
   bool recurse=true; //warning: need to keep true
   int iter=0;
   double curr = 0.05;
@@ -865,7 +866,8 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
   // get a decent starting point
   double curr_logl,curr_dlogl,curr_ddlogl;
   partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
-  cout << "Starting at curr="<<curr << ", logl, dlogl and ddlogl: " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
+  if(verbose)
+    cout << "Starting at curr="<<curr << ", logl, dlogl and ddlogl: " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
   double prop = curr;
   double prop_logl = curr_logl;
   double prop_dlogl = curr_dlogl;
@@ -883,12 +885,16 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
       // cout << "curr_dlogl in mleDistance for curr_dlogl>0: " << curr_dlogl << endl;
       // cout << "curr_ddlogl in mleDistance for curr_dlogl>0: " << curr_ddlogl << endl;
       prop = 2*curr;
-      cout << "double starting point in mleDistance because curr_dlogl>0" << endl;
+      if(verbose)
+	cout << "double starting point in mleDistance because curr_dlogl>0" << endl;
       partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      cout << "prop in mleDistance for curr_dlogl>0: " << prop << endl;
-      cout << "prop_logl in mleDistance for curr_dlogl>0: " << prop_logl << endl;
-      cout << "prop_dlogl in mleDistance for curr_dlogl>0: " << prop_dlogl << endl;
-      cout << "prop_ddlogl in mleDistance for curr_dlogl>0: " << prop_ddlogl << endl;
+      if(verbose)
+	{
+	  cout << "prop in mleDistance for curr_dlogl>0: " << prop << endl;
+	  cout << "prop_logl in mleDistance for curr_dlogl>0: " << prop_logl << endl;
+	  cout << "prop_dlogl in mleDistance for curr_dlogl>0: " << prop_dlogl << endl;
+	  cout << "prop_ddlogl in mleDistance for curr_dlogl>0: " << prop_ddlogl << endl;
+	}
       if ( ++iter > 100 )
         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
     } while ( prop_dlogl > 0);
@@ -906,26 +912,37 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
       // cout << "curr_dlogl in mleDistance for curr_dlogl<0: " << curr_dlogl << endl;
       // cout << "curr_ddlogl in mleDistance for curr_dlogl<0: " << curr_ddlogl << endl;
       prop = 0.5*curr;
-      cout << "half starting point in mleDistance because curr_dlogl<0" << endl;
+      if(verbose)
+	cout << "half starting point in mleDistance because curr_dlogl<0" << endl;
       partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      cout << "prop in mleDistance for curr_dlogl<0: " << prop << endl;
-      cout << "prop_logl in mleDistance for curr_dlogl<0: " << prop_logl << endl;
-      cout << "prop_dlogl in mleDistance for curr_dlogl<0: " << prop_dlogl << endl;
-      cout << "prop_ddlogl in mleDistance for curr_dlogl<0: " << prop_ddlogl << endl;
+      if(verbose)
+	{
+	  cout << "prop in mleDistance for curr_dlogl<0: " << prop << endl;
+	  cout << "prop_logl in mleDistance for curr_dlogl<0: " << prop_logl << endl;
+	  cout << "prop_dlogl in mleDistance for curr_dlogl<0: " << prop_dlogl << endl;
+	  cout << "prop_ddlogl in mleDistance for curr_dlogl<0: " << prop_ddlogl << endl;
+	}
       if ( ++iter > 100 )
         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
     } while ( prop_dlogl < 0 );
   }
   // switch to protected Newton-Raphson
-  cout << "Two points to interpolate: " << curr << ", " << prop << endl;
-  cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
+  if(verbose)
+    {
+      cout << "Two points to interpolate: " << curr << ", " << prop << endl;
+      cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
+    }
   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
   partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-  cout << "Starting prop: " << prop << endl;
-  cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+  if(verbose)
+    {
+      cout << "Starting prop: " << prop << endl;
+      cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+    }
   do
   {
-    cout << "entered while" << endl;
+    if(verbose)
+      cout << "entered while" << endl;
     curr = prop;
     partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
     // cout << "curr in mleDistance: " << curr << endl;
@@ -956,8 +973,11 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
     }
   } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8); //clau: added stopping rule dlogl~0g
-  cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
-  cout << "-----" << endl;
+  if(verbose)
+    {
+      cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+      cout << "-----" << endl;
+    }
   return prop;
 }
 
@@ -1065,14 +1085,15 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ea and eb head toward the root.
-void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum1, double& sum2, mt19937_64& rng)
+void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum1, double& sum2, mt19937_64& rng, bool verbose)
 {
   if(sum1 < t1 || sum2 < t1)
     {
       cerr << "Sum smaller than summand in mle distance1D" << endl;
       exit(1);
     }
-  cout << "Entering mleDistance1D" << endl;
+  if(verbose)
+    cout << "Entering mleDistance1D" << endl;
   bool recurse=true; //warning: need to keep true
   int iter=0;
   double curr = t1;
@@ -1086,7 +1107,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   {
     do
     {
-      cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
+      if(verbose)
+	cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
       curr = prop;
       curr_logl = prop_logl;
       curr_dlogl = prop_dlogl;
@@ -1114,32 +1136,43 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     } while ( prop_dlogl < 0 );
   }
   // switch to protected Newton-Raphson
-  cout << "Two points to interpolate: " << curr << ", " << prop << endl;
-  cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
+  if(verbose)
+    {
+      cout << "Two points to interpolate: " << curr << ", " << prop << endl;
+      cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
+    }
   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
   partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-  cout << "Starting prop: " << prop << endl;
-  cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+  if(verbose)
+    {
+      cout << "Starting prop: " << prop << endl;
+      cout << "prop_logl, prop_dlogl, prop_ddlogl" << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+    }
   do
   {
     curr = prop;
     partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
-    cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
-    cout << "mleDistance1D Newton-Raphson dlogl: " << curr_dlogl << endl;
-    cout << "mleDistance1D Newton-Raphson ddlogl: " << curr_ddlogl << endl;
+    if(verbose)
+      {
+	cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
+	cout << "mleDistance1D Newton-Raphson dlogl: " << curr_dlogl << endl;
+	cout << "mleDistance1D Newton-Raphson ddlogl: " << curr_ddlogl << endl;
+      }
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     double delta = curr_dlogl / curr_ddlogl;
     prop = curr - delta;
     while ( prop < 0 )
     {
-      cerr << "found negative" << endl;
+      if(verbose)
+	cerr << "found negative" << endl;
       delta = 0.5*delta;
       prop = curr - delta;
     }
     while ( prop > min(sum1,sum2))
       {
-	cerr << "found jump bigger than sum" << endl;
+	if(verbose)
+	  cerr << "found jump bigger than sum" << endl;
 	delta = 0.5*delta;
 	prop = curr - delta;
       }
@@ -1149,7 +1182,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       mleErrorJoint(nx,ny,nz);
     while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
     {
-      cerr << "found bigger step" << endl;
+      if(verbose)
+	cerr << "found bigger step" << endl;
       delta = 0.5*delta;
       prop = curr - delta;
       partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
@@ -1157,42 +1191,16 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
         mleErrorJoint(nx,ny,nz);
     }
   } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8);
-  cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
-  cout << "-----" << endl;
+  if(verbose)
+    {
+      cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
+      cout << "-----" << endl;
+    }
   double mu = prop;
   double var = -1/prop_ddlogl;
-  // double s = min(sum1,sum2);
-  // if( mu == 0) //fixit: need to make multivariateGamma1D work
-  //   {
-  //     cerr << "Cannot handle mu==0 in mleDistance1D" << endl;
-  //     exit(1);
-  //   }
-  // if( mu == s)
-  //   {
-  //     cerr << "Cannot handle mu==s in mleDistance1D" << endl;
-  //     exit(1);
-  //   }
-  // double part1 = (mu * mu * (s-mu)) / (s * var);
-  // double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
-  // double a =  part1 - mu / s;
-  // double b = part2 - (s - mu) / s;
-  // cout << "a,b " << a << " , " << b << endl;
-  // double rbeta = beta(a,b,rng);
-  // t1 = rbeta * s;
-  // cout << "1D mean: " << mu << ", variance: " << var << endl;
-  // cout << "sum1, sum2 " << sum1 << ", " << sum2 << endl;
-  // cout << "Sample 1D bl: " << t1 << endl;
-  // cout << "a/(a+b) " << a/(a+b) << endl;
-  // t2 = sum1-t1;
-  // t3 = sum2-t1;
-  // if(t1<0 || t2<0 || t3<0)
-  //   {
-  //     cerr << "Sampled negative branches in mleDistance1D" << endl;
-  //     exit(1);
-  //   }
-  // logdensity += (a-1)*log(t1)+(b-1)*log(s-t1);
-  Vector3d bl = multivariateGamma1D(mu,var,sum1,sum2,rng, logdensity);
-  cout << "bl after multivariateGamma1D: " << bl.transpose() << endl;
+  Vector3d bl = multivariateGamma1D(mu,var,sum1,sum2,rng, logdensity, verbose);
+  if(verbose)
+    cout << "bl after multivariateGamma1D: " << bl.transpose() << endl;
   t1 = bl[0];
   t2 = bl[1];
   t3 = bl[2];
@@ -1311,11 +1319,14 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // it calls different functions depending on the number of sums known
 // double& to modify inside? yes
 // warning: this would break if a sum is in fact 0, but i don't think this would happen
-void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng)
+void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng, bool verbose)
 {
-  cout << "Entering mleDistanceJoint" << endl;
-  cout << "lx,ly,lz: " << lx << ", " << ly << ", " << lz << endl;
-  cout << "sxy,sxz,syz: " << sxy << ", " << sxz << ", " << syz << endl;
+  if(verbose)
+    {
+      cout << "Entering mleDistanceJoint" << endl;
+      cout << "lx,ly,lz: " << lx << ", " << ly << ", " << lz << endl;
+      cout << "sxy,sxz,syz: " << sxy << ", " << sxz << ", " << syz << endl;
+    }
   if(sxy > 0 && sxz > 0 && syz > 0)
     {
       cerr << "Trying to condition al all three sums, impossible!" << endl;
@@ -1323,37 +1334,37 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
     }
   if ( sxy + sxz + syz == 0) //not conditional
     {
-      mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng);
+      mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng, verbose);
       return;
     }
   if( sxy > 0 && sxz + syz == 0) //conditional on sxy
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,lz,ly,sxy,rng); //warning in order branches
+      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,lz,ly,sxy,rng, verbose); //warning in order branches
       return;
     }
   if( sxz > 0 && sxy + syz == 0) //conditional on sxz
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,ly,lz,sxz,rng); //warning in order branches
+      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,ly,lz,sxz,rng, verbose); //warning in order branches
       return;
     }
   if( syz > 0 && sxz + sxy == 0) //conditional on syz
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,ly,lx,lz,syz,rng); //warning in order branches
+      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,ly,lx,lz,syz,rng, verbose); //warning in order branches
       return;
     }
   if( sxy > 0 && sxz > 0) //conditional on sxy,sxz
     {
-      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz, sxy, sxz, rng);
+      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz, sxy, sxz, rng, verbose);
       return;
     }
   if( sxy > 0 && syz > 0) //conditional on sxy,syz
     {
-      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, ly, lx, lz, sxy, syz, rng);
+      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, ly, lx, lz, sxy, syz, rng, verbose);
       return;
     }
   if( sxz > 0 && syz > 0) //conditional on sxz,syz
     {
-      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lz, lx, ly, sxz, syz, rng);
+      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lz, lx, ly, sxz, syz, rng, verbose);
       return;
     }
 }
@@ -1362,9 +1373,10 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
-void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng)
+void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng, bool verbose)
 {
-  cout << "Entering mleDistance3D" << endl;
+  if(verbose)
+    cout << "Entering mleDistance3D" << endl;
   bool recurse=true; //warning: need to keep true
   int iter=0;
   Vector3d curr(lx,ly,lz);
@@ -1403,7 +1415,8 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       {
 	while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
 	  {
-	    cerr << "found negative with big curr, will shrink delta" << endl;
+	    if(verbose)
+	      cerr << "found negative with big curr, will shrink delta" << endl;
 	    if(prop[0] < 0)
 	      delta[0] = 0.5* delta[0];
 	    if(prop[1] < 0)
@@ -1416,23 +1429,27 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     //    cerr << "Delta " << delta.transpose() << endl;
     if(prop[0] < 0 && curr[0] < 1.0e-5)
       {
-    	cerr << "found negative for 1st element with curr small, will set to zero" << endl;
+	if(verbose)
+	  cerr << "found negative for 1st element with curr small, will set to zero" << endl;
     	prop[0] = 0;
 	keepZero1 = true;
       }
     if(prop[1] < 0 && curr[1] < 1.0e-5)
       {
-    	cerr << "found negative for 2nd element with curr small, will set to zero" << endl;
+	if(verbose)
+	  cerr << "found negative for 2nd element with curr small, will set to zero" << endl;
     	prop[1] = 0;
 	keepZero2 = true;
       }
     if(prop[2] < 0 && curr[2] < 1.0e-5)
       {
-    	cerr << "found negative for 3rd element with curr small, will set to zero" << endl;
+	if(verbose)
+	  cerr << "found negative for 3rd element with curr small, will set to zero" << endl;
     	prop[2] = 0;
 	keepZero3 = true;
       }
-    cout << "prop befofe partialPathCalculations3D: " << prop.transpose() << endl;
+    if(verbose)
+      cout << "prop befofe partialPathCalculations3D: " << prop.transpose() << endl;
 
     partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
@@ -1441,7 +1458,8 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       {
 	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
 	  {
-	    cerr << "found bigger step" << endl;
+	    if(verbose)
+	      cerr << "found bigger step" << endl;
 	    if(keepZero1)
 		delta[0] = 0;
 	    if(keepZero2)
@@ -1457,12 +1475,16 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       }
   } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.0e-8);
   Matrix3d cov = (-1) * prop_hessian.inverse();
-  cout << "Finally converged to" << endl;
-  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
-  cout << "3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
+  if(verbose)
+    {
+      cout << "Finally converged to" << endl;
+      cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+      cout << "3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
+    }
   //  double logdensity = 0; //fixit: needs to be the attribute saved until this point
-  Vector3d bl = multivariateGamma3D(prop,cov,rng, logdensity);
-  cout << "Sample bl 3D: "<< bl.transpose() << endl;
+  Vector3d bl = multivariateGamma3D(prop,cov,rng, logdensity, verbose);
+  if(verbose)
+    cout << "Sample bl 3D: "<< bl.transpose() << endl;
   //Vector3d bl = prop;
   lx = bl[0];
   ly = bl[1];
@@ -1480,9 +1502,10 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
-void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum, mt19937_64& rng)
+void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum, mt19937_64& rng, bool verbose)
 {
-  cout << "Entering mleDistance2D" << endl;
+  if(verbose)
+    cout << "Entering mleDistance2D" << endl;
   if (sum < t1)
     {
       cerr << "Sum smaller than summand in mleDistance2D" << endl;
@@ -1495,10 +1518,13 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   Vector2d curr_gradient;
   Matrix2d curr_hessian;
   partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse); //true in original mleDist
-  cout << "Starting point in mleDistance2D" << endl;
-  cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
-  cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
-  cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+  if(verbose)
+    {
+      cout << "Starting point in mleDistance2D" << endl;
+      cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
+      cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+      cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+    }
   Vector2d prop = curr;
   double prop_logl = curr_logl;
   Vector2d prop_gradient = curr_gradient;
@@ -1509,12 +1535,16 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   // still need to find a starting point
   do
   {
-    cout << "entered while" << endl;
+    if(verbose)
+      cout << "entered while" << endl;
     curr = prop;
     partialPathCalculations2D(curr,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
-    cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
-    cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
-    cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+    if(verbose)
+      {
+	cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
+	cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+	cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+      }
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     delta = curr_hessian.inverse() * curr_gradient;
@@ -1522,37 +1552,46 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       delta[0] = 0;
     if(keepZero2)
       delta[1] = 0;
-    cout << "First delta: " << delta.transpose() << endl;
+    if(verbose)
+      cout << "First delta: " << delta.transpose() << endl;
     prop = curr - delta;
-    cout << "New proposed: " << prop.transpose() << endl;
-    cout << "with sum: " << sum << endl;
+    if(verbose)
+      {
+	cout << "New proposed: " << prop.transpose() << endl;
+	cout << "with sum: " << sum << endl;
+      }
     if(curr[0] > 1.0e-5 && curr[1] > 1.0e-5)
       {
 	while ( prop[0] < 0 || prop[1] < 0)
 	  {
-	    cerr << "found negative with curr big, will shrink delta" << endl;
+	    if(verbose)
+	      cerr << "found negative with curr big, will shrink delta" << endl;
 	    if(prop[0] < 0)
 	      delta[0] = 0.5* delta[0];
 	    if(prop[1] < 0)
 	      delta[1] = 0.5* delta[1];
-	    cerr << "new delta: " << delta.transpose() << endl;
+	    if(verbose)
+	      cerr << "new delta: " << delta.transpose() << endl;
 	    prop = curr - delta;
 	  }
       }
     //cerr << "Delta " << delta.transpose() << endl;
     if(prop[0] < 0 && curr[0] < 1.0e-5)
       {
-    	cerr << "found negative for 1st element with curr small, will set to zero" << endl;
+	if(verbose)
+	  cerr << "found negative for 1st element with curr small, will set to zero" << endl;
     	prop[0] = 0;
 	keepZero1 = true;
       }
     if(prop[1] < 0 && curr[1] < 1.0e-5)
       {
-    	cerr << "found negative for 2nd element with curr small, will set to zero" << endl;
+	if(verbose)
+	  cerr << "found negative for 2nd element with curr small, will set to zero" << endl;
     	prop[1] = 0;
 	keepZero2 = true;
       }
-    cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
+    if(verbose)
+      cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
     partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
@@ -1560,40 +1599,50 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       {
 	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
 	  {
-	    cerr << "found bigger step" << endl;
+	    if(verbose)
+	      cerr << "found bigger step" << endl;
 	    if(keepZero1)
 		delta[0] = 0;
 	    if(keepZero2)
 		delta[1] = 0;
 	    delta = delta*0.5;
-	    cerr << "new delta: " << delta.transpose() << endl;
+	    if(verbose)
+	      cerr << "new delta: " << delta.transpose() << endl;
 	    prop = curr - delta;
-	    cout << "prop befofe partialPathCalculations2D inside check for bigger step: " << prop.transpose() << endl;
+	    if(verbose)
+	      cout << "prop befofe partialPathCalculations2D inside check for bigger step: " << prop.transpose() << endl;
 	    partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
 	    if ( ++iter > 100 )
 	      mleErrorJoint(nx,ny,nz);
 	  }
       }
   } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.e-8 );
-  cout << "Finally converged" << endl;
+  if(verbose)
+    cout << "Finally converged" << endl;
   if(prop[0] < 0)
     {
-      cout << "after while, we need to fix one negative" << endl;
+      if(verbose)
+	cout << "after while, we need to fix one negative" << endl;
       prop[0] = 0;
       partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     }
   if(prop[1] < 0)
     {
-      cout << "after while, we need to fix one negative" << endl;
+      if(verbose)
+	cout << "after while, we need to fix one negative" << endl;
       prop[1] = 0 ;
       partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     }
   Matrix2d cov = (-1) * prop_hessian.inverse();
-  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
-  cout << "2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
+  if(verbose)
+    {
+      cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+      cout << "2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
+    }
   //  double logdensity = 0; //fixit: needs to be the logdensity saved until this point
-  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng, logdensity); //t3=sum-t1
-  cout << "Sample 2D bl: " << bl.transpose() << endl;
+  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng, logdensity, verbose); //t3=sum-t1
+  if(verbose)
+    cout << "Sample 2D bl: " << bl.transpose() << endl;
   t1 = bl[0];
   t2 = bl[1];
   t3 = bl[2];
@@ -1702,16 +1751,20 @@ pair<int,int> getPair(int x,int y)
   return pair<int,int> (x,y);
 }
 
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng) //clau: added seed
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, bool verbose) //clau: added seed, verbose
 {
+  //cout << "Starting generateBL with verbose: " << verbose << endl;
   map<pair<int,int>,double> distanceMap;
   list<Node*> nodeList;
   depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents();
-  cout << "Node List:";
-  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-    cout << " " << (*p)->getNumber();
-  cout << endl;
+  if(verbose)
+    {
+      cout << "Node List:";
+      for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+	cout << " " << (*p)->getNumber();
+      cout << endl;
+    }
 
   list<Node*>::iterator p=nodeList.begin();
   while ( true )
@@ -1741,8 +1794,11 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       par = x->getNodeParent();
       z = par->closeRelative();
     }
-    cout << "------------- Sample branch lengths for nodes:------------------" << endl;
-    cout << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << " " << par->getNumber() << endl;
+    if(verbose)
+      {
+	cout << "------------- Sample branch lengths for nodes:------------------" << endl;
+	cout << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << " " << par->getNumber() << endl;
+      }
     // do calculations
     x->calculateEdges(qmatrix); //ignores the parent edge, only for children edges
     y->calculateEdges(qmatrix);
@@ -1762,7 +1818,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     bool foundxz = false;
     m = distanceMap.find( getPair(x->getNumber(),y->getNumber()) );
     if ( m == distanceMap.end() ) //clau: did not find x,y; when do you put them inside distanceMap? at the end here
-      dxy = mleDistance(alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),qmatrix);
+      dxy = mleDistance(alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),qmatrix, verbose);
     else
       {
 	dxy = m->second;
@@ -1770,7 +1826,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       }
     m = distanceMap.find( getPair(x->getNumber(),z->getNumber()) );
     if ( m == distanceMap.end() )
-      dxz = mleDistance(alignment,x,x->getEdgeParent(),z,z->getEdgeParent(),qmatrix);
+      dxz = mleDistance(alignment,x,x->getEdgeParent(),z,z->getEdgeParent(),qmatrix, verbose);
     else
       {
 	dxz = m->second;
@@ -1778,7 +1834,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       }
     m = distanceMap.find( getPair(y->getNumber(),z->getNumber()) );
     if ( m == distanceMap.end() )
-      dyz = mleDistance(alignment,y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix);
+      dyz = mleDistance(alignment,y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix, verbose);
     else
       {
 	dyz = m->second;
@@ -1789,7 +1845,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	cerr << "Error: three sums found, cannot condition on three sums" << endl;
 	exit(1);
       }
-    cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
+    if(verbose)
+      cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
     double sxy = 0;
     double sxz = 0;
     double syz = 0;
@@ -1800,19 +1857,24 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     if ( foundyz )
       syz = dyz;
 
-    cout << "after mleDistance or map, dxy,dxz,dyz " << dxy << ", " << dxz << ", " << dyz << endl;
+    if(verbose)
+      cout << "after mleDistance or map, dxy,dxz,dyz " << dxy << ", " << dxz << ", " << dyz << endl;
     //clau: lengthX0, lengthY0, lengthZ0 (from NJ) are starting points for joint N-R:
     //fixit: need to make a function of this
     double lengthX0 = (dxy + dxz - dyz)*0.5;
     double lengthY0 = (dxy + dyz - dxz)*0.5;
     double lengthZ0 = (dxz + dyz - dxy)*0.5;
-    cout << "lengthX0: " << lengthX0 << endl;
-    cout << "lengthY0: " << lengthY0 << endl;
-    cout << "lengthZ0: " << lengthZ0 << endl;
+    if(verbose)
+      {
+	cout << "lengthX0: " << lengthX0 << endl;
+	cout << "lengthY0: " << lengthY0 << endl;
+	cout << "lengthZ0: " << lengthZ0 << endl;
+      }
     // question: could it be that two or more are negative?
     if ( lengthX0 < 0 )
     {
-      cerr << "Warning: fix negative edge length in starting point." << endl;
+      if(verbose)
+	cerr << "Warning: fix negative edge length in starting point." << endl;
       lengthX0 = 0.0001; //clau: does not work very well starting point of 0
       if (foundxy)
 	lengthY0 = dxy - lengthX0;
@@ -1821,7 +1883,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
     if ( lengthY0 < 0 )
     {
-      cerr << "Warning: fix negative edge length in starting point." << endl;
+      if(verbose)
+	cerr << "Warning: fix negative edge length in starting point." << endl;
       lengthY0 = 0.0001;
       if (foundxy)
 	lengthX0 = dxy - lengthY0;
@@ -1830,7 +1893,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
     if ( lengthZ0 < 0 )
     {
-      cerr << "Warning: fix negative edge length in starting point." << endl;
+      if(verbose)
+	cerr << "Warning: fix negative edge length in starting point." << endl;
       lengthZ0 = 0.0001;
       if (foundxz)
 	lengthX0 = dxz - lengthZ0;
@@ -1846,29 +1910,39 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     double lx = lengthX0;
     double ly = lengthY0;
     double lz = lengthZ0;
-    cout << "dxy " << dxy << ", dxz " << dxz << ", dyz " << dyz << endl;
-    cout << "sxy " << sxy << ", sxz " << sxz << ", syz " << syz << endl;
-    cout << "Starting points: " << endl;
-    cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
 
-    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng);
+    if(verbose)
+      {
+	cout << "dxy " << dxy << ", dxz " << dxz << ", dyz " << dyz << endl;
+	cout << "sxy " << sxy << ", sxz " << sxz << ", syz " << syz << endl;
+	cout << "Starting points: " << endl;
+	cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
+      }
 
-    cout << "after mleDistanceJoint: " << endl;
-    cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
+    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng, verbose);
+
+    if(verbose)
+      {
+	cout << "after mleDistanceJoint: " << endl;
+	cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
+      }
 
     if ( lx < 0 ) //fixit: make a function of this
     {
-      cerr << "Warning: fix negative edge length." << endl;
+      if(verbose)
+	cerr << "Warning: fix negative edge length." << endl;
       lx = 0.0;
     }
     if ( ly < 0 )
     {
-      cerr << "Warning: fix negative edge length." << endl;
+      if(verbose)
+	cerr << "Warning: fix negative edge length." << endl;
       ly = 0.0;
     }
     if ( lz < 0 )
     {
-      cerr << "Warning: fix negative edge length." << endl;
+      if(verbose)
+	cerr << "Warning: fix negative edge length." << endl;
       lz = 0.0;
     }
 
