@@ -1198,7 +1198,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     }
   double mu = prop;
   double var = -1/prop_ddlogl;
-  Vector3d bl = multivariateGamma1D(mu,var,sum1,sum2,rng, logdensity);
+  Vector3d bl = multivariateGamma1D(mu,var,sum1,sum2,rng, logdensity, verbose);
   if(verbose)
     cout << "bl after multivariateGamma1D: " << bl.transpose() << endl;
   t1 = bl[0];
@@ -1482,7 +1482,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cout << "3D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
     }
   //  double logdensity = 0; //fixit: needs to be the attribute saved until this point
-  Vector3d bl = multivariateGamma3D(prop,cov,rng, logdensity);
+  Vector3d bl = multivariateGamma3D(prop,cov,rng, logdensity, verbose);
   if(verbose)
     cout << "Sample bl 3D: "<< bl.transpose() << endl;
   //Vector3d bl = prop;
@@ -1640,7 +1640,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cout << "2D mean: " << prop.transpose() << endl << ", cov matrix: " << endl << cov << endl;
     }
   //  double logdensity = 0; //fixit: needs to be the logdensity saved until this point
-  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng, logdensity); //t3=sum-t1
+  Vector3d bl = multivariateGamma2D(prop,cov,sum,rng, logdensity, verbose); //t3=sum-t1
   if(verbose)
     cout << "Sample 2D bl: " << bl.transpose() << endl;
   t1 = bl[0];
@@ -1753,15 +1753,18 @@ pair<int,int> getPair(int x,int y)
 
 void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, bool verbose) //clau: added seed, verbose
 {
-  cout << "Starting generateBL with verbose: " << verbose << endl;
+  //cout << "Starting generateBL with verbose: " << verbose << endl;
   map<pair<int,int>,double> distanceMap;
   list<Node*> nodeList;
   depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents();
-  cout << "Node List:";
-  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-    cout << " " << (*p)->getNumber();
-  cout << endl;
+  if(verbose)
+    {
+      cout << "Node List:";
+      for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+	cout << " " << (*p)->getNumber();
+      cout << endl;
+    }
 
   list<Node*>::iterator p=nodeList.begin();
   while ( true )

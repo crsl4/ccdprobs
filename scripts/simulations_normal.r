@@ -17,6 +17,10 @@ library(mvtnorm)
 ## WEIGHTS AND BRANCHES: work fine for cond!!
 ## for d??0 = 0.1 for all
 ## and for same bl as birds
+
+seed = 0646 ## only for comparison with BranchLength/Code/test/bl
+set.seed(seed) ## only for comparison with BranchLength/Code/test/bl
+
 who="(1,2)---(3,4)"
 d1x0=0.11
 d2x0=0.078

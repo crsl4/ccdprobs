@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
   }
   mt19937_64 rng(parameters.getSeed());
 
-  cerr << "Seed: " << parameters.getSeed() << endl;
+  cout << "Seed: " << parameters.getSeed() << endl;
 
   // set up Q matrix
   QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
     sampleSize = parameters.getSampleSize();
 
   bool verbose = parameters.getVerbose();
-  cout << "Verbose: " << verbose << endl;
+  //cout << "Verbose: " << verbose << endl;
 
   cout << "Sample size: " << sampleSize << endl;
 
@@ -96,10 +96,12 @@ int main(int argc, char* argv[])
     // log-likelihood calculation
     //checkDistances(tree,alignment,model);
     tree.randomize(rng);
-    cout << tree.makeTopologyNumbers() << endl;
+    if(verbose)
+      cout << tree.makeTopologyNumbers() << endl;
     int errors = 0;
     for(int i = 0; i < sampleSize; i++)
       {
+	cout << "------------- rep " << i << " -------------" << endl;
 	try
 	  {
 	    tree.generateBranchLengths(alignment,model,rng, verbose);
