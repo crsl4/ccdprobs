@@ -1331,8 +1331,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // it calls different functions depending on the number of sums known
 // double& to modify inside? yes
 // warning: this would break if a sum is in fact 0, but i don't think this would happen
-void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng, bool verbose, bool mvnormal)
-{
+void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng, bool verbose, bool mvnormal, ofstream& table3D, ofstream& table2D, ofstream& par3D, ofstream& par2D)
+{ //todo: add ofstream to each mledistance3d,2d and write needed things to file
   if(verbose)
     {
       cout << "Entering mleDistanceJoint" << endl;
@@ -1778,6 +1778,16 @@ pair<int,int> getPair(int x,int y)
 void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, bool verbose, bool mvnormal) //clau: added seed, verbose, mvnormal
 {
   //cout << "Starting generateBL with verbose: " << verbose << endl;
+  // files to study form of lik:
+  ofstream table3D;
+  ofstream table2D;
+  ofstream par3D;
+  ofstream par2D;
+  //table3D.open("table3D.txt");
+  //table2D.open("table2D.txt");
+  //par3D.open("par3D.txt");
+  //par2D.open("par2D.txt");
+
   map<pair<int,int>,double> distanceMap;
   list<Node*> nodeList;
   depthFirstNodeList(nodeList);
@@ -1943,7 +1953,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
       }
 
-    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng, verbose, mvnormal);
+    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng, verbose, mvnormal, table3D, table2D, par3D, par2D);
     //change to pass the parent
     if(verbose)
       {

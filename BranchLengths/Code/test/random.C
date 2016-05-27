@@ -231,7 +231,7 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
        lambda2 = num / (L(1,1) * L(1,1));
      }
    bl[1] = gamma(alpha2,1/lambda2,rng); //c++ gamma has different parametrization
-   logdensity += (alpha1-1)*log(bl[0])+(beta1-1)*log(sum-bl[0])+(alpha2-1)*log(bl[1])-lambda2*bl[1];
+   logdensity += (alpha1-1)*log(bl[0])+(beta1-1)*log(sum-bl[0])-(alpha1+beta1-1)*log(sum)+(alpha2-1)*log(bl[1])-lambda2*bl[1];
    return bl;
  }
 

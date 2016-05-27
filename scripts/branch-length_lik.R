@@ -570,6 +570,35 @@ simulateBranchLength.multinorm = function(nsim,seq1.dist,seq2.dist, seq3.dist, Q
     return ( list(t=w, mu=mu$t, sigma=-Sigma) )
 }
 
+## simulates d1x,d2x,d3x jointly
+## with gamma/beta
+simulateBranchLength.gamma = function(nsim,seq1.dist,seq2.dist, seq3.dist, Q, t0, verbose=FALSE){
+    mu = findMLE3D(seq1.dist, seq2.dist, seq3.dist,Q, t0, verbose=verbose)
+    Sigma = solve(mu$obsInfo)
+    R = chol(-Sigma)
+    L = t(R)
+    ## simulate T1
+    alpha1 = mu$t[1]^2/(L[1,1]*L[1,1])
+    lambda1 = mu$t[1]/(L[1,1]*L[1,1])
+    t1 = rgamma(1,shape=alpha1,rate=lambda1)
+    ## simulate T2|T1
+    z1 = (t1-mu$t[1])/L[1,1]
+    num = mu$t[2] + L[2,1]*z1
+    alpha2 = num^2/L[2,2]^2
+    lambda2 = num/L[2,2]^2
+    t2 = rgamma(1,shape=alpha2,rate=lambda2)
+    ## simulate T3|T1,T2
+    z2 = (t2-mu$t[2]-L[2,1]*z1)/L[2,2]
+    num = mu$t[3] + L[3,1]*z1 + L[3,2]*z2
+    alpha3 = num^2/L[3,3]^2
+    lambda3 = num/L[3,3]^2
+    t3 = rgamma(1,shape=alpha3,rate=lambda3)
+    w = c(t1,t2,t3)
+    ## logdensity
+    logdens = (alpha1-1)*log(t1)-lambda1*t1+(alpha2-1)*log(t2)-lambda2*t2+(alpha3-1)*log(t3)-lambda3*t3
+    return ( list(t=w, mu=mu$t, sigma=-Sigma, logdens=logdens) )
+}
+
 ## ----------------------------------------------------
 ## 2D conditional likelihood
 
@@ -679,6 +708,30 @@ simulateBranchLength.conditionalMultinorm = function(nsim,seqx.dist,seq3.dist, s
     Sigma = solve(mu$obsInfo)
     w = rmvnorm(nsim, mu$t, -Sigma)
     return ( list(t=w, mu=mu$t, sigma=-Sigma) )
+}
+
+## simulates dxy,d4y because d3y is conditional on dxy+d3y=d3x
+## need the sum (d3x) as input
+simulateBranchLength.conditionalGamma = function(nsim,seqx.dist,seq3.dist, seq4.dist, Q, t0, d3x,verbose=FALSE){
+    mu = findMLE2D(seqx.dist, seq3.dist, seq4.dist,Q, d3x, t0, verbose=verbose)
+    Sigma = solve(mu$obsInfo)
+    R = chol(-Sigma)
+    L = t(R)
+    ## simulate beta
+    alpha1 = mu$t[1]^2*(d3x-mu$t[1])/(d3x*L[1,1]^2) - mu$t[1]/d3x
+    beta1 = mu$t[1]*(d3x-mu$t[1])^2/(d3x*L[1,1]^2) - (d3x-mu$t[1])/d3x
+    b = rbeta(1,alpha1,beta1)
+    t1 = b*d3x
+    ## simulate T2|T1
+    z1 = (t1-mu$t[1])/L[1,1]
+    num = mu$t[2]+L[2,1]*z1
+    alpha2 = num^2/L[2,2]^2
+    lambda2 = num/L[2,2]^2
+    t2 = rgamma(1,shape=alpha2,rate=lambda2)
+    w = c(t1,t2)
+    ## logdensity
+    logdens = (alpha1-1)*log(t1)+(beta1-1)*log(d3x-t1)-(alpha1+beta1-1)*log(d3x)+(alpha2-1)*log(t2)-lambda2*t2
+    return ( list(t=w, mu=mu$t, sigma=-Sigma, logdens = logdens) )
 }
 
 

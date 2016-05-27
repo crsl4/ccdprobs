@@ -19,8 +19,13 @@ To do:
 1) write loglik and gamma parameters to file: compare plots in R
 2) implement gamma/beta in R, see if it works
 
-* go back to normal dist to see if it works on 4 taxa: compare weights
-and logdens,loglik in c++
+3) go back to normal dist to see if it works on 4 taxa: compare weights
+and logdens,loglik in c++:
+CONCLUSION: in c++ ESS 4%, in R 40%, does not make sense!
+- change R to use the standard normal?
+- check all steps for typos in c++, recall we had a problem in R
+because of a typo
+- need to make this case work in c++!!
 
 
 
