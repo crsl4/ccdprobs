@@ -170,8 +170,8 @@ public:
   void depthFirstNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
   void generateBranchLengths(Alignment&,QMatrix&,mt19937_64& rng, bool,bool);
-  double logPriorExp(double);
-  double calculateWeight(const Alignment&,QMatrix&, double);
+  double logPriorExp(double,ofstream&);
+  double calculateWeight(const Alignment&,QMatrix&, double,bool,ofstream&);
 };
 
 double vectorProduct(vector<Vector4d> v);

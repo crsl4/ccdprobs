@@ -100,13 +100,16 @@ int main(int argc, char* argv[])
     if(verbose)
       cout << tree.makeTopologyNumbers() << endl;
     int errors = 0;
+    ofstream logwfile;
+    logwfile.open("logw.txt"); //warning: only works for 4taxa tree
+    logwfile << "bl1,bl2,bl3,bl4,bl5,loglik,logprior,logdens,logweight" << endl;
     for(int i = 0; i < sampleSize; i++)
       {
 	cout << "------------- rep " << i << " -------------" << endl;
 	try
 	  {
 	    tree.generateBranchLengths(alignment,model,rng, verbose, mvnormal);
-	    double weight = tree.calculateWeight(alignment, model, 0.05);
+	    double weight = tree.calculateWeight(alignment, model, 0.05, verbose, logwfile);
 	    logw(i) = weight;
 	    tree.print(cout);
 	  }
@@ -116,12 +119,6 @@ int main(int argc, char* argv[])
 	    errors++;
 	    logw(i) = 0;
 	  }
-      }
-    ofstream logwfile;
-    logwfile.open("logw.txt");
-    for(int i = 0; i < sampleSize; i++)
-      {
-	logwfile << logw(i) << endl;
       }
     logwfile.close();
     // double average = 0;

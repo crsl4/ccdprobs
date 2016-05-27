@@ -2009,25 +2009,34 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 }
 
 
-double Tree::logPriorExp(double mean)
+double Tree::logPriorExp(double mean,ofstream& logwfile)
 {
   double logprior = 0;
   for(vector<Edge*>::iterator e=edges.begin();e!=edges.end();e++)
-      logprior += (*e)->getLength();
+    {
+      double length = (*e)->getLength();
+      logprior += length;
+      logwfile << length << ",";
+    }
   logprior = (1/mean) * logprior;
   return logprior;
 }
 
-double Tree::calculateWeight(const Alignment& alignment,QMatrix& qmatrix, double mean)
+double Tree::calculateWeight(const Alignment& alignment,QMatrix& qmatrix, double mean, bool verbose, ofstream& logwfile)
 {
   double loglik = calculate(alignment,qmatrix);
-  double logprior = logPriorExp(mean);
+  double logprior = logPriorExp(mean,logwfile);
   double logdens = getLogdensity();
-  cout << "Loglik for tree: " << loglik << endl;
-  cout << "LogDensity for tree: " <<  logdens << endl;
-  cout << "LogPrior for tree: " << logprior << endl;
+  if(verbose)
+    {
+      cout << "Loglik for tree: " << loglik << endl;
+      cout << "LogDensity for tree: " <<  logdens << endl;
+      cout << "LogPrior for tree: " << logprior << endl;
+    }
   double weight = logprior + loglik - logdens;
-  cout << "LogWeight: " << weight << endl;
+  if(verbose)
+    cout << "LogWeight: " << weight << endl;
+  logwfile << loglik << "," << logprior << "," << logdens << "," << weight << endl;
   return weight;
 }
 
