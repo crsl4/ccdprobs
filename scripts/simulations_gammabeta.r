@@ -11,8 +11,8 @@
 library(ape)
 source('branch-length_lik.r')
 source('4taxa_functions.r')
-library(ggplot2)
-library(weights)
+##library(ggplot2)
+##library(weights)
 library(mvtnorm)
 
 ## ------------------
