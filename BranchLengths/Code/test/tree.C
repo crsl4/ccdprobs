@@ -1792,6 +1792,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   list<Node*> nodeList;
   depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents();
+  logdensity = 0;
   if(verbose)
     {
       cout << "Node List:";

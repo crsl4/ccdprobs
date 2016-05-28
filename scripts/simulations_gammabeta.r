@@ -9,7 +9,7 @@
 ## modified to save loglik separate from logw
 
 library(ape)
-source('branch-length_lik.r')
+source('branch-length_lik.R')
 source('4taxa_functions.r')
 ##library(ggplot2)
 ##library(weights)

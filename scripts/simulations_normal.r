@@ -5,10 +5,10 @@
 ## modified to save loglik separate from logw
 
 library(ape)
-source('branch-length_lik.r')
+source('branch-length_lik.R')
 source('4taxa_functions.r')
-library(ggplot2)
-library(weights)
+##library(ggplot2)
+##library(weights)
 library(mvtnorm)
 
 ## ------------------
@@ -283,6 +283,9 @@ for(nr in 1:nreps){
 data = data.frame(d1x.joint,d2x.joint,d3y.joint,d4y.joint,dxy.joint,logwv.joint, logl.joint, logdens.joint,
     d1x.cond,d2x.cond,d3y.cond,d4y.cond,dxy.cond,logwv.cond, logl.cond, logdens.cond,
     d1x.nj,d2x.nj,d3y.nj,d4y.nj,dxy.nj,logwv.nj, logl.nj, logdens.nj)
+save(data, file="simDataR_646.Rda")
+
+if(FALSE){
 head(data)
 summary(data)
 data[data$logwv.joint==0,]
@@ -1592,3 +1595,4 @@ hist(data$dxy)
 abline(v=dxy0, col="red")
 abline(v=m.xy,col="blue")
 
+}

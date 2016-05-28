@@ -140,6 +140,7 @@ public:
   Node* getNode(int n) { return nodes[n]; }
   Edge* getEdge(int n) { return edges[n]; }
   string getTreeString() { return treeString; }
+  void setLogdensity(double x) { logdensity = x; }
   double getLogdensity() { return logdensity; }
   void readSubtree(istringstream&,Node*,int);
   void setNumbers(Node*);
