@@ -732,7 +732,7 @@ simulateBranchLength.conditionalGamma = function(nsim,seqx.dist,seq3.dist, seq4.
     t2 = rgamma(1,shape=alpha2,rate=lambda2)
     w = c(t1,t2)
     ## logdensity
-    logdens = -lbeta(alpha1,beta1)) + (alpha1-1)*log(t1)+(beta1-1)*log(d3x-t1)-(alpha1+beta1-1)*log(d3x)+(alpha2-1)*log(t2)-lambda2*t2 +
+    logdens = -lbeta(alpha1,beta1) + (alpha1-1)*log(t1)+(beta1-1)*log(d3x-t1)-(alpha1+beta1-1)*log(d3x)+(alpha2-1)*log(t2)-lambda2*t2 +
         alpha2*log(lambda2) - lgamma(alpha2)
     return ( list(t=w, mu=mu$t, sigma=-Sigma, logdens = logdens) )
 }
