@@ -239,6 +239,7 @@ data = data.frame(d1x.joint,d2x.joint,d3y.joint,d4y.joint,dxy.joint,logwv.joint,
 save(data,file="simulations_gammabeta.Rda")
 
 if(FALSE){
+load("simulations_gammabeta.Rda")
 head(data)
 summary(data)
 data[data$logwv.joint==0,]

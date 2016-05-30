@@ -103,12 +103,25 @@ int main(int argc, char* argv[])
     ofstream logwfile;
     logwfile.open("logw.txt"); //warning: only works for 4taxa tree
     logwfile << "bl1,bl2,bl3,bl4,bl5,loglik,logprior,logdens,logweight" << endl;
+    // files to study form of lik:
+    ofstream table3D;
+    ofstream table2D;
+    ofstream par3D;
+    ofstream par2D;
+    //table3D.open("table3D.txt");
+    //table2D.open("table2D.txt");
+    par3D.open("par3D.txt");
+    par2D.open("par2D.txt");
+  
+    par3D << "mu1,mu2,mu3,s1,s2,s3,s4,s5,s6,s7,s8,s9,a1,b1,a2,b2,a3,b3" << endl;
+    par2D << "mu1,mu2,s1,s2,s3,s4,a1,b1,a2,b2" << endl;
+
     for(int i = 0; i < sampleSize; i++)
       {
 	cout << "------------- rep " << i << " -------------" << endl;
 	try
 	  {
-	    tree.generateBranchLengths(alignment,model,rng, verbose, mvnormal);
+	    tree.generateBranchLengths(alignment,model,rng, verbose, mvnormal, par3D, par2D);
 	    double weight = tree.calculateWeight(alignment, model, 0.05, verbose, logwfile);
 	    logw(i) = weight;
 	    tree.print(cout);
@@ -121,6 +134,9 @@ int main(int argc, char* argv[])
 	  }
       }
     logwfile.close();
+    par3D.close();
+    par2D.close();
+
     // double average = 0;
     // for(int i = 0; i < sampleSize; i++)
     //   {

@@ -16,8 +16,8 @@ VectorXd multivariateNormal(VectorXd,MatrixXd,mt19937_64&, double&);
 double normal(double, double, mt19937_64&);
 double gamma(double, double, mt19937_64&);
 double beta(double, double, mt19937_64&);
-Vector3d multivariateGamma3D(Vector3d,Matrix3d,mt19937_64&, double&, bool);
-Vector3d multivariateGamma2D(Vector2d,Matrix2d,double,mt19937_64&, double&,bool);
+Vector3d multivariateGamma3D(Vector3d,Matrix3d,mt19937_64&, double&, bool, ofstream&);
+Vector3d multivariateGamma2D(Vector2d,Matrix2d,double,mt19937_64&, double&,bool, ofstream&);
 Vector3d multivariateGamma1D(double,double,double,double,mt19937_64&, double&,bool);
 void pathologicalBetaPar(double,double&,double&);
 

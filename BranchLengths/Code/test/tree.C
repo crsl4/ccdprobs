@@ -488,8 +488,7 @@ double Tree::calculate(const Alignment& alignment,QMatrix& qmatrix)
   logLikelihood.resize(alignment.getNumSites());
   // calculate transition probabilities for all edges
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
-    (*e)->calculate(qmatrix);
-
+      (*e)->calculate(qmatrix);
   // loop over sites and calculate log-likelihood while traversing the tree
   for ( int k=0; k < alignment.getNumSites(); ++k )
   {
@@ -1331,7 +1330,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // it calls different functions depending on the number of sums known
 // double& to modify inside? yes
 // warning: this would break if a sum is in fact 0, but i don't think this would happen
-void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng, bool verbose, bool mvnormal, ofstream& table3D, ofstream& table2D, ofstream& par3D, ofstream& par2D)
+void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng, bool verbose, bool mvnormal, ofstream& par3D, ofstream& par2D)
 { //todo: add ofstream to each mledistance3d,2d and write needed things to file
   if(verbose)
     {
@@ -1346,22 +1345,22 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
     }
   if ( sxy + sxz + syz == 0) //not conditional
     {
-      mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng, verbose,mvnormal);
+      mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng, verbose,mvnormal, par3D);
       return;
     }
   if( sxy > 0 && sxz + syz == 0) //conditional on sxy
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,lz,ly,sxy,rng, verbose,mvnormal); //warning in order branches
+      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,lz,ly,sxy,rng, verbose,mvnormal, par2D); //warning in order branches
       return;
     }
   if( sxz > 0 && sxy + syz == 0) //conditional on sxz
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,ly,lz,sxz,rng, verbose,mvnormal); //warning in order branches
+      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,ly,lz,sxz,rng, verbose,mvnormal, par2D); //warning in order branches
       return;
     }
   if( syz > 0 && sxz + sxy == 0) //conditional on syz
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,ly,lx,lz,syz,rng, verbose,mvnormal); //warning in order branches
+      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,ly,lx,lz,syz,rng, verbose,mvnormal, par2D); //warning in order branches
       return;
     }
   if( sxy > 0 && sxz > 0) //conditional on sxy,sxz
@@ -1385,7 +1384,7 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
-void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng, bool verbose, bool mvnormal)
+void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng, bool verbose, bool mvnormal, ofstream& par3D)
 {
   if(verbose)
     cout << "Entering mleDistance3D" << endl;
@@ -1487,6 +1486,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       }
   } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.0e-8);
   Matrix3d cov = (-1) * prop_hessian.inverse();
+  par3D << prop[0] << "," << prop[1] << "," << prop[2] << "," << cov(0,0) << "," << cov(0,1) << "," << cov(0,2) << "," << cov(1,0) << "," << cov(1,1) << "," << cov(1,2) << "," << cov(2,0) << "," << cov(2,1) << "," << cov(2,2) << "," << endl;
   if(verbose)
     {
       cout << "Finally converged to" << endl;
@@ -1495,9 +1495,12 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     }
   Vector3d bl;
   if(mvnormal)
-    bl = multivariateNormal(prop,cov,rng, logdensity);
+    {
+      bl = multivariateNormal(prop,cov,rng, logdensity);
+      par3D << "0,0,0,0,0,0" <<endl;
+    }
   else
-    bl = multivariateGamma3D(prop,cov,rng, logdensity, verbose);
+    bl = multivariateGamma3D(prop,cov,rng, logdensity, verbose,par3D);
   if(verbose)
     cout << "Sample bl 3D: "<< bl.transpose() << endl;
   //Vector3d bl = prop;
@@ -1517,7 +1520,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
-void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum, mt19937_64& rng, bool verbose, bool mvnormal)
+void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum, mt19937_64& rng, bool verbose, bool mvnormal, ofstream& par2D)
 {
   if(verbose)
     cout << "Entering mleDistance2D" << endl;
@@ -1648,7 +1651,9 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       prop[1] = 0 ;
       partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     }
+
   Matrix2d cov = (-1) * prop_hessian.inverse();
+  par2D << prop[0] << "," << prop[1] << "," << cov(0,0) << "," << cov(0,1) << "," << cov(1,0) << "," << cov(1,1) << "," << endl;
   if(verbose)
     {
       cout << "Gradient " << endl << prop_gradient.transpose() << endl;
@@ -1659,12 +1664,13 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   if(mvnormal)
     {
       Vector2d bl12 = multivariateNormal(prop,cov,rng, logdensity); //t3=sum-t1
+      par2D << "0,0,0,0" << endl;
       bl[0] = bl12[0];
       bl[1] = bl12[1];
       bl[2] = sum - bl[0];
     }
   else
-    bl = multivariateGamma2D(prop,cov,sum,rng, logdensity, verbose); //t3=sum-t1
+    bl = multivariateGamma2D(prop,cov,sum,rng, logdensity, verbose, par2D); //t3=sum-t1
   if(verbose)
     cout << "Sample 2D bl: " << bl.transpose() << endl;
   t1 = bl[0];
@@ -1775,18 +1781,9 @@ pair<int,int> getPair(int x,int y)
   return pair<int,int> (x,y);
 }
 
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, bool verbose, bool mvnormal) //clau: added seed, verbose, mvnormal
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, bool verbose, bool mvnormal, ofstream& par3D, ofstream& par2D) //clau: added seed, verbose, mvnormal
 {
   //cout << "Starting generateBL with verbose: " << verbose << endl;
-  // files to study form of lik:
-  ofstream table3D;
-  ofstream table2D;
-  ofstream par3D;
-  ofstream par2D;
-  //table3D.open("table3D.txt");
-  //table2D.open("table2D.txt");
-  //par3D.open("par3D.txt");
-  //par2D.open("par2D.txt");
 
   map<pair<int,int>,double> distanceMap;
   list<Node*> nodeList;
@@ -1954,7 +1951,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
       }
 
-    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng, verbose, mvnormal, table3D, table2D, par3D, par2D);
+    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng, verbose, mvnormal, par3D, par2D);
     //change to pass the parent
     if(verbose)
       {
@@ -2004,7 +2001,6 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     par->deactivateChild(1);
     par->deactivateChild(0);
   }
-
   for ( map<pair<int,int>,double>::iterator m=distanceMap.begin(); m!= distanceMap.end(); ++m )
     cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
 }
@@ -2025,8 +2021,8 @@ double Tree::logPriorExp(double mean,ofstream& logwfile)
 
 double Tree::calculateWeight(const Alignment& alignment,QMatrix& qmatrix, double mean, bool verbose, ofstream& logwfile)
 {
-  double loglik = calculate(alignment,qmatrix);
   double logprior = logPriorExp(mean,logwfile);
+  double loglik = calculate(alignment,qmatrix);
   double logdens = getLogdensity();
   if(verbose)
     {

@@ -14,33 +14,23 @@ bad seeds:
 ./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
 
 
-To do:
-- weights in a vector: check 4taxa case, compare to R:
-1) write loglik and gamma parameters to file: compare plots in R
-2) implement gamma/beta in R, see if it works
-
-3) go back to normal dist to see if it works on 4 taxa: compare weights
-and logdens,loglik in c++:
-CONCLUSION: in c++ ESS 4%, in R 40%, does not make sense!
-- change R to use the standard normal?
-- check all steps for typos in c++, recall we had a problem in R
-because of a typo
-- need to make this case work in c++!!
-
-
+Bret:
+*** 4 taxa:
+- fix loglik problem (repeated in all replicates)
+- fix C++ problem for gammabeta not behaving like R
+(not done grid yet because things work in r for 4 taxa)
+- compilation error with par3D, par2D to save the parameters for gammabeta
 
 * find birds/cats data for 4 taxa and test. recall that we did not
 have a good ess in R on these examples, we suspected because the
 normal was not good fit when bl~0. rerun in R to compare dist of
 weights
 
-- for more than 4 taxa:
+
+****for more than 4 taxa:
 * save individual seed per run with error to replicate errors
 * try/catch not working: need to change exit(1) to throw(...)
-
 Bret:
-- correct computation of logdensity for mvnormal case
-- 4taxa birds: weights too big! imposible to get exp(.), problem logdensity huge, why?
 - set seed per replicate how? create vector of seeds?
 - how to save bl? not always in the same order: although for 4 birds
 it looks in the same order
@@ -51,10 +41,9 @@ To do (later):
 - still need checks for t==sum in mleDistance?D, when to set it ==sum?
 
 --------
-bret (later):
+later:
 - check calculate parent at the end of generateBL, it does not work,
 we get nan again with recurse=true or false: will leave for later,
-
 - cannot write to file: gridPlotFile/gridPlotScreen, did not compile
 
 
