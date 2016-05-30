@@ -1,0 +1,6346 @@
+
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-redhat-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> ## same as simulations_normal.r but with the new gamma/beta
+> ## approach
+> ## Claudia May 2016
+> 
+> ## same as simulations.r for 4 taxa, but
+> ## now using normal for the bl, and keeping the
+> ## dependence from start (see ipad formulas)
+> ## Claudia April 2016
+> ## modified to save loglik separate from logw
+> 
+> library(ape)
+> source('branch-length_lik.R')
+> source('4taxa_functions.r')
+> ##library(ggplot2)
+> ##library(weights)
+> library(mvtnorm)
+> 
+> ## ------------------
+> ## Case (1,2)---(3,4)
+> ## Simulating (d1x,d2x,dxy,d3y,d4y) jointly
+> ## WEIGHTS AND BRANCHES: work fine for cond!!
+> ## for d??0 = 0.1 for all
+> ## and for same bl as birds
+> 
+> seed = 0646 ## only for comparison with BranchLength/Code/test/bl
+> set.seed(seed) ## only for comparison with BranchLength/Code/test/bl
+> 
+> who="(1,2)---(3,4)"
+> d1x0=0.11
+> d2x0=0.078
+> dxy0 = 0.03
+> d3y0 = 0.091
+> d4y0 = 0.098
+> ## d1x0=0.1
+> ## d2x0=0.1
+> ## dxy0 = 0.1
+> ## d3y0 = 0.1
+> ## d4y0 = 0.1
+> eta = 0.5
+> nsites=1500
+> nuc <- c('a','c','g','t')
+> Q = randomQ(4,rescale=TRUE)
+> r=Q$r
+> p=Q$p
+> ## simulate seqx
+> seqx = sample(nuc,size=nsites,prob=Q$p,replace=TRUE)
+> 
+> ## simulate seq1
+> P = matrixExp(Q,d1x0)
+> seq1 = numeric(nsites)
+> for ( i in 1:nsites )
++     seq1[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+> ## simulate seq2
+> P = matrixExp(Q,d2x0)
+> seq2 = numeric(nsites)
+> for ( i in 1:nsites )
++     seq2[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+> 
+> ## simulate seqy
+> P = matrixExp(Q,dxy0)
+> seqy = numeric(nsites)
+> for ( i in 1:nsites )
++     seqy[i] = sample(nuc,size=1,prob=P[which(nuc==seqx[i]),])
+> 
+> ## simulate seq3
+> P = matrixExp(Q,d3y0)
+> seq3 = numeric(nsites)
+> for ( i in 1:nsites )
++     seq3[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+> ## simulate seq4
+> P = matrixExp(Q,d4y0)
+> seq4 = numeric(nsites)
+> for ( i in 1:nsites )
++     seq4[i] = sample(nuc,size=1,prob=P[which(nuc==seqy[i]),])
+> 
+> 
+> seq1.dist = seqMatrix(seq1)
+> seq2.dist = seqMatrix(seq2)
+> seq3.dist = seqMatrix(seq3)
+> seq4.dist = seqMatrix(seq4)
+> 
+> ## gamma density
+> out12 = countsMatrix(seq1,seq2)
+> out13 = countsMatrix(seq1,seq3)
+> out14 = countsMatrix(seq1,seq4)
+> out23 = countsMatrix(seq2,seq3)
+> out24 = countsMatrix(seq2,seq4)
+> out34 = countsMatrix(seq3,seq4)
+> 
+> nreps = 1000
+> 
+> logwv.joint = rep(0,nreps)
+> logl.joint = rep(0,nreps)
+> logdens.joint = rep(0,nreps)
+> d1x.joint=rep(0,nreps)
+> d2x.joint=rep(0,nreps)
+> d3y.joint=rep(0,nreps)
+> d4y.joint=rep(0,nreps)
+> dxy.joint=rep(0,nreps)
+> mat.joint <- c() ## better: vector("list",nreps)
+> mean.joint <- c()
+> 
+> logwv.cond = rep(0,nreps)
+> logl.cond = rep(0,nreps)
+> logdens.cond = rep(0,nreps)
+> d1x.cond=rep(0,nreps)
+> d2x.cond=rep(0,nreps)
+> d3y.cond=rep(0,nreps)
+> d4y.cond=rep(0,nreps)
+> dxy.cond=rep(0,nreps)
+> mat.cond <- c()
+> mean1.cond <- c()
+> mean2.cond <- c()
+> 
+> 
+> for(nr in 1:nreps){
++     print(nr)
++     ## ----------------- joint ---------------------------------------------
++     ## starting point BioNJ:
++     jc12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
++     jc13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
++     jc14 = simulateBranchLength.jc(nsim=1,out14,eta=eta)
++     jc23 = simulateBranchLength.jc(nsim=1,out23,eta=eta)
++     jc24 = simulateBranchLength.jc(nsim=1,out24,eta=eta)
++     jc34 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
++     t.lik12 = simulateBranchLength.lik(nsim=1, seq1.dist,seq2.dist,Q,t0=jc12$t,eta=eta)
++     t.lik13 = simulateBranchLength.lik(nsim=1, seq1.dist,seq3.dist,Q,t0=jc13$t,eta=eta)
++     t.lik14 = simulateBranchLength.lik(nsim=1, seq1.dist,seq4.dist,Q,t0=jc14$t,eta=eta)
++     t.lik23 = simulateBranchLength.lik(nsim=1, seq2.dist,seq3.dist,Q,t0=jc23$t,eta=eta)
++     t.lik24 = simulateBranchLength.lik(nsim=1, seq2.dist,seq4.dist,Q,t0=jc24$t,eta=eta)
++     t.lik34 = simulateBranchLength.lik(nsim=1, seq3.dist,seq4.dist,Q,t0=jc34$t,eta=eta)
++     d12 = t.lik12$t
++     d13 = t.lik13$t
++     d14 = t.lik14$t
++     d23 = t.lik23$t
++     d24 = t.lik24$t
++     d34 = t.lik34$t
++     v12 = d12
++     v13 = d13
++     v14 = d14
++     v23 = d23
++     v24 = d24
++     v34 = d34
++     s1 = d12+d13+d14
++     s2 = d12+d23+d24
++     d1x.t0 = (d12+1/2*(s1-s2))/2
++     d2x.t0 = (d12+1/2*(s2-s1))/2
++     lambda = 0.5 + ((v23-v13)+(v24-v14))/(2*2*v12)
++     d3x = (lambda*d13+(1-lambda)*d23-lambda*d1x.t0-(1-lambda)*d2x.t0)
++     d4x = (lambda*d14+(1-lambda)*d24-lambda*d1x.t0-(1-lambda)*d2x.t0)
++     d3y.t0 = (d34+d3x-d4x)/2
++     d4y.t0 = (d34+d4x-d3x)/2
++     dxy.t0 = (d3x+d4x-d34)/2
++     print(c(d1x.t0, d2x.t0, dxy.t0, d3y.t0, d4y.t0))
++ 
++     d = simulateBranchLength.multinorm5D(nsim=1,seq1.dist, seq2.dist, seq3.dist,seq4.dist,Q,t0=c(d1x.t0, d2x.t0, d3y.t0,d4y.t0, dxy.t0), verbose=FALSE)
++     d1x.joint[nr] = d$t[1]
++     d2x.joint[nr] = d$t[2]
++     d3y.joint[nr] = d$t[3]
++     d4y.joint[nr] = d$t[4]
++     dxy.joint[nr] = d$t[5]
++     mat.joint[[nr]] = d$sigma
++     mean.joint[[nr]] = d$mu
++ 
++     if(d1x.joint[nr]<0 || d2x.joint[nr]<0 || d3y.joint[nr]<0 || dxy.joint[nr]<0 || d4y.joint[nr]<0){
++         print("negative bl")
++     } else{
++         print("all positive")
++         ##print(paste(d1x[nr],d2x[nr], dxy[nr], d3y[nr], d4y[nr]))
++         logl.joint[nr] = gtr.log.lik.all(d1x.joint[nr],d2x.joint[nr],dxy.joint[nr],d3y.joint[nr],d4y.joint[nr],seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
++         logdens.joint[nr] = log(dmvnorm(d$t,mean=d$mu, sigma=d$sigma))
++         logprior = logPriorExpDist(d1x.joint[nr], d2x.joint[nr], d3y.joint[nr], d4y.joint[nr], dxy.joint[nr], m=0.1)
++         logwv.joint[nr] = logprior + logl.joint[nr] - logdens.joint[nr]
++     }
++ 
++     ## ----------------------- conditional ------------------------------------------
++     ## starting point:
++     jc12 = simulateBranchLength.jc(nsim=1,out12,eta=eta)
++     jc13 = simulateBranchLength.jc(nsim=1,out13,eta=eta)
++     jc23 = simulateBranchLength.jc(nsim=1,out23,eta=eta)
++     t.lik12 = simulateBranchLength.norm(nsim=1, seq1.dist,seq2.dist,Q,t0=jc12$t,eta=eta)
++     t.lik13 = simulateBranchLength.norm(nsim=1, seq1.dist,seq3.dist,Q,t0=jc13$t,eta=eta)
++     t.lik23 = simulateBranchLength.norm(nsim=1, seq2.dist,seq3.dist,Q,t0=jc23$t,eta=eta)
++     d12 = t.lik12$t
++     d13 = t.lik13$t
++     d23 = t.lik23$t
++     d1x.t0 = (d12+d13-d23)/2
++     d2x.t0 = (d12+d23-d13)/2
++     d3x.t0 = (d13+d23-d12)/2
++ 
++     d = simulateBranchLength.gamma(nsim=1,seq1.dist, seq2.dist, seq3.dist,Q,t0=c(d1x.t0, d2x.t0, d3x.t0))
++     d1x.cond[nr] = d$t[1]
++     d2x.cond[nr] = d$t[2]
++     d3x.cond = d$t[3]
++     mean1.cond[[nr]] = d$mu
++ 
++     seqx.dist = sequenceDist(d1x.cond[nr], d2x.cond[nr] ,seq1.dist, seq2.dist, Q)
++ 
++     jcx3 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
++     jcx4 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
++     jc34 = simulateBranchLength.jc(nsim=1,out34,eta=eta)
++     t.likx3 = simulateBranchLength.norm(nsim=1, seqx.dist,seq3.dist,Q,t0=jcx3$t,eta=eta)
++     t.likx4 = simulateBranchLength.norm(nsim=1, seqx.dist,seq4.dist,Q,t0=jcx4$t,eta=eta)
++     t.lik34 = simulateBranchLength.norm(nsim=1, seq3.dist,seq4.dist,Q,t0=jc34$t,eta=eta)
++     d3x = t.likx3$t
++     d4x = t.likx4$t
++     d34 = t.lik34$t
++     dxy.t0 = (d3x+d4x-d34)/2
++     d3y.t0 = (d34+d3x-d4x)/2
++     d4y.t0 = (d34+d4x-d3x)/2
++ 
++     d2 = simulateBranchLength.conditionalGamma(nsim=1,seqx.dist, seq3.dist, seq4.dist,Q,t0=c(dxy.t0, d4y.t0),d3x.cond)
++     dxy.cond[nr] = d2$t[1]
++     d4y.cond[nr] = d2$t[2]
++     d3y.cond[nr] = d3x.cond - dxy.cond[nr]
++     mat.cond[[nr]]= matrix(c(d$sigma[1,1], d$sigma[1,2], d$sigma[1,3],0,0,
++                 d$sigma[1,2], d$sigma[2,2], d$sigma[2,3],0,0,
++                 d$sigma[1,3], d$sigma[2,3], d$sigma[3,3]+d2$sigma[1,1],(-1)*d2$sigma[2,1], (-1)*d2$sigma[1,1],
++                 0,0,(-1)*d2$sigma[2,1], d2$sigma[2,2], d2$sigma[1,2],
++                 0,0,(-1)*d2$sigma[1,1], d2$sigma[2,1], d2$sigma[1,1]),
++                 ncol=5)
++     mean2.cond[[nr]] = d2$mu
++ 
++     if(d1x.cond[nr]<0 || d2x.cond[nr]<0 || d3y.cond[nr]<0 || dxy.cond[nr]<0 || d4y.cond[nr]<0){
++         print("negative bl")
++     } else{
++         print("all positive")
++         ##print(paste(d1x[nr],d2x[nr], dxy[nr], d3y[nr], d4y[nr]))
++         logl.cond[nr] = gtr.log.lik.all(d1x.cond[nr],d2x.cond[nr],dxy.cond[nr],d3y.cond[nr],d4y.cond[nr],seq1.dist, seq2.dist, seq3.dist, seq4.dist, Q)
++         logdens.cond[nr] = d$logdens + d2$logdens
++         logprior = logPriorExpDist(d1x.cond[nr], d2x.cond[nr], d3y.cond[nr], d4y.cond[nr], dxy.cond[nr], m=0.1)
++         logwv.cond[nr] = logprior + logl.cond[nr] - logdens.cond[nr]
++     }
++ }
+[1] 1
+[1] 0.10165089 0.05639791 0.07003112 0.07550307 0.06502309
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.307511e-06 -2.321668e-09  3.914026e-07
+[1] "all positive"
+[1] 2
+[1] 0.115703075 0.082344797 0.004145144 0.093841472 0.101392081
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.237521e-09 2.776741e-10 1.358634e-10
+[1] "all positive"
+[1] 3
+[1] 0.10575147 0.06576237 0.04462846 0.07736296 0.07602908
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.396402e-08 9.783154e-09 2.448665e-07
+[1] "all positive"
+[1] 4
+[1] 0.09818468 0.09233473 0.02602733 0.08838548 0.07228723
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.083556e-06 2.425808e-05 2.540426e-06
+[1] "all positive"
+[1] 5
+[1] 0.12577063 0.04577220 0.05953420 0.08167908 0.07666880
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.694473e-07 2.577325e-08 7.092317e-07
+[1] "all positive"
+[1] 6
+[1] 0.09438042 0.10345184 0.04017805 0.07535610 0.08230689
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.293762e-05 6.544050e-06 4.768913e-06
+[1] "all positive"
+[1] 7
+[1] 0.10056330 0.09003840 0.02027013 0.06690286 0.10849478
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.086750e-05 3.252322e-05 4.454005e-07
+[1] "all positive"
+[1] 8
+[1] 0.14380348 0.08083577 0.02110687 0.08428293 0.07488115
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.931726e-09 8.732024e-09 6.540008e-08
+[1] "all positive"
+[1] 9
+[1] 0.14075354 0.13023430 0.01327070 0.07602481 0.09214220
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.058132e-05 2.123172e-05 1.508214e-04
+[1] "all positive"
+[1] 10
+[1] 0.11249302 0.11225923 0.02554380 0.06383133 0.09355144
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.186388e-06 3.243996e-05 4.159626e-05
+[1] "all positive"
+[1] 11
+[1] 0.12344753 0.08753672 0.03922877 0.05654428 0.08418479
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.791199e-08 6.565894e-09 5.647250e-09
+[1] "all positive"
+[1] 12
+[1] 0.10172098 0.09473204 0.01083779 0.08026440 0.10131267
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.007476e-10 3.378198e-11 8.657717e-10
+[1] "all positive"
+[1] 13
+[1] 0.15607141 0.06381000 0.03254654 0.07087314 0.08943854
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.197996e-07 1.117331e-06 1.381804e-07
+[1] "all positive"
+[1] 14
+[1] 0.11254424 0.05954288 0.05817101 0.07251573 0.08819617
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.652668e-11 1.494113e-10 1.176565e-09
+[1] "all positive"
+[1] 15
+[1]  0.120087807  0.109125414 -0.006398309  0.078434598  0.124839196
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.509188e-06 1.103520e-07 1.664185e-07
+[1] "all positive"
+[1] 16
+[1] 0.11109508 0.10281991 0.03700186 0.05768731 0.11228796
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.704859e-12 3.272749e-10 9.322502e-10
+[1] "all positive"
+[1] 17
+[1] 0.10421059 0.09949522 0.02287427 0.07133766 0.07752086
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.035541e-08 7.298801e-07 8.817305e-08
+[1] "all positive"
+[1] 18
+[1] 0.12894800 0.06991311 0.02968244 0.06456049 0.09741327
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -3.445073e-09  1.654473e-07  3.034156e-07
+[1] "all positive"
+[1] 19
+[1] 0.09721932 0.07159774 0.03574065 0.09807203 0.06893773
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.178770e-08 6.592716e-09 7.082224e-11
+[1] "all positive"
+[1] 20
+[1] 0.12836544 0.06894422 0.04084629 0.07204266 0.08479300
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.113166e-06 -8.100520e-08  7.199341e-06
+[1] "all positive"
+[1] 21
+[1] 0.12508267 0.08722252 0.02219278 0.08927551 0.08540854
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.337818e-08 1.980087e-07 3.355022e-07
+[1] "all positive"
+[1] 22
+[1] 0.08065170 0.10092248 0.03538066 0.05003528 0.11785577
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.223331e-05 1.180071e-04 1.507388e-05
+[1] "all positive"
+[1] 23
+[1] 0.09469364 0.07859883 0.02160334 0.08169806 0.09369025
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.181861e-09 1.078098e-06 5.769852e-07
+[1] "all positive"
+[1] 24
+[1] 0.11576109 0.06801004 0.03513005 0.05766043 0.09047130
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.454553e-05 5.258421e-04 5.750117e-05
+[1] "all positive"
+[1] 25
+[1] 0.11252197 0.05860290 0.03225444 0.08754688 0.10365507
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.637148e-05 5.001123e-04 5.916412e-05
+[1] "all positive"
+[1] 26
+[1] 0.11968852 0.07840317 0.01836444 0.10224402 0.07550714
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.291926e-07 1.881405e-06 2.070545e-07
+[1] "all positive"
+[1] 27
+[1] 0.12506175 0.06829092 0.03935945 0.06789530 0.07227348
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.874684e-10 2.572395e-09 3.060172e-10
+[1] "all positive"
+[1] 28
+[1] 0.08523454 0.07797028 0.06252771 0.04372135 0.10084348
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001069711 0.0010081012 0.0001260825
+[1] "all positive"
+[1] 29
+[1] 0.11221852 0.09510508 0.01940848 0.08638611 0.08302795
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.011062e-08 1.024782e-09 7.973194e-10
+[1] "all positive"
+[1] 30
+[1] 0.13319602 0.06892681 0.03856185 0.09043402 0.09341960
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.041002e-09 2.462855e-09 2.618266e-08
+[1] "all positive"
+[1] 31
+[1] 0.09245797 0.08953704 0.03565532 0.07941870 0.09191628
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.420834e-04 4.998093e-05 1.363386e-04
+[1] "all positive"
+[1] 32
+[1] 0.10318981 0.08661489 0.06912455 0.05273606 0.06953976
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.181147e-10 1.758438e-10 1.418784e-09
+[1] "all positive"
+[1] 33
+[1] 0.09381068 0.07157727 0.05143759 0.06050707 0.08822304
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.195213e-09 1.238694e-08 9.926065e-08
+[1] "all positive"
+[1] 34
+[1]  0.14734924  0.10466352 -0.02205844  0.08721368  0.10888149
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.860782e-10 9.847620e-10 8.571303e-09
+[1] "all positive"
+[1] 35
+[1] 0.07327177 0.08116197 0.03535807 0.10134541 0.09630609
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.833434e-05 5.180968e-04 9.628207e-05
+[1] "all positive"
+[1] 36
+[1] 0.10637380 0.09514473 0.01101420 0.08809696 0.09910849
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.001628e-05 2.665740e-04 3.133201e-05
+[1] "all positive"
+[1] 37
+[1] 0.09492543 0.10455695 0.02191669 0.06264090 0.10471142
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.885190e-05 2.186962e-04 3.282624e-05
+[1] "all positive"
+[1] 38
+[1] 0.12749307 0.06591201 0.01237482 0.08369406 0.10114497
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.661997e-08 2.999634e-08 2.228245e-07
+[1] "all positive"
+[1] 39
+[1] 0.09376086 0.08280904 0.02609144 0.07810828 0.08592245
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.196501e-09 4.282912e-10 3.418266e-12
+[1] "all positive"
+[1] 40
+[1] 0.08665430 0.07242680 0.01652590 0.07655953 0.10804568
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.314788e-09 1.299950e-10 1.066708e-10
+[1] "all positive"
+[1] 41
+[1] 0.09145782 0.09669698 0.04010667 0.08579808 0.08440584
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.345035e-05 5.755619e-04 7.992999e-05
+[1] "all positive"
+[1] 42
+[1] 0.10452231 0.06330323 0.03858553 0.08621862 0.09368166
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.128737e-06 3.718608e-06 5.101881e-05
+[1] "all positive"
+[1] 43
+[1] 0.10413743 0.08056880 0.03420718 0.07062543 0.09081475
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  9.874167e-06 -5.268314e-08  3.204363e-06
+[1] "all positive"
+[1] 44
+[1] 0.13142480 0.08464923 0.01807276 0.06453606 0.11161402
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.588273e-08 6.924552e-09 1.338668e-07
+[1] "all positive"
+[1] 45
+[1] 0.09598810 0.08994785 0.05705843 0.06908492 0.09900827
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.270537e-08 3.304176e-08 2.699144e-07
+[1] "all positive"
+[1] 46
+[1] 0.10658251 0.07733562 0.01195062 0.10519836 0.10112418
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.348315e-09 6.802996e-08 9.554074e-09
+[1] "all positive"
+[1] 47
+[1] 0.10474889 0.08978814 0.02394486 0.08142460 0.09597231
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.235255e-06 1.652646e-05 1.644339e-06
+[1] "all positive"
+[1] 48
+[1] 0.11748916 0.08025969 0.01623781 0.09638592 0.09566832
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.659895e-09 3.471129e-09 2.966801e-08
+[1] "all positive"
+[1] 49
+[1] 0.12226798 0.07043896 0.04508198 0.07216960 0.07840135
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.743474e-05 9.634412e-04 1.664615e-04
+[1] "all positive"
+[1] 50
+[1] 0.10902968 0.07123367 0.03784232 0.07404828 0.09083541
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.030244e-06 1.655495e-06 1.291752e-05
+[1] "all positive"
+[1] 51
+[1] 0.09538286 0.09417513 0.02444420 0.09079089 0.08508549
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -4.357505e-07  1.263171e-04  1.530208e-04
+[1] "all positive"
+[1] 52
+[1] 0.09989132 0.06162780 0.04994616 0.07652282 0.09096705
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.286685e-05 5.821938e-04 8.391682e-05
+[1] "all positive"
+[1] 53
+[1] 0.10203302 0.06849035 0.01444174 0.07161725 0.08175880
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.445844e-11 8.986578e-11 7.503225e-10
+[1] "all positive"
+[1] 54
+[1] 0.10996065 0.08491788 0.04581351 0.05955937 0.08315439
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.517866e-09 6.534827e-09 4.795730e-08
+[1] "all positive"
+[1] 55
+[1] 0.11885158 0.06633778 0.02186149 0.07914100 0.11970665
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -1.043742e-05  6.675997e-04  5.505086e-04
+[1] "all positive"
+[1] 56
+[1] 0.14074385 0.06829478 0.01658658 0.07952258 0.09292066
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.477070e-09 4.964098e-09 3.528825e-08
+[1] "all positive"
+[1] 57
+[1] 0.117658020 0.086396323 0.005662232 0.085857092 0.119008196
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.072346e-09 4.030419e-09 7.380342e-09
+[1] "all positive"
+[1] 58
+[1] 0.14265163 0.08543952 0.01926876 0.06900114 0.09193496
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.791007e-08 1.706782e-09 1.187731e-07
+[1] "all positive"
+[1] 59
+[1] 0.11861296 0.09181648 0.02388214 0.09466726 0.08087836
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.796365e-09 6.613534e-08 7.500733e-09
+[1] "all positive"
+[1] 60
+[1] 0.11678534 0.11030111 0.02903093 0.07185183 0.09254862
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.370695e-10 1.683595e-10 1.473430e-09
+[1] "all positive"
+[1] 61
+[1] 0.12520880 0.09122942 0.01874891 0.06645174 0.10799188
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.896088e-08 1.738986e-07 2.117749e-08
+[1] "all positive"
+[1] 62
+[1] 0.1120119387 0.0955706301 0.0008223869 0.0792296664 0.1057490630
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.193601e-04 3.018631e-05 1.627090e-04
+[1] "all positive"
+[1] 63
+[1] 0.105768064 0.090657676 0.007391582 0.075242479 0.107110503
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.816607e-07 6.602423e-07 3.687373e-06
+[1] "all positive"
+[1] 64
+[1] 0.11590990 0.08641065 0.01548740 0.07581451 0.10439353
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.065628e-10 1.433996e-10 1.204852e-09
+[1] "all positive"
+[1] 65
+[1] 0.10728450 0.08348593 0.02861320 0.07730959 0.08342555
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.708559e-09 2.380626e-08 4.269639e-09
+[1] "all positive"
+[1] 66
+[1] 0.09164558 0.09349485 0.01703950 0.09974536 0.09047773
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.582493e-07 2.962854e-06 3.280084e-07
+[1] "all positive"
+[1] 67
+[1] 0.140191824 0.075039136 0.009222123 0.078426311 0.109320811
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.213370e-05 7.448491e-05 6.278474e-06
+[1] "all positive"
+[1] 68
+[1] 0.11987955 0.07230585 0.03374757 0.08071635 0.10552871
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.290514e-07 3.019404e-06 3.670546e-07
+[1] "all positive"
+[1] 69
+[1] 0.11259599 0.10064990 0.04325842 0.06297484 0.09909777
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.039353e-10 4.603556e-09 5.587053e-10
+[1] "all positive"
+[1] 70
+[1] 0.12872539 0.07797571 0.02616060 0.07774726 0.07139105
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -7.354707e-10  3.174111e-08  3.316621e-08
+[1] "all positive"
+[1] 71
+[1] 0.139630982 0.070760434 0.003260109 0.108706097 0.098008918
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.551516e-07 5.951676e-06 2.409993e-05
+[1] "all positive"
+[1] 72
+[1] 0.10670971 0.10719385 0.04770745 0.07404495 0.05250775
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.442639e-08 1.523839e-07 2.095823e-08
+[1] "all positive"
+[1] 73
+[1] 0.111237317 0.103875833 0.002810337 0.086947770 0.097003347
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.711639e-08 9.016777e-07 1.112147e-07
+[1] "all positive"
+[1] 74
+[1] 0.12581407 0.06840402 0.03417109 0.07617916 0.06499414
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001020440 0.0009942754 0.0001258176
+[1] "all positive"
+[1] 75
+[1] 0.13669993 0.04285024 0.04380303 0.06633881 0.10331892
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.395946e-06 4.967935e-05 8.700930e-06
+[1] "all positive"
+[1] 76
+[1] 0.10476450 0.06818813 0.04310270 0.06173906 0.09333654
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.203112e-05 2.269048e-05 1.655314e-04
+[1] "all positive"
+[1] 77
+[1] 0.099527951 0.092664134 0.008091468 0.089577715 0.089507500
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.301522e-08 4.889159e-09 2.947723e-09
+[1] "all positive"
+[1] 78
+[1] 0.10815875 0.06595471 0.03772937 0.07950491 0.07145762
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.774080e-10 4.346231e-09 5.261437e-10
+[1] "all positive"
+[1] 79
+[1] 0.10556261 0.08920154 0.03954762 0.07698737 0.08863434
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.717713e-06 8.426731e-05 1.878348e-05
+[1] "all positive"
+[1] 80
+[1] 0.09237525 0.07848849 0.03155706 0.09451993 0.09940460
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.363174e-05  2.330604e-05 -6.079503e-08
+[1] "all positive"
+[1] 81
+[1]  0.116864423  0.071960237 -0.000958952  0.091654868  0.109963700
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.381840e-09 2.672604e-08 2.841490e-09
+[1] "all positive"
+[1] 82
+[1]  0.140070594  0.103559127 -0.004920458  0.068936916  0.097666182
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.579093e-08 2.313485e-07 2.764642e-08
+[1] "all positive"
+[1] 83
+[1] 0.07548715 0.10166955 0.04888475 0.10169922 0.04833443
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.737583e-06 1.474035e-05 1.649860e-06
+[1] "all positive"
+[1] 84
+[1] 0.12109448 0.05521948 0.02732916 0.06399525 0.09952191
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.443664e-05 5.090366e-06 1.080010e-05
+[1] "all positive"
+[1] 85
+[1] 0.09362099 0.09880999 0.02691457 0.06148875 0.09406285
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.891497e-06 7.276534e-06 2.017043e-08
+[1] "all positive"
+[1] 86
+[1] 0.10030838 0.06744924 0.04373533 0.07747436 0.08705912
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.621920e-06 7.163935e-05 8.926483e-06
+[1] "all positive"
+[1] 87
+[1]  0.098448194  0.084534215 -0.003990235  0.082324045  0.122867818
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.119277e-08 1.013710e-07 1.220129e-08
+[1] "all positive"
+[1] 88
+[1] 0.11139480 0.07983271 0.03989912 0.04899775 0.10194327
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.912130e-04 1.583002e-03 1.128225e-05
+[1] "all positive"
+[1] 89
+[1] 0.10219512 0.08227445 0.01070119 0.08628482 0.12459910
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.465708e-06 2.969768e-05 3.399158e-06
+[1] "all positive"
+[1] 90
+[1] 0.14399586 0.06647587 0.00690449 0.09608450 0.10368879
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.915655e-06 5.198157e-06 4.317173e-07
+[1] "all positive"
+[1] 91
+[1] 0.11473437 0.09034347 0.02543320 0.06869121 0.08196571
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.899988e-07 8.732864e-07 5.474959e-08
+[1] "all positive"
+[1] 92
+[1] 0.113954026 0.111231953 0.004484049 0.054531979 0.089921417
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  6.983216e-07 -4.044880e-08  6.235079e-07
+[1] "all positive"
+[1] 93
+[1]  0.17180063  0.08910005 -0.01137397  0.10740302  0.07593455
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.470942e-09 2.461159e-10 1.986907e-10
+[1] "all positive"
+[1] 94
+[1] 0.12660114 0.06785293 0.01411419 0.11678257 0.09940822
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.210301e-05 2.055310e-04 4.392020e-05
+[1] "all positive"
+[1] 95
+[1] 0.11191863 0.09308293 0.01992015 0.07279115 0.09882906
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.136097e-06 3.386342e-07 2.800526e-07
+[1] "all positive"
+[1] 96
+[1] 0.11391064 0.06138627 0.03561029 0.05674529 0.10159163
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.027745e-06 6.761379e-06 6.989727e-07
+[1] "all positive"
+[1] 97
+[1] 0.12943733 0.07274427 0.03104130 0.07120823 0.10078087
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.658332e-06 7.229290e-05 9.040449e-06
+[1] "all positive"
+[1] 98
+[1] 0.08816111 0.07641990 0.04535437 0.07145630 0.09668197
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.342804e-08 1.500669e-08 1.791760e-07
+[1] "all positive"
+[1] 99
+[1] 0.12317655 0.07481978 0.01987480 0.08095549 0.07265722
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.422708e-09 7.858953e-09 6.455086e-08
+[1] "all positive"
+[1] 100
+[1] 0.08996117 0.08033770 0.07516848 0.07940108 0.04847874
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.727551e-09 4.367734e-08 5.356393e-09
+[1] "all positive"
+[1] 101
+[1] 0.07082418 0.10480135 0.03415927 0.09361364 0.08395501
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.293647e-07 5.292805e-06 5.948348e-07
+[1] "all positive"
+[1] 102
+[1]  0.136565565  0.098795524 -0.001606837  0.078602560  0.095625179
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.866744e-08 2.631640e-09 1.340250e-07
+[1] "all positive"
+[1] 103
+[1] 0.09929449 0.06790923 0.03396719 0.08795921 0.08504454
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.088040e-06 1.300060e-05 4.465897e-05
+[1] "all positive"
+[1] 104
+[1] 0.12818784 0.06312745 0.02087066 0.10233691 0.09374992
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.636898e-06  1.710822e-06 -5.389103e-08
+[1] "all positive"
+[1] 105
+[1] 0.11439154 0.07024657 0.03358469 0.07419776 0.09475827
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.165316e-07 1.213519e-06 9.371244e-08
+[1] "all positive"
+[1] 106
+[1] 0.1161826470 0.1063416918 0.0007150231 0.0963741507 0.0968574285
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.124806e-07 1.123643e-05 2.532927e-06
+[1] "all positive"
+[1] 107
+[1] 0.09528519 0.08485508 0.02893251 0.06192446 0.09951176
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.619415e-08 1.217573e-07 2.522809e-08
+[1] "all positive"
+[1] 108
+[1] 0.12896031 0.08447580 0.02168057 0.07904079 0.08730998
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.539790e-08 1.350792e-07 1.580642e-08
+[1] "all positive"
+[1] 109
+[1] 0.11119192 0.07923698 0.03128716 0.04402934 0.10362799
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.523242e-06 3.793702e-05 5.599238e-06
+[1] "all positive"
+[1] 110
+[1] 0.12613920 0.08147276 0.04121776 0.07502285 0.09366762
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.232311e-10 3.498883e-06 8.466386e-06
+[1] "all positive"
+[1] 111
+[1] 0.12047590 0.06241105 0.03579440 0.08078516 0.07737963
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.154780e-07 2.270142e-08 1.623132e-08
+[1] "all positive"
+[1] 112
+[1]  0.111926637  0.102360049 -0.002315857  0.091785633  0.095175016
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.922715e-06 2.666036e-08 4.714311e-07
+[1] "all positive"
+[1] 113
+[1] 0.11653688 0.07418436 0.03374655 0.08338670 0.10103303
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.552916e-07 1.279357e-06 1.412535e-07
+[1] "all positive"
+[1] 114
+[1] 0.096607814 0.084731712 0.004426887 0.092841305 0.084656832
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.823665e-06 8.856203e-05 1.063272e-05
+[1] "all positive"
+[1] 115
+[1] 0.11986436 0.07490358 0.03844847 0.08308657 0.06697817
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.600916e-06 7.900904e-05 8.715191e-06
+[1] "all positive"
+[1] 116
+[1] 0.10104917 0.06412907 0.04135221 0.06677001 0.10828508
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.713165e-08 2.094557e-06 6.982491e-07
+[1] "all positive"
+[1] 117
+[1] 0.10054271 0.06274549 0.06312471 0.06813065 0.08615065
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -1.081357e-07  5.090056e-06  8.806396e-06
+[1] "all positive"
+[1] 118
+[1] 0.09386016 0.07775946 0.02678888 0.09504620 0.09230117
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.705435e-07 4.318900e-07 5.860019e-06
+[1] "all positive"
+[1] 119
+[1] 0.09330664 0.08618227 0.05104950 0.05562255 0.07837586
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.393324e-06 1.257385e-05 1.508640e-06
+[1] "all positive"
+[1] 120
+[1] 0.11834970 0.09233179 0.02988155 0.05466280 0.08688192
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.063096e-06 1.095019e-07 8.226469e-08
+[1] "all positive"
+[1] 121
+[1] 0.10783952 0.09634598 0.01698835 0.07655589 0.09003591
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.363481e-05 1.195559e-04 1.400042e-05
+[1] "all positive"
+[1] 122
+[1]  0.12766571  0.08771972 -0.01290128  0.06992375  0.09647045
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.376656e-06 1.449263e-07 1.033216e-07
+[1] "all positive"
+[1] 123
+[1] 0.11786130 0.07810157 0.01607918 0.08237743 0.11498820
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.978022e-05 4.277980e-04 4.015376e-05
+[1] "all positive"
+[1] 124
+[1] 0.11737851 0.07726018 0.03092047 0.04676825 0.10526056
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.342744e-10 1.055155e-09 8.641791e-09
+[1] "all positive"
+[1] 125
+[1] 0.12046096 0.08030140 0.01301808 0.09950852 0.11016438
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.054562e-09 3.657866e-08 4.393512e-09
+[1] "all positive"
+[1] 126
+[1] 0.11775196 0.05782367 0.04225888 0.06485490 0.09302605
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.422971e-06 5.913212e-07 6.195721e-06
+[1] "all positive"
+[1] 127
+[1] 0.11060121 0.08985058 0.04564976 0.07069441 0.08486183
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  2.732051e-07  3.641082e-07 -6.128191e-09
+[1] "all positive"
+[1] 128
+[1] 0.116132833 0.082035022 0.003926897 0.106282023 0.091403119
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.813957e-10 4.670345e-09 5.999545e-10
+[1] "all positive"
+[1] 129
+[1] 0.11921043 0.05604171 0.01230400 0.08666239 0.10550204
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.408589e-05 4.718229e-04 1.587050e-04
+[1] "all positive"
+[1] 130
+[1] 0.12229529 0.07879071 0.02739259 0.05867941 0.10288096
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.069988e-06 4.722897e-05 1.350159e-04
+[1] "all positive"
+[1] 131
+[1] 0.11799463 0.08210478 0.02864279 0.07249681 0.09993044
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.37353e-06 2.36224e-05 1.38644e-04
+[1] "all positive"
+[1] 132
+[1] 0.11507684 0.07821605 0.06610278 0.06704885 0.09750600
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.519061e-05 1.372289e-04 1.648137e-05
+[1] "all positive"
+[1] 133
+[1] 0.11871435 0.06649442 0.05344721 0.05158403 0.08187733
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.239317e-05 5.737978e-05 3.690136e-04
+[1] "all positive"
+[1] 134
+[1] 0.11582759 0.09097229 0.02496450 0.07841869 0.07768716
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.600840e-06 2.625769e-05 3.465068e-06
+[1] "all positive"
+[1] 135
+[1] 0.13318615 0.09146819 0.01910137 0.07304775 0.09935060
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.424881e-06 2.886472e-07 1.211863e-05
+[1] "all positive"
+[1] 136
+[1] 0.11466514 0.04026359 0.05708919 0.11981436 0.07680838
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -1.587738e-06  3.437561e-04  7.949828e-04
+[1] "all positive"
+[1] 137
+[1] 0.09193433 0.10502662 0.03198861 0.06083895 0.09872844
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.018714e-08 5.906430e-08 3.594178e-07
+[1] "all positive"
+[1] 138
+[1] 0.111947750 0.088823523 0.006208193 0.087020757 0.112318527
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.641670e-07 4.181201e-06 4.817665e-07
+[1] "all positive"
+[1] 139
+[1] 0.11528441 0.07793937 0.02677303 0.08971188 0.10219637
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.262111e-05 -1.376908e-08  3.838646e-06
+[1] "all positive"
+[1] 140
+[1] 0.13057232 0.08164614 0.02955271 0.05197779 0.11456664
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.706062e-07 3.067489e-06 4.539117e-07
+[1] "all positive"
+[1] 141
+[1] 0.09800105 0.10600320 0.04826856 0.06563841 0.07140954
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.146065e-08 1.146436e-09 9.169954e-10
+[1] "all positive"
+[1] 142
+[1] 0.11420062 0.08742667 0.02344857 0.07251229 0.07933247
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.665730e-05 2.484215e-05 2.393008e-04
+[1] "all positive"
+[1] 143
+[1]  1.363559e-01  8.302836e-02 -4.195721e-05  7.357683e-02  9.494914e-02
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.676319e-09 8.246719e-10 7.829754e-10
+[1] "all positive"
+[1] 144
+[1] 0.11145505 0.07520391 0.03282274 0.07600611 0.09801877
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.424479e-05 4.055973e-04 4.939125e-05
+[1] "all positive"
+[1] 145
+[1] 0.14903526 0.06626901 0.03000853 0.06182305 0.10061349
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.655988e-10 9.110725e-09 1.141397e-09
+[1] "all positive"
+[1] 146
+[1] 0.08864693 0.06532366 0.04560008 0.08213100 0.07707102
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.544506e-06 4.603379e-07 4.109163e-08
+[1] "all positive"
+[1] 147
+[1] 0.09389440 0.07748022 0.03510203 0.08988393 0.08451916
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.142422e-05 4.138516e-06 3.315825e-05
+[1] "all positive"
+[1] 148
+[1] 0.12809324 0.05428702 0.05309917 0.07412341 0.08178898
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.832721e-05 6.196168e-04 7.471965e-05
+[1] "all positive"
+[1] 149
+[1]  0.1315586769  0.0863906750 -0.0007236061  0.0759584777  0.0808363125
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.105972e-08 1.076366e-06 4.031937e-06
+[1] "all positive"
+[1] 150
+[1] 0.10364730 0.08369972 0.03922636 0.10249797 0.07476391
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.033828e-06 8.859402e-08 9.782239e-08
+[1] "all positive"
+[1] 151
+[1] 0.09295488 0.07517050 0.04069904 0.05207861 0.07994423
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.333052e-07 2.182108e-06 2.706310e-07
+[1] "all positive"
+[1] 152
+[1] 0.12717744 0.09695870 0.01543077 0.04938754 0.10027337
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.743947e-05 1.212300e-06 1.995363e-06
+[1] "all positive"
+[1] 153
+[1] 0.11820348 0.09026874 0.03471626 0.06852969 0.10976395
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.802677e-07 2.234796e-06 1.420684e-07
+[1] "all positive"
+[1] 154
+[1] 0.10392751 0.10068590 0.03288652 0.06979768 0.07581385
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.575040e-10 5.097530e-09 1.527732e-08
+[1] "all positive"
+[1] 155
+[1] 0.09611097 0.08443300 0.03276376 0.07545455 0.09472980
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  5.889995e-07 -9.319148e-09  2.254082e-07
+[1] "all positive"
+[1] 156
+[1] 0.1063887384 0.0744100084 0.0008887898 0.1084747490 0.1085437179
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.171311e-08 8.102308e-08 7.556819e-09
+[1] "all positive"
+[1] 157
+[1] 0.10306422 0.05364753 0.02640646 0.08014871 0.10249217
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  9.950324e-06 -1.370230e-07  5.805822e-06
+[1] "all positive"
+[1] 158
+[1] 0.10196446 0.05306691 0.04015249 0.09454680 0.08948484
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.589975e-05 8.014839e-06 7.307677e-07
+[1] "all positive"
+[1] 159
+[1] 0.093692132 0.124834974 0.007022544 0.082387334 0.109126312
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.980047e-10 8.885733e-09 1.053010e-09
+[1] "all positive"
+[1] 160
+[1] 0.10517074 0.05801349 0.04483014 0.06257532 0.08418146
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.223174e-06 5.904533e-05 7.345926e-06
+[1] "all positive"
+[1] 161
+[1] 0.12507483 0.06751630 0.03747871 0.06130733 0.10757026
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.630034e-09 4.649728e-08 6.130503e-09
+[1] "all positive"
+[1] 162
+[1]  0.137478571  0.088959031 -0.002510071  0.095751857  0.096830090
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.645816e-08 2.080103e-07 1.626736e-08
+[1] "all positive"
+[1] 163
+[1] 0.10585136 0.07621756 0.01766134 0.08990941 0.09445899
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.197149e-08 4.759941e-07 5.789660e-08
+[1] "all positive"
+[1] 164
+[1] 0.10548705 0.06640830 0.05157172 0.06286621 0.12940574
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.094263e-05 8.743447e-05 1.168361e-05
+[1] "all positive"
+[1] 165
+[1] 0.14478882 0.08304534 0.01408010 0.07275488 0.11308586
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001549147 0.0013858497 0.0001652647
+[1] "all positive"
+[1] 166
+[1] 0.12109252 0.08708345 0.02816093 0.09011398 0.08066540
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  6.217257e-04  3.558128e-04 -1.456782e-05
+[1] "all positive"
+[1] 167
+[1] 0.111919034 0.100661911 0.007804734 0.049584796 0.111221586
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.522784e-08 7.894310e-07 1.234988e-07
+[1] "all positive"
+[1] 168
+[1] 0.11074876 0.07839204 0.01125375 0.09484217 0.09273253
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.520887e-05 1.089435e-03 3.008497e-04
+[1] "all positive"
+[1] 169
+[1] 0.11886545 0.06655392 0.02005364 0.10744731 0.08378059
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.287302e-07 4.870280e-07 2.677947e-06
+[1] "all positive"
+[1] 170
+[1] 0.11075277 0.05411967 0.03662730 0.09103039 0.09593089
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.926180e-06 1.125337e-05 8.979013e-07
+[1] "all positive"
+[1] 171
+[1] 0.10638503 0.09126487 0.01948667 0.07901657 0.11154288
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.638480e-06 2.958814e-06 2.197799e-05
+[1] "all positive"
+[1] 172
+[1] 0.11889541 0.08574043 0.04481516 0.05079801 0.07440032
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.651554e-08 4.266706e-07 5.196807e-08
+[1] "all positive"
+[1] 173
+[1] 0.08635537 0.05915154 0.06272955 0.05993709 0.10223750
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.322324e-10 3.129437e-10 1.834720e-09
+[1] "all positive"
+[1] 174
+[1] 0.10589680 0.07361094 0.04142212 0.06679448 0.08948014
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.342247e-09 3.023914e-08 3.641210e-09
+[1] "all positive"
+[1] 175
+[1] 0.08776050 0.09245515 0.03130640 0.06524906 0.11272889
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.160208e-08 8.597273e-09 7.872333e-09
+[1] "all positive"
+[1] 176
+[1] 0.10284106 0.08585534 0.01869375 0.08056240 0.08619503
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.071512e-05 7.753227e-05 7.504594e-06
+[1] "all positive"
+[1] 177
+[1] 0.12940563 0.07957196 0.01916364 0.05787247 0.09234033
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.021580e-06 2.758162e-05 1.027356e-05
+[1] "all positive"
+[1] 178
+[1] 0.139961358 0.081237799 0.009650662 0.082937657 0.117866296
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.678742e-09 2.638847e-08 3.430084e-09
+[1] "all positive"
+[1] 179
+[1] 0.11005717 0.06182170 0.03609580 0.08189865 0.09533797
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.795484e-05 7.236401e-05 5.128416e-04
+[1] "all positive"
+[1] 180
+[1] 0.12305043 0.08513016 0.02100893 0.07669740 0.10334051
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -3.640734e-08  1.578025e-06  2.686330e-06
+[1] "all positive"
+[1] 181
+[1] 0.09329982 0.09640382 0.04642714 0.05099464 0.11986197
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.014421e-07 9.297426e-07 1.131831e-07
+[1] "all positive"
+[1] 182
+[1] 0.095219839 0.078600153 0.008488264 0.105587537 0.091950078
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.417924e-05 1.296336e-04 1.574305e-05
+[1] "all positive"
+[1] 183
+[1] 0.11588737 0.06196605 0.05349325 0.07422608 0.08670256
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.085253e-08 7.433518e-08 1.445422e-09
+[1] "all positive"
+[1] 184
+[1] 0.13056369 0.08965713 0.01154160 0.09243969 0.08646696
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.398209e-06 3.456706e-05 2.037953e-06
+[1] "all positive"
+[1] 185
+[1] 0.07349238 0.10134727 0.03794440 0.04503016 0.11554599
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.141538e-08 1.072889e-08 1.064294e-07
+[1] "all positive"
+[1] 186
+[1] 0.13964871 0.07330835 0.03031006 0.09575049 0.07692870
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.955924e-06 5.676955e-05 7.167731e-06
+[1] "all positive"
+[1] 187
+[1] 0.11934977 0.05213112 0.01690610 0.09918536 0.09124795
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.802807e-06 1.269456e-05 1.203419e-06
+[1] "all positive"
+[1] 188
+[1] 0.10399769 0.08064978 0.02741140 0.08871317 0.09152563
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.634148e-07 3.581562e-07 6.938147e-07
+[1] "all positive"
+[1] 189
+[1] 0.11431131 0.07802307 0.02937974 0.08334436 0.09293764
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.113825e-09 3.435290e-10 8.357002e-10
+[1] "all positive"
+[1] 190
+[1] 0.10754923 0.07685592 0.05234142 0.06918971 0.07418662
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.817179e-06 7.501829e-06 7.790758e-05
+[1] "all positive"
+[1] 191
+[1] 0.10571548 0.07945901 0.04176074 0.07136448 0.09135463
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.206415e-05 2.123365e-05 1.594135e-04
+[1] "all positive"
+[1] 192
+[1] 0.10343815 0.07006494 0.02882124 0.08652400 0.08348085
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.936827e-08 9.378655e-07 1.172464e-07
+[1] "all positive"
+[1] 193
+[1] 0.08745085 0.07892907 0.05799763 0.06041597 0.08835450
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.607836e-05 7.573226e-04 1.319890e-04
+[1] "all positive"
+[1] 194
+[1] 0.11845612 0.06478103 0.03321485 0.06229540 0.10463988
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.693279e-06 2.430751e-07 2.223857e-06
+[1] "all positive"
+[1] 195
+[1] 0.10703643 0.07684746 0.01029777 0.06089518 0.09659759
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.663660e-06 1.857605e-05 2.705191e-06
+[1] "all positive"
+[1] 196
+[1] 0.124753185 0.074771193 0.004696786 0.104327236 0.087483784
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.706360e-05 4.761595e-04 3.704264e-05
+[1] "all positive"
+[1] 197
+[1] 0.13588650 0.06235220 0.02080416 0.06811375 0.09195099
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.814391e-07 1.420958e-06 1.498678e-07
+[1] "all positive"
+[1] 198
+[1] 0.10318640 0.09947657 0.02237021 0.08665070 0.08123340
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0000653797 0.0007342074 0.0001077170
+[1] "all positive"
+[1] 199
+[1] 0.11743449 0.07531982 0.01866769 0.07807745 0.09850849
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.044946e-06 5.663619e-06 4.224409e-08
+[1] "all positive"
+[1] 200
+[1] 0.11781121 0.08169551 0.03024812 0.08345277 0.11056452
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.457203e-04 1.250381e-05 1.377073e-05
+[1] "all positive"
+[1] 201
+[1] 0.13856406 0.04316043 0.04592237 0.08106113 0.09250646
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.124458e-07 3.253474e-08 5.599888e-08
+[1] "all positive"
+[1] 202
+[1] 0.11877510 0.12885025 0.02895255 0.04185624 0.09127385
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.936738e-05 1.764941e-04 2.139206e-05
+[1] "all positive"
+[1] 203
+[1] 0.13969629 0.08425761 0.03772954 0.06492273 0.06506885
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.538074e-09 5.163437e-09 3.646645e-08
+[1] "all positive"
+[1] 204
+[1] 0.12362378 0.07706680 0.03293267 0.06566200 0.09126156
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.388810e-08 5.223897e-07 6.697539e-08
+[1] "all positive"
+[1] 205
+[1] 0.10312311 0.10442334 0.02456880 0.05241536 0.09277580
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.339857e-05 5.185777e-06 1.651215e-04
+[1] "all positive"
+[1] 206
+[1] 0.09868772 0.08090585 0.02078771 0.08112587 0.10512972
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.216355e-06 1.244009e-07 9.491197e-08
+[1] "all positive"
+[1] 207
+[1] 0.12131576 0.07933163 0.03231464 0.06267385 0.08791301
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.090763e-09 9.844444e-09 1.181616e-09
+[1] "all positive"
+[1] 208
+[1] 0.11915845 0.09591125 0.02331852 0.08340123 0.09997121
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.216984e-06 1.013429e-05 1.131311e-06
+[1] "all positive"
+[1] 209
+[1] 0.10474678 0.05551254 0.03358183 0.09323533 0.09301581
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.283427e-05 3.803214e-04 3.699357e-05
+[1] "all positive"
+[1] 210
+[1] 0.11192117 0.04395143 0.04662346 0.08927026 0.10146303
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.259007e-05 9.359704e-05 7.535522e-04
+[1] "all positive"
+[1] 211
+[1] 0.10411537 0.07814129 0.02120003 0.06669314 0.09402318
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.606223e-07 2.747269e-07 2.585051e-06
+[1] "all positive"
+[1] 212
+[1] 0.11051826 0.08431389 0.01471891 0.06791220 0.12894463
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.029220e-04 3.982155e-04 1.996109e-05
+[1] "all positive"
+[1] 213
+[1]  0.142389366  0.094656811 -0.006417324  0.082192001  0.115165679
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.831256e-05 1.431852e-04 1.509401e-05
+[1] "all positive"
+[1] 214
+[1] 0.09462213 0.07521268 0.04158572 0.07645880 0.07240076
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.993633e-09 1.770543e-08 2.093100e-09
+[1] "all positive"
+[1] 215
+[1] 0.115904535 0.073236791 0.006576121 0.096417943 0.093136088
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.547547e-05 1.567935e-04 2.093723e-05
+[1] "all positive"
+[1] 216
+[1] 0.12163972 0.07847496 0.04963530 0.07501105 0.06068299
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.785182e-05 2.748697e-04 3.114992e-05
+[1] "all positive"
+[1] 217
+[1] 0.10949028 0.06932839 0.02563924 0.07764124 0.09981329
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.441325e-08 5.719044e-09 4.111278e-09
+[1] "all positive"
+[1] 218
+[1] 0.10413132 0.06907875 0.03271198 0.09383814 0.09142605
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.371709e-08 9.239061e-08 2.065537e-07
+[1] "all positive"
+[1] 219
+[1] 0.11289177 0.06149682 0.03211853 0.07866240 0.08913673
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  9.418987e-07  7.288487e-07 -2.603683e-08
+[1] "all positive"
+[1] 220
+[1] 0.09546893 0.09264257 0.03260412 0.05541981 0.11094853
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.077317e-07 8.766119e-07 8.139433e-06
+[1] "all positive"
+[1] 221
+[1]  0.14422035  0.09385418 -0.01379696  0.10022246  0.10261996
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.042013e-06 1.546248e-05 5.808514e-05
+[1] "all positive"
+[1] 222
+[1] 0.10005119 0.06338115 0.05558041 0.08139535 0.07857777
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.401843e-10 5.318823e-11 4.477496e-11
+[1] "all positive"
+[1] 223
+[1] 0.13381204 0.06401979 0.01178253 0.08628908 0.09556510
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.339372e-09 1.091546e-09 1.158179e-08
+[1] "all positive"
+[1] 224
+[1] 0.10795676 0.08538132 0.01954506 0.07335047 0.08282542
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.003564e-11 4.581220e-10 1.734680e-09
+[1] "all positive"
+[1] 225
+[1] 0.11371305 0.03436015 0.06301476 0.06699309 0.08628673
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  2.095356e-04  1.681721e-04 -2.202320e-06
+[1] "all positive"
+[1] 226
+[1] 0.10816237 0.06434025 0.06062187 0.07925917 0.06779525
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.001811e-10 1.551700e-09 5.408748e-09
+[1] "all positive"
+[1] 227
+[1] 0.12755463 0.07481557 0.02269835 0.08715131 0.08491337
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.990638e-08 1.710716e-07 1.962967e-08
+[1] "all positive"
+[1] 228
+[1] 0.11516228 0.08058768 0.03184407 0.05257344 0.09636584
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.770251e-05 1.383973e-04 9.420480e-06
+[1] "all positive"
+[1] 229
+[1] 0.111570775 0.073820559 0.005062247 0.104075042 0.102765037
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.296427e-05 4.441505e-05 3.743612e-04
+[1] "all positive"
+[1] 230
+[1] 0.11219747 0.05591970 0.05145140 0.08938413 0.07222056
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.797151e-09 7.157484e-08 8.723484e-09
+[1] "all positive"
+[1] 231
+[1] 0.14031110 0.07157543 0.03124269 0.06315064 0.10853984
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.555489e-06 1.540014e-07 1.259494e-07
+[1] "all positive"
+[1] 232
+[1] 0.11893595 0.07621702 0.04344774 0.07876891 0.09081348
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.063285e-06 5.583865e-06 4.040062e-07
+[1] "all positive"
+[1] 233
+[1] 0.10348692 0.09922640 0.05065834 0.06497773 0.08671127
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.754145e-09 3.670221e-08 4.737419e-09
+[1] "all positive"
+[1] 234
+[1] 0.11372421 0.05640427 0.06005401 0.06087935 0.08497618
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.981413e-10 5.749698e-09 1.305971e-09
+[1] "all positive"
+[1] 235
+[1] 0.12293800 0.09347445 0.01786501 0.06484070 0.09606933
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.409618e-05 2.137815e-04 2.529230e-05
+[1] "all positive"
+[1] 236
+[1] 0.12701637 0.07220918 0.03200579 0.08388203 0.07223596
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.669774e-09 8.061609e-09 6.636409e-08
+[1] "all positive"
+[1] 237
+[1] 0.12072961 0.08147092 0.02120128 0.08163815 0.09628891
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.774645e-07 1.601169e-06 1.920875e-07
+[1] "all positive"
+[1] 238
+[1] 0.11849759 0.08114619 0.01374497 0.09157623 0.10882871
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.781920e-07 3.393359e-06 4.050148e-07
+[1] "all positive"
+[1] 239
+[1] 0.10395543 0.06371417 0.05183186 0.07132945 0.05610633
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -9.686805e-10  1.310094e-07  8.752760e-08
+[1] "all positive"
+[1] 240
+[1] 0.13336954 0.07274415 0.01363473 0.05655534 0.10609931
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.019877e-07 -6.128194e-09  1.353251e-07
+[1] "all positive"
+[1] 241
+[1] 0.13484492 0.07900037 0.02752456 0.09618996 0.07487353
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.769856e-05 1.604844e-04 1.936537e-05
+[1] "all positive"
+[1] 242
+[1] 0.11777813 0.09486353 0.01476581 0.06850283 0.07817238
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.615701e-07 4.331792e-08 1.032851e-08
+[1] "all positive"
+[1] 243
+[1] 0.13013322 0.06458934 0.04011009 0.07888675 0.08948945
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.921504e-07 5.150566e-06 5.178347e-07
+[1] "all positive"
+[1] 244
+[1] 0.147065222 0.075531581 0.002286681 0.098533431 0.094993815
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.944401e-05 6.955921e-05 3.908984e-04
+[1] "all positive"
+[1] 245
+[1] 0.09833568 0.08890250 0.01737038 0.10879037 0.08250947
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.729729e-06 1.570507e-05 1.894946e-06
+[1] "all positive"
+[1] 246
+[1] 0.10930255 0.08266955 0.01636621 0.07781749 0.11785422
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.953797e-05 1.872093e-04 2.373100e-05
+[1] "all positive"
+[1] 247
+[1] 0.10895817 0.05452382 0.05740680 0.07560102 0.10086153
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.089542e-08 1.856297e-07 2.198165e-08
+[1] "all positive"
+[1] 248
+[1] 0.09536872 0.06310594 0.04577115 0.10891608 0.09675238
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.386326e-07 1.429528e-06 1.935506e-07
+[1] "all positive"
+[1] 249
+[1] 0.10177343 0.08497641 0.04822042 0.07374681 0.08867803
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.210537e-08 7.639627e-07 1.736223e-07
+[1] "all positive"
+[1] 250
+[1] 0.08632715 0.06811116 0.04091175 0.07371485 0.10818164
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.420732e-06 2.195375e-05 2.646663e-06
+[1] "all positive"
+[1] 251
+[1] 0.08192018 0.08103015 0.05758558 0.06554540 0.10879064
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.054078e-10 3.452493e-10 3.142872e-09
+[1] "all positive"
+[1] 252
+[1] 0.11986436 0.07318268 0.01013927 0.10693444 0.09689595
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.824198e-07 2.430415e-06 2.117486e-07
+[1] "all positive"
+[1] 253
+[1] 0.12004906 0.10060315 0.02643813 0.06045859 0.10599517
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.542914e-09 1.444766e-08 1.793793e-09
+[1] "all positive"
+[1] 254
+[1] 0.09408993 0.07854548 0.04361189 0.07646213 0.10513844
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -9.446425e-10  4.401109e-08  4.342704e-08
+[1] "all positive"
+[1] 255
+[1] 0.07898218 0.09351053 0.03724242 0.09728155 0.09356852
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.171672e-07 7.603735e-07 7.577725e-06
+[1] "all positive"
+[1] 256
+[1] 0.11945336 0.08413849 0.01501711 0.07056223 0.11274367
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.504806e-07 2.499525e-06 3.289318e-07
+[1] "all positive"
+[1] 257
+[1] 0.105221843 0.092034540 0.008517342 0.096180162 0.084564895
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.852661e-04 2.701406e-04 3.090119e-06
+[1] "all positive"
+[1] 258
+[1] 0.10937891 0.06843608 0.05106262 0.07481162 0.09971202
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.170838e-05 4.271839e-04 4.003131e-05
+[1] "all positive"
+[1] 259
+[1]  0.09681166  0.10343892 -0.01321083  0.09880512  0.10760944
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.516110e-04 4.199134e-04 1.199905e-05
+[1] "all positive"
+[1] 260
+[1] 0.10492178 0.07794907 0.02956040 0.05477109 0.10011961
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.596690e-05 2.157442e-04 3.762257e-05
+[1] "all positive"
+[1] 261
+[1]  0.11641421  0.09130822 -0.01675686  0.09977904  0.10194231
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.629363e-08 1.417085e-09 8.681982e-08
+[1] "all positive"
+[1] 262
+[1] 0.13359234 0.07893676 0.02595697 0.10619744 0.08513582
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0002714997 0.0012920860 0.0003247087
+[1] "all positive"
+[1] 263
+[1] 0.13118136 0.04879196 0.03828256 0.06289763 0.07134143
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.373794e-09 3.064058e-08 3.701041e-09
+[1] "all positive"
+[1] 264
+[1] 0.11851794 0.09482852 0.01504570 0.07576157 0.11159491
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.268487e-07 2.087625e-06 2.551907e-07
+[1] "all positive"
+[1] 265
+[1] 0.11944358 0.07549714 0.02698124 0.06554701 0.09550127
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.892257e-08 3.363455e-09 1.920399e-09
+[1] "all positive"
+[1] 266
+[1] 0.131507975 0.093113222 0.007226284 0.079975306 0.103863706
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.252639e-06 5.527604e-05 1.191225e-05
+[1] "all positive"
+[1] 267
+[1] 0.11574469 0.07034458 0.01112702 0.09654493 0.11087123
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.151815e-09 1.424393e-08 2.286983e-09
+[1] "all positive"
+[1] 268
+[1] 0.13044697 0.09436953 0.01893643 0.07171357 0.07385539
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.200671e-10 1.229847e-09 9.896870e-09
+[1] "all positive"
+[1] 269
+[1] 0.11069470 0.06547264 0.04847851 0.09881869 0.07604661
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.986313e-09 6.650566e-10 1.562306e-10
+[1] "all positive"
+[1] 270
+[1] 0.10906989 0.06796608 0.02494268 0.08161469 0.10396074
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.129280e-06 2.854564e-05 3.462560e-06
+[1] "all positive"
+[1] 271
+[1] 0.11974064 0.09430739 0.02354617 0.05060579 0.09900052
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.718005e-06 3.565317e-05 4.529001e-06
+[1] "all positive"
+[1] 272
+[1] 0.134992503 0.060499549 0.009571907 0.093316931 0.088704351
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.223040e-05 1.384609e-05 4.620197e-05
+[1] "all positive"
+[1] 273
+[1] 0.11599160 0.06912172 0.04153065 0.05546576 0.10255513
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.961693e-06 4.535383e-07 4.387968e-07
+[1] "all positive"
+[1] 274
+[1] 0.14139764 0.08942006 0.01685943 0.09454516 0.08368908
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.510621e-07 4.971863e-07 3.568940e-06
+[1] "all positive"
+[1] 275
+[1] 0.10839418 0.08532039 0.04695367 0.09018421 0.06228202
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.897567e-08 1.914836e-07 1.119735e-06
+[1] "all positive"
+[1] 276
+[1] 0.11035190 0.10055289 0.02045733 0.09339800 0.06087987
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.658292e-06 1.449262e-06 1.605918e-07
+[1] "all positive"
+[1] 277
+[1] 0.12288742 0.07001137 0.04870152 0.07736453 0.07848063
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.784979e-09 1.649819e-08 2.022839e-09
+[1] "all positive"
+[1] 278
+[1] 0.10465600 0.05873945 0.05590193 0.08773347 0.08549807
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001290209 0.0012209856 0.0001512215
+[1] "all positive"
+[1] 279
+[1] 0.09734951 0.07826681 0.03896924 0.07632010 0.06265964
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.524553e-07 6.728744e-06 9.071500e-07
+[1] "all positive"
+[1] 280
+[1] 0.11957817 0.06796130 0.02497873 0.11337958 0.08424659
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.995912e-07 7.428618e-07 4.834306e-06
+[1] "all positive"
+[1] 281
+[1] 0.135403397 0.064978074 0.009765891 0.086467098 0.101014771
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.394654e-06 3.925001e-05 4.673023e-06
+[1] "all positive"
+[1] 282
+[1] 0.10931210 0.09241217 0.02381510 0.07169500 0.09095949
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001132296 0.0013315935 0.0002029934
+[1] "all positive"
+[1] 283
+[1] 0.08395485 0.10625070 0.03758558 0.07770382 0.09725059
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.354942e-06 2.130743e-05 2.562705e-06
+[1] "all positive"
+[1] 284
+[1] 0.11277751 0.06269710 0.05105775 0.07289249 0.08291612
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -3.468678e-06  1.350935e-04  1.587148e-04
+[1] "all positive"
+[1] 285
+[1] 0.09299135 0.08224225 0.03697751 0.05943575 0.12707561
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.856806e-07 1.495513e-08 1.855642e-08
+[1] "all positive"
+[1] 286
+[1] 0.11818856 0.07932339 0.03474076 0.08598799 0.08498210
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.466027e-05 1.162948e-04 1.242232e-05
+[1] "all positive"
+[1] 287
+[1] 0.12463632 0.05892727 0.05084588 0.07088271 0.09888763
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.252824e-06 9.400187e-06 5.748695e-05
+[1] "all positive"
+[1] 288
+[1] 0.12201778 0.07566888 0.03775306 0.07064104 0.07243197
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.186449e-06 2.927592e-05 3.566842e-06
+[1] "all positive"
+[1] 289
+[1] 0.135473289 0.093743475 0.009603979 0.071023728 0.094903327
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.852014e-09 3.484761e-08 1.620599e-07
+[1] "all positive"
+[1] 290
+[1] 0.1325101912 0.0799137853 0.0007927339 0.0916469765 0.0891718124
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.770891e-08 7.071749e-09 5.155480e-09
+[1] "all positive"
+[1] 291
+[1] 0.10176731 0.05005193 0.07650399 0.04464515 0.08852575
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.797388e-10 5.247738e-09 3.847731e-10
+[1] "all positive"
+[1] 292
+[1] 0.09191403 0.08868187 0.02351370 0.07714309 0.07509880
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.463005e-08 8.465793e-08 8.099733e-07
+[1] "all positive"
+[1] 293
+[1] 0.11199094 0.04846235 0.07289843 0.06158065 0.08259159
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.540387e-08 1.647854e-07 7.518497e-09
+[1] "all positive"
+[1] 294
+[1] 0.11869903 0.07146720 0.04120461 0.07670310 0.07257608
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.743035e-05 4.247594e-04 5.070160e-05
+[1] "all positive"
+[1] 295
+[1] 0.12181525 0.07734428 0.01316738 0.08593758 0.07763866
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.135076e-08 2.024050e-09 3.854318e-09
+[1] "all positive"
+[1] 296
+[1] 0.09771410 0.08206934 0.04275829 0.07737283 0.07621178
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.177072e-05 5.866797e-04 7.387949e-05
+[1] "all positive"
+[1] 297
+[1] 0.12585060 0.06139051 0.05160665 0.08499090 0.06902107
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.323805e-05 1.430676e-05 1.747417e-06
+[1] "all positive"
+[1] 298
+[1] 0.13312348 0.07435944 0.02024783 0.07833046 0.09017271
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.737185e-10 5.448894e-10 4.437579e-09
+[1] "all positive"
+[1] 299
+[1] 0.12602278 0.07886625 0.01329092 0.05880880 0.08780748
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.313371e-08 2.322398e-07 7.848752e-07
+[1] "all positive"
+[1] 300
+[1] 0.09680909 0.08888712 0.02968187 0.09157144 0.09804943
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.317371e-06 2.444100e-08 4.415257e-07
+[1] "all positive"
+[1] 301
+[1] 0.10830579 0.07728961 0.02216999 0.10062594 0.08015309
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.014223e-10 1.564983e-10 1.235845e-09
+[1] "all positive"
+[1] 302
+[1] 0.11438564 0.08283820 0.04658595 0.06715758 0.09917764
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.683899e-05 3.857370e-04 5.305715e-05
+[1] "all positive"
+[1] 303
+[1] 0.13618852 0.06973001 0.01749354 0.07791875 0.11265539
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.691607e-08 4.339997e-07 5.326604e-08
+[1] "all positive"
+[1] 304
+[1] 0.10525936 0.07372723 0.01017869 0.10064129 0.10682180
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -2.856946e-06  2.690756e-04  1.986582e-04
+[1] "all positive"
+[1] 305
+[1] 0.11634022 0.09149050 0.03264945 0.07378194 0.07943752
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.145782e-06 4.576081e-08 1.947280e-07
+[1] "all positive"
+[1] 306
+[1] 0.12656622 0.11349548 0.01211066 0.06332196 0.10658311
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.281569e-05 8.847022e-05 4.829681e-04
+[1] "all positive"
+[1] 307
+[1] 0.122319361 0.068969268 0.006774147 0.088916011 0.095188903
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.173147e-07 2.774962e-06 4.572563e-07
+[1] "all positive"
+[1] 308
+[1] 0.11145105 0.07227489 0.02706077 0.08636310 0.08626413
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.996442e-05 2.612179e-04 4.423316e-05
+[1] "all positive"
+[1] 309
+[1] 0.09493730 0.09656329 0.04700953 0.05680268 0.11151417
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.313669e-10 1.101879e-09 9.363901e-09
+[1] "all positive"
+[1] 310
+[1] 0.10307875 0.08637288 0.04438581 0.06978898 0.08457797
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.102713e-06 1.894058e-05 2.268736e-06
+[1] "all positive"
+[1] 311
+[1] 0.09861832 0.06035356 0.05003687 0.07163036 0.10332051
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.672825e-07 1.291167e-06 1.344908e-07
+[1] "all positive"
+[1] 312
+[1] 0.146003127 0.090888011 0.006100759 0.089955461 0.087461020
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.066020e-09 1.014370e-08 1.681985e-09
+[1] "all positive"
+[1] 313
+[1] 0.12364239 0.07847333 0.01705400 0.09373224 0.07654860
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.172036e-07 6.086806e-07 4.954536e-06
+[1] "all positive"
+[1] 314
+[1] 0.13952904 0.07548566 0.04797669 0.07967022 0.07324675
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.454248e-05 5.744544e-04 6.806330e-05
+[1] "all positive"
+[1] 315
+[1]  0.11668632  0.08014486 -0.01036644  0.09037566  0.11890655
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.367259e-08 8.157724e-09 6.893722e-09
+[1] "all positive"
+[1] 316
+[1] 0.10946469 0.07017480 0.03936721 0.07455725 0.08062266
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.538714e-05 5.707384e-04 6.638406e-05
+[1] "all positive"
+[1] 317
+[1] 0.12045052 0.06748061 0.04640499 0.08419383 0.07787306
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.318844e-08 6.219390e-07 1.143655e-07
+[1] "all positive"
+[1] 318
+[1] 0.09883549 0.08453735 0.05450336 0.05973739 0.08147798
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.954466e-07 2.498648e-06 2.830068e-07
+[1] "all positive"
+[1] 319
+[1] 0.08769798 0.07801084 0.01514587 0.09837966 0.11234402
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.010838e-04 8.468030e-04 5.095366e-05
+[1] "all positive"
+[1] 320
+[1] 0.10107467 0.07444626 0.05619478 0.08453473 0.05919708
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.903711e-07 1.837912e-08 1.585692e-08
+[1] "all positive"
+[1] 321
+[1] 0.09836869 0.08244014 0.02034750 0.08435415 0.08044446
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.018669e-05 8.377387e-05 9.194534e-06
+[1] "all positive"
+[1] 322
+[1] 0.09959931 0.03353992 0.05711018 0.08660269 0.09149273
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0003476252 0.0000113858 0.0001018433
+[1] "all positive"
+[1] 323
+[1] 0.11362441 0.07021629 0.03238834 0.08112406 0.11998578
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.596709e-05 5.776840e-06 2.762807e-06
+[1] "all positive"
+[1] 324
+[1] 0.12774761 0.06161380 0.04077132 0.07759118 0.09304380
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.723690e-09 2.311227e-08 2.620533e-09
+[1] "all positive"
+[1] 325
+[1] 0.1354238110 0.0852625377 0.0009163461 0.0886048460 0.0792751702
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.264112e-05 2.117683e-04 2.625726e-05
+[1] "all positive"
+[1] 326
+[1]  0.107771184  0.093041564 -0.003616072  0.073506731  0.089730453
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.262018e-08 1.722200e-07 9.254110e-07
+[1] "all positive"
+[1] 327
+[1] 0.114325751 0.122001574 0.002241991 0.072890671 0.089571043
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.861107e-05 2.615546e-04 3.176567e-05
+[1] "all positive"
+[1] 328
+[1] 0.11444807 0.05188216 0.02153984 0.07389832 0.10847411
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.160691e-09 5.592502e-08 6.745323e-09
+[1] "all positive"
+[1] 329
+[1] 0.11132338 0.08911423 0.02742176 0.08339392 0.06998179
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.797254e-08 6.437452e-07 8.072526e-08
+[1] "all positive"
+[1] 330
+[1] 0.09689010 0.07705725 0.03048197 0.07646310 0.08223911
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.450620e-07 1.759886e-05 5.808458e-06
+[1] "all positive"
+[1] 331
+[1] 0.12197919 0.07405750 0.01863254 0.08843822 0.08947397
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -1.258242e-06  1.780601e-04  1.184958e-04
+[1] "all positive"
+[1] 332
+[1] 0.11379325 0.07666409 0.04181266 0.05746526 0.07816529
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.412968e-07 1.035489e-07 8.362213e-07
+[1] "all positive"
+[1] 333
+[1] 0.12391205 0.08440674 0.04265932 0.04353402 0.09270890
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.788607e-06 5.282902e-06 4.866003e-05
+[1] "all positive"
+[1] 334
+[1]  0.11692175  0.11226119 -0.02540373  0.09633661  0.11287502
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.043153e-08 4.473297e-08 3.628363e-07
+[1] "all positive"
+[1] 335
+[1] 0.14738785 0.08966575 0.02064235 0.08388548 0.08570170
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.212593e-05 1.003971e-04 1.114348e-05
+[1] "all positive"
+[1] 336
+[1] 0.09640904 0.11133504 0.01433537 0.07914407 0.09486409
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.037925e-08 9.635029e-08 1.186245e-08
+[1] "all positive"
+[1] 337
+[1] 0.08495779 0.07589165 0.03486091 0.11018305 0.10574188
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  8.488474e-08 -4.652792e-09  6.619118e-08
+[1] "all positive"
+[1] 338
+[1] 0.111990657 0.074012893 0.009602588 0.075084361 0.114140765
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  5.747425e-06  2.468266e-06 -7.448074e-08
+[1] "all positive"
+[1] 339
+[1] 0.110731651 0.095723891 0.001218809 0.127336205 0.083425415
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.218453e-09 1.238573e-10 9.549228e-11
+[1] "all positive"
+[1] 340
+[1] 0.116454882 0.081720727 0.008536037 0.074415269 0.109450623
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.876516e-08 1.607010e-07 1.840353e-08
+[1] "all positive"
+[1] 341
+[1] 0.108427375 0.072689798 0.006989872 0.091945019 0.090709576
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.525673e-06 2.120490e-04 4.843723e-04
+[1] "all positive"
+[1] 342
+[1] 0.13452788 0.07732860 0.01619880 0.07909234 0.09145724
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.703099e-04 4.323440e-05 2.458483e-05
+[1] "all positive"
+[1] 343
+[1]  0.13197513  0.09978358 -0.01000277  0.10069403  0.07795183
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.709553e-10 2.297656e-09 9.507795e-09
+[1] "all positive"
+[1] 344
+[1] 0.11714305 0.09829729 0.03081833 0.07701971 0.07748737
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.535041e-10 1.442630e-09 5.758059e-09
+[1] "all positive"
+[1] 345
+[1] 0.09359099 0.09992605 0.03500448 0.06767892 0.08629800
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  4.093807e-09 -2.130932e-10  6.925082e-09
+[1] "all positive"
+[1] 346
+[1] 0.10757100 0.07467093 0.04401960 0.07433158 0.06834429
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.286315e-07 1.463886e-07 1.757635e-08
+[1] "all positive"
+[1] 347
+[1] 0.10326388 0.08364294 0.04611857 0.08775042 0.09030303
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.194170e-07 9.374980e-07 9.834198e-08
+[1] "all positive"
+[1] 348
+[1] 0.09681937 0.07663084 0.01277603 0.11857662 0.09001347
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.029853e-09  5.970232e-10 -2.346512e-11
+[1] "all positive"
+[1] 349
+[1] 0.09696139 0.07208999 0.04783406 0.08327443 0.09424705
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.678298e-09 6.497315e-10 3.863964e-10
+[1] "all positive"
+[1] 350
+[1] 0.11196361 0.05287336 0.02122263 0.10635768 0.10012400
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.369107e-10 8.525320e-09 1.142356e-09
+[1] "all positive"
+[1] 351
+[1] 0.09913212 0.06668044 0.04046402 0.09108105 0.07530737
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.048075e-04 4.307340e-06 5.853077e-04
+[1] "all positive"
+[1] 352
+[1] 0.11901597 0.07946660 0.01574004 0.09359120 0.09730117
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.308433e-10 5.888673e-10 5.413641e-09
+[1] "all positive"
+[1] 353
+[1] 0.12883498 0.09538699 0.02672387 0.06776696 0.07695767
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.986358e-05 3.930180e-04 6.806470e-05
+[1] "all positive"
+[1] 354
+[1] 0.11095082 0.07574135 0.03821167 0.07144482 0.09563845
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.008998e-07 -2.678445e-09  4.565684e-08
+[1] "all positive"
+[1] 355
+[1] 0.11367848 0.08663371 0.03521087 0.05535268 0.08928172
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.225113e-06 6.723613e-05 8.298395e-06
+[1] "all positive"
+[1] 356
+[1] 0.14760702 0.06037830 0.05750312 0.05154029 0.07850218
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.604592e-07 3.541981e-07 2.421205e-06
+[1] "all positive"
+[1] 357
+[1] 0.11924153 0.05570027 0.05662489 0.07317433 0.06642959
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.660775e-07 8.882064e-06 1.085070e-06
+[1] "all positive"
+[1] 358
+[1] 0.11883256 0.08598443 0.01097210 0.08471984 0.07453364
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.233822e-08 1.998059e-08 1.559920e-07
+[1] "all positive"
+[1] 359
+[1] 0.10028129 0.08056753 0.02946726 0.07541917 0.09432508
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  9.422911e-08  9.384503e-08 -3.780343e-11
+[1] "all positive"
+[1] 360
+[1] 0.10675907 0.07757329 0.03749633 0.06624859 0.10403220
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -1.802569e-11  7.455160e-10  1.225808e-09
+[1] "all positive"
+[1] 361
+[1] 0.11482911 0.07071515 0.04121285 0.05111837 0.11436525
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  2.168830e-04  8.449284e-05 -1.898077e-06
+[1] "all positive"
+[1] 362
+[1] 0.12775223 0.07351236 0.02404706 0.08365327 0.09086975
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.471315e-05 5.045792e-05 4.112827e-04
+[1] "all positive"
+[1] 363
+[1] 0.13658291 0.08113451 0.02163355 0.08116827 0.08882647
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.715243e-06 7.498126e-07 6.379067e-07
+[1] "all positive"
+[1] 364
+[1] 0.124312338 0.102495745 0.008556797 0.085108550 0.076486488
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.209301e-08 4.241271e-07 1.663606e-06
+[1] "all positive"
+[1] 365
+[1] 0.09324448 0.06676073 0.03506476 0.07147792 0.09322017
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.516318e-09 6.038952e-08 8.617994e-09
+[1] "all positive"
+[1] 366
+[1] 0.13925244 0.06763933 0.01547673 0.08211804 0.10145084
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.401509e-08 3.151449e-07 1.029820e-07
+[1] "all positive"
+[1] 367
+[1] 0.11733689 0.09034584 0.05557154 0.07254051 0.07873601
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.887598e-05 5.419994e-04 6.591673e-05
+[1] "all positive"
+[1] 368
+[1] 0.08852944 0.09655160 0.02526551 0.08047459 0.08860559
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.733351e-07 4.985934e-08 2.050287e-06
+[1] "all positive"
+[1] 369
+[1] 0.11613120 0.05773456 0.01332317 0.08055590 0.09013175
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.139387e-07 2.302650e-07 1.630620e-06
+[1] "all positive"
+[1] 370
+[1] 0.09724409 0.07387701 0.05543487 0.06362134 0.09167902
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.023181e-10 1.287493e-08 4.022988e-08
+[1] "all positive"
+[1] 371
+[1] 0.11029118 0.06611740 0.02557999 0.08846257 0.09445054
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.627977e-05 9.944647e-05 8.368397e-06
+[1] "all positive"
+[1] 372
+[1] 0.10452877 0.05506475 0.03961705 0.07101411 0.12166739
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  2.668184e-07  2.135899e-07 -8.247103e-09
+[1] "all positive"
+[1] 373
+[1] 0.10353611 0.08685275 0.02723542 0.08751191 0.09719482
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.287096e-10 5.927780e-11 3.797029e-11
+[1] "all positive"
+[1] 374
+[1] 0.11127608 0.06028394 0.03697251 0.08419382 0.09459735
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.180790e-05 9.911025e-05 3.236317e-04
+[1] "all positive"
+[1] 375
+[1]  0.128114725  0.061028945 -0.007635187  0.085437759  0.098624824
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.527763e-06 5.171051e-05 6.421929e-06
+[1] "all positive"
+[1] 376
+[1]  0.105644935  0.064368824 -0.004736649  0.093416522  0.125129195
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.183012e-05 3.454384e-04 1.678184e-05
+[1] "all positive"
+[1] 377
+[1]  0.135841072  0.080888653 -0.003765989  0.076827879  0.111467338
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.856950e-04 7.329072e-05 3.606911e-05
+[1] "all positive"
+[1] 378
+[1] 0.09692811 0.09051415 0.04460397 0.07773765 0.08110154
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.018512e-06 2.110938e-06 1.991862e-05
+[1] "all positive"
+[1] 379
+[1] 0.08373207 0.09098825 0.04553555 0.06655969 0.08994670
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.424717e-05 1.319718e-04 1.623583e-05
+[1] "all positive"
+[1] 380
+[1] 0.13335901 0.08556504 0.02628528 0.05886434 0.07566965
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.668883e-05 7.958446e-05 6.055215e-04
+[1] "all positive"
+[1] 381
+[1] 0.10539676 0.06614262 0.05513632 0.08594341 0.08607401
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.304208e-08 2.004513e-07 3.895679e-08
+[1] "all positive"
+[1] 382
+[1] 0.12176760 0.09205898 0.02013131 0.10548180 0.07686911
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.176137e-06 1.475506e-07 7.077257e-08
+[1] "all positive"
+[1] 383
+[1] 0.13433006 0.06996659 0.02321683 0.06492056 0.10042382
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.924347e-05 2.708609e-04 1.370837e-05
+[1] "all positive"
+[1] 384
+[1] 0.142573941 0.083450232 0.008473553 0.073026906 0.077969948
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.206108e-07 2.023402e-06 2.464374e-07
+[1] "all positive"
+[1] 385
+[1] 0.08903366 0.07722415 0.01933194 0.09092698 0.10499678
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.404905e-06 3.138096e-05 3.838677e-06
+[1] "all positive"
+[1] 386
+[1] 0.10914599 0.04520177 0.05264056 0.06272829 0.11932798
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.687236e-08 3.831367e-09 2.823299e-09
+[1] "all positive"
+[1] 387
+[1] 0.10755129 0.07212841 0.05273500 0.08904556 0.06890469
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.631999e-10 2.730158e-08 1.311571e-08
+[1] "all positive"
+[1] 388
+[1] 0.10970761 0.06991775 0.01789242 0.09790442 0.09033862
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.687187e-10 2.460006e-09 2.975217e-10
+[1] "all positive"
+[1] 389
+[1] 0.13304616 0.08798102 0.01063633 0.09098312 0.09477062
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.661523e-08 4.802948e-07 5.446942e-08
+[1] "all positive"
+[1] 390
+[1] 0.134130094 0.095352196 0.009374106 0.070612823 0.084342584
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.548455e-07 2.325557e-06 2.821485e-07
+[1] "all positive"
+[1] 391
+[1] 0.13635933 0.10817774 0.01029952 0.08339711 0.07946078
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  8.496926e-05  3.704936e-05 -1.153193e-06
+[1] "all positive"
+[1] 392
+[1] 0.13858421 0.08261861 0.02619703 0.06889467 0.09165253
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.484880e-07 2.292617e-06 2.079303e-07
+[1] "all positive"
+[1] 393
+[1] 0.12303228 0.08713776 0.02273710 0.06678622 0.10546827
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.630564e-04 4.244787e-05 2.406425e-05
+[1] "all positive"
+[1] 394
+[1] 0.11008164 0.08566046 0.02849115 0.07492916 0.09819804
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.876328e-08 7.076184e-07 6.863211e-08
+[1] "all positive"
+[1] 395
+[1] 0.09611243 0.08549217 0.01377412 0.07929712 0.12958255
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.929941e-09 1.456864e-09 6.519232e-10
+[1] "all positive"
+[1] 396
+[1] 0.12262410 0.08799883 0.04051020 0.05791304 0.07645158
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.640101e-05 3.308840e-04 4.004828e-05
+[1] "all positive"
+[1] 397
+[1] 0.112156331 0.079031841 0.008154003 0.078483036 0.106386586
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.831222e-05 4.375202e-05 3.496901e-04
+[1] "all positive"
+[1] 398
+[1] 0.12729338 0.07696743 0.02312762 0.06299410 0.11622858
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.892798e-10 1.476476e-09 6.275915e-09
+[1] "all positive"
+[1] 399
+[1] 0.11579421 0.06735981 0.04203660 0.07769093 0.07361508
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.268039e-10 6.225431e-09 1.454250e-09
+[1] "all positive"
+[1] 400
+[1] 0.09581833 0.08143136 0.01747873 0.07980270 0.10450776
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.799045e-05 3.418478e-04 3.307561e-05
+[1] "all positive"
+[1] 401
+[1] 0.125406947 0.094347369 0.002410718 0.103087527 0.088102994
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.444327e-06 2.239251e-05 2.724454e-06
+[1] "all positive"
+[1] 402
+[1] 0.10287931 0.07049775 0.00555253 0.12385935 0.09241507
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.800195e-10 7.503144e-09 7.716194e-10
+[1] "all positive"
+[1] 403
+[1] 0.09881010 0.05301935 0.06006335 0.06673647 0.07848981
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.364296e-08 5.232399e-08 4.140762e-07
+[1] "all positive"
+[1] 404
+[1] 0.126625581 0.080906538 0.003077987 0.079393201 0.106966407
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.355160e-07 4.043276e-09 6.766765e-07
+[1] "all positive"
+[1] 405
+[1] 0.11341094 0.08070452 0.03271741 0.06138226 0.10586584
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.105056e-07 7.743160e-08 8.886594e-07
+[1] "all positive"
+[1] 406
+[1] 0.10018976 0.07475709 0.01983185 0.06964753 0.10893363
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.720712e-10 1.096425e-09 7.940296e-09
+[1] "all positive"
+[1] 407
+[1] 0.09169278 0.08061011 0.04148737 0.05902599 0.10659798
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.248459e-04 2.091302e-05 1.431458e-04
+[1] "all positive"
+[1] 408
+[1] 0.13574008 0.06542650 0.03317497 0.07329137 0.11024502
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.212808e-09 1.934833e-09 1.514190e-08
+[1] "all positive"
+[1] 409
+[1] 0.13226807 0.06165289 0.02654844 0.08290123 0.09332567
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.463207e-06 1.218608e-04 2.230789e-05
+[1] "all positive"
+[1] 410
+[1] 0.10723144 0.06842242 0.02644687 0.08122666 0.10857985
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.440276e-05 7.753702e-05 6.852366e-04
+[1] "all positive"
+[1] 411
+[1] 0.11739490 0.08925845 0.01578525 0.07238497 0.11631356
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.013486e-09 2.569507e-10 2.858492e-10
+[1] "all positive"
+[1] 412
+[1] 0.09212006 0.08920021 0.05588041 0.06343483 0.08210558
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.744136e-08 1.773112e-07 2.366458e-08
+[1] "all positive"
+[1] 413
+[1] 0.10118918 0.09409755 0.01740503 0.07478024 0.08223941
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.303704e-06 4.971511e-07 4.546107e-07
+[1] "all positive"
+[1] 414
+[1] 0.12901826 0.10332140 0.01090026 0.07475323 0.07677637
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.168648e-05 3.807334e-04 8.363905e-05
+[1] "all positive"
+[1] 415
+[1] 0.10455993 0.09233929 0.01988458 0.07306559 0.09415615
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.401037e-04 6.032796e-06 2.349776e-05
+[1] "all positive"
+[1] 416
+[1] 0.10752514 0.07728266 0.02678328 0.05959767 0.10258837
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.955924e-04 -1.196219e-05  2.421716e-04
+[1] "all positive"
+[1] 417
+[1] 0.11584901 0.07996403 0.02739351 0.08143440 0.10371032
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.788778e-09 2.216397e-07 9.222670e-08
+[1] "all positive"
+[1] 418
+[1] 0.09933761 0.10316615 0.01400869 0.11269005 0.08658539
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.590738e-04 1.178420e-04 1.084029e-05
+[1] "all positive"
+[1] 419
+[1] 0.09542725 0.08411364 0.01771472 0.07556240 0.09926498
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.082464e-09 3.438704e-08 3.876187e-09
+[1] "all positive"
+[1] 420
+[1] 0.12735126 0.07790084 0.03623818 0.09490758 0.08429802
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.173140e-05 2.475053e-05 1.479715e-04
+[1] "all positive"
+[1] 421
+[1] 0.12220910 0.07640658 0.03477801 0.10222268 0.08395585
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.251096e-05 -3.257097e-07  5.345802e-06
+[1] "all positive"
+[1] 422
+[1] 0.10642562 0.08453973 0.02223286 0.08132523 0.09102066
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.474010e-06 2.142478e-05 9.842580e-05
+[1] "all positive"
+[1] 423
+[1] 0.12907044 0.07433675 0.02221697 0.06440631 0.09695614
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.871987e-05 5.792723e-05 4.570886e-04
+[1] "all positive"
+[1] 424
+[1] 0.12661727 0.08448589 0.01278666 0.06373278 0.09667502
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.456202e-05 1.347729e-04 1.655310e-05
+[1] "all positive"
+[1] 425
+[1] 0.11313631 0.08876293 0.05081023 0.06391623 0.09764539
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.610245e-05 1.418623e-03 3.244107e-04
+[1] "all positive"
+[1] 426
+[1] 0.13027432 0.09540580 0.01143874 0.07546550 0.08463451
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.986169e-09 5.413112e-08 6.508063e-09
+[1] "all positive"
+[1] 427
+[1] 0.11587410 0.06904643 0.04320763 0.07270808 0.08164213
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.231962e-08 5.876896e-08 2.960186e-07
+[1] "all positive"
+[1] 428
+[1]  0.11768201  0.09213955 -0.02643943  0.09812829  0.12889316
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.146195e-05 2.983687e-04 3.751607e-05
+[1] "all positive"
+[1] 429
+[1] 0.11356912 0.07146249 0.01464836 0.08687127 0.10735923
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.972938e-05 2.001334e-04 2.628363e-05
+[1] "all positive"
+[1] 430
+[1] 0.141089763 0.079269369 0.009959936 0.085891620 0.091091903
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.255070e-07 1.533134e-06 8.629487e-06
+[1] "all positive"
+[1] 431
+[1] 0.08897222 0.08171164 0.03510636 0.08095284 0.10883189
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.629736e-05 3.329909e-04 4.056761e-05
+[1] "all positive"
+[1] 432
+[1] 0.08510147 0.08892338 0.02121609 0.07704658 0.11193973
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.825178e-08 -2.463787e-09  5.102247e-08
+[1] "all positive"
+[1] 433
+[1] 0.13965295 0.09657689 0.02026441 0.08932275 0.08818865
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.789258e-06 1.599675e-06 2.168414e-05
+[1] "all positive"
+[1] 434
+[1] 0.09920525 0.06430498 0.01905473 0.12589209 0.10710876
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.906680e-09 1.131810e-08 8.759036e-08
+[1] "all positive"
+[1] 435
+[1] 0.11082436 0.06690763 0.01582484 0.08689347 0.10552129
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.111659e-08 8.401284e-07 1.028093e-07
+[1] "all positive"
+[1] 436
+[1] 0.10943256 0.08620346 0.05561952 0.06834080 0.07220875
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.597410e-05 6.068341e-05 4.288799e-04
+[1] "all positive"
+[1] 437
+[1] 0.09609469 0.06210888 0.06210268 0.07492734 0.08769401
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.472759e-08 5.444424e-08 4.428871e-09
+[1] "all positive"
+[1] 438
+[1] 0.10462831 0.07660277 0.03061685 0.07173718 0.07316845
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.413786e-05 1.912512e-06 2.438147e-06
+[1] "all positive"
+[1] 439
+[1] 0.11305929 0.05518378 0.02829891 0.06631638 0.08500448
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.593553e-06 1.441227e-05 1.735565e-06
+[1] "all positive"
+[1] 440
+[1] 0.09744154 0.06626848 0.03316722 0.08290814 0.10064239
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.712607e-09  2.500687e-09 -2.648148e-11
+[1] "all positive"
+[1] 441
+[1] 0.11076591 0.07791333 0.05101463 0.05395880 0.08484934
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  9.761099e-05  8.454595e-05 -3.025719e-06
+[1] "all positive"
+[1] 442
+[1]  0.11443970  0.11691910 -0.00328106  0.08773975  0.08659485
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.526999e-08 5.918144e-09 4.083979e-09
+[1] "all positive"
+[1] 443
+[1] 0.10395457 0.07924096 0.03458379 0.07766721 0.12588457
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.645283e-07 3.564742e-07 2.452548e-06
+[1] "all positive"
+[1] 444
+[1] 0.11909968 0.07737492 0.01413262 0.07269565 0.10545967
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.290052e-09 3.077624e-08 3.815164e-09
+[1] "all positive"
+[1] 445
+[1] 0.12182118 0.06799768 0.01050958 0.08945941 0.08996086
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.267589e-07 4.595391e-06 8.313793e-07
+[1] "all positive"
+[1] 446
+[1] 0.10681670 0.08445405 0.04419631 0.07710891 0.08347551
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.314493e-04 2.920917e-04 5.416342e-05
+[1] "all positive"
+[1] 447
+[1] 0.10664165 0.06423629 0.01664879 0.09013190 0.10652620
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.459067e-05 7.877364e-04 9.747315e-05
+[1] "all positive"
+[1] 448
+[1] 0.114698020 0.089975858 0.007391177 0.092294602 0.087536166
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.265523e-09 7.598007e-08 9.273520e-09
+[1] "all positive"
+[1] 449
+[1] 0.10020533 0.07682835 0.03148264 0.08256202 0.09418795
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.928058e-07 9.051795e-09 8.252483e-08
+[1] "all positive"
+[1] 450
+[1]  0.142617665  0.092518847 -0.002714042  0.085616031  0.067124089
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.172189e-06 1.259651e-05 1.761325e-06
+[1] "all positive"
+[1] 451
+[1] 0.09965832 0.07821453 0.06025511 0.09255697 0.08601460
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.732064e-07 1.680086e-08 1.434703e-08
+[1] "all positive"
+[1] 452
+[1] 0.12543224 0.08745632 0.01573751 0.09212246 0.08567370
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.445942e-08 8.563622e-09 6.655387e-09
+[1] "all positive"
+[1] 453
+[1] 0.10710879 0.09416398 0.03299520 0.06757786 0.08631699
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.318439e-06 2.063025e-05 1.755423e-06
+[1] "all positive"
+[1] 454
+[1] 0.108699668 0.061950932 0.009640417 0.078155585 0.115289505
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  4.443995e-05  5.734447e-05 -8.428964e-07
+[1] "all positive"
+[1] 455
+[1] 0.100789915 0.118218095 0.003690334 0.059780539 0.105762933
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.581807e-07 1.491454e-06 1.863583e-07
+[1] "all positive"
+[1] 456
+[1] 0.08201730 0.10220535 0.03159447 0.06263137 0.11107457
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.017513e-05 9.895409e-05 1.329630e-05
+[1] "all positive"
+[1] 457
+[1] 0.11459973 0.06898245 0.03159619 0.06507768 0.08795004
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001054888 0.0009656733 0.0001175066
+[1] "all positive"
+[1] 458
+[1] 0.07686777 0.08211908 0.04836657 0.07244669 0.09357023
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.109967e-10 1.054489e-08 1.572695e-09
+[1] "all positive"
+[1] 459
+[1] 0.09898241 0.06310313 0.06500061 0.05461582 0.09479313
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.925440e-06 1.734938e-05 1.607028e-06
+[1] "all positive"
+[1] 460
+[1] 0.12301893 0.05860367 0.05018381 0.05379911 0.09597318
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.268476e-08 8.088145e-09 1.306491e-09
+[1] "all positive"
+[1] 461
+[1] 0.09433346 0.09075460 0.04148733 0.07864106 0.08197194
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.873129e-05 3.640791e-04 5.977908e-05
+[1] "all positive"
+[1] 462
+[1] 0.10572643 0.08669515 0.02762170 0.04455423 0.09675431
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.062797e-08 2.801005e-07 3.405144e-08
+[1] "all positive"
+[1] 463
+[1] 0.10230834 0.07967914 0.03588117 0.06612558 0.09426029
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.410389e-08 6.381128e-08 3.227103e-10
+[1] "all positive"
+[1] 464
+[1] 0.12100161 0.10165261 0.03122055 0.07265992 0.07555819
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.320772e-07 6.194657e-06 8.002544e-07
+[1] "all positive"
+[1] 465
+[1] 0.10101796 0.09602318 0.01246752 0.09583302 0.09416284
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.441379e-09 2.440400e-10 1.953920e-10
+[1] "all positive"
+[1] 466
+[1] 0.12658965 0.05762830 0.04713403 0.07692570 0.09388178
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -2.334738e-07  3.093738e-05  6.855468e-05
+[1] "all positive"
+[1] 467
+[1] 0.13322655 0.06950320 0.05757154 0.05144045 0.09797801
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.877158e-06 1.588949e-05 1.798297e-06
+[1] "all positive"
+[1] 468
+[1] 0.09780278 0.08284515 0.04368968 0.07320555 0.07770768
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.733269e-08 3.860671e-07 4.227374e-08
+[1] "all positive"
+[1] 469
+[1] 0.12193620 0.07483905 0.01888185 0.08387891 0.10154110
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.308890e-05 4.369973e-04 3.598293e-05
+[1] "all positive"
+[1] 470
+[1] 0.12173127 0.04793235 0.07169250 0.05457960 0.07729778
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.013313e-07 5.383631e-07 4.020313e-06
+[1] "all positive"
+[1] 471
+[1] 0.10894259 0.07700618 0.05000815 0.05360156 0.09665805
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.739730e-10 2.675933e-09 3.582954e-09
+[1] "all positive"
+[1] 472
+[1] 0.12263049 0.08210194 0.03261879 0.06179974 0.09555545
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.167445e-07 1.696064e-07 1.839808e-06
+[1] "all positive"
+[1] 473
+[1] 0.105092279 0.083372129 0.005074143 0.098178946 0.098161183
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.460729e-06 6.634290e-07 1.591822e-05
+[1] "all positive"
+[1] 474
+[1] 0.11017253 0.08168065 0.02445961 0.10451388 0.07807350
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.078732e-06 1.910082e-05 2.330116e-06
+[1] "all positive"
+[1] 475
+[1]  0.124495532  0.092060915 -0.003878667  0.095718224  0.086466651
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.172554e-05 1.977030e-06 9.660697e-06
+[1] "all positive"
+[1] 476
+[1] 0.12059836 0.08168192 0.02205505 0.07001761 0.10567524
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  2.668924e-06 -8.863606e-09  6.783849e-06
+[1] "all positive"
+[1] 477
+[1] 0.11457884 0.07757295 0.02699428 0.09809753 0.09282990
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.773492e-07 2.074226e-06 2.098129e-07
+[1] "all positive"
+[1] 478
+[1] 0.143442439 0.078293008 0.008683157 0.090647171 0.075008345
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.367155e-08 2.217534e-08 1.723467e-07
+[1] "all positive"
+[1] 479
+[1] 0.11774351 0.05748506 0.02953169 0.06999297 0.09073336
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.145918e-05 5.669399e-06 3.664063e-06
+[1] "all positive"
+[1] 480
+[1] 0.09653277 0.06585933 0.03602563 0.09023029 0.08465967
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.400317e-08 2.410408e-08 1.833753e-07
+[1] "all positive"
+[1] 481
+[1] 0.13157747 0.07062777 0.01917532 0.07929564 0.07937848
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.344824e-05 1.377183e-04 1.918103e-05
+[1] "all positive"
+[1] 482
+[1] 0.11449958 0.07568054 0.05479921 0.05568639 0.09506678
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.405265e-08 6.467887e-08 4.061295e-09
+[1] "all positive"
+[1] 483
+[1]  0.109614816  0.100946629 -0.004069058  0.081253100  0.099236095
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.696021e-09 1.585352e-10 1.462909e-10
+[1] "all positive"
+[1] 484
+[1] 0.11218542 0.08792831 0.05335355 0.09372090 0.06160558
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.693649e-05 4.214871e-04 5.034491e-05
+[1] "all positive"
+[1] 485
+[1] 0.09274996 0.10348258 0.01369713 0.09843815 0.08872950
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.951580e-09 8.873873e-09 7.154464e-08
+[1] "all positive"
+[1] 486
+[1] 0.101356004 0.087006670 0.007458293 0.074708784 0.105669372
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.421614e-05 3.873813e-05 3.048017e-04
+[1] "all positive"
+[1] 487
+[1] 0.09634955 0.08523733 0.01884470 0.07838152 0.11663193
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.556141e-08 8.809527e-09 6.623852e-09
+[1] "all positive"
+[1] 488
+[1] 0.12886088 0.06039000 0.01358412 0.08639031 0.09294969
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.172229e-06 1.986920e-05 2.413952e-06
+[1] "all positive"
+[1] 489
+[1] 0.10169381 0.09015681 0.01022341 0.09770422 0.08499831
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.507773e-07 1.987827e-08 2.187280e-07
+[1] "all positive"
+[1] 490
+[1] 0.12563920 0.07016938 0.02577696 0.04663532 0.10653885
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.775766e-05 1.712062e-03 7.300315e-04
+[1] "all positive"
+[1] 491
+[1] 0.10722130 0.06943887 0.02986799 0.07194768 0.11898053
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.111375e-08 4.582267e-07 6.674616e-08
+[1] "all positive"
+[1] 492
+[1] 0.11921283 0.08828903 0.02557119 0.06428156 0.07234888
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.530701e-05 2.251637e-06 1.742662e-05
+[1] "all positive"
+[1] 493
+[1] 0.09298371 0.09824975 0.05894710 0.06276587 0.08824426
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.064526e-04 1.187761e-04 9.754279e-07
+[1] "all positive"
+[1] 494
+[1] 0.09629489 0.08162236 0.03485628 0.06835751 0.08421571
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.473571e-05 7.674085e-06 5.802066e-06
+[1] "all positive"
+[1] 495
+[1] 0.120932310 0.085558717 0.005866899 0.054960473 0.114360510
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.795999e-05 8.738557e-05 6.465032e-04
+[1] "all positive"
+[1] 496
+[1]  0.114281907  0.077598141 -0.002063067  0.096025628  0.116944785
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.224388e-09 2.098206e-08 2.624788e-09
+[1] "all positive"
+[1] 497
+[1]  0.13295992  0.11775507 -0.02085861  0.09497392  0.08591357
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.630027e-05 3.530209e-05 2.429461e-04
+[1] "all positive"
+[1] 498
+[1] 0.12742373 0.08060484 0.00434710 0.09044201 0.10191014
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  4.146178e-05 -1.279426e-06  7.960095e-05
+[1] "all positive"
+[1] 499
+[1] 0.11301702 0.09872837 0.00989379 0.07180328 0.08237832
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.133841e-07 8.208585e-06 2.747811e-05
+[1] "all positive"
+[1] 500
+[1] 0.12599261 0.06214166 0.03131795 0.09082552 0.10828831
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.439968e-10 7.794025e-10 5.269298e-09
+[1] "all positive"
+[1] 501
+[1] 0.11672064 0.07971683 0.01470554 0.06433457 0.10882740
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.194997e-05 1.123049e-06 1.025780e-06
+[1] "all positive"
+[1] 502
+[1] 0.10324392 0.08195173 0.03309038 0.08086808 0.07189972
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.318479e-06 2.501936e-07 4.177804e-08
+[1] "all positive"
+[1] 503
+[1] 0.07810510 0.07131385 0.04388301 0.11704983 0.07661648
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.028378e-06 1.746352e-06 1.336571e-05
+[1] "all positive"
+[1] 504
+[1] 0.11577053 0.07105391 0.01960083 0.07517591 0.12900585
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.387572e-08 1.235174e-07 8.921099e-07
+[1] "all positive"
+[1] 505
+[1] 0.09063461 0.07986800 0.06245038 0.06998885 0.08650372
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.664880e-06 4.523476e-06 2.841891e-05
+[1] "all positive"
+[1] 506
+[1] 0.11487333 0.08475708 0.03011779 0.07560332 0.08112988
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.825377e-09 7.408235e-09 5.342312e-08
+[1] "all positive"
+[1] 507
+[1] 0.10771285 0.06903303 0.04541901 0.07912505 0.08336449
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.482583e-08 2.991616e-07 3.436292e-08
+[1] "all positive"
+[1] 508
+[1] 0.11002351 0.12090060 0.03639883 0.05434155 0.09069510
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.096168e-05 2.479810e-04 3.767941e-05
+[1] "all positive"
+[1] 509
+[1] 0.10652372 0.08426424 0.01472397 0.08810348 0.08455287
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.376534e-08 -6.278659e-10  8.195036e-09
+[1] "all positive"
+[1] 510
+[1] 0.11805553 0.06130946 0.03127611 0.08550102 0.09263299
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.060582e-09 2.850606e-08 5.078730e-09
+[1] "all positive"
+[1] 511
+[1] 0.09196468 0.08098114 0.05862859 0.07341714 0.08046666
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.924161e-09 1.016259e-09 2.575898e-08
+[1] "all positive"
+[1] 512
+[1] 0.11990734 0.06891092 0.04238931 0.07650947 0.08805544
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.609144e-06 3.802186e-05 2.058801e-04
+[1] "all positive"
+[1] 513
+[1] 0.08758351 0.07968223 0.03786261 0.07864004 0.07805818
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.442524e-10 5.586484e-09 7.535086e-10
+[1] "all positive"
+[1] 514
+[1] 0.10105448 0.07367795 0.02866951 0.05379707 0.10187109
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.432841e-05 3.219344e-04 4.001717e-05
+[1] "all positive"
+[1] 515
+[1] 0.10696106 0.11576007 0.03586264 0.07105621 0.10438938
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.762018e-06 7.947463e-05 1.218381e-05
+[1] "all positive"
+[1] 516
+[1] 0.11989368 0.08147311 0.01204218 0.07969062 0.10744691
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.219145e-08 1.800916e-08 1.457975e-07
+[1] "all positive"
+[1] 517
+[1] 0.12770345 0.06797044 0.03571771 0.09563724 0.08895025
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.048612e-07 2.786260e-06 3.382570e-07
+[1] "all positive"
+[1] 518
+[1] 0.10586649 0.07783304 0.04697333 0.07763346 0.09219412
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.936985e-06 8.876915e-06 1.245460e-07
+[1] "all positive"
+[1] 519
+[1] 0.11454309 0.05752535 0.04243880 0.08016395 0.07372682
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.813117e-09 1.603655e-08 1.886947e-09
+[1] "all positive"
+[1] 520
+[1] 0.10851837 0.06964113 0.03059083 0.08350299 0.09158404
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.223572e-08 5.708409e-07 6.951630e-08
+[1] "all positive"
+[1] 521
+[1] 0.11854340 0.06598082 0.02706670 0.07549644 0.11302230
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.336696e-05 -8.658403e-07  1.285026e-05
+[1] "all positive"
+[1] 522
+[1] 0.11925446 0.06058233 0.05246767 0.07392781 0.09248346
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.231736e-05 6.687955e-05 5.002701e-06
+[1] "all positive"
+[1] 523
+[1] 0.09772111 0.09349344 0.04195318 0.07348950 0.08331252
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.383344e-05 2.193789e-04 2.684869e-05
+[1] "all positive"
+[1] 524
+[1] 0.11132585 0.07974764 0.02434056 0.08354565 0.10083601
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.171088e-09 3.174858e-08 1.322632e-07
+[1] "all positive"
+[1] 525
+[1] 0.11026722 0.06611663 0.03018717 0.07812196 0.09953605
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.617208e-08 4.862615e-07 6.725877e-08
+[1] "all positive"
+[1] 526
+[1] 0.09973465 0.08731378 0.03965865 0.08512278 0.10035388
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.749844e-06 4.501624e-04 1.795982e-04
+[1] "all positive"
+[1] 527
+[1] 0.10674188 0.08677310 0.02833577 0.09303251 0.08740929
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.679980e-06 2.417567e-07 3.746952e-07
+[1] "all positive"
+[1] 528
+[1] 0.12698786 0.10316059 0.01387448 0.05952152 0.09483364
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.320262e-08 2.679930e-09 1.552637e-09
+[1] "all positive"
+[1] 529
+[1] 0.12325483 0.07688477 0.02209023 0.09323220 0.08899475
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.857356e-05 1.692084e-04 2.049843e-05
+[1] "all positive"
+[1] 530
+[1] 0.13351496 0.04896214 0.04207377 0.08395782 0.05919261
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.398754e-06 1.308483e-05 1.625253e-06
+[1] "all positive"
+[1] 531
+[1] 0.11851473 0.09459960 0.02904100 0.07736339 0.06729757
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -2.863597e-09  1.470952e-07  1.333418e-07
+[1] "all positive"
+[1] 532
+[1] 0.09001802 0.07392523 0.06233482 0.06018529 0.06958380
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.052270e-04 7.013165e-05 3.867407e-05
+[1] "all positive"
+[1] 533
+[1] 0.12013652 0.08149976 0.01890916 0.04538812 0.09604052
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.097211e-10 1.170618e-09 9.569597e-09
+[1] "all positive"
+[1] 534
+[1] 0.09779371 0.08676439 0.05701082 0.05963289 0.09825031
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.008756e-06 8.339170e-04 5.778045e-04
+[1] "all positive"
+[1] 535
+[1] 0.12065825 0.06140446 0.02851164 0.08463045 0.09840600
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.698406e-09 3.664306e-08 9.444573e-09
+[1] "all positive"
+[1] 536
+[1] 0.11323960 0.08255164 0.01729539 0.08345964 0.09848712
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.033728e-09 1.180009e-08 1.756812e-09
+[1] "all positive"
+[1] 537
+[1] 0.10682145 0.08594122 0.02133999 0.07760494 0.08362294
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.151921e-04  1.082456e-04 -1.458154e-07
+[1] "all positive"
+[1] 538
+[1]  0.117862617  0.084608384 -0.002150689  0.088951407  0.111203202
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.616389e-09 4.558364e-08 4.964956e-09
+[1] "all positive"
+[1] 539
+[1] 0.12446894 0.06064476 0.01879561 0.08138507 0.11475638
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.631778e-08  8.230926e-09 -3.209408e-10
+[1] "all positive"
+[1] 540
+[1]  0.105840711  0.084385612 -0.005254129  0.082433127  0.103035782
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.338320e-09 6.488261e-10 4.939781e-10
+[1] "all positive"
+[1] 541
+[1] 0.13542648 0.08836383 0.01908600 0.08917161 0.07894302
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.332501e-09 7.659363e-10 5.584168e-10
+[1] "all positive"
+[1] 542
+[1] 0.10323491 0.04955445 0.05502399 0.05647082 0.10628785
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.910034e-06 8.160177e-08 3.692365e-07
+[1] "all positive"
+[1] 543
+[1] 0.12528661 0.05421537 0.05073094 0.06261490 0.07895503
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.152097e-06 2.061618e-07 3.953675e-08
+[1] "all positive"
+[1] 544
+[1] 0.10620298 0.07576139 0.02038622 0.09844109 0.07241594
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.220748e-05 8.702973e-04 1.079969e-04
+[1] "all positive"
+[1] 545
+[1] 0.09837024 0.09348025 0.03284688 0.06128160 0.08362609
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.566685e-06  2.288529e-06 -4.527858e-09
+[1] "all positive"
+[1] 546
+[1] 0.11687093 0.06196244 0.01562225 0.09930534 0.09472117
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.987876e-07 2.300123e-07 1.096291e-08
+[1] "all positive"
+[1] 547
+[1] 0.11289734 0.08068245 0.05111785 0.05352515 0.08210513
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.009406e-09 1.437955e-09 1.182048e-08
+[1] "all positive"
+[1] 548
+[1] 0.11623676 0.07290164 0.03028788 0.07625912 0.09744770
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -2.082173e-09  1.942331e-07  1.417552e-07
+[1] "all positive"
+[1] 549
+[1] 0.120465451 0.099882808 0.006836761 0.082869021 0.078969278
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.474115e-06 4.039232e-06 9.737081e-07
+[1] "all positive"
+[1] 550
+[1] 0.11259739 0.06361350 0.05351447 0.08134849 0.09657857
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.200587e-08 2.490482e-08 1.751108e-07
+[1] "all positive"
+[1] 551
+[1] 0.12025643 0.06277308 0.04853540 0.07540940 0.06538994
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.474165e-08 4.591511e-09 8.176342e-08
+[1] "all positive"
+[1] 552
+[1] 0.12598261 0.09953603 0.02668376 0.08197687 0.08577086
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.339037e-05 7.622811e-05 5.131579e-05
+[1] "all positive"
+[1] 553
+[1] 0.12410292 0.07246283 0.01451873 0.08821550 0.10481272
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.026618e-05 2.060089e-04 2.284079e-05
+[1] "all positive"
+[1] 554
+[1] 0.09579128 0.08211935 0.03171673 0.08155954 0.09569225
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.411768e-09 9.304667e-09 6.892562e-10
+[1] "all positive"
+[1] 555
+[1] 0.13392455 0.08453539 0.02203105 0.07691268 0.10871739
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.681289e-07 8.461548e-07 6.826184e-06
+[1] "all positive"
+[1] 556
+[1] 0.122644618 0.068060133 0.008624969 0.090887987 0.074559947
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.939239e-05 1.076909e-04 4.938675e-06
+[1] "all positive"
+[1] 557
+[1] 0.11410340 0.09934137 0.01716573 0.05655676 0.13353158
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.075716e-10 1.200154e-09 9.689781e-09
+[1] "all positive"
+[1] 558
+[1] 0.13604438 0.07999657 0.02167523 0.10136896 0.09386926
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.624571e-06 5.236268e-05 6.464870e-06
+[1] "all positive"
+[1] 559
+[1] 0.12422091 0.07485976 0.01875025 0.08195250 0.08148049
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.851269e-06 7.659490e-06 1.589910e-07
+[1] "all positive"
+[1] 560
+[1] 0.07743508 0.08012887 0.03830918 0.08658261 0.09583557
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.128839e-08 1.588875e-07 8.803145e-08
+[1] "all positive"
+[1] 561
+[1] 0.11310375 0.08446777 0.01756803 0.06903420 0.09440962
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.786652e-06 1.370750e-06 1.835646e-05
+[1] "all positive"
+[1] 562
+[1] 0.09710710 0.07752830 0.01590332 0.07361127 0.09547328
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.347584e-07 4.726123e-08 4.852695e-08
+[1] "all positive"
+[1] 563
+[1] 0.11954034 0.09043291 0.01906904 0.05842655 0.09481379
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.559450e-05 8.193769e-05 5.830860e-06
+[1] "all positive"
+[1] 564
+[1] 0.11312139 0.06156190 0.02943381 0.06413340 0.11030773
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.351365e-06 3.120531e-05 1.461955e-04
+[1] "all positive"
+[1] 565
+[1] 0.13395726 0.09276779 0.01378803 0.06424378 0.08687364
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.104450e-08 1.396424e-07 9.839061e-07
+[1] "all positive"
+[1] 566
+[1] 0.10982700 0.05186441 0.03769723 0.10406470 0.06697191
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.324720e-04  1.135835e-04 -1.102577e-06
+[1] "all positive"
+[1] 567
+[1] 0.10219122 0.06799728 0.03897327 0.07715584 0.09090007
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.337462e-05 1.064989e-04 6.611523e-06
+[1] "all positive"
+[1] 568
+[1] 0.13832572 0.06820872 0.05935471 0.06129926 0.06202252
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.468687e-08 8.001181e-07 2.647159e-07
+[1] "all positive"
+[1] 569
+[1] 0.09962552 0.07175373 0.04147600 0.07719298 0.08158830
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.674413e-06 2.335052e-04 1.563161e-04
+[1] "all positive"
+[1] 570
+[1] 0.14081301 0.06346300 0.03416897 0.09455819 0.08197800
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.882957e-06 4.021271e-06 3.336070e-05
+[1] "all positive"
+[1] 571
+[1] 0.11302079 0.09248886 0.02817098 0.08092210 0.09345907
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.930022e-08 4.294532e-07 6.101894e-08
+[1] "all positive"
+[1] 572
+[1] 0.12097045 0.07611190 0.05205911 0.04595444 0.10291069
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.854685e-08 2.521314e-06 4.333756e-06
+[1] "all positive"
+[1] 573
+[1] 0.09696835 0.07941168 0.02784349 0.06848234 0.09642721
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.157997e-10 4.574108e-11 1.003088e-09
+[1] "all positive"
+[1] 574
+[1] 0.11408470 0.07090544 0.02596772 0.09955745 0.10857544
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.364621e-05 1.501731e-04 2.163184e-05
+[1] "all positive"
+[1] 575
+[1] 0.107557315 0.101677623 0.000513189 0.084145720 0.098068807
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -7.233669e-11  4.306682e-09  5.720753e-09
+[1] "all positive"
+[1] 576
+[1] 0.09460992 0.07439808 0.01539295 0.08612133 0.09264960
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.556464e-08 4.616950e-08 3.428635e-07
+[1] "all positive"
+[1] 577
+[1] 0.11936087 0.08671165 0.00319006 0.08199954 0.11005958
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.451254e-10 2.584795e-09 3.568706e-10
+[1] "all positive"
+[1] 578
+[1] 0.12195291 0.06604845 0.03032292 0.05709154 0.11148100
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.780925e-07 2.045848e-07 8.407674e-09
+[1] "all positive"
+[1] 579
+[1] 0.11212881 0.05855189 0.02823908 0.07793522 0.10522848
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.965250e-07 4.615221e-07 3.206342e-06
+[1] "all positive"
+[1] 580
+[1] 0.10600757 0.08704407 0.01705743 0.07280438 0.09685536
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.137263e-07 2.518381e-08 2.374557e-09
+[1] "all positive"
+[1] 581
+[1] 0.12611345 0.08632539 0.04183188 0.07139094 0.10368342
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.581569e-07 2.392553e-06 2.945146e-07
+[1] "all positive"
+[1] 582
+[1] 0.124775165 0.090101752 0.009306898 0.073362812 0.098079101
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001486389 0.0012168168 0.0001336325
+[1] "all positive"
+[1] 583
+[1] 0.11432029 0.07850350 0.02317651 0.10048450 0.09131774
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.504698e-10 5.415214e-10 4.301255e-09
+[1] "all positive"
+[1] 584
+[1] 0.10272386 0.08367527 0.02499410 0.07986583 0.09359003
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.084985e-08 1.905082e-07 2.311948e-08
+[1] "all positive"
+[1] 585
+[1] 0.10868204 0.10285131 0.01102704 0.06028846 0.10059675
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.484363e-05 1.695567e-05 1.949644e-04
+[1] "all positive"
+[1] 586
+[1] 0.1351993527 0.0831078964 0.0005335242 0.0918759483 0.0866632168
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.053047e-11 1.351131e-10 9.738060e-10
+[1] "all positive"
+[1] 587
+[1] 0.11859144 0.06715879 0.02500745 0.08127687 0.11057634
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.126038e-07 1.824080e-06 2.090332e-07
+[1] "all positive"
+[1] 588
+[1] 0.12709862 0.07820040 0.01332155 0.06724147 0.09632909
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.685276e-05 4.455986e-06 3.805294e-07
+[1] "all positive"
+[1] 589
+[1] 0.09647109 0.07496381 0.03531241 0.06423307 0.10529747
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.167615e-05 3.925786e-05 1.834972e-04
+[1] "all positive"
+[1] 590
+[1] 0.08984190 0.08855995 0.02194934 0.08478376 0.09096929
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.239479e-09 1.233950e-08 9.930697e-08
+[1] "all positive"
+[1] 591
+[1] 0.10258284 0.09671367 0.02648254 0.08150275 0.08806729
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.358327e-07 9.618026e-07 9.122184e-08
+[1] "all positive"
+[1] 592
+[1] 0.10853263 0.07879925 0.01759040 0.08049538 0.10785369
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.896872e-06 5.139155e-05 2.419038e-04
+[1] "all positive"
+[1] 593
+[1] 0.14006137 0.06346625 0.01835699 0.09372600 0.09207223
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.311810e-06 -7.634571e-08  1.765350e-06
+[1] "all positive"
+[1] 594
+[1]  0.129231326  0.089526399 -0.008502466  0.073835310  0.110784519
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.433763e-09 2.340190e-09 1.814534e-08
+[1] "all positive"
+[1] 595
+[1] 0.11383713 0.09201387 0.03467569 0.07208422 0.10973664
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.956882e-09 2.031249e-09 1.541133e-08
+[1] "all positive"
+[1] 596
+[1] 0.10513754 0.08649470 0.03841195 0.07993715 0.06335464
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -3.296923e-09  4.029413e-07  8.958043e-07
+[1] "all positive"
+[1] 597
+[1] 0.09310647 0.06530104 0.03504479 0.07882487 0.09453655
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.046306e-05 2.629198e-04 7.512623e-05
+[1] "all positive"
+[1] 598
+[1] 0.09976740 0.08637842 0.02513592 0.07848700 0.09779843
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.057448e-06 2.821226e-05 3.454738e-06
+[1] "all positive"
+[1] 599
+[1] 0.108523696 0.098866370 0.007337493 0.098827842 0.082249823
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.754800e-06 1.757901e-07 1.402018e-07
+[1] "all positive"
+[1] 600
+[1] 0.13698164 0.09286447 0.02285160 0.05458536 0.09153774
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.437601e-06 1.224841e-04 2.260946e-05
+[1] "all positive"
+[1] 601
+[1] 0.10921288 0.08070217 0.01964764 0.07604182 0.08807831
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  5.497144e-09  2.202000e-09 -5.688261e-11
+[1] "all positive"
+[1] 602
+[1] 0.10108544 0.07409391 0.00969501 0.09623687 0.08463674
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.155924e-04 9.309368e-05 7.915330e-04
+[1] "all positive"
+[1] 603
+[1] 0.08404120 0.06915051 0.04267538 0.07062753 0.08505171
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  6.478006e-08 -1.080114e-09  2.460172e-08
+[1] "all positive"
+[1] 604
+[1] 0.08759747 0.08768835 0.06177158 0.06298748 0.08712246
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.226548e-07 2.606808e-05 2.394774e-05
+[1] "all positive"
+[1] 605
+[1] 0.09036866 0.09636203 0.02373485 0.07832822 0.09738923
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.902712e-09 2.458530e-10 1.101245e-10
+[1] "all positive"
+[1] 606
+[1] 0.10431062 0.08437370 0.01478461 0.09318047 0.10645601
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.465741e-09 4.186366e-08 5.205357e-09
+[1] "all positive"
+[1] 607
+[1] 0.11590514 0.06513680 0.04955662 0.05962262 0.08643517
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.396687e-09 5.795080e-08 6.976176e-09
+[1] "all positive"
+[1] 608
+[1] 0.14167876 0.09117075 0.02727337 0.07710584 0.08153636
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.456978e-09 3.614399e-09 2.930956e-08
+[1] "all positive"
+[1] 609
+[1] 0.11097360 0.05966663 0.04716833 0.07893920 0.10033625
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.063819e-10 2.204237e-11 1.064764e-09
+[1] "all positive"
+[1] 610
+[1]  0.107291503  0.109201200 -0.004520014  0.080718584  0.112759305
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.890332e-08 2.286749e-08 2.460254e-07
+[1] "all positive"
+[1] 611
+[1]  0.116945089  0.100240337 -0.002965212  0.091252123  0.104682218
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.610041e-10 5.159942e-09 6.297473e-10
+[1] "all positive"
+[1] 612
+[1] 0.10605785 0.06877503 0.03188123 0.07969097 0.07922222
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -5.287863e-09  2.011197e-07  2.471981e-07
+[1] "all positive"
+[1] 613
+[1] 0.12641706 0.03604956 0.06551148 0.08740518 0.09371494
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.865935e-05 3.713484e-05 3.197579e-04
+[1] "all positive"
+[1] 614
+[1] 0.10288149 0.06773743 0.06838032 0.06857781 0.08037937
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0003006554 0.0013970900 0.0002069130
+[1] "all positive"
+[1] 615
+[1] 0.12602713 0.05016128 0.05730450 0.06766192 0.08965844
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.502543e-06 5.213494e-05 6.551558e-06
+[1] "all positive"
+[1] 616
+[1] 0.11220429 0.07312665 0.04880998 0.06929565 0.07441667
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.029651e-07 -7.003158e-09  1.154131e-07
+[1] "all positive"
+[1] 617
+[1] 0.09977617 0.09527584 0.03360570 0.06226377 0.10384088
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.097685e-08 1.446702e-09 2.103801e-08
+[1] "all positive"
+[1] 618
+[1] 0.11455397 0.06857787 0.03860497 0.06080134 0.09603221
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.490255e-09 2.744651e-09 2.756657e-09
+[1] "all positive"
+[1] 619
+[1] 0.12871770 0.06204630 0.02820148 0.06167847 0.11275900
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.723445e-08 2.520564e-09 8.359596e-10
+[1] "all positive"
+[1] 620
+[1] 0.11507355 0.07786204 0.02130256 0.10312589 0.07545902
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.753256e-04 4.457454e-05 1.668419e-05
+[1] "all positive"
+[1] 621
+[1] 0.10974676 0.09290056 0.02022875 0.07962144 0.11020225
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.773418e-09 3.866719e-10 2.952211e-10
+[1] "all positive"
+[1] 622
+[1] 0.09646839 0.09780625 0.03462845 0.05597977 0.09728999
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.658941e-04 4.485157e-04 1.210287e-05
+[1] "all positive"
+[1] 623
+[1] 0.09700894 0.07402378 0.03730182 0.07416180 0.08861007
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.977077e-05 2.406589e-04 2.605621e-05
+[1] "all positive"
+[1] 624
+[1]  0.1229589975  0.0787412288 -0.0008293496  0.0832804833  0.1005870052
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.881960e-09 2.101191e-09 1.513094e-10
+[1] "all positive"
+[1] 625
+[1] 0.110479572 0.107335014 0.004547226 0.086685143 0.089464274
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001724335 0.0013773106 0.0001478522
+[1] "all positive"
+[1] 626
+[1] 0.1159490432 0.0921640748 0.0007731353 0.1084057215 0.0944522331
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.839673e-05 2.791159e-05 2.232321e-04
+[1] "all positive"
+[1] 627
+[1] 0.11853046 0.06480443 0.03931108 0.07769018 0.07578290
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.240940e-07 2.867543e-09 1.134881e-06
+[1] "all positive"
+[1] 628
+[1] 0.12319329 0.06660054 0.05933435 0.08205170 0.06492527
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.096392e-05 3.820305e-04 4.724224e-05
+[1] "all positive"
+[1] 629
+[1] 0.09098042 0.05968849 0.03802643 0.11230397 0.09098333
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.438732e-05 1.089326e-05 1.470432e-06
+[1] "all positive"
+[1] 630
+[1] 0.12662925 0.07002215 0.04964219 0.05751641 0.08557105
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.818244e-09 4.907672e-10 2.809586e-11
+[1] "all positive"
+[1] 631
+[1] 0.11702264 0.05604854 0.04809971 0.07973835 0.07986715
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.661937e-07 4.255722e-08 2.445398e-08
+[1] "all positive"
+[1] 632
+[1] 0.14141170 0.07993255 0.02523190 0.09101906 0.06095969
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.562703e-08 3.235532e-07 3.904446e-08
+[1] "all positive"
+[1] 633
+[1] 0.089071691 0.078088351 0.008733665 0.092421198 0.105715898
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.974861e-10 2.616436e-10 3.856194e-09
+[1] "all positive"
+[1] 634
+[1] 0.12863254 0.07770284 0.03133113 0.07046888 0.08974930
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.954786e-07 6.623380e-06 5.993009e-07
+[1] "all positive"
+[1] 635
+[1] 0.11962395 0.08894433 0.01693713 0.06845741 0.09053754
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.085977e-08 3.150837e-08 9.943335e-10
+[1] "all positive"
+[1] 636
+[1] 0.13659439 0.07827743 0.01978530 0.06939347 0.08811470
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  2.441537e-06 -1.613760e-07  2.802748e-06
+[1] "all positive"
+[1] 637
+[1] 0.09252617 0.08697225 0.02679055 0.08973592 0.08481485
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  4.031624e-04 -2.027099e-05  2.893038e-04
+[1] "all positive"
+[1] 638
+[1] 0.11951860 0.09147261 0.02790079 0.07096772 0.08035146
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  6.126608e-09  2.800083e-09 -9.482837e-11
+[1] "all positive"
+[1] 639
+[1] 0.10670852 0.08160881 0.05666946 0.05671575 0.11667666
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.362907e-10 7.213595e-09 1.506261e-09
+[1] "all positive"
+[1] 640
+[1] 0.123181642 0.083511144 0.003576026 0.095791974 0.090179107
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.380824e-06 4.572295e-07 7.207954e-06
+[1] "all positive"
+[1] 641
+[1] 0.12099098 0.06729433 0.01546457 0.08106284 0.08088730
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.617056e-05 1.458392e-04 7.405325e-04
+[1] "all positive"
+[1] 642
+[1] 0.10394810 0.09987081 0.01323935 0.08747659 0.08169285
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.317644e-06 1.794519e-05 7.649953e-05
+[1] "all positive"
+[1] 643
+[1] 0.13787425 0.06756851 0.02642318 0.09729499 0.07585541
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.462311e-08 8.120956e-08 6.051236e-07
+[1] "all positive"
+[1] 644
+[1] 0.10509120 0.06195279 0.03884161 0.09286581 0.08986144
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.010354e-09 3.676474e-08 4.481207e-09
+[1] "all positive"
+[1] 645
+[1] 0.124351311 0.086960949 0.006685976 0.082699486 0.104401853
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.360961e-09 3.949351e-08 4.754696e-09
+[1] "all positive"
+[1] 646
+[1] 0.10285213 0.09256356 0.04965915 0.05025012 0.08843335
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.206123e-09 4.738866e-08 1.217119e-08
+[1] "all positive"
+[1] 647
+[1] 0.13512687 0.08287542 0.02733457 0.08637984 0.10490811
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.127534e-06 1.353255e-06 1.206649e-05
+[1] "all positive"
+[1] 648
+[1] 0.101976949 0.092922121 0.007659089 0.100216956 0.090134987
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.977865e-06 1.740321e-05 2.044228e-06
+[1] "all positive"
+[1] 649
+[1] 0.116993653 0.097352372 0.004034408 0.101056562 0.093243630
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.199013e-07 2.198168e-07 2.117873e-06
+[1] "all positive"
+[1] 650
+[1] 0.11088712 0.04943775 0.07036398 0.08542078 0.07168617
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.293693e-09 2.377947e-08 3.240874e-09
+[1] "all positive"
+[1] 651
+[1] 0.134662600 0.081211068 0.007962378 0.084053533 0.104413421
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.390962e-06 1.923430e-07 7.332006e-08
+[1] "all positive"
+[1] 652
+[1] 0.09736662 0.06655796 0.05662070 0.06576569 0.07409492
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -3.054710e-08  1.276582e-06  1.415747e-06
+[1] "all positive"
+[1] 653
+[1] 0.08756822 0.07513862 0.03384188 0.08960381 0.08904566
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.205346e-06 2.464179e-06 3.349398e-05
+[1] "all positive"
+[1] 654
+[1] 0.11382897 0.05015244 0.01904868 0.05585346 0.12130619
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.116070e-06 6.297550e-05 7.432594e-06
+[1] "all positive"
+[1] 655
+[1] 0.11616793 0.06137686 0.01879623 0.05666116 0.11146747
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.577743e-07 5.738609e-06 9.253250e-07
+[1] "all positive"
+[1] 656
+[1] 0.10490850 0.07613741 0.05496046 0.07816166 0.09144829
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.692019e-07 9.520510e-06 4.035467e-06
+[1] "all positive"
+[1] 657
+[1] 0.10030805 0.05992889 0.05082757 0.07601609 0.08027305
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.376984e-06 2.695582e-05 3.973358e-06
+[1] "all positive"
+[1] 658
+[1] 0.12662652 0.08269708 0.02181491 0.08655368 0.08156653
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.509099e-07 1.020366e-06 9.349586e-08
+[1] "all positive"
+[1] 659
+[1] 0.10006429 0.07818664 0.02779459 0.06917763 0.07199877
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.255190e-10 4.816046e-09 5.863418e-10
+[1] "all positive"
+[1] 660
+[1] 0.11732138 0.07125907 0.02916198 0.05611431 0.10853669
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.018276e-08 2.636485e-09 1.652143e-10
+[1] "all positive"
+[1] 661
+[1] 0.11065797 0.06599798 0.07182581 0.03704603 0.09478789
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.538109e-07 5.075259e-08 1.596565e-07
+[1] "all positive"
+[1] 662
+[1] 0.108051680 0.090646454 0.001502951 0.090143267 0.118819028
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.289500e-10 8.362034e-09 1.001329e-09
+[1] "all positive"
+[1] 663
+[1] 0.11027455 0.08267475 0.04361647 0.08356949 0.08992990
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.387494e-08 3.283717e-09 2.812248e-09
+[1] "all positive"
+[1] 664
+[1] 0.09236042 0.09683957 0.02549364 0.07437725 0.09441747
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  8.975183e-10 -5.095879e-11  1.566273e-09
+[1] "all positive"
+[1] 665
+[1] 0.10688752 0.10932946 0.02929259 0.08376148 0.07511192
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.207286e-08 7.596638e-07 8.398824e-08
+[1] "all positive"
+[1] 666
+[1] 0.09729692 0.07686525 0.02413868 0.07671103 0.09180046
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.062781e-08 7.001975e-07 8.112220e-08
+[1] "all positive"
+[1] 667
+[1] 0.12010777 0.06063311 0.08124407 0.07040300 0.07446387
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.022554e-10 7.718954e-09 9.831758e-10
+[1] "all positive"
+[1] 668
+[1] 0.11252849 0.08586236 0.04363268 0.09579995 0.09814945
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.636226e-07 1.852281e-07 3.484539e-06
+[1] "all positive"
+[1] 669
+[1] 0.07179716 0.07350391 0.06909139 0.07080547 0.06942023
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.934285e-09 1.058934e-07 1.633126e-08
+[1] "all positive"
+[1] 670
+[1] 0.10680413 0.09244954 0.02643053 0.09282764 0.07531613
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.470176e-05 8.991025e-07 9.790326e-06
+[1] "all positive"
+[1] 671
+[1] 0.11016784 0.08004883 0.03178276 0.05696338 0.10602153
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  5.195380e-09 -1.049353e-10  2.056294e-09
+[1] "all positive"
+[1] 672
+[1] 0.10572574 0.07302415 0.04118341 0.07094201 0.08736578
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.447186e-05  1.315195e-05 -4.535530e-07
+[1] "all positive"
+[1] 673
+[1] 0.12052382 0.08117994 0.03745502 0.05960259 0.08399966
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.294471e-08 1.285908e-08 4.894149e-09
+[1] "all positive"
+[1] 674
+[1] 0.12093317 0.11097241 0.01467457 0.07580159 0.08527137
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.251962e-05 6.193676e-06 1.257529e-06
+[1] "all positive"
+[1] 675
+[1] 0.125544064 0.100111235 0.007491936 0.087069440 0.098166456
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.292104e-04 1.487669e-05 9.150791e-06
+[1] "all positive"
+[1] 676
+[1] 0.11016136 0.08077720 0.03179839 0.06487029 0.10563025
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.722436e-06 7.662009e-05 1.924827e-05
+[1] "all positive"
+[1] 677
+[1] 0.10767007 0.09597135 0.02711295 0.08316320 0.08387875
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.132254e-09 7.400668e-10 8.760553e-09
+[1] "all positive"
+[1] 678
+[1] 0.08104103 0.08092192 0.03822075 0.07504877 0.07992912
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.549036e-06 1.254981e-04 4.019121e-04
+[1] "all positive"
+[1] 679
+[1]  0.10400724  0.11469363 -0.01429340  0.06468343  0.12242968
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.550826e-05 5.685888e-04 5.691732e-05
+[1] "all positive"
+[1] 680
+[1] 0.13892393 0.08122841 0.01047772 0.09860142 0.06645132
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.098597e-10 5.769575e-10 2.803820e-09
+[1] "all positive"
+[1] 681
+[1] 0.11426930 0.08516832 0.01418685 0.07973750 0.08873902
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.486518e-06 7.972046e-06 6.996206e-05
+[1] "all positive"
+[1] 682
+[1] 0.11127052 0.07916181 0.02509155 0.07819343 0.07564916
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.711892e-08 -1.453210e-10  4.196012e-08
+[1] "all positive"
+[1] 683
+[1] 0.12877439 0.07240339 0.04506778 0.07734249 0.07733725
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.347392e-07 5.901965e-06 5.668155e-07
+[1] "all positive"
+[1] 684
+[1] 0.10667049 0.05430704 0.04025640 0.08014259 0.07838606
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.040536e-05 1.930376e-04 2.421701e-05
+[1] "all positive"
+[1] 685
+[1] 0.11476175 0.04863594 0.06994672 0.06127392 0.07438064
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.792719e-09 2.575910e-08 3.153915e-09
+[1] "all positive"
+[1] 686
+[1] 0.11413200 0.10515437 0.02098413 0.07913497 0.07496582
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.824979e-04 5.462524e-05 5.965103e-05
+[1] "all positive"
+[1] 687
+[1] 0.12178727 0.07949254 0.03627686 0.05356176 0.09009998
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.265551e-07 6.570051e-07 4.700184e-08
+[1] "all positive"
+[1] 688
+[1] 0.12230631 0.06952671 0.02547601 0.07316360 0.08192245
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.626669e-09 1.341156e-07 4.694590e-08
+[1] "all positive"
+[1] 689
+[1] 0.08680267 0.08735066 0.01435078 0.08519617 0.10263534
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.468423e-06 3.629109e-07 2.105140e-05
+[1] "all positive"
+[1] 690
+[1] 0.12725632 0.04564944 0.05400178 0.10580369 0.04474186
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.905217e-09 2.757006e-08 2.639684e-09
+[1] "all positive"
+[1] 691
+[1] 0.12483426 0.09274709 0.02893952 0.05995186 0.10522792
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.047263e-05 4.260362e-05 2.308351e-06
+[1] "all positive"
+[1] 692
+[1] 0.12854791 0.06189437 0.04509678 0.06577206 0.08220526
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.917231e-06 5.839632e-06 3.500477e-05
+[1] "all positive"
+[1] 693
+[1] 0.10508781 0.09092859 0.02128078 0.08507022 0.07712340
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001204963 0.0005623255 0.0001999146
+[1] "all positive"
+[1] 694
+[1] 0.11052010 0.10017806 0.03695603 0.07845166 0.06408038
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.423753e-06 6.265187e-06 7.118510e-05
+[1] "all positive"
+[1] 695
+[1] 0.09349489 0.06914467 0.04008394 0.07549084 0.09161984
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.092422e-06 -5.921244e-09  4.504557e-07
+[1] "all positive"
+[1] 696
+[1] 0.11879681 0.06226599 0.04114835 0.06030665 0.09242171
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.717880e-07 5.311684e-07 3.166717e-06
+[1] "all positive"
+[1] 697
+[1] 0.10657837 0.07984012 0.05030050 0.07422695 0.06787001
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.925783e-08 4.960692e-09 2.348514e-09
+[1] "all positive"
+[1] 698
+[1] 0.10379540 0.08595403 0.04447292 0.06598378 0.07567555
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.285619e-09 5.811626e-08 2.600658e-08
+[1] "all positive"
+[1] 699
+[1] 0.15144676 0.09292547 0.02045767 0.06335733 0.09724026
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.160260e-08 3.360978e-07 3.642481e-08
+[1] "all positive"
+[1] 700
+[1] 0.13012125 0.04467580 0.05621378 0.07227155 0.10341093
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.851834e-07 2.693415e-06 3.373553e-07
+[1] "all positive"
+[1] 701
+[1] 0.10329601 0.08218815 0.01284345 0.07841610 0.12535954
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.070651e-10 1.197070e-09 9.668304e-09
+[1] "all positive"
+[1] 702
+[1] 0.09222590 0.08922765 0.01736816 0.06456265 0.09453846
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.118436e-09 2.765414e-08 3.265427e-09
+[1] "all positive"
+[1] 703
+[1] 0.11572752 0.08453643 0.03938905 0.06441704 0.08641262
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.679563e-06 7.134758e-07 4.909860e-07
+[1] "all positive"
+[1] 704
+[1] 0.096244859 0.094234080 0.009043258 0.090191476 0.107471346
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.106662e-10 6.105805e-11 5.005107e-11
+[1] "all positive"
+[1] 705
+[1] 0.11070503 0.06821826 0.03026398 0.06330924 0.09179839
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.643701e-06 1.416180e-05 1.629321e-06
+[1] "all positive"
+[1] 706
+[1] 0.13376337 0.06481288 0.02930961 0.08856020 0.08990318
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.431084e-05 3.162642e-04 3.869987e-05
+[1] "all positive"
+[1] 707
+[1] 0.10801396 0.05920821 0.05764800 0.05631674 0.09362177
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.459785e-06 1.972799e-06 1.660665e-05
+[1] "all positive"
+[1] 708
+[1] 0.12909780 0.07167229 0.02263766 0.06433790 0.09097704
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.733950e-08 2.469587e-07 2.965699e-08
+[1] "all positive"
+[1] 709
+[1] 0.10177268 0.09408386 0.02821991 0.09687518 0.07394324
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.796183e-05 2.289063e-06 2.770045e-06
+[1] "all positive"
+[1] 710
+[1] 0.099521019 0.069166313 0.005813988 0.097511191 0.093122983
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.071627e-10 5.268725e-10 3.398147e-09
+[1] "all positive"
+[1] 711
+[1] 0.13046315 0.06265967 0.02429380 0.09689540 0.08190920
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.184881e-07 6.507950e-07 5.660203e-06
+[1] "all positive"
+[1] 712
+[1]  0.121981742  0.091214056 -0.003302308  0.073149577  0.127502061
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.015799e-11 1.025485e-10 8.363003e-10
+[1] "all positive"
+[1] 713
+[1] 0.09507096 0.08538204 0.04560670 0.08256232 0.09581907
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.329402e-09 7.990232e-09 6.426461e-08
+[1] "all positive"
+[1] 714
+[1] 0.10793536 0.05904941 0.02335614 0.07846596 0.07837938
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.135334e-08 1.226710e-07 1.727899e-08
+[1] "all positive"
+[1] 715
+[1] 0.11129511 0.10137864 0.03979079 0.05189538 0.10126557
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.063116e-08 1.701308e-07 1.245039e-06
+[1] "all positive"
+[1] 716
+[1] 0.108367992 0.092937358 0.009401274 0.072992761 0.089831721
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.499103e-06 -1.271246e-07  1.873266e-06
+[1] "all positive"
+[1] 717
+[1] 0.10008944 0.08331867 0.01704657 0.10716911 0.09974845
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.617922e-04 -7.427416e-06  3.177635e-04
+[1] "all positive"
+[1] 718
+[1] 0.13125286 0.07774905 0.01185229 0.07543824 0.09374603
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.804545e-06 3.315769e-06 2.961724e-05
+[1] "all positive"
+[1] 719
+[1] 0.11622478 0.07892098 0.03550535 0.09044658 0.07499600
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.082024e-06 4.081021e-06 3.775739e-07
+[1] "all positive"
+[1] 720
+[1] 0.15074482 0.07454410 0.02698712 0.06453179 0.09686903
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  9.673643e-05 -2.397853e-06  4.168481e-05
+[1] "all positive"
+[1] 721
+[1] 0.11169550 0.06208128 0.05714995 0.04599899 0.11068061
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.323254e-05 2.751344e-04 1.329934e-05
+[1] "all positive"
+[1] 722
+[1] 0.10842454 0.10257820 0.01892000 0.06091948 0.09050495
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -2.618025e-07  1.050176e-05  1.658376e-05
+[1] "all positive"
+[1] 723
+[1] 0.11225668 0.05559914 0.03183243 0.08344525 0.10484296
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.201479e-09 1.242996e-10 9.277557e-11
+[1] "all positive"
+[1] 724
+[1] 0.1180497308 0.0888274065 0.0001137331 0.1067293628 0.0924611017
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.392627e-07 5.248115e-07 3.592318e-06
+[1] "all positive"
+[1] 725
+[1] 0.12227170 0.08122212 0.03105939 0.07814698 0.09540125
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.375133e-04 7.704419e-06 1.885810e-05
+[1] "all positive"
+[1] 726
+[1] 0.11096867 0.08287916 0.01986112 0.09373097 0.10410753
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.025939e-07 7.431941e-06 9.139035e-07
+[1] "all positive"
+[1] 727
+[1] 0.11576532 0.05795233 0.03640291 0.08002610 0.07352554
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.097857e-05 7.544406e-05 5.410014e-06
+[1] "all positive"
+[1] 728
+[1] 0.112563888 0.081516462 0.007787254 0.082397926 0.091837216
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.761381e-05 5.567284e-05 4.501283e-04
+[1] "all positive"
+[1] 729
+[1] 0.132964572 0.089553451 0.006409953 0.102035298 0.071479170
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.785349e-08 1.468652e-07 9.465462e-07
+[1] "all positive"
+[1] 730
+[1] 0.10877730 0.07697611 0.01602314 0.08136915 0.10817165
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.539800e-04 -2.046722e-05  5.911321e-04
+[1] "all positive"
+[1] 731
+[1] 0.11137296 0.08202083 0.01876419 0.09599281 0.09167508
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.276456e-06 6.675355e-05 8.131798e-06
+[1] "all positive"
+[1] 732
+[1] 0.12987029 0.08889354 0.01998738 0.07482442 0.10119154
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.757992e-05 2.679676e-06 8.857165e-06
+[1] "all positive"
+[1] 733
+[1] 0.12237905 0.09463231 0.02407233 0.07278472 0.06049386
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.132929e-09 3.744816e-08 3.699683e-09
+[1] "all positive"
+[1] 734
+[1] 0.11843271 0.06810904 0.02158324 0.11802312 0.09630941
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.406119e-06 4.698845e-05 5.456900e-06
+[1] "all positive"
+[1] 735
+[1] 0.11143072 0.07987228 0.02727715 0.09659775 0.08095894
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.765088e-07 4.625320e-07 4.520899e-06
+[1] "all positive"
+[1] 736
+[1] 0.11461156 0.09352602 0.01605202 0.08573492 0.09343299
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.803563e-09 5.569276e-08 6.118346e-09
+[1] "all positive"
+[1] 737
+[1] 0.12359030 0.05439159 0.04326917 0.07558020 0.07957976
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.438436e-09 2.232553e-08 2.715575e-09
+[1] "all positive"
+[1] 738
+[1] 0.125636929 0.083221171 0.003774898 0.084557433 0.092067482
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.770558e-06 1.617227e-05 1.962253e-06
+[1] "all positive"
+[1] 739
+[1] 0.11430149 0.05638711 0.01651169 0.07520410 0.11505043
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.032150e-06 9.074078e-08 9.510816e-08
+[1] "all positive"
+[1] 740
+[1] 0.09728449 0.04774593 0.06562879 0.05762035 0.10544981
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.627875e-10 5.130850e-09 6.221217e-10
+[1] "all positive"
+[1] 741
+[1] 0.10375504 0.07385052 0.03157267 0.08358863 0.08220016
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.400957e-10 6.039793e-10 6.458831e-09
+[1] "all positive"
+[1] 742
+[1] 0.10796338 0.08167842 0.01870658 0.07415489 0.10215608
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.230115e-06 3.581415e-05 4.061127e-06
+[1] "all positive"
+[1] 743
+[1] 0.127572068 0.079241922 0.006434816 0.090741278 0.096684275
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.416927e-05 2.620860e-04 3.834193e-05
+[1] "all positive"
+[1] 744
+[1]  0.11146795  0.10329906 -0.00920455  0.11773936  0.10594899
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.969879e-07 1.321812e-05 2.239143e-06
+[1] "all positive"
+[1] 745
+[1] 0.11166623 0.06815772 0.03889354 0.07659347 0.09270792
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.437008e-10 2.591048e-10 4.320174e-09
+[1] "all positive"
+[1] 746
+[1] 0.12596700 0.07390275 0.02956642 0.06693859 0.10549615
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.172402e-09 8.926229e-09 6.758700e-08
+[1] "all positive"
+[1] 747
+[1] 0.11451837 0.06362337 0.02747824 0.07063310 0.09616682
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.463770e-08 5.639553e-08 4.917609e-07
+[1] "all positive"
+[1] 748
+[1] 0.124250581 0.097998223 0.006241244 0.084498361 0.087293974
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.115141e-06 2.077036e-06 1.525100e-05
+[1] "all positive"
+[1] 749
+[1] 0.11410844 0.06665944 0.03290682 0.07553207 0.08938624
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.712671e-04 1.227615e-03 7.560597e-05
+[1] "all positive"
+[1] 750
+[1] 0.11640544 0.06348716 0.03901478 0.06883115 0.09017143
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.531829e-07 2.813762e-05 1.423897e-05
+[1] "all positive"
+[1] 751
+[1] 0.12292712 0.06310986 0.03279054 0.07736719 0.10873429
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.933148e-08 2.922526e-10 1.055718e-08
+[1] "all positive"
+[1] 752
+[1] 0.101532895 0.078385705 0.009121748 0.096979778 0.096136196
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.399145e-08 1.019180e-06 3.790113e-06
+[1] "all positive"
+[1] 753
+[1] 0.08072443 0.08296733 0.04807834 0.06943056 0.09601700
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.346962e-05 7.687023e-04 9.402968e-05
+[1] "all positive"
+[1] 754
+[1] 0.14835652 0.08655404 0.01701195 0.06717026 0.10871963
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.704604e-09 1.473415e-07 2.844128e-08
+[1] "all positive"
+[1] 755
+[1] 0.13130835 0.08561915 0.05778783 0.05214919 0.08855133
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.442598e-07 4.197796e-07 1.302885e-08
+[1] "all positive"
+[1] 756
+[1] 0.12822887 0.07834618 0.01926866 0.09716672 0.09311558
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.478383e-08 2.778462e-05 6.907277e-05
+[1] "all positive"
+[1] 757
+[1] 0.08490667 0.07877195 0.04601960 0.06688374 0.08350546
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.048749e-09 2.171032e-08 5.424950e-09
+[1] "all positive"
+[1] 758
+[1] 0.12287737 0.07796534 0.00963852 0.08908911 0.09084633
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.113421e-11 1.377888e-10 9.409664e-10
+[1] "all positive"
+[1] 759
+[1] 0.11607861 0.05730499 0.02483548 0.09583963 0.09216377
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.421021e-06 4.455982e-06 2.570702e-07
+[1] "all positive"
+[1] 760
+[1] 0.11613661 0.08360342 0.01791265 0.06985462 0.11679310
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.487764e-08 5.004454e-07 6.063123e-08
+[1] "all positive"
+[1] 761
+[1] 0.10326083 0.06781495 0.04476297 0.09305284 0.07086363
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.204865e-05 3.935315e-04 6.283691e-05
+[1] "all positive"
+[1] 762
+[1] 0.12881213 0.07481061 0.04610552 0.04580901 0.09673927
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  4.136267e-07 -4.265455e-09  1.009718e-06
+[1] "all positive"
+[1] 763
+[1] 0.125871214 0.079748403 0.008250691 0.080405091 0.086148774
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.538302e-07 4.738052e-05 5.777966e-05
+[1] "all positive"
+[1] 764
+[1] 0.09519388 0.08463264 0.02665741 0.09354871 0.11164279
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.482180e-04 5.477895e-04 3.985496e-05
+[1] "all positive"
+[1] 765
+[1] 0.10618538 0.08155641 0.04056852 0.08285186 0.07287894
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.106952e-06 7.348375e-07 5.475040e-07
+[1] "all positive"
+[1] 766
+[1] 0.10874048 0.08504553 0.02932235 0.04845914 0.10848894
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.279687e-06 9.612806e-06 1.238907e-06
+[1] "all positive"
+[1] 767
+[1] 0.12628746 0.06775851 0.02492569 0.08912011 0.08416066
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.319267e-05 4.019550e-04 4.965225e-05
+[1] "all positive"
+[1] 768
+[1] 0.12694230 0.08085678 0.02151287 0.05556705 0.09126199
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -3.741011e-09  1.626924e-07  1.669902e-07
+[1] "all positive"
+[1] 769
+[1] 0.11981031 0.05709513 0.02838687 0.11722625 0.06811592
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.759219e-08 6.143376e-09 4.274949e-09
+[1] "all positive"
+[1] 770
+[1] 0.10500035 0.07599014 0.03535252 0.07318279 0.10844074
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.161148e-08 1.182110e-07 7.959459e-07
+[1] "all positive"
+[1] 771
+[1] 0.10355114 0.07904339 0.05285034 0.06787046 0.07934711
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001535243 0.0013635250 0.0001615771
+[1] "all positive"
+[1] 772
+[1] 0.07932253 0.09603164 0.02273844 0.07550797 0.10683506
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.332512e-06 8.996965e-07 4.562932e-07
+[1] "all positive"
+[1] 773
+[1] 0.10082765 0.07362146 0.04877544 0.07008279 0.08315913
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.732339e-05 1.278727e-05 2.089414e-04
+[1] "all positive"
+[1] 774
+[1] 0.092571802 0.090762502 0.007479433 0.089917690 0.111309858
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.613264e-09 3.160737e-10 4.711820e-11
+[1] "all positive"
+[1] 775
+[1] 0.10959298 0.06396001 0.04560210 0.07007783 0.09745395
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.346976e-08 1.090308e-09 1.335029e-09
+[1] "all positive"
+[1] 776
+[1] 0.08222452 0.07237913 0.03885831 0.09005854 0.07515461
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.074277e-07 1.619992e-05 8.730149e-06
+[1] "all positive"
+[1] 777
+[1] 0.11258224 0.06055313 0.04408904 0.08820818 0.09079013
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.467458e-04 2.832471e-04 7.462346e-05
+[1] "all positive"
+[1] 778
+[1] 0.10798974 0.07589971 0.02724203 0.08143856 0.08984539
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.742195e-06 3.468631e-07 3.259876e-07
+[1] "all positive"
+[1] 779
+[1] 0.10803624 0.08089273 0.03472584 0.07816535 0.10194644
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.192104e-06 1.881654e-05 2.129381e-06
+[1] "all positive"
+[1] 780
+[1] 0.12629380 0.04055158 0.02106402 0.09712730 0.10551646
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.536615e-06 1.402836e-05 1.701147e-06
+[1] "all positive"
+[1] 781
+[1] 0.118459928 0.079560703 0.002207695 0.067935408 0.120655979
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.522262e-09 2.094593e-10 9.452816e-11
+[1] "all positive"
+[1] 782
+[1] 0.09483993 0.06656360 0.02876271 0.06688238 0.10276128
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.427634e-06 9.369907e-05 1.228498e-05
+[1] "all positive"
+[1] 783
+[1] 0.12135476 0.09574660 0.02332909 0.07377342 0.09896075
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.124518e-09 1.507743e-09 1.273161e-08
+[1] "all positive"
+[1] 784
+[1] 0.11290830 0.07952884 0.02594572 0.08659937 0.09073117
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.825793e-05 4.772853e-04 5.144998e-05
+[1] "all positive"
+[1] 785
+[1] 0.13854548 0.05182949 0.02903927 0.08782953 0.10054588
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.341754e-09 4.689804e-08 3.597193e-09
+[1] "all positive"
+[1] 786
+[1] 0.10206108 0.09411730 0.01379705 0.09120431 0.10839375
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.114331e-06 3.636395e-07 8.941738e-08
+[1] "all positive"
+[1] 787
+[1] 0.089707507 0.103551123 0.002601787 0.085743763 0.095785744
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.257431e-10 1.768246e-10 1.461900e-09
+[1] "all positive"
+[1] 788
+[1] 0.10736012 0.06467299 0.03595470 0.09285132 0.07137339
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.153754e-09 1.154891e-07 2.363928e-08
+[1] "all positive"
+[1] 789
+[1]  0.132706037  0.062057094 -0.008750649  0.092211415  0.112662288
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001458672 0.0001500600 0.0001136639
+[1] "all positive"
+[1] 790
+[1] 0.08105379 0.07095925 0.04707553 0.07339502 0.08693854
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.783640e-07 2.711488e-06 3.486096e-07
+[1] "all positive"
+[1] 791
+[1] 0.09879562 0.07673825 0.04149429 0.08163741 0.09427229
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.485113e-09 3.940365e-09 9.978096e-11
+[1] "all positive"
+[1] 792
+[1] 0.10194753 0.07023389 0.05107546 0.07599608 0.07573731
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.328526e-06 1.237192e-05 6.322090e-05
+[1] "all positive"
+[1] 793
+[1]  0.1023756649  0.1016631402 -0.0001084979  0.0981308441  0.1143479348
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.222902e-05 7.123803e-05 6.511149e-04
+[1] "all positive"
+[1] 794
+[1] 0.137896568 0.089809630 0.008959867 0.071176729 0.085661198
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.679291e-06 7.076930e-05 8.663946e-06
+[1] "all positive"
+[1] 795
+[1] 0.10498122 0.06202952 0.04432298 0.06166795 0.08250390
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.432007e-06 2.317333e-07 2.055404e-07
+[1] "all positive"
+[1] 796
+[1] 0.12022142 0.08531836 0.03175439 0.08591379 0.06655224
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -6.770839e-07  3.729416e-05  7.209873e-05
+[1] "all positive"
+[1] 797
+[1] 0.10766417 0.09533028 0.03814011 0.07747653 0.04533096
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.696570e-08 1.426085e-07 1.603624e-08
+[1] "all positive"
+[1] 798
+[1] 0.11701344 0.08805846 0.02971133 0.06042395 0.09554137
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.776138e-10 2.609761e-10 2.111205e-09
+[1] "all positive"
+[1] 799
+[1] 0.12365995 0.11988913 0.01321137 0.07274850 0.08699920
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.801403e-05 6.264395e-04 7.672645e-05
+[1] "all positive"
+[1] 800
+[1] 0.11207778 0.05834150 0.03353240 0.07154778 0.08676411
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.668773e-06 4.036728e-06 3.233976e-05
+[1] "all positive"
+[1] 801
+[1] 0.10094297 0.10332435 0.01845167 0.07788516 0.12132227
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0006278124 0.0001677092 0.0000063438
+[1] "all positive"
+[1] 802
+[1] 0.10619515 0.06357751 0.04164199 0.06023757 0.10362558
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.184862e-07 7.717726e-09 4.400362e-08
+[1] "all positive"
+[1] 803
+[1] 0.09807558 0.08919299 0.04115249 0.07755979 0.08339505
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.972198e-06  1.544292e-06 -5.858479e-08
+[1] "all positive"
+[1] 804
+[1] 0.09073636 0.09595682 0.03735022 0.09156691 0.07343848
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.431060e-06 4.085793e-05 5.003786e-06
+[1] "all positive"
+[1] 805
+[1] 0.12883548 0.06457113 0.02128767 0.07911020 0.09719964
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.055797e-07 9.421067e-07 1.120131e-07
+[1] "all positive"
+[1] 806
+[1] 0.10062765 0.10161508 0.05747453 0.07110734 0.08655715
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.662448e-07 5.616191e-08 4.575516e-08
+[1] "all positive"
+[1] 807
+[1] 0.10675162 0.07805987 0.01472964 0.08586559 0.10262884
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.069989e-06 4.204078e-06 2.278187e-05
+[1] "all positive"
+[1] 808
+[1] 0.11186708 0.06951083 0.04037100 0.07690148 0.09067048
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.375070e-08 6.792888e-09 9.026759e-10
+[1] "all positive"
+[1] 809
+[1] 0.11210828 0.04590290 0.03501199 0.08695359 0.10116206
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.789082e-08 1.695963e-07 2.128579e-08
+[1] "all positive"
+[1] 810
+[1] 0.14030904 0.09672213 0.01294003 0.07846955 0.08320625
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.105389e-06 4.662352e-05 5.656088e-06
+[1] "all positive"
+[1] 811
+[1] 0.12390981 0.07671196 0.04140774 0.05950414 0.09344638
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.281129e-09 4.890429e-08 6.009439e-09
+[1] "all positive"
+[1] 812
+[1] 0.12104655 0.08458269 0.01589431 0.05669015 0.10061188
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.429728e-06 4.300978e-07 3.666421e-07
+[1] "all positive"
+[1] 813
+[1] 0.07515676 0.09971241 0.06052043 0.06339842 0.09849705
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.219745e-04 -1.010999e-05  6.926300e-04
+[1] "all positive"
+[1] 814
+[1] 0.09991160 0.09270024 0.03156760 0.08278057 0.09334014
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.668735e-09 1.657901e-08 1.010724e-09
+[1] "all positive"
+[1] 815
+[1] 0.13364666 0.07431110 0.03917044 0.08116040 0.09669135
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.902122e-08 2.283880e-07 1.014295e-06
+[1] "all positive"
+[1] 816
+[1] 0.09807830 0.06400568 0.04200022 0.07344278 0.09262477
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.316867e-06 4.331606e-06 4.991141e-05
+[1] "all positive"
+[1] 817
+[1] 0.13174637 0.08009551 0.01421907 0.06619374 0.09453116
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.032394e-10 2.358168e-09 2.511679e-09
+[1] "all positive"
+[1] 818
+[1] 0.12768062 0.06432548 0.01329165 0.09956380 0.10197973
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.415223e-08 1.204224e-07 4.514645e-10
+[1] "all positive"
+[1] 819
+[1] 0.08577782 0.09458099 0.03078525 0.09307093 0.07454347
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.754121e-09 1.545334e-08 1.214368e-07
+[1] "all positive"
+[1] 820
+[1] 0.08761192 0.06253079 0.05820652 0.06837915 0.08222327
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.169469e-07 3.658975e-07 2.801703e-06
+[1] "all positive"
+[1] 821
+[1] 0.14461958 0.05182951 0.03043281 0.07526221 0.09757386
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.556520e-07 1.579899e-06 2.079885e-07
+[1] "all positive"
+[1] 822
+[1] 0.13158058 0.05169297 0.01438274 0.08719394 0.10126331
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.482628e-06 3.137830e-05 3.759290e-06
+[1] "all positive"
+[1] 823
+[1] 0.10889410 0.05244251 0.05807095 0.09710349 0.10864204
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.201335e-06 3.011232e-05 1.086796e-05
+[1] "all positive"
+[1] 824
+[1] 0.11144024 0.06759695 0.02987264 0.08172109 0.06822029
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.235695e-09 1.679719e-08 2.915737e-09
+[1] "all positive"
+[1] 825
+[1] 0.10519414 0.07679644 0.03150088 0.08230661 0.10116844
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.074309e-08 9.260323e-10 1.009319e-09
+[1] "all positive"
+[1] 826
+[1] 0.10256787 0.05941331 0.05170481 0.07087736 0.07257330
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.044782e-06 5.076791e-05 5.705240e-06
+[1] "all positive"
+[1] 827
+[1] 0.12220613 0.05177340 0.04774027 0.07291540 0.09178124
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.702747e-08 2.397280e-07 1.657527e-07
+[1] "all positive"
+[1] 828
+[1] 0.11528344 0.08103070 0.02198121 0.07713403 0.09986043
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.910737e-04 -1.278563e-05  2.233320e-04
+[1] "all positive"
+[1] 829
+[1] 0.13331580 0.05643832 0.03567863 0.06532700 0.08105103
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.909950e-07 5.572186e-06 6.960491e-07
+[1] "all positive"
+[1] 830
+[1] 0.10932348 0.09017679 0.02933074 0.07456933 0.08177291
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.896059e-06 2.547616e-05 1.464636e-06
+[1] "all positive"
+[1] 831
+[1] 0.09980669 0.07020836 0.03893172 0.07177526 0.10400170
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.575771e-05 4.233989e-04 5.198532e-05
+[1] "all positive"
+[1] 832
+[1] 0.09451084 0.07512498 0.04518528 0.05758167 0.09323552
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -2.283043e-07  5.873625e-05  3.704474e-05
+[1] "all positive"
+[1] 833
+[1] 0.10296397 0.05228416 0.06337789 0.07310798 0.09264959
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.831905e-04 2.785472e-05 8.356217e-06
+[1] "all positive"
+[1] 834
+[1] 0.09333081 0.09557449 0.01555945 0.08606204 0.10595651
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.641764e-09 2.671284e-07 7.752349e-07
+[1] "all positive"
+[1] 835
+[1]  0.125587699  0.107492568 -0.009360677  0.091806873  0.073804295
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.483329e-06 3.327555e-05 4.207509e-06
+[1] "all positive"
+[1] 836
+[1] 0.13093682 0.07692326 0.02200358 0.06075283 0.08802487
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.855262e-10 4.178852e-10 3.390685e-09
+[1] "all positive"
+[1] 837
+[1] 0.10664239 0.10396839 0.02318911 0.05934584 0.09974933
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.221235e-05 6.417565e-04 2.451445e-04
+[1] "all positive"
+[1] 838
+[1] 0.10185554 0.07929505 0.03821435 0.07154043 0.09293003
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.491797e-06 3.637156e-07 8.778522e-07
+[1] "all positive"
+[1] 839
+[1] 0.10308473 0.07585865 0.03376740 0.07111766 0.10201210
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.770927e-06 5.571213e-04 2.554337e-04
+[1] "all positive"
+[1] 840
+[1] 0.11337590 0.09173855 0.04090854 0.06094378 0.08433049
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.246475e-09 2.082885e-10 4.830936e-11
+[1] "all positive"
+[1] 841
+[1] 0.10204466 0.05452177 0.07252086 0.06747846 0.07661244
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.268982e-08 1.174242e-07 8.586559e-09
+[1] "all positive"
+[1] 842
+[1] 0.12541999 0.09020981 0.01098164 0.06637220 0.10327575
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.716925e-05 1.894075e-04 2.935609e-05
+[1] "all positive"
+[1] 843
+[1] 0.12639876 0.06534820 0.03065800 0.08931221 0.08081113
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.906419e-06 2.709634e-05 3.349342e-06
+[1] "all positive"
+[1] 844
+[1] 0.09600058 0.08658996 0.03916367 0.06733421 0.10001186
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.069291e-07 -4.740126e-09  6.242466e-08
+[1] "all positive"
+[1] 845
+[1] 0.09211538 0.07030882 0.02048458 0.08631240 0.10490953
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.203765e-06 1.074502e-05 1.276578e-06
+[1] "all positive"
+[1] 846
+[1] 0.10284182 0.05996443 0.04345651 0.06858966 0.08939459
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.264698e-06 4.199269e-05 5.376797e-06
+[1] "all positive"
+[1] 847
+[1] 0.11131826 0.07090658 0.04220744 0.05598290 0.08938769
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.811020e-05 3.145016e-04 2.021057e-05
+[1] "all positive"
+[1] 848
+[1] 0.11677749 0.05287627 0.04055310 0.11070918 0.08828324
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.069756e-06 3.001756e-06 2.449796e-05
+[1] "all positive"
+[1] 849
+[1] 0.11614430 0.07708858 0.03889684 0.06257751 0.10520909
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.120977e-09 9.187517e-08 3.466093e-07
+[1] "all positive"
+[1] 850
+[1] 0.09641827 0.07556218 0.05610994 0.06805506 0.12604264
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.575935e-08 2.190645e-07 2.493560e-08
+[1] "all positive"
+[1] 851
+[1] 0.11157005 0.05806507 0.04902399 0.07557940 0.08940474
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.120405e-04 -7.361903e-06  1.269443e-04
+[1] "all positive"
+[1] 852
+[1] 0.10092036 0.09771108 0.01019125 0.08312422 0.09555925
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.422170e-08 1.038893e-08 2.337680e-10
+[1] "all positive"
+[1] 853
+[1] 0.10987626 0.07430876 0.01804239 0.10631965 0.08410883
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.695644e-09 1.698915e-08 2.241233e-09
+[1] "all positive"
+[1] 854
+[1] 0.11349174 0.05787289 0.01976023 0.08044238 0.09894269
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.670433e-05 3.405649e-04 6.014447e-05
+[1] "all positive"
+[1] 855
+[1] 0.11979594 0.07360744 0.03411948 0.06481624 0.09226135
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.338883e-05 6.220578e-05 5.102294e-04
+[1] "all positive"
+[1] 856
+[1]  0.11938731  0.10664423 -0.01109152  0.08675384  0.11740152
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.659856e-05 1.444237e-04 1.677418e-05
+[1] "all positive"
+[1] 857
+[1]  0.123845775  0.092707972 -0.003408469  0.091215187  0.116155603
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  2.916222e-04  4.960328e-04 -6.113721e-09
+[1] "all positive"
+[1] 858
+[1] 0.11099909 0.07112766 0.02964008 0.08715142 0.08963951
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.072392e-04 1.754786e-05 4.156524e-05
+[1] "all positive"
+[1] 859
+[1] 0.10022877 0.06805922 0.04754744 0.07845709 0.08419848
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.320478e-09 2.896680e-07 1.074591e-07
+[1] "all positive"
+[1] 860
+[1] 0.10986270 0.08152838 0.02714353 0.07298148 0.10155791
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.773803e-06 5.412251e-05 5.076595e-06
+[1] "all positive"
+[1] 861
+[1] 0.10062002 0.04533530 0.04191920 0.07622174 0.09638872
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.905895e-08  6.446116e-08 -2.462306e-10
+[1] "all positive"
+[1] 862
+[1] 0.09346781 0.08636772 0.02273889 0.08283479 0.11324556
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.215990e-06 1.439419e-07 2.708239e-07
+[1] "all positive"
+[1] 863
+[1] 0.10561298 0.08153343 0.01589680 0.07317968 0.10498921
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.592454e-06 6.967390e-05 8.502173e-06
+[1] "all positive"
+[1] 864
+[1] 0.10949359 0.06695816 0.02527107 0.10328810 0.12184199
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -1.251858e-08  4.864187e-07  5.840134e-07
+[1] "all positive"
+[1] 865
+[1] 0.08741468 0.06949593 0.03077307 0.09017976 0.09885119
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.488143e-07 4.184983e-08 2.235800e-08
+[1] "all positive"
+[1] 866
+[1] 0.13264412 0.06408406 0.04189772 0.09184390 0.06772889
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.242551e-07 1.173509e-06 1.450201e-07
+[1] "all positive"
+[1] 867
+[1] 0.10141898 0.08333590 0.03198036 0.05922851 0.10954650
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.168658e-08 3.203290e-08 2.592537e-07
+[1] "all positive"
+[1] 868
+[1] 0.11697416 0.08913143 0.03597815 0.08452306 0.05455431
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.299526e-08 4.787172e-10 2.303071e-09
+[1] "all positive"
+[1] 869
+[1] 0.10428563 0.05952761 0.01774165 0.09288008 0.09687928
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.377758e-08 1.164718e-07 1.318210e-08
+[1] "all positive"
+[1] 870
+[1] 0.09999234 0.08467125 0.02821702 0.05766873 0.09193990
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.242158e-05 1.976781e-04 1.685311e-05
+[1] "all positive"
+[1] 871
+[1] 0.12961667 0.10401746 0.01767871 0.07725758 0.08879511
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  9.455284e-05 -3.241153e-06  2.006066e-04
+[1] "all positive"
+[1] 872
+[1] 0.10893445 0.05749946 0.03657751 0.05899415 0.10140965
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.603809e-09 2.342509e-08 2.805789e-09
+[1] "all positive"
+[1] 873
+[1]  0.100610179  0.080492999 -0.008012037  0.087706241  0.108476618
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.553115e-10 6.956987e-10 6.527868e-09
+[1] "all positive"
+[1] 874
+[1] 0.13070572 0.07909061 0.02056818 0.08307705 0.09846795
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.114729e-07 4.756642e-07 3.794971e-06
+[1] "all positive"
+[1] 875
+[1] 0.08848049 0.09219090 0.03933067 0.08897359 0.06552081
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.781175e-05 7.256892e-05 5.842269e-04
+[1] "all positive"
+[1] 876
+[1] 0.13573411 0.08663537 0.02036543 0.07730662 0.09584066
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.669554e-07 7.856355e-06 8.577654e-07
+[1] "all positive"
+[1] 877
+[1] 0.10354223 0.10943229 0.02691049 0.06376556 0.09948460
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.041335e-06 1.189646e-06 1.079290e-05
+[1] "all positive"
+[1] 878
+[1] 0.12899052 0.10433209 0.01526551 0.05987494 0.08742816
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -7.595367e-09  1.242726e-06  8.172515e-07
+[1] "all positive"
+[1] 879
+[1] 0.08131099 0.06815677 0.03947397 0.09021232 0.10416027
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.750261e-05 2.225253e-04 4.308122e-04
+[1] "all positive"
+[1] 880
+[1] 0.11266661 0.07722008 0.04036723 0.07309902 0.09073127
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.422265e-08 2.379629e-09 1.980367e-09
+[1] "all positive"
+[1] 881
+[1] 0.09323572 0.07582114 0.04859697 0.07860878 0.07460460
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.679261e-05 1.048023e-05 5.517382e-06
+[1] "all positive"
+[1] 882
+[1] 0.11227542 0.09222570 0.03009181 0.08456964 0.08715383
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.124836e-07 6.225889e-06 6.436236e-07
+[1] "all positive"
+[1] 883
+[1] 0.13947444 0.07334622 0.01858830 0.07216071 0.10287259
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.329872e-05 9.668364e-07 1.474113e-06
+[1] "all positive"
+[1] 884
+[1] 0.10902374 0.07875979 0.01236084 0.08349107 0.10524580
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.571335e-04 1.195821e-04 1.763314e-05
+[1] "all positive"
+[1] 885
+[1] 0.11892328 0.08830233 0.04855851 0.04378170 0.09046157
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.554547e-09 8.023448e-08 1.475218e-08
+[1] "all positive"
+[1] 886
+[1] 0.12889494 0.06199966 0.05569873 0.08496583 0.06724537
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.588194e-06 1.154142e-05 8.670239e-05
+[1] "all positive"
+[1] 887
+[1] 0.12509296 0.07198016 0.01235222 0.08909481 0.09316874
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.825592e-08 -2.259715e-09  3.552459e-08
+[1] "all positive"
+[1] 888
+[1] 0.09497021 0.09275578 0.03684609 0.07792831 0.10511722
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0002269003 0.0005518446 0.0003718772
+[1] "all positive"
+[1] 889
+[1] 0.13546717 0.06950043 0.02308673 0.09900033 0.05846650
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.000305e-07 9.452486e-07 1.170183e-07
+[1] "all positive"
+[1] 890
+[1] 0.12126796 0.07528842 0.04337177 0.06239219 0.09440093
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.149933e-09 2.262245e-09 1.619992e-08
+[1] "all positive"
+[1] 891
+[1] 0.11427167 0.05976325 0.03905047 0.07126788 0.09871711
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.646213e-06 6.576189e-08 1.048178e-05
+[1] "all positive"
+[1] 892
+[1] 0.11344910 0.07740202 0.02260471 0.05725259 0.11034546
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.960177e-09 9.599667e-09 6.936843e-08
+[1] "all positive"
+[1] 893
+[1] 0.12160006 0.07803998 0.02909449 0.06349578 0.07661276
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.177747e-07 5.515844e-06 6.844137e-07
+[1] "all positive"
+[1] 894
+[1] 0.09347463 0.10259417 0.03723350 0.06339401 0.08207334
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.358746e-05 1.173444e-03 7.567344e-04
+[1] "all positive"
+[1] 895
+[1] 0.10432387 0.07808096 0.03502108 0.08759990 0.07818479
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.962800e-04 8.855551e-05 1.749286e-05
+[1] "all positive"
+[1] 896
+[1] 0.10884964 0.08727548 0.02251976 0.06579624 0.10305162
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  2.084526e-09 -1.046933e-10  3.848705e-09
+[1] "all positive"
+[1] 897
+[1] 0.10255627 0.07781722 0.03095882 0.07109428 0.10850161
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  3.271281e-05 -7.245130e-07  7.425962e-05
+[1] "all positive"
+[1] 898
+[1] 0.10241185 0.09004213 0.03228631 0.06911186 0.09278319
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.742915e-05 2.597241e-04 3.256716e-05
+[1] "all positive"
+[1] 899
+[1] 0.11935558 0.09759792 0.02933322 0.07172714 0.07579639
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  4.378109e-07 -2.546574e-08  3.910188e-07
+[1] "all positive"
+[1] 900
+[1]  0.12478727  0.09173997 -0.00539025  0.09756271  0.08893977
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.833827e-07 8.007619e-06 9.646970e-07
+[1] "all positive"
+[1] 901
+[1] 0.11764055 0.06158819 0.02867270 0.10964653 0.07364327
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.542840e-06 5.907326e-06 3.323118e-07
+[1] "all positive"
+[1] 902
+[1] 0.153742315 0.086884281 0.005065571 0.087213683 0.092062082
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.927491e-05 1.560636e-05 3.024736e-04
+[1] "all positive"
+[1] 903
+[1] 0.09579419 0.08655760 0.03494391 0.08698257 0.07766478
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -2.760325e-10  1.260440e-08  1.385901e-08
+[1] "all positive"
+[1] 904
+[1] 0.14328167 0.08942242 0.00783912 0.09454045 0.10324542
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -8.811464e-08  3.415255e-06  4.233077e-06
+[1] "all positive"
+[1] 905
+[1] 0.135174793 0.066067567 0.004904224 0.132674695 0.099536797
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  4.179941e-05 -2.727563e-06  5.513314e-05
+[1] "all positive"
+[1] 906
+[1] 0.12833130 0.06134031 0.03376682 0.08398562 0.07748128
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.620117e-05 4.150417e-04 4.967692e-05
+[1] "all positive"
+[1] 907
+[1] 0.10203557 0.04865649 0.03735973 0.08712858 0.09072431
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.791277e-10 7.869899e-10 6.607428e-09
+[1] "all positive"
+[1] 908
+[1] 0.09564217 0.03998160 0.05658957 0.06604348 0.09277450
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.674707e-07 1.475728e-06 1.708565e-07
+[1] "all positive"
+[1] 909
+[1] 0.120097164 0.099914293 0.005613397 0.072947435 0.112808594
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.038642e-06 4.861453e-06 3.802214e-05
+[1] "all positive"
+[1] 910
+[1] 0.09815951 0.09295865 0.02420639 0.06948753 0.07976267
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.656604e-06 9.096573e-08 4.881203e-07
+[1] "all positive"
+[1] 911
+[1] 0.14349538 0.10221575 0.01699108 0.08525105 0.08336290
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.535324e-08 2.549441e-08 1.967976e-07
+[1] "all positive"
+[1] 912
+[1] 0.10072501 0.07561200 0.03514823 0.06538208 0.09902946
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.378250e-07 -3.661594e-09  9.680835e-08
+[1] "all positive"
+[1] 913
+[1] 0.13744369 0.08107559 0.00301276 0.08039564 0.09075983
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.207240e-09 4.089962e-10 6.853624e-09
+[1] "all positive"
+[1] 914
+[1] 0.10475153 0.07842909 0.03397943 0.10834897 0.07410186
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.886976e-05 7.682075e-06 6.503737e-06
+[1] "all positive"
+[1] 915
+[1] 0.13388886 0.07015086 0.02743504 0.07329539 0.09733189
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.256109e-08 1.853129e-07 6.459088e-07
+[1] "all positive"
+[1] 916
+[1] 0.12109656 0.06250752 0.01570637 0.08449422 0.10479299
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.091022e-05 3.022412e-05 2.468859e-04
+[1] "all positive"
+[1] 917
+[1] 0.12912845 0.04309989 0.04909463 0.07803123 0.09269491
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.312872e-07 3.695234e-05 9.633715e-05
+[1] "all positive"
+[1] 918
+[1] 0.09719865 0.06797098 0.05190823 0.05972160 0.08263044
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.688871e-06 1.554156e-05 1.899686e-06
+[1] "all positive"
+[1] 919
+[1] 0.11355891 0.07784641 0.04233585 0.06640496 0.10074155
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.214721e-05 2.093828e-04 2.665234e-05
+[1] "all positive"
+[1] 920
+[1] 0.10113377 0.10317161 0.02136383 0.06400382 0.10005546
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001273065 0.0011670589 0.0001420765
+[1] "all positive"
+[1] 921
+[1] 0.135030874 0.097010271 0.009081589 0.062458789 0.082454988
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.412631e-10 2.163649e-10 1.721795e-09
+[1] "all positive"
+[1] 922
+[1] 0.09871284 0.06110402 0.04043332 0.08684255 0.10977843
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.489319e-05 2.034914e-06 8.863313e-07
+[1] "all positive"
+[1] 923
+[1] 0.10466163 0.07459419 0.03863051 0.06976652 0.12187638
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.247059e-08 1.051795e-07 9.079520e-07
+[1] "all positive"
+[1] 924
+[1] 0.122076046 0.098734099 0.005722489 0.074153105 0.088133846
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.282984e-06 7.625117e-07 9.433042e-06
+[1] "all positive"
+[1] 925
+[1] 0.10829119 0.08342597 0.03838465 0.07021640 0.07898810
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.541220e-07 6.287737e-08 3.627196e-09
+[1] "all positive"
+[1] 926
+[1] 0.10465111 0.03270291 0.05311440 0.05141157 0.10586642
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.804387e-05 3.774411e-05 2.635048e-04
+[1] "all positive"
+[1] 927
+[1] 0.09795461 0.05403924 0.03364316 0.07251565 0.11359210
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.164074e-05 1.284257e-05 3.505139e-04
+[1] "all positive"
+[1] 928
+[1] 0.10244047 0.09702551 0.02471504 0.09166365 0.06110253
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.643869e-07 5.009706e-05 1.369992e-04
+[1] "all positive"
+[1] 929
+[1] 0.11443460 0.07262891 0.02839796 0.07678862 0.10684341
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.334317e-08 4.867055e-08 4.449772e-07
+[1] "all positive"
+[1] 930
+[1] 0.12344739 0.07473566 0.03821028 0.05409270 0.09107679
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.520242e-06 1.301021e-04 3.544886e-05
+[1] "all positive"
+[1] 931
+[1] 0.13105259 0.09057356 0.01013447 0.09196801 0.10402127
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  4.957732e-04 -3.069269e-05  6.124572e-04
+[1] "all positive"
+[1] 932
+[1] 0.129351751 0.087683413 0.001516673 0.080380780 0.071301332
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.379502e-07 7.601973e-06 9.165312e-07
+[1] "all positive"
+[1] 933
+[1] 0.14712062 0.07112941 0.03136594 0.07612276 0.07028652
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.063215e-05 2.041013e-05 1.067413e-06
+[1] "all positive"
+[1] 934
+[1] 0.09875480 0.08945476 0.01058296 0.11527277 0.10220456
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.038080e-05 6.996363e-04 9.174209e-05
+[1] "all positive"
+[1] 935
+[1] 0.11719962 0.05472934 0.05501984 0.06839183 0.07329676
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.425452e-07 8.323922e-06 9.810232e-07
+[1] "all positive"
+[1] 936
+[1]  0.111687650  0.090012574 -0.001596659  0.082052886  0.102198411
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.010135e-09 -5.809486e-11  8.537797e-10
+[1] "all positive"
+[1] 937
+[1] 0.09855645 0.10273556 0.01107412 0.10132285 0.08645279
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.068710e-06 9.201965e-06 1.257531e-06
+[1] "all positive"
+[1] 938
+[1]  0.114756156  0.098638076 -0.005255989  0.073103594  0.121891937
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.157624e-10 6.536126e-09 7.925763e-10
+[1] "all positive"
+[1] 939
+[1] 0.11892503 0.06238270 0.01421207 0.09150891 0.08804741
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.926782e-08 4.015037e-07 5.389888e-08
+[1] "all positive"
+[1] 940
+[1] 0.09623134 0.05471733 0.03850043 0.05674392 0.09160817
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.187178e-06 6.560834e-05 7.955516e-06
+[1] "all positive"
+[1] 941
+[1]  0.134111332  0.080205718 -0.007061506  0.095291689  0.104075802
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.426698e-05 1.191820e-05 1.962460e-04
+[1] "all positive"
+[1] 942
+[1] 0.12362237 0.09300577 0.01826800 0.08390780 0.08083317
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.538871e-04 5.101671e-05 3.112747e-05
+[1] "all positive"
+[1] 943
+[1] 0.11920981 0.07768211 0.02646130 0.06237819 0.09127519
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.109990e-08 1.673188e-08 1.342466e-07
+[1] "all positive"
+[1] 944
+[1] 0.08461606 0.05486491 0.08797980 0.06183468 0.08069055
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 7.811763e-06 1.843049e-05 3.149692e-07
+[1] "all positive"
+[1] 945
+[1] 0.11772741 0.07944202 0.01550734 0.06894070 0.08693764
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.903092e-06 4.214284e-07 2.855217e-07
+[1] "all positive"
+[1] 946
+[1] 0.15628139 0.07095564 0.01907700 0.08199059 0.08829616
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.551045e-09 2.342173e-08 2.858587e-09
+[1] "all positive"
+[1] 947
+[1] 0.13283409 0.08948412 0.01080934 0.07551141 0.09461675
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.523626e-07 4.214084e-06 8.802941e-07
+[1] "all positive"
+[1] 948
+[1] 0.12061428 0.06847783 0.03330004 0.07569072 0.07613905
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.336710e-07 2.157889e-06 2.644299e-07
+[1] "all positive"
+[1] 949
+[1] 0.11149495 0.06754196 0.01426811 0.08940620 0.10673409
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.957596e-06 1.109999e-06 5.489556e-07
+[1] "all positive"
+[1] 950
+[1] 0.10441097 0.07674023 0.05085055 0.08549085 0.07436987
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] -3.585582e-10  2.454462e-08  3.536287e-08
+[1] "all positive"
+[1] 951
+[1] 0.12611774 0.07338512 0.05169190 0.05069235 0.08885264
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.603180e-09 9.801959e-09 9.358677e-08
+[1] "all positive"
+[1] 952
+[1] 0.12819312 0.08712765 0.03374963 0.07750769 0.09907495
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.807255e-07 5.563718e-07 3.265070e-06
+[1] "all positive"
+[1] 953
+[1] 0.11312113 0.07875610 0.04248369 0.06340548 0.08407172
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.041114e-05 8.499836e-05 3.562023e-04
+[1] "all positive"
+[1] 954
+[1] 0.07752403 0.09181781 0.04472272 0.10023609 0.07679935
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.431561e-08 1.224296e-07 6.896874e-07
+[1] "all positive"
+[1] 955
+[1] 0.14297571 0.06009733 0.02610583 0.07795931 0.08412049
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.435960e-06 1.317563e-05 1.605000e-06
+[1] "all positive"
+[1] 956
+[1] 0.12759750 0.05037159 0.03750589 0.08119478 0.08171524
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.692333e-09 5.622279e-09 4.492238e-08
+[1] "all positive"
+[1] 957
+[1] 0.10622758 0.07703373 0.05115260 0.06053586 0.09563011
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.193283e-04 6.960064e-05 1.652400e-05
+[1] "all positive"
+[1] 958
+[1] 0.09720981 0.10004910 0.02271467 0.06824264 0.08326986
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.085766e-07 2.506143e-08 1.332682e-08
+[1] "all positive"
+[1] 959
+[1]  0.115736025  0.097502419 -0.000880004  0.091730499  0.096573748
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  5.468727e-04 -1.139284e-05  5.299078e-04
+[1] "all positive"
+[1] 960
+[1] 0.151343607 0.091506547 0.009870333 0.068492170 0.083400026
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.535265e-08 1.090377e-06 3.492262e-07
+[1] "all positive"
+[1] 961
+[1] 0.10427022 0.09408427 0.03408033 0.05646378 0.07591453
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.569574e-09 1.428921e-08 1.728418e-09
+[1] "all positive"
+[1] 962
+[1] 0.11956047 0.07969029 0.03044199 0.08137156 0.05893535
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.038451e-07 7.934849e-06 9.300824e-07
+[1] "all positive"
+[1] 963
+[1] 0.10401923 0.08441574 0.03104002 0.05876745 0.07676150
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.274041e-09 9.665589e-09 9.887059e-10
+[1] "all positive"
+[1] 964
+[1] 0.08885500 0.06597931 0.02459502 0.08164961 0.11112873
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.725875e-10 5.119036e-09 8.728213e-10
+[1] "all positive"
+[1] 965
+[1] 0.10274213 0.07325109 0.05454757 0.06168316 0.08525109
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  5.098248e-05 -2.302000e-06  9.835850e-05
+[1] "all positive"
+[1] 966
+[1]  0.106484108  0.074874944 -0.004427233  0.104336919  0.104975028
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.993647e-09 4.800703e-08 6.102280e-09
+[1] "all positive"
+[1] 967
+[1] 0.09120412 0.05972838 0.06199057 0.08638481 0.08642674
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.647295e-06 2.854651e-05 2.414789e-06
+[1] "all positive"
+[1] 968
+[1] 0.09435557 0.07631808 0.02583653 0.08105499 0.09041414
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.753832e-07 1.040195e-06 8.353584e-08
+[1] "all positive"
+[1] 969
+[1] 0.13253331 0.07194023 0.03460174 0.04463175 0.10564273
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.158478e-06 1.083866e-05 3.239535e-06
+[1] "all positive"
+[1] 970
+[1] 0.11352505 0.06226961 0.02980420 0.06591988 0.08714470
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.406688e-08 8.232960e-08 1.628648e-09
+[1] "all positive"
+[1] 971
+[1] 0.11911846 0.08795958 0.03511220 0.07100973 0.09693138
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.903840e-06 4.711547e-07 1.876832e-07
+[1] "all positive"
+[1] 972
+[1] 0.10063873 0.06523531 0.06168891 0.08503280 0.06852354
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.945290e-05 2.714973e-04 3.325076e-05
+[1] "all positive"
+[1] 973
+[1] 0.11694998 0.07403383 0.02508909 0.08349243 0.07134905
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.999893e-08 2.199580e-07 7.235238e-09
+[1] "all positive"
+[1] 974
+[1] 0.110250232 0.108661511 0.007812116 0.094568127 0.116071459
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.276721e-09 2.291101e-09 1.706450e-08
+[1] "all positive"
+[1] 975
+[1] 0.09812487 0.07237640 0.05681504 0.08351285 0.07615876
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 8.915044e-06 2.168155e-05 3.006355e-06
+[1] "all positive"
+[1] 976
+[1] 0.12654962 0.06318026 0.02277636 0.09594519 0.08190366
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.928168e-09 2.861380e-08 1.132608e-07
+[1] "all positive"
+[1] 977
+[1]  0.122812616  0.115430818 -0.001617636  0.126435500  0.073555392
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.536890e-06 1.729972e-07 1.105291e-07
+[1] "all positive"
+[1] 978
+[1] 0.12191510 0.06821033 0.02755814 0.05999579 0.08663460
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.117219e-09 3.142176e-08 1.166025e-07
+[1] "all positive"
+[1] 979
+[1] 0.12852672 0.07399344 0.03121374 0.09370953 0.07653945
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 0.0001078928 0.0011131968 0.0001485388
+[1] "all positive"
+[1] 980
+[1] 0.09993954 0.10447518 0.02183127 0.07710686 0.10149256
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.041082e-10 3.645629e-09 5.684301e-10
+[1] "all positive"
+[1] 981
+[1] 0.122433148 0.100714585 0.009778487 0.071972440 0.095198151
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.681660e-06 3.486694e-06 3.439043e-05
+[1] "all positive"
+[1] 982
+[1] 0.13809639 0.06024140 0.04305569 0.05770520 0.11683165
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.842888e-08 2.121310e-09 1.246130e-09
+[1] "all positive"
+[1] 983
+[1] 0.11706109 0.05719402 0.05644451 0.06770559 0.08240860
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.104779e-08 1.138168e-09 8.542818e-10
+[1] "all positive"
+[1] 984
+[1]  0.10259844  0.08789304 -0.01260634  0.09630950  0.12830874
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.732334e-08 2.523476e-07 1.842314e-08
+[1] "all positive"
+[1] 985
+[1] 0.11151715 0.07924525 0.04853215 0.05713961 0.06949425
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.766115e-06 2.907884e-06 2.038594e-05
+[1] "all positive"
+[1] 986
+[1] 0.12300530 0.07658664 0.04842394 0.07777593 0.06794757
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.794456e-07 1.001441e-06 4.772619e-06
+[1] "all positive"
+[1] 987
+[1] 0.11240146 0.08804201 0.02071972 0.07559629 0.11214806
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.257707e-08 2.496071e-09 3.515451e-10
+[1] "all positive"
+[1] 988
+[1] 0.12337852 0.04255021 0.03498650 0.09429449 0.10969168
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.820568e-08 1.135255e-06 1.689634e-07
+[1] "all positive"
+[1] 989
+[1] 0.111497105 0.095094823 0.005759599 0.091836681 0.085417814
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 3.623333e-10 4.286220e-09 6.600462e-10
+[1] "all positive"
+[1] 990
+[1] 0.09256356 0.09480957 0.04707892 0.05595556 0.10205049
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.933234e-05 3.103590e-05 2.440043e-04
+[1] "all positive"
+[1] 991
+[1] 0.10387836 0.06899281 0.02740825 0.07446724 0.08686330
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.604431e-05 2.983619e-05 6.514437e-08
+[1] "all positive"
+[1] 992
+[1] 0.10869114 0.07962618 0.03109751 0.08258683 0.09119035
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 5.967234e-10 5.221334e-11 5.730372e-11
+[1] "all positive"
+[1] 993
+[1]  0.105699700  0.085207306 -0.004207736  0.089527110  0.134524846
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  2.504193e-05  4.170354e-05 -1.350274e-07
+[1] "all positive"
+[1] 994
+[1] 0.11187535 0.05401055 0.03389178 0.07422824 0.08261533
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 4.880889e-09 7.362752e-09 5.907061e-08
+[1] "all positive"
+[1] 995
+[1] 0.09381498 0.08336399 0.05006908 0.04860311 0.09780816
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.440711e-10 6.216005e-10 3.253327e-09
+[1] "all positive"
+[1] 996
+[1] 0.12775665 0.05718259 0.01031953 0.08871545 0.09540824
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 1.858386e-07 1.704960e-06 2.077095e-07
+[1] "all positive"
+[1] 997
+[1] 0.10073091 0.07512512 0.04034069 0.07007715 0.09050887
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 9.006029e-11 1.056459e-10 9.487964e-10
+[1] "all positive"
+[1] 998
+[1] 0.11679264 0.09070683 0.02789991 0.08204651 0.08395654
+[1] "all positive"
+[1] "Gradient at the end:"
+[1]  1.714864e-05 -1.018287e-06  1.649354e-05
+[1] "all positive"
+[1] 999
+[1] 0.13690503 0.06420731 0.03631911 0.07900254 0.08047708
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 2.632331e-06 9.505556e-08 4.691377e-07
+[1] "all positive"
+[1] 1000
+[1] 0.12590784 0.06069281 0.04363107 0.05140913 0.10533272
+[1] "all positive"
+[1] "Gradient at the end:"
+[1] 6.934177e-10 6.994574e-09 9.290655e-10
+[1] "all positive"
+> 
+> data = data.frame(d1x.joint,d2x.joint,d3y.joint,d4y.joint,dxy.joint,logwv.joint, logl.joint, logdens.joint,
++     d1x.cond,d2x.cond,d3y.cond,d4y.cond,dxy.cond,logwv.cond, logl.cond, logdens.cond,
++     d1x.nj,d2x.nj,d3y.nj,d4y.nj,dxy.nj,logwv.nj, logl.nj, logdens.nj)
+> save(data,file="simulations_gammabeta.Rda")
+> 
+> if(FALSE){
++ head(data)
++ summary(data)
++ data[data$logwv.joint==0,]
++ data[data$logwv.cond==0,]
++ 
++ my.logw.joint = data$logwv.joint - mean(data$logwv.joint)
++ data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
++ data[data$w.joint>0.01,]
++ length(data[data$w.joint>0.01,]$w.joint)
++ hist(data$w.joint)
++ plot(1:length(data$w.joint),cumsum(rev(sort(data$w.joint))))
++ my.logw.cond = data$logwv.cond - mean(data$logwv.cond)
++ data$w.cond = exp(my.logw.cond)/sum(exp(my.logw.cond))
++ data[data$w.cond>0.01,]
++ length(data[data$w.cond>0.01,]$w.cond)
++ hist(data$w.cond)
++ plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
++ 
++ ## effective sample size:
++ (1/sum(data$w.joint^2))/nreps
++ (1/sum(data$w.cond^2))/nreps
++ 
++ 
++ mat.joint[[1]]/max(mat.joint[[1]])
++ mat.cond[[1]]/max(mat.cond[[1]])
++ 
++ 
++ hist(d1x.joint)
++ abline(v=d1x0,col="red")
++ hist(d1x.cond)
++ abline(v=d1x0,col="red")
++ 
++ hist(dxy.joint)
++ abline(v=dxy0,col="red")
++ hist(data$dxy.cond)
++ abline(v=dxy0,col="red")
++ 
++ hist(d3y.joint)
++ abline(v=d3y0,col="red")
++ hist(d3y.cond)
++ abline(v=d3y0,col="red")
++ 
++ suma1=matrix(rep(0,25),ncol=5)
++ suma2=matrix(rep(0,25),ncol=5)
++ for(i in 1:nreps){
++     suma1 = suma1+mat.joint[[i]]
++     suma2 = suma2+mat.cond[[i]]
++ }
++ mean.mat.joint = suma1/nreps
++ mean.mat.cond = suma2/nreps
++ 
++ round(mean.mat.joint,5)
++ round(mean.mat.cond,5)
++ round(mean.mat.joint/max(mean.mat.joint),4)
++ round(mean.mat.cond/max(mean.mat.cond),4)
++ 
++ suma1=rep(0,5)
++ suma2=rep(0,3)
++ suma3=rep(0,2)
++ for(i in 1:nreps){
++     suma1 = suma1+mean.joint[[i]]
++     suma2 = suma2+mean1.cond[[i]]
++     suma3 = suma3+mean2.cond[[i]]
++ }
++ 
++ mean.mean.joint = suma1/nreps
++ mean.mean1.cond = suma2/nreps
++ mean.mean2.cond = suma3/nreps
++ 
++ mean.mean.joint
++ mean.mean1.cond
++ mean.mean2.cond
++ 
++ p1 <- ggplot(data,aes(dxy.joint,d4y.joint))+geom_point(color="blue")+geom_point(aes(dxy.cond,d4y.cond),data=data,colour="red")+
++     ggtitle("Blue=5D joint, Red= conditional")
++ plot(p1)
++ p2 <- ggplot(data,aes(d1x.joint,d2x.joint))+geom_point(color="blue")+geom_point(aes(d1x.cond,d2x.cond),data=data,colour="red")+
++     ggtitle("Blue=5D joint, Red= conditional")
++ plot(p2)
++ }
+> 
+> proc.time()
+     user    system   elapsed 
+11293.367     1.051 11279.674 
