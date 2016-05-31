@@ -1,6 +1,7 @@
 #include <random>
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 #include "Eigen/Core"
 #include "Eigen/Eigenvalues"
@@ -154,7 +155,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   if(verbose)
     cout << "T3: " << bl[2] << endl;
   logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + alpha3*log(lambda3) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1]+(alpha3-1)*log(bl[2])-lambda3*bl[2] - log(tgamma(alpha1)) - log(tgamma(alpha2)) - log(tgamma(alpha3));
-  //par3D << alpha1 << "," << beta1 << "," << alpha2 << "," << beta2 << "," << alpha3 << "," << beta3 << endl;
+  par3D << alpha1 << "," << lambda1 << "," << alpha2 << "," << lambda2 << "," << alpha3 << "," << lambda3 << endl;
   return bl;
  }
 
