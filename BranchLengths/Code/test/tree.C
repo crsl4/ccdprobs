@@ -439,6 +439,8 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
     if ( m == patternToProbMap.end() ) // first time this pattern calculated
     {
       patternToProbMap[ pattern ] = pair<double,Vector4d> (0,translate(base)); //clau: translate->4 probs
+      cerr << "calculate called on node " << number << " for site " << site;
+      cerr << " prob for " << pattern << " set to " << patternToProbMap[ pattern ].first << " " << patternToProbMap[ pattern ].second.transpose() << endl;
     }
     return;
   }
@@ -473,6 +475,8 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
     scale += log( vmax );
     tempProb /= vmax;
     patternToProbMap[ pattern ] = pair<double,Vector4d> (scale,tempProb);
+    cerr << "calculate called on node " << number << " for site " << site;
+    cerr << " prob for " << pattern << " set to " << patternToProbMap[ pattern ].first << " " << patternToProbMap[ pattern ].second.transpose() << endl;
   }
 }
 

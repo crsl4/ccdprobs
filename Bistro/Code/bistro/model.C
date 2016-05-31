@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <cmath>
+#include <random>
 
 #include "Eigen/Core"
 #include "Eigen/Eigenvalues"
@@ -97,3 +98,12 @@ Matrix4d QMatrix::getQQP(double t)
   Vector4d x = vectorExp(t);
   return V * lambda.asDiagonal() * lambda.asDiagonal() * x.asDiagonal() * Vinv;
 }
+
+// x is current state; assume 0 < x[i] < 1 and sum x[i] = 1
+// y is the returned proposed state with equivalent constraints
+// proposal is Dirichlet distribution with alpha[i] = scale*x[i] + 0.5
+// this helps prevent the state from getting sucked into a corner where x[i] = 0 for some i
+//void mcmcProposeDirichlet(vector<double>& x,vector<double>& y,double scale,mt19937_64& rng)
+//{
+//  
+//}

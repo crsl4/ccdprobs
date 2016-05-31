@@ -96,7 +96,6 @@ int main(int argc, char* argv[])
 
     // log-likelihood calculation
     //checkDistances(tree,alignment,model);
-    tree.randomize(rng);
     if(verbose)
       cout << tree.makeTopologyNumbers() << endl;
     int errors = 0;
@@ -121,6 +120,7 @@ int main(int argc, char* argv[])
 	cout << "------------- rep " << i << " -------------" << endl;
 	try
 	  {
+	    tree.randomize(rng);
 	    tree.generateBranchLengths(alignment,model,rng, verbose, mvnormal, par3D, par2D);
 	    double weight = tree.calculateWeight(alignment, model, 0.05, verbose, logwfile);
 	    logw(i) = weight;
