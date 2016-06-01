@@ -121,6 +121,7 @@ int main(int argc, char* argv[])
 	try
 	  {
 	    tree.randomize(rng);
+	    tree.clearProbMaps();
 	    tree.generateBranchLengths(alignment,model,rng, verbose, mvnormal, par3D, par2D);
 	    double weight = tree.calculateWeight(alignment, model, 0.05, verbose, logwfile);
 	    logw(i) = weight;
