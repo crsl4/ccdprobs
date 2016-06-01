@@ -11,13 +11,43 @@ mv logw.txt logw646_norm_full.txt
 mv par3D.txt par3D_646_norm_full.txt
 mv par2D.txt par2D_646_norm_full.txt
 
-then compareLogLikComputation.r
-problem: with both c++ and r, we have bad weights (ESS ~1%), it seems
-like the edges are not in the correct order
+then compareLogLikComputation.r: logw646_norm_full.Rda
+c++ logw ESS ~15%
+R logw ESS ~16%
+not the 40% that we used to get, could it have been an artifact of the
+lack of randomization? no.
+try again without randomizing:
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal
+mv logw.txt logw646_norm_nonrand.txt
+mv par3D.txt par3D_646_norm_nonrand.txt
+mv par2D.txt par2D_646_norm_nonrand.txt
+=> does not work, worse ESS ~1%
+
+## seems that range of internal bl in c++ is wider than in R
+> summary(dataC$bl2)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+0.009314 0.029320 0.038820 0.042910 0.057950 0.087690
+> summary(dataR$dxy.cond)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+0.01158 0.02679 0.03155 0.03190 0.03656 0.05615
 
 
+*** aqui vamos:
+* gammabeta
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965
+mv logw.txt logw646_gam_full.txt
+mv par3D.txt par3D_646_gam_full.txt
+mv par2D.txt par2D_646_gam_full.txt
 
-
+then compareLogLikComputation.r: logw646_gam_full.Rda
+ESS worse ~0.4%
+worse range, not including the true value for c++
+> summary(dataC$bl2)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+0.03995 0.05391 0.05850 0.05913 0.06411 0.08790
+> summary(dataR$dxy.cond)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+0.01225 0.02660 0.03190 0.03230 0.03718 0.06139
 
 
 

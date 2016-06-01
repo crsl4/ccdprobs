@@ -66,7 +66,7 @@ data = read.table("../BranchLengths/Code/test/logw646_norm_nonrand.txt", sep=","
 par3D = read.table("../BranchLengths/Code/test/par3D_646_norm_nonrand.txt", sep=",", header=TRUE)
 par2D = read.table("../BranchLengths/Code/test/par2D_646_norm_nonrand.txt", sep=",", header=TRUE)
 
-##data = read.table("../BranchLengths/Code/test/logw646_gam_full.txt", sep=",", header=TRUE)
+data = read.table("../BranchLengths/Code/test/logw646_gam_full.txt", sep=",", header=TRUE)
 
 head(data)
 summary(data)
@@ -104,5 +104,43 @@ hist(data$wR)
 plot(1:length(data$wR),cumsum(rev(sort(data$wR))))
 (1/sum(data$wR^2))/nrep
 
-plot(1:nrep,data$loglik)
-plot(1:nrep, data$loglikR)
+save(data,file="logw646_norm_full.Rda")
+save(data,file="logw646_gam_full.Rda")
+
+plot(data$loglik, data$loglikR)
+
+
+load(file="simDataR_646.Rda")
+load(file="simulations_gammabeta.Rda")
+head(data)
+my.logw.joint = data$logwv.joint - mean(data$logwv.joint)
+data$w.joint = exp(my.logw.joint)/sum(exp(my.logw.joint))
+data[data$w.joint>0.01,]
+length(data[data$w.joint>0.01,]$w.joint)
+hist(data$w.joint)
+plot(1:length(data$w.joint),cumsum(rev(sort(data$w.joint))))
+my.logw.cond = data$logwv.cond - mean(data$logwv.cond)
+data$w.cond = exp(my.logw.cond)/sum(exp(my.logw.cond))
+data[data$w.cond>0.01,]
+length(data[data$w.cond>0.01,]$w.cond)
+hist(data$w.cond)
+plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
+
+(1/sum(data$w.joint^2))/nreps
+(1/sum(data$w.cond^2))/nreps
+
+
+## -------------------------------------------------
+## comparing analysis all in R vs all in C++
+## ------------------------------------------------
+load(file="simDataR_646.Rda")
+load(file="simulations_gammabeta.Rda")
+dataR = data
+load(file="logw646_norm_full.Rda")
+load(file="logw646_gam_full.Rda")
+dataC = data
+
+hist(dataC$bl2) ## wider range
+hist(dataR$dxy.cond)
+summary(dataC$bl2)
+summary(dataR$dxy.cond)
