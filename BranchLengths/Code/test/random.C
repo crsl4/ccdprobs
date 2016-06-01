@@ -144,7 +144,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
 	cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is zero" << endl;
       //exit(1);
       alpha3 = 1;
-      lambda3 = 1/L(1,1);
+      lambda3 = 1/L(2,2);
     }
   if( num > TOL)
     {

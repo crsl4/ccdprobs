@@ -57,6 +57,77 @@ seq2.dist = seqMatrix(seq2)
 seq3.dist = seqMatrix(seq3)
 seq4.dist = seqMatrix(seq4)
 
+## sample of 1 to study step by step
+## compare with BL/Code/test/screen646_norm_1.txt
+## different gradient and hessian computation
+data = read.table("../BranchLengths/Code/test/logw646_norm_1.txt", sep=",", header=TRUE)
+par3D = read.table("../BranchLengths/Code/test/par3D_646_norm_1.txt", sep=",", header=TRUE)
+par2D = read.table("../BranchLengths/Code/test/par2D_646_norm_1.txt", sep=",", header=TRUE)
+
+## We want to compare the Newton-Raphson (from screen646_norm_1.txt)
+## Entering mleDistanceJoint
+## lx,ly,lz: 0.0897102, 0.0262534, 0.125166
+## sxy,sxz,syz: 0.115964, 0, 0
+## Entering mleDistance2D
+## Starting point in mleDistance2D
+## mleDistance2D Newton-Raphson curr: 0.0897102  0.125166
+## mleDistance2D Newton-Raphson gradient:  -2229.4 -496.485
+## mleDistance2D Newton-Raphson inverse hessian:
+## -1.44679e-05 -4.78424e-05
+## -4.78424e-05 -0.000710913
+## entered while
+## mleDistance2D Newton-Raphson curr: 0.0897102  0.125166
+## mleDistance2D Newton-Raphson gradient:  -2229.4 -496.485
+## mleDistance2D Newton-Raphson inverse hessian:
+## -1.44679e-05 -4.78424e-05
+## -4.78424e-05 -0.000710913
+## First delta: 0.0560078  0.459618
+## New proposed: 0.0337024 -0.334451
+## with sum: 0.115964
+## ...
+## Finally converged
+## Gradient
+## 8.88207e-06 0.000468723
+## 2D mean: 0.0466979 0.0373409
+## , cov matrix:
+##  1.89557e-05 -1.40234e-06
+## -1.40234e-06  4.61438e-05
+
+
+seqx.dist = sequenceDist(0.0782513, 0.112059,seq3.dist, seq4.dist, Q)
+mu = findMLE2D(seq2.dist, seqx.dist, seq1.dist,Q, 0.115964, t0=c(0.08971,0.125166), verbose=TRUE)
+## [1] "entering findMLE..."
+## [1] 0.089710 0.125166
+## [1] "gradient and hessian"
+## [1] -157.90620  -78.70095
+##            [,1]      [,2]
+## [1,] -25201.942  1199.208
+## [2,]   1199.208 -6550.252
+
+hessian = matrix(c(-25201.942,  1199.208,1199.208, -6550.252), ncol=2)
+solve(hessian)
+##               [,1]          [,2]
+## [1,] -4.002819e-05 -7.328287e-06
+## [2,] -7.328287e-06 -1.540075e-04
+
+mu$t ## 0.0826959, 0.11346942
+-1*solve(mu$obsInfo)
+##              [,1]         [,2]
+## [1,] 4.352266e-05 2.821790e-06
+## [2,] 2.821790e-06 1.249793e-04
+
+d2 = simulateBranchLength.conditionalMultinorm(nsim=1,seq2.dist, seqx.dist, seq1.dist,Q,t0=c(0.08971, 0.125166),0.115964)
+d2$t[1] ## 0.06916
+d2$t[2] ## 0.11255
+0.115964 - d2$t[1] ## 0.0468
+
+
+
+## ----------------------------------------------------------------
+## comparing sample of 1000 between R and C++
+## still differences in both mvnormal and gammabeta
+## ----------------------------------------------------------------
+
 ## order: d2x,dxy,d3y,d4y,d1x
 data = read.table("../BranchLengths/Code/test/logw646_norm_full.txt", sep=",", header=TRUE)
 par3D = read.table("../BranchLengths/Code/test/par3D_646_norm_full.txt", sep=",", header=TRUE)
@@ -67,6 +138,8 @@ par3D = read.table("../BranchLengths/Code/test/par3D_646_norm_nonrand.txt", sep=
 par2D = read.table("../BranchLengths/Code/test/par2D_646_norm_nonrand.txt", sep=",", header=TRUE)
 
 data = read.table("../BranchLengths/Code/test/logw646_gam_full.txt", sep=",", header=TRUE)
+par3D = read.table("../BranchLengths/Code/test/par3D_646_gam_full.txt", sep=",", header=TRUE)
+par2D = read.table("../BranchLengths/Code/test/par2D_646_gam_full.txt", sep=",", header=TRUE)
 
 head(data)
 summary(data)
@@ -130,6 +203,7 @@ plot(1:length(data$w.cond),cumsum(rev(sort(data$w.cond))))
 (1/sum(data$w.cond^2))/nreps
 
 
+
 ## -------------------------------------------------
 ## comparing analysis all in R vs all in C++
 ## ------------------------------------------------
@@ -144,3 +218,18 @@ hist(dataC$bl2) ## wider range
 hist(dataR$dxy.cond)
 summary(dataC$bl2)
 summary(dataR$dxy.cond)
+
+## -------------------------------------------
+## comparing mean from gammas to mu
+## -------------------------------------------
+
+head(par3D)
+par3D <- within(par3D, mugam1 <- a1/b1)
+summary(par3D$mu1)
+summary(par3D$mugam1)
+par3D <- within(par3D, mugam2 <- a2/b2)
+summary(par3D$mu2)
+summary(par3D$mugam2)
+par3D <- within(par3D, mugam3 <- a3/b3)
+summary(par3D$mu3)
+summary(par3D$mugam3)

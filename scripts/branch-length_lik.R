@@ -681,6 +681,12 @@ findMLE2D = function(seqx.dist, seq3.dist, seq4.dist, Q, d3x, t0=c(0.1,0.1), tol
         if(verbose)
             print(told)
         f =loglik2D(seqx.dist, seq3.dist, seq4.dist,Q, told, d3x)
+        if(verbose)
+            {
+                print("gradient and hessian")
+                print(f$gradient)
+                print(f$hessian)
+            }
         gap = solve(f$hessian) %*% f$gradient
         tnew = told - gap
         while(any(tnew<0)){ #avoid negative BL

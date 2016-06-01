@@ -17,6 +17,9 @@ bad seeds:
 
 
 *** 4 taxa:
+- strange different ESS between loglik C++ and R for same branch
+lengths
+
 * simulated data 4 taxa: we get ESS 15% (both R and C++), hard to
 * compare logdensity because we would need to know the order of
 * sampled. but, it seems that bl have a wider range from c++ than R, why?

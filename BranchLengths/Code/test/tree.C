@@ -671,7 +671,7 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
   }
   gradient << dll1, dll2, dll3;
   hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33; //row-wise
-  MatrixXd L( hessian.llt().matrixL() );
+  //MatrixXd L( hessian.llt().matrixL() );
   //cerr << "LLT of Hessian 3D: " << endl << L << endl;
 }
 

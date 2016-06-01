@@ -1,0 +1,40 @@
+DIFFERENCE BETWEEN R AND C++
+----------------------------
+
+## from screen646_norm_1.txt
+It seems that Newton-Raphson is not doing a good job.
+Starting points:
+lx 0.0897102, ly 0.0262534, lz 0.125166
+true 0.078, 0.03, 0.11
+we are optimizing for 1 and 3, and yes, we want to reduce, but the new delta is huge:
+mleDistance2D Newton-Raphson curr: 0.0897102  0.125166
+mleDistance2D Newton-Raphson gradient:  -2229.4 -496.485
+mleDistance2D Newton-Raphson inverse hessian:
+-1.44679e-05 -4.78424e-05
+-4.78424e-05 -0.000710913
+First delta: 0.0560078  0.459618
+New proposed: 0.0337024 -0.334451
+
+grad = c(-2229.4, -496.485)
+H = matrix(c(-1.44679e-05, -4.78424e-05,-4.78424e-05, -0.000710913),ncol=2)
+H%*%grad
+
+## stopping rules for N-R
+In R:
+while(error>0.0001 & i < 10000)
+error = max(abs(tnew-told))
+
+In C++:
+while(delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.0e-8)
+
+Also, in R we cut delta in half, all delta, not just for the negative entry
+
+Also, different gradient and hessian (see compareLogLikComputation.r)
+mu = findMLE2D(seq2.dist, seqx.dist, seq1.dist,Q, 0.115964, t0=c(0.08971,0.125166), verbose=TRUE)
+## [1] "entering findMLE..."
+## [1] 0.089710 0.125166
+## [1] "gradient and hessian"
+## [1] -157.90620  -78.70095
+##            [,1]      [,2]
+## [1,] -25201.942  1199.208
+## [2,]   1199.208 -6550.252
