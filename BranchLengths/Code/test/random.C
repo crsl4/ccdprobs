@@ -154,7 +154,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   bl[2] = gamma(alpha3,1/lambda3,rng); //c++ gamma has different parametrization
   if(verbose)
     cout << "T3: " << bl[2] << endl;
-  logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + alpha3*log(lambda3) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1]+(alpha3-1)*log(bl[2])-lambda3*bl[2] - log(tgamma(alpha1)) - log(tgamma(alpha2)) - log(tgamma(alpha3));
+  logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + alpha3*log(lambda3) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1]+(alpha3-1)*log(bl[2])-lambda3*bl[2] - lgamma(alpha1) - lgamma(alpha2) - lgamma(alpha3);
   par3D << alpha1 << "," << lambda1 << "," << alpha2 << "," << lambda2 << "," << alpha3 << "," << lambda3 << endl;
   return bl;
  }
@@ -233,8 +233,8 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
        lambda2 = num / (L(1,1) * L(1,1));
      }
    bl[1] = gamma(alpha2,1/lambda2,rng); //c++ gamma has different parametrization
-   logdensity += log(tgamma(alpha1+beta1)) - log(tgamma(alpha1)) - log(tgamma(beta1)) + (alpha1-1)*log(bl[0])+(beta1-1)*log(sum-bl[0])-(alpha1+beta1-1)*log(sum)+alpha2*log(lambda2) - log(tgamma(alpha2)) + (alpha2-1)*log(bl[1])-lambda2*bl[1];
-   //par2D << alpha1 << "," << beta1 << "," << alpha2 << "," << beta2 << endl;
+   logdensity += lgamma(alpha1+beta1) - lgamma(alpha1) - lgamma(beta1) + (alpha1-1)*log(bl[0])+(beta1-1)*log(sum-bl[0])-(alpha1+beta1-1)*log(sum)+alpha2*log(lambda2) - lgamma(alpha2) + (alpha2-1)*log(bl[1])-lambda2*bl[1];
+   par2D << alpha1 << "," << beta1 << "," << alpha2 << "," << lambda2 << endl;
    return bl;
  }
 

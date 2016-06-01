@@ -48,6 +48,7 @@ public:
     nodes[1] = temp;
   }
   void print(ostream&);
+  void printTable(ostream&);
   void calculate(QMatrix& qmatrix) { transitionMatrix = qmatrix.getTransitionMatrix(length); }
   Matrix4d getTransitionMatrix() { return transitionMatrix; }
 };

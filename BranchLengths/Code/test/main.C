@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     int errors = 0;
     ofstream logwfile;
     logwfile.open("logw.txt"); //warning: only works for 4taxa tree
-    logwfile << "bl1,bl2,bl3,bl4,bl5,loglik,logprior,logdens,logweight" << endl;
+    logwfile << "n1,n2,bl1,n1,n2,bl2,n1,n2,bl3,n1,n2,bl4,n1,n2,bl5,loglik,logprior,logdens,logweight" << endl;
     // files to study form of lik:
     ofstream table3D;
     ofstream table2D;
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     //table2D.open("table2D.txt");
     par3D.open("par3D.txt");
     par2D.open("par2D.txt");
-  
+
     par3D << "mu1,mu2,mu3,s1,s2,s3,s4,s5,s6,s7,s8,s9,a1,b1,a2,b2,a3,b3" << endl;
     par2D << "mu1,mu2,s1,s2,s3,s4,a1,b1,a2,b2" << endl;
 
@@ -121,6 +121,7 @@ int main(int argc, char* argv[])
 	try
 	  {
 	    tree.randomize(rng);
+	    tree.clearProbMaps();
 	    tree.generateBranchLengths(alignment,model,rng, verbose, mvnormal, par3D, par2D);
 	    double weight = tree.calculateWeight(alignment, model, 0.05, verbose, logwfile);
 	    logw(i) = weight;

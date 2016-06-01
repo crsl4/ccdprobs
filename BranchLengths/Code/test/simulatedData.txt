@@ -8,6 +8,29 @@ d4y0 = 0.098
 * multinormal
 ./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal
 mv logw.txt logw646_norm_full.txt
+mv par3D.txt par3D_646_norm_full.txt
+mv par2D.txt par2D_646_norm_full.txt
+
+then compareLogLikComputation.r
+problem: with both c++ and r, we have bad weights (ESS ~1%), it seems
+like the edges are not in the correct order
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------
+before fixing loglik
+--------------------------------------------------------
+
+* multinormal
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal
+mv logw.txt logw646_norm_full.txt
 
 (4,3,(2,1));
 numTaxa = 4, numNodes = 6, numEdges = 5

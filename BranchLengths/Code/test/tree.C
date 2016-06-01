@@ -35,8 +35,14 @@ void Node::print(ostream& f)
 void Edge::print(ostream& f)
 {
   f << setw(3) << number << ":";
-  f << " n[" << (nodes[0])->getNumber() << "] <-> " << "n[" << (nodes[1])->getNumber() << "]";
+  f << " n[" << (nodes[0])->getNumber() << "] <-> " << "n[" << (nodes[1])->getNumber() << "] ,";
   f << " length = " << setprecision(8) << length << endl;
+}
+
+void Edge::printTable(ostream& f)
+{
+  f << (nodes[0])->getNumber() << "," << (nodes[1])->getNumber() << ",";
+  f << setprecision(8) << length;
 }
 
 void Tree::print(ostream& f)
@@ -1490,7 +1496,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       }
   } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.0e-8);
   Matrix3d cov = (-1) * prop_hessian.inverse();
-  par3D << prop[0] << "," << prop[1] << "," << prop[2] << "," << cov(0,0) << "," << cov(0,1) << "," << cov(0,2) << "," << cov(1,0) << "," << cov(1,1) << "," << cov(1,2) << "," << cov(2,0) << "," << cov(2,1) << "," << cov(2,2) << "," << endl;
+  par3D << prop[0] << "," << prop[1] << "," << prop[2] << "," << cov(0,0) << "," << cov(0,1) << "," << cov(0,2) << "," << cov(1,0) << "," << cov(1,1) << "," << cov(1,2) << "," << cov(2,0) << "," << cov(2,1) << "," << cov(2,2) << ",";
   if(verbose)
     {
       cout << "Finally converged to" << endl;
@@ -1657,7 +1663,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     }
 
   Matrix2d cov = (-1) * prop_hessian.inverse();
-  par2D << prop[0] << "," << prop[1] << "," << cov(0,0) << "," << cov(0,1) << "," << cov(1,0) << "," << cov(1,1) << "," << endl;
+  par2D << prop[0] << "," << prop[1] << "," << cov(0,0) << "," << cov(0,1) << "," << cov(1,0) << "," << cov(1,1) << ",";
   if(verbose)
     {
       cout << "Gradient " << endl << prop_gradient.transpose() << endl;
@@ -2017,7 +2023,9 @@ double Tree::logPriorExp(double mean,ofstream& logwfile)
     {
       double length = (*e)->getLength();
       logprior += length;
-      logwfile << length << ",";
+      //      logwfile << length << ",";
+      (*e)->printTable(logwfile);
+      logwfile << ",";
     }
   logprior = (1/mean) * logprior;
   return logprior;

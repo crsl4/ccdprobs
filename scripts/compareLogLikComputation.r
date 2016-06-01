@@ -59,10 +59,25 @@ seq4.dist = seqMatrix(seq4)
 
 ## order: d2x,dxy,d3y,d4y,d1x
 data = read.table("../BranchLengths/Code/test/logw646_norm_full.txt", sep=",", header=TRUE)
-data = read.table("../BranchLengths/Code/test/logw646_gam_full.txt", sep=",", header=TRUE)
+par3D = read.table("../BranchLengths/Code/test/par3D_646_norm_full.txt", sep=",", header=TRUE)
+par2D = read.table("../BranchLengths/Code/test/par2D_646_norm_full.txt", sep=",", header=TRUE)
+
+data = read.table("../BranchLengths/Code/test/logw646_norm_nonrand.txt", sep=",", header=TRUE)
+par3D = read.table("../BranchLengths/Code/test/par3D_646_norm_nonrand.txt", sep=",", header=TRUE)
+par2D = read.table("../BranchLengths/Code/test/par2D_646_norm_nonrand.txt", sep=",", header=TRUE)
+
+##data = read.table("../BranchLengths/Code/test/logw646_gam_full.txt", sep=",", header=TRUE)
+
 head(data)
 summary(data)
-## problem: loglik is identical for all rows
+
+mylogw = data$logweight - mean(data$logweight)
+data$w = exp(mylogw)/sum(exp(mylogw))
+data[data$w>0.01,]
+length(data[data$w>0.01,]$w)
+hist(data$w)
+plot(1:length(data$w),cumsum(rev(sort(data$w))))
+(1/sum(data$w^2))/1000
 
 nrep = nrow(data)
 loglikR = rep(NA,nrep)
@@ -88,3 +103,6 @@ length(data[data$wR>0.01,]$wR)
 hist(data$wR)
 plot(1:length(data$wR),cumsum(rev(sort(data$wR))))
 (1/sum(data$wR^2))/nrep
+
+plot(1:nrep,data$loglik)
+plot(1:nrep, data$loglikR)
