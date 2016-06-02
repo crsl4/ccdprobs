@@ -65,6 +65,22 @@ seq4.dist = seqMatrix(seq4)
 ## ----------------------------------------------------------------
 
 ## order: d2x,dxy,d3y,d4y,d1x
+data = read.table("../BranchLengths/Code/test/logw646_gam_mle.txt", sep=",", header=TRUE)
+par3D = read.table("../BranchLengths/Code/test/par3D_646_gam_mle.txt", sep=",", header=TRUE)
+par2D = read.table("../BranchLengths/Code/test/par2D_646_gam_mle.txt", sep=",", header=TRUE)
+
+data = read.table("../BranchLengths/Code/test/logw646_norm_mle.txt", sep=",", header=TRUE)
+par3D = read.table("../BranchLengths/Code/test/par3D_646_norm_mle.txt", sep=",", header=TRUE)
+par2D = read.table("../BranchLengths/Code/test/par2D_646_norm_mle.txt", sep=",", header=TRUE)
+
+data = read.table("../BranchLengths/Code/test/logw646_gam_goodR.txt", sep=",", header=TRUE)
+par3D = read.table("../BranchLengths/Code/test/par3D_646_gam_goodR.txt", sep=",", header=TRUE)
+par2D = read.table("../BranchLengths/Code/test/par2D_646_gam_goodR.txt", sep=",", header=TRUE)
+
+data = read.table("../BranchLengths/Code/test/logw646_norm_goodR.txt", sep=",", header=TRUE)
+par3D = read.table("../BranchLengths/Code/test/par3D_646_norm_goodR.txt", sep=",", header=TRUE)
+par2D = read.table("../BranchLengths/Code/test/par2D_646_norm_goodR.txt", sep=",", header=TRUE)
+
 data = read.table("../BranchLengths/Code/test/logw646_norm_full.txt", sep=",", header=TRUE)
 par3D = read.table("../BranchLengths/Code/test/par3D_646_norm_full.txt", sep=",", header=TRUE)
 par2D = read.table("../BranchLengths/Code/test/par2D_646_norm_full.txt", sep=",", header=TRUE)

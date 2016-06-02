@@ -1360,7 +1360,7 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
     }
   if( sxy > 0 && sxz + syz == 0) //conditional on sxy
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,lz,ly,sxy,rng, verbose,mvnormal, par2D); //warning in order branches
+      mleDistance2D(alignment, nx,ex,nz,ez,ny,ey,qmatrix,lx,lz,ly,sxy,rng, verbose,mvnormal, par2D); //warning in order branches
       return;
     }
   if( sxz > 0 && sxy + syz == 0) //conditional on sxz
@@ -1370,7 +1370,7 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
     }
   if( syz > 0 && sxz + sxy == 0) //conditional on syz
     {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,ly,lx,lz,syz,rng, verbose,mvnormal, par2D); //warning in order branches
+      mleDistance2D(alignment, ny,ey,nx,ex,nz,ez,qmatrix,ly,lx,lz,syz,rng, verbose,mvnormal, par2D); //warning in order branches
       return;
     }
   if( sxy > 0 && sxz > 0) //conditional on sxy,sxz
@@ -1380,12 +1380,12 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
     }
   if( sxy > 0 && syz > 0) //conditional on sxy,syz
     {
-      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, ly, lx, lz, sxy, syz, rng, verbose,mvnormal);
+      mleDistance1D(alignment,ny,ey,nx,ex,nz,ez,qmatrix, ly, lx, lz, sxy, syz, rng, verbose,mvnormal);
       return;
     }
   if( sxz > 0 && syz > 0) //conditional on sxz,syz
     {
-      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lz, lx, ly, sxz, syz, rng, verbose,mvnormal);
+      mleDistance1D(alignment,nz,ez,nx,ex,ny,ey,qmatrix, lz, lx, ly, sxz, syz, rng, verbose,mvnormal);
       return;
     }
 }
@@ -1530,6 +1530,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // Find joint mle distance between nodes nx,ny,nz with edges ex,ey,ez
 // conditional in one sum: t1,t2,s-t1
 // warning: input t1,t2,t3,sum
+// warning: nx is associated with t1, ny with t2, and nz with t3, careful in mleDistanceJoint
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
@@ -1597,10 +1598,11 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	  {
 	    if(verbose)
 	      cerr << "found negative with curr big, will shrink delta" << endl;
-	    if(prop[0] < 0)
-	      delta[0] = 0.5* delta[0];
-	    if(prop[1] < 0)
-	      delta[1] = 0.5* delta[1];
+	    // if(prop[0] < 0)
+	    //   delta[0] = 0.5* delta[0];
+	    // if(prop[1] < 0)
+	    //   delta[1] = 0.5* delta[1];
+	    delta = 0.5* delta;
 	    if(verbose)
 	      cerr << "new delta: " << delta.transpose() << endl;
 	    prop = curr - delta;
@@ -1626,30 +1628,30 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-    if(!keepZero1 && !keepZero2)
-      {
-	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
-	  {
-	    if(verbose)
-	      cerr << "found bigger step" << endl;
-	    if(keepZero1)
-		delta[0] = 0;
-	    if(keepZero2)
-		delta[1] = 0;
-	    delta = delta*0.5;
-	    if(verbose)
-	      cerr << "new delta: " << delta.transpose() << endl;
-	    prop = curr - delta;
-	    if(verbose)
-	      cout << "prop befofe partialPathCalculations2D inside check for bigger step: " << prop.transpose() << endl;
-	    partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
-	    if ( ++iter > 100 )
-	      mleErrorJoint(nx,ny,nz);
-	  }
-      }
+    // if(!keepZero1 && !keepZero2)
+    //   {
+    // 	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
+    // 	  {
+    // 	    if(verbose)
+    // 	      cerr << "found bigger step" << endl;
+    // 	    if(keepZero1)
+    // 		delta[0] = 0;
+    // 	    if(keepZero2)
+    // 		delta[1] = 0;
+    // 	    delta = delta*0.5;
+    // 	    if(verbose)
+    // 	      cerr << "new delta: " << delta.transpose() << endl;
+    // 	    prop = curr - delta;
+    // 	    if(verbose)
+    // 	      cout << "prop befofe partialPathCalculations2D inside check for bigger step: " << prop.transpose() << endl;
+    // 	    partialPathCalculations2D(prop,sum,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,recurse);
+    // 	    if ( ++iter > 100 )
+    // 	      mleErrorJoint(nx,ny,nz);
+    // 	  }
+    //   }
     } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL) );
   if(verbose)
-    cout << "Finally converged" << endl;
+    cout << "Finally converged. delta squared norm: " << delta.squaredNorm() << " and prop gradient squared norm " << prop_gradient.squaredNorm() << "with TOL " << TOL << endl;
   if(prop[0] < 0)
     {
       if(verbose)

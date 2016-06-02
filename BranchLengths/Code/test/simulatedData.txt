@@ -4,6 +4,64 @@ d2x0 = 0.078
 dxy0 = 0.03
 d3y0 = 0.091
 d4y0 = 0.098
+** testData includes all the output files now
+
+-----------------------------------------------------------------------
+problem found: mleDistance2D not correct nodes associated with t1,t2,t3
+-----------------------------------------------------------------------
+* multinormal
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.24246467,0.15367960,0.21689231,0.10244317,0.03172279,0.25279747 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal
+mv logw.txt logw646_norm_mle.txt
+mv par3D.txt par3D_646_norm_mle.txt
+mv par2D.txt par2D_646_norm_mle.txt
+ESS 43%, and good range
+> (1/sum(data$w^2))/1000
+[1] 0.4321325
+> summary(data$bl2)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+0.01562 0.02808 0.03253 0.03291 0.03731 0.05894
+
+* gammabeta
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.24246467,0.15367960,0.21689231,0.10244317,0.03172279,0.25279747 -p 0.04736586,0.08641125,0.76855324,0.09766965
+mv logw.txt logw646_gam_mle.txt
+mv par3D.txt par3D_646_gam_mle.txt
+mv par2D.txt par2D_646_gam_mle.txt
+ESS 30%, and better range:
+> (1/sum(data$w^2))/1000
+[1] 0.2950675
+> summary(data$bl2)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+0.01502 0.02734 0.03199 0.03229 0.03655 0.05980
+
+
+
+
+
+-------------------------------------------
+problem found: rates need to add up to 1
+-------------------------------------------
+* multinormal
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.24246467,0.15367960,0.21689231,0.10244317,0.03172279,0.25279747 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal
+mv logw.txt logw646_norm_goodR.txt
+mv par3D.txt par3D_646_norm_goodR.txt
+mv par2D.txt par2D_646_norm_goodR.txt
+ESS ~0.3%, worse! and using loglikR, it is the same 0.3%
+Still bigger gradient (see below) and wider range, not even centered on true value
+> summary(data$bl2)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+0.01056 0.02915 0.03727 0.04228 0.05684 0.08663
+
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.24246467,0.15367960,0.21689231,0.10244317,0.03172279,0.25279747 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal -n 1 --verbose -s 1175948390 >& screen646_norm_goodR_1.txt
+
+* gammabeta
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.24246467,0.15367960,0.21689231,0.10244317,0.03172279,0.25279747 -p 0.04736586,0.08641125,0.76855324,0.09766965
+mv logw.txt logw646_gam_goodR.txt
+mv par3D.txt par3D_646_gam_goodR.txt
+mv par2D.txt par2D_646_gam_goodR.txt
+ESS 10%, and using loglikR, 12%; also wide range
+> summary(data$bl2)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+0.01168 0.02917 0.03774 0.04212 0.05560 0.0935
 
 ------------------------------------------------
 TOL = 1.0e-8 (before 1.0e-4)
