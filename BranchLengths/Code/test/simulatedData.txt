@@ -21,7 +21,7 @@ R.
 
 CONCLUSION: no clear pattern here
 
-./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal -n 1 --verbose >& screen646_norm_1_tol.txt -s 1175948390
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal -n 1 --verbose -s 1175948390 >& screen646_norm_1_tol.txt
 
 NOTICE: exact same problem with 1.0e-2 and 1.0e-4 because it is the big jump, the big gradient!
 So, NO, TOL is not affecting until we figure out why the gradient is so big

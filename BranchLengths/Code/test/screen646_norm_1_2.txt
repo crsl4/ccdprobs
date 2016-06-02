@@ -91,7 +91,7 @@ lengthY0: 0.113462
 lengthZ0: 0.120932
 dxy 0.192786, dxz 0.200255, dyz 0.234394
 sxy 0, sxz 0, syz 0
-Starting points:
+Starting points: 
 lx 0.0793232, ly 0.113462, lz 0.120932
 Entering mleDistanceJoint
 lx,ly,lz: 0.0793232, 0.113462, 0.120932
@@ -99,35 +99,35 @@ sxy,sxz,syz: 0, 0, 0
 Entering mleDistance3D
 mleDistance3D Newton-Raphson curr: 0.0793232  0.113462  0.120932
 mleDistance3D Newton-Raphson gradient:  -45.688 -84.1692 -73.1214
-mleDistance3D Newton-Raphson inverse hessian:
+mleDistance3D Newton-Raphson inverse hessian: 
 -9.85803e-05  1.18323e-05  9.08453e-06
  1.18323e-05 -0.000148516  1.70883e-06
  9.08453e-06  1.70883e-06 -0.000156222
 prop befofe partialPathCalculations3D: 0.0764795  0.101628  0.110067
 mleDistance3D Newton-Raphson curr: 0.0764795  0.101628  0.110067
 mleDistance3D Newton-Raphson gradient: 2.42058 12.0813  9.3701
-mleDistance3D Newton-Raphson inverse hessian:
+mleDistance3D Newton-Raphson inverse hessian: 
 -8.73069e-05    8.905e-06  6.43093e-06
    8.905e-06 -0.000114621   3.1421e-06
  6.43093e-06   3.1421e-06  -0.00012428
 prop befofe partialPathCalculations3D: 0.076523 0.102961 0.111178
 mleDistance3D Newton-Raphson curr: 0.076523 0.102961 0.111178
 mleDistance3D Newton-Raphson gradient: 0.00186528   0.183826   0.120791
-mleDistance3D Newton-Raphson inverse hessian:
+mleDistance3D Newton-Raphson inverse hessian: 
 -8.78648e-05   9.1788e-06  6.71695e-06
   9.1788e-06 -0.000118045  2.96382e-06
  6.71695e-06  2.96382e-06 -0.000127269
 prop befofe partialPathCalculations3D: 0.0765206  0.102983  0.111193
 Finally converged to
-Gradient
+Gradient 
 -9.26266e-07  4.44536e-05  2.26417e-05
 3D mean: 0.0765206  0.102983  0.111193
-, cov matrix:
+, cov matrix: 
  8.78663e-05 -9.18264e-06 -6.72176e-06
 -9.18264e-06  0.000118099  -2.9602e-06
 -6.72176e-06  -2.9602e-06   0.00012731
 Sample bl 3D: 0.0782513  0.112059  0.115964
-after mleDistanceJoint:
+after mleDistanceJoint: 
 lx 0.0782513, ly 0.112059, lz 0.115964
 ------------- Sample branch lengths for nodes:------------------
 2 5 1 6
@@ -187,7 +187,7 @@ lengthY0: 0.0262534
 lengthZ0: 0.125166
 dxy 0.115964, dxz 0.214877, dyz 0.15142
 sxy 0.115964, sxz 0, syz 0
-Starting points:
+Starting points: 
 lx 0.0897102, ly 0.0262534, lz 0.125166
 Entering mleDistanceJoint
 lx,ly,lz: 0.0897102, 0.0262534, 0.125166
@@ -196,13 +196,13 @@ Entering mleDistance2D
 Starting point in mleDistance2D
 mleDistance2D Newton-Raphson curr: 0.0897102  0.125166
 mleDistance2D Newton-Raphson gradient:  -2229.4 -496.485
-mleDistance2D Newton-Raphson inverse hessian:
+mleDistance2D Newton-Raphson inverse hessian: 
 -1.44679e-05 -4.78424e-05
 -4.78424e-05 -0.000710913
 entered while
 mleDistance2D Newton-Raphson curr: 0.0897102  0.125166
 mleDistance2D Newton-Raphson gradient:  -2229.4 -496.485
-mleDistance2D Newton-Raphson inverse hessian:
+mleDistance2D Newton-Raphson inverse hessian: 
 -1.44679e-05 -4.78424e-05
 -4.78424e-05 -0.000710913
 First delta: 0.0560078  0.459618
@@ -216,7 +216,7 @@ prop befofe partialPathCalculations2D: 0.0337024 0.0102619
 entered while
 mleDistance2D Newton-Raphson curr: 0.0337024 0.0102619
 mleDistance2D Newton-Raphson gradient: 974.765 1653.88
-mleDistance2D Newton-Raphson inverse hessian:
+mleDistance2D Newton-Raphson inverse hessian: 
 -1.20125e-05   8.9149e-07
   8.9149e-07  -6.3445e-06
 First delta:  -0.0102349 -0.00962406
@@ -226,7 +226,7 @@ prop befofe partialPathCalculations2D: 0.0439373  0.019886
 entered while
 mleDistance2D Newton-Raphson curr: 0.0439373  0.019886
 mleDistance2D Newton-Raphson gradient: 195.552 641.597
-mleDistance2D Newton-Raphson inverse hessian:
+mleDistance2D Newton-Raphson inverse hessian: 
 -1.68085e-05  9.35968e-07
  9.35968e-07 -1.65219e-05
 First delta: -0.00268641  -0.0104174
@@ -236,7 +236,7 @@ prop befofe partialPathCalculations2D: 0.0466237 0.0303034
 entered while
 mleDistance2D Newton-Raphson curr: 0.0466237 0.0303034
 mleDistance2D Newton-Raphson gradient: 16.1463  182.77
-mleDistance2D Newton-Raphson inverse hessian:
+mleDistance2D Newton-Raphson inverse hessian: 
 -1.83808e-05  1.10749e-06
  1.10749e-06 -3.23446e-05
 First delta: -9.43655e-05  -0.00589375
@@ -246,7 +246,7 @@ prop befofe partialPathCalculations2D: 0.0467181 0.0361971
 entered while
 mleDistance2D Newton-Raphson curr: 0.0467181 0.0361971
 mleDistance2D Newton-Raphson gradient: 0.78462 25.4911
-mleDistance2D Newton-Raphson inverse hessian:
+mleDistance2D Newton-Raphson inverse hessian: 
 -1.88708e-05  1.34656e-06
  1.34656e-06 -4.37192e-05
 First delta: 1.95189e-05 -0.00111339
@@ -256,7 +256,7 @@ prop befofe partialPathCalculations2D: 0.0466986 0.0373105
 entered while
 mleDistance2D Newton-Raphson curr: 0.0466986 0.0373105
 mleDistance2D Newton-Raphson gradient: 0.0136039  0.660757
-mleDistance2D Newton-Raphson inverse hessian:
+mleDistance2D Newton-Raphson inverse hessian: 
 -1.89535e-05  1.40082e-06
  1.40082e-06 -4.60783e-05
 First delta:  6.67758e-07 -3.04275e-05
@@ -264,14 +264,14 @@ New proposed: 0.0466979 0.0373409
 with sum: 0.115964
 prop befofe partialPathCalculations2D: 0.0466979 0.0373409
 Finally converged
-Gradient
+Gradient 
 8.88207e-06 0.000468723
 2D mean: 0.0466979 0.0373409
-, cov matrix:
+, cov matrix: 
  1.89557e-05 -1.40234e-06
 -1.40234e-06  4.61438e-05
 Sample 2D bl: 0.0421041 0.0245354 0.0738595
-after mleDistanceJoint:
+after mleDistanceJoint: 
 lx 0.0421041, ly 0.0738595, lz 0.0245354
 2 5 --> 0.115964
 Loglik for tree: -3466.08

@@ -1419,9 +1419,12 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   {
     curr = prop;
     partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,recurse);
-    // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
-    // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
-    // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+    if(verbose)
+      {
+	cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
+	cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+	cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+      }
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     delta = curr_hessian.inverse() * curr_gradient;
@@ -1644,7 +1647,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	      mleErrorJoint(nx,ny,nz);
 	  }
       }
-  } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL) );
+    } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL) );
   if(verbose)
     cout << "Finally converged" << endl;
   if(prop[0] < 0)

@@ -213,7 +213,7 @@ par2D = read.table("../BranchLengths/Code/test/par2D_646_norm_1.txt", sep=",", h
 ##  1.89557e-05 -1.40234e-06
 ## -1.40234e-06  4.61438e-05
 
-
+## -------------------2D ------------------------------------
 seqx.dist = sequenceDist(0.0782513, 0.112059,seq3.dist, seq4.dist, Q)
 mu = findMLE2D(seq2.dist, seqx.dist, seq1.dist,Q, 0.115964, t0=c(0.08971,0.125166), verbose=TRUE)
 ## [1] "entering findMLE..."
@@ -240,3 +240,21 @@ d2 = simulateBranchLength.conditionalMultinorm(nsim=1,seq2.dist, seqx.dist, seq1
 d2$t[1] ## 0.06916
 d2$t[2] ## 0.11255
 0.115964 - d2$t[1] ## 0.0468
+
+## --------------------------- 3D ----------------------------------------------
+## Entering mleDistance3D
+## mleDistance3D Newton-Raphson curr: 0.0793232  0.113462  0.120932
+## mleDistance3D Newton-Raphson gradient:  -45.688 -84.1692 -73.1214
+## mleDistance3D Newton-Raphson inverse hessian:
+## -9.85803e-05  1.18323e-05  9.08453e-06
+##  1.18323e-05 -0.000148516  1.70883e-06
+##  9.08453e-06  1.70883e-06 -0.000156222
+
+mu = findMLE3D(seq3.dist, seq4.dist, seq2.dist,Q, t0=c(0.0793232,0.113462,0.120932), verbose=TRUE)
+## [1] "entering findMLE..."
+## [1] 0.0793232 0.1134620 0.1209320
+## [1] -115.7679 -128.1574 -107.1479
+##            [,1]       [,2]       [,3]
+## [1,] -9206.0668 -1250.8563  -961.3468
+## [2,] -1250.8563 -6653.9773  -414.5576
+## [3,]  -961.3468  -414.5576 -6397.8609
