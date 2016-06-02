@@ -5,13 +5,39 @@ dxy0 = 0.03
 d3y0 = 0.091
 d4y0 = 0.098
 
+------------------------------------------------
+TOL = 1.0e-8 (before 1.0e-4)
+make sure to do "make clean"
+-----------------------------------------------
+
+* multinormal:
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal
+mv logw.txt logw646_norm_tol.txt
+mv par3D.txt par3D_646_norm_tol.txt
+mv par2D.txt par2D_646_norm_tol.txt
+ESS 11% (or 13% from R) with 1.0e-8, not better than the 16% (both R
+C++) we had before with 1.0e-4, with 1.0e-2 in c++ is 13% and 18% in
+R.
+
+CONCLUSION: no clear pattern here
+
+./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal -n 1 --verbose >& screen646_norm_1_tol.txt -s 1175948390
+
+NOTICE: exact same problem with 1.0e-2 and 1.0e-4 because it is the big jump, the big gradient!
+So, NO, TOL is not affecting until we figure out why the gradient is so big
+
+
+--------------------------------------------------
+analysis of 1 sample
+-------------------------------------------------
+
 * multinormal: we want to compare computation with R
 ./bl -f "../../Data/simSeq646.fasta" -t "(2,(3,4),1);" -q 0.8939155,0.5665839,0.7996356,0.3776861,0.1169551,0.9320103 -p 0.04736586,0.08641125,0.76855324,0.09766965 --mvnormal -n 1 --verbose >& screen646_norm_1.txt
 mv logw.txt logw646_norm_1.txt
 mv par3D.txt par3D_646_norm_1.txt
 mv par2D.txt par2D_646_norm_1.txt
 
-
+*** this helped us understand that the newton-rapshon is causing problems, see debug.txt
 
 ----------------------------------------------------
 after fixing loglik, but still not the same results

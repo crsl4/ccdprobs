@@ -1,0 +1,254 @@
+1: a=83 c=127 g=1147 t=143
+2: a=84 c=142 g=1132 t=142
+3: a=71 c=145 g=1135 t=149
+4: a=75 c=148 g=1125 t=152
+Seed: 1175948390
+Sample size: 1
+(2,(3,4),1);
+------------- rep 0 -------------
+Node List: 3 4 2 5 1 6
+------------- Sample branch lengths for nodes:------------------
+3 4 2 5
+mleDistance for nodes 3, 4
+Starting at curr=0.05, logl, dlogl and ddlogl: -2099.3, 2917.27, -82416.6
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.1
+prop_logl in mleDistance for curr_dlogl>0: -2016.06
+prop_dlogl in mleDistance for curr_dlogl>0: 888.194
+prop_ddlogl in mleDistance for curr_dlogl>0: -19654.3
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.2
+prop_logl in mleDistance for curr_dlogl>0: -1985.05
+prop_dlogl in mleDistance for curr_dlogl>0: -29.9035
+prop_ddlogl in mleDistance for curr_dlogl>0: -3950.27
+Two points to interpolate: 0.1, 0.2
+Derivatives: 888.194, -29.9035
+Starting prop: 0.196743
+prop_logl, prop_dlogl, prop_ddlogl-1984.97, -16.7565, -4123.97
+entered while
+entered while
+entered while
+Finally converged to prop: 0.192786 with logl, dlogl, ddlogl: -1984.94, 1.63814e-10, -4347.18
+-----
+mleDistance for nodes 3, 2
+Starting at curr=0.05, logl, dlogl and ddlogl: -2123.51, 3037.59, -84818.3
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.1
+prop_logl in mleDistance for curr_dlogl>0: -2036.09
+prop_dlogl in mleDistance for curr_dlogl>0: 948.43
+prop_ddlogl in mleDistance for curr_dlogl>0: -20254
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.2
+prop_logl in mleDistance for curr_dlogl>0: -2000.88
+prop_dlogl in mleDistance for curr_dlogl>0: 1.03949
+prop_ddlogl in mleDistance for curr_dlogl>0: -4086.77
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.4
+prop_logl in mleDistance for curr_dlogl>0: -2041.86
+prop_dlogl in mleDistance for curr_dlogl>0: -297.168
+prop_ddlogl in mleDistance for curr_dlogl>0: -303.256
+Two points to interpolate: 0.2, 0.4
+Derivatives: 1.03949, -297.168
+Starting prop: 0.200697
+prop_logl, prop_dlogl, prop_ddlogl-2000.88, -1.79666, -4049.59
+entered while
+entered while
+Finally converged to prop: 0.200255 with logl, dlogl, ddlogl: -2000.88, 4.40666e-08, -4073.14
+-----
+mleDistance for nodes 4, 2
+Starting at curr=0.05, logl, dlogl and ddlogl: -2235.87, 3571.21, -95351.2
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.1
+prop_logl in mleDistance for curr_dlogl>0: -2129.89
+prop_dlogl in mleDistance for curr_dlogl>0: 1216.87
+prop_ddlogl in mleDistance for curr_dlogl>0: -22935.1
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.2
+prop_logl in mleDistance for curr_dlogl>0: -2076.12
+prop_dlogl in mleDistance for curr_dlogl>0: 133.866
+prop_ddlogl in mleDistance for curr_dlogl>0: -4775.31
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.4
+prop_logl in mleDistance for curr_dlogl>0: -2099.06
+prop_dlogl in mleDistance for curr_dlogl>0: -233.969
+prop_ddlogl in mleDistance for curr_dlogl>0: -479.628
+Two points to interpolate: 0.2, 0.4
+Derivatives: 133.866, -233.969
+Starting prop: 0.272786
+prop_logl, prop_dlogl, prop_ddlogl-2075.99, -97.3138, -2018.28
+entered while
+entered while
+entered while
+entered while
+Finally converged to prop: 0.234394 with logl, dlogl, ddlogl: -2073.98, 6.02582e-08, -3141.47
+-----
+foundxy 0, foundyz 0, foundxz 0
+after mleDistance or map, dxy,dxz,dyz 0.192786, 0.200255, 0.234394
+lengthX0: 0.0793232
+lengthY0: 0.113462
+lengthZ0: 0.120932
+dxy 0.192786, dxz 0.200255, dyz 0.234394
+sxy 0, sxz 0, syz 0
+Starting points: 
+lx 0.0793232, ly 0.113462, lz 0.120932
+Entering mleDistanceJoint
+lx,ly,lz: 0.0793232, 0.113462, 0.120932
+sxy,sxz,syz: 0, 0, 0
+Entering mleDistance3D
+prop befofe partialPathCalculations3D: 0.0764795  0.101628  0.110067
+prop befofe partialPathCalculations3D: 0.076523 0.102961 0.111178
+Finally converged to
+Gradient 
+0.00186528   0.183826   0.120791
+3D mean: 0.076523 0.102961 0.111178
+, cov matrix: 
+ 8.78648e-05  -9.1788e-06 -6.71695e-06
+ -9.1788e-06  0.000118045 -2.96382e-06
+-6.71695e-06 -2.96382e-06  0.000127269
+Sample bl 3D: 0.0782537  0.112036  0.115948
+after mleDistanceJoint: 
+lx 0.0782537, ly 0.112036, lz 0.115948
+------------- Sample branch lengths for nodes:------------------
+2 5 1 6
+mleDistance for nodes 2, 1
+Starting at curr=0.05, logl, dlogl and ddlogl: -2160.61, 3246.62, -88670
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.1
+prop_logl in mleDistance for curr_dlogl>0: -2065.76
+prop_dlogl in mleDistance for curr_dlogl>0: 1058.32
+prop_ddlogl in mleDistance for curr_dlogl>0: -21283.6
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.2
+prop_logl in mleDistance for curr_dlogl>0: -2022.75
+prop_dlogl in mleDistance for curr_dlogl>0: 58.7963
+prop_ddlogl in mleDistance for curr_dlogl>0: -4342.44
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.4
+prop_logl in mleDistance for curr_dlogl>0: -2055.11
+prop_dlogl in mleDistance for curr_dlogl>0: -262.314
+prop_ddlogl in mleDistance for curr_dlogl>0: -351.601
+Two points to interpolate: 0.2, 0.4
+Derivatives: 58.7963, -262.314
+Starting prop: 0.236621
+prop_logl, prop_dlogl, prop_ddlogl-2023.11, -68.3508, -2739.59
+entered while
+entered while
+entered while
+Finally converged to prop: 0.214877 with logl, dlogl, ddlogl: -2022.33, 9.33945e-05, -3589.59
+-----
+mleDistance for nodes 5, 1
+Starting at curr=0.05, logl, dlogl and ddlogl: -2795.21, 1618.43, -46867.5
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.1
+prop_logl in mleDistance for curr_dlogl>0: -2751.22
+prop_dlogl in mleDistance for curr_dlogl>0: 406.94
+prop_ddlogl in mleDistance for curr_dlogl>0: -12293.6
+double starting point in mleDistance because curr_dlogl>0
+prop in mleDistance for curr_dlogl>0: 0.2
+prop_logl in mleDistance for curr_dlogl>0: -2746.97
+prop_dlogl in mleDistance for curr_dlogl>0: -171.021
+prop_ddlogl in mleDistance for curr_dlogl>0: -2423.68
+Two points to interpolate: 0.1, 0.2
+Derivatives: 406.94, -171.021
+Starting prop: 0.17041
+prop_logl, prop_dlogl, prop_ddlogl-2743.13, -81.6933, -3715.46
+entered while
+entered while
+entered while
+Finally converged to prop: 0.151419 with logl, dlogl, ddlogl: -2742.32, 0.000187843, -4958.88
+-----
+foundxy 1, foundyz 0, foundxz 0
+after mleDistance or map, dxy,dxz,dyz 0.115948, 0.214877, 0.151419
+lengthX0: 0.0897028
+lengthY0: 0.026245
+lengthZ0: 0.125174
+dxy 0.115948, dxz 0.214877, dyz 0.151419
+sxy 0.115948, sxz 0, syz 0
+Starting points: 
+lx 0.0897028, ly 0.026245, lz 0.125174
+Entering mleDistanceJoint
+lx,ly,lz: 0.0897028, 0.026245, 0.125174
+sxy,sxz,syz: 0.115948, 0, 0
+Entering mleDistance2D
+Starting point in mleDistance2D
+mleDistance2D Newton-Raphson curr: 0.0897028  0.125174
+mleDistance2D Newton-Raphson gradient: -2230.09 -496.478
+mleDistance2D Newton-Raphson inverse hessian: 
+ -1.4462e-05  -4.7844e-05
+ -4.7844e-05 -0.000711028
+entered while
+mleDistance2D Newton-Raphson curr: 0.0897028  0.125174
+mleDistance2D Newton-Raphson gradient: -2230.09 -496.478
+mleDistance2D Newton-Raphson inverse hessian: 
+ -1.4462e-05  -4.7844e-05
+ -4.7844e-05 -0.000711028
+First delta: 0.0560051  0.459706
+New proposed: 0.0336977 -0.334532
+with sum: 0.115948
+found negative with curr big, will shrink delta
+new delta: 0.0560051  0.229853
+found negative with curr big, will shrink delta
+new delta: 0.0560051  0.114926
+prop befofe partialPathCalculations2D: 0.0336977 0.0102473
+entered while
+mleDistance2D Newton-Raphson curr: 0.0336977 0.0102473
+mleDistance2D Newton-Raphson gradient: 975.112 1656.42
+mleDistance2D Newton-Raphson inverse hessian: 
+-1.20075e-05  8.90403e-07
+ 8.90403e-07 -6.33185e-06
+First delta:  -0.0102338 -0.00961992
+New proposed: 0.0439315 0.0198672
+with sum: 0.115948
+prop befofe partialPathCalculations2D: 0.0439315 0.0198672
+entered while
+mleDistance2D Newton-Raphson curr: 0.0439315 0.0198672
+mleDistance2D Newton-Raphson gradient: 195.659 642.818
+mleDistance2D Newton-Raphson inverse hessian: 
+ -1.6802e-05   9.3489e-07
+  9.3489e-07 -1.64966e-05
+First delta: -0.0026865 -0.0104214
+New proposed:  0.046618 0.0302886
+with sum: 0.115948
+prop befofe partialPathCalculations2D:  0.046618 0.0302886
+entered while
+mleDistance2D Newton-Raphson curr:  0.046618 0.0302886
+mleDistance2D Newton-Raphson gradient: 16.1684 183.266
+mleDistance2D Newton-Raphson inverse hessian: 
+-1.83744e-05  1.10652e-06
+ 1.10652e-06 -3.23157e-05
+First delta: -9.42958e-05  -0.00590448
+New proposed: 0.0467123 0.0361931
+with sum: 0.115948
+prop befofe partialPathCalculations2D: 0.0467123 0.0361931
+Finally converged
+Gradient 
+0.787629  25.6095
+2D mean: 0.0467123 0.0361931
+, cov matrix: 
+ 1.88652e-05 -1.34596e-06
+-1.34596e-06  4.37075e-05
+Sample 2D bl: 0.0421294 0.0237261 0.0738183
+after mleDistanceJoint: 
+lx 0.0421294, ly 0.0738183, lz 0.0237261
+2 5 --> 0.115948
+Loglik for tree: -3468.92
+LogDensity for tree: -2.43328
+LogPrior for tree: 6.59927
+LogWeight: -3459.89
+(2,(3,4),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: 1: 1: Edges: e[5] -> n[6]
+  2: 2: 1: Edges: e[1] -> n[6]
+  3: 3: 2: Edges: e[3] -> n[5]
+  4: 4: 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.042129436
+  2: n[5] <-> n[6] , length = 0.073818341
+  3: n[3] <-> n[5] , length = 0.078253656
+  4: n[4] <-> n[5] , length = 0.11203578
+  5: n[1] <-> n[6] , length = 0.023726089
+
+Errors: 0

@@ -18,7 +18,13 @@ bad seeds:
 
 *** 4 taxa:
 - strange different ESS between loglik C++ and R for same branch
-lengths
+lengths:
+- seems to be because the gradient is calculated differently, and we
+have huge jumps in C++. thus, we have a difference in the computation
+of loglik, and gradient. this is causing the difference between R and
+C++, but also the wider range of sampling in C++ because we do not
+reach the MLE correctly
+
 
 * simulated data 4 taxa: we get ESS 15% (both R and C++), hard to
 * compare logdensity because we would need to know the order of

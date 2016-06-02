@@ -971,7 +971,7 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
     partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
     if ( ++iter > 100 )
       mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
+    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) > (TOL*TOL) )
     {
       // cout << "found big jump" << endl;
       delta = 0.5*delta;
@@ -981,7 +981,7 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
       if ( ++iter > 100 )
         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
     }
-  } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8); //clau: added stopping rule dlogl~0g
+  } while ( fabs(curr - prop) > (TOL*TOL) && fabs(prop_dlogl) > (TOL*TOL)); //clau: added stopping rule dlogl~0g
   if(verbose)
     {
       cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
@@ -1189,7 +1189,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
-    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
+    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) > (TOL*TOL) )
     {
       if(verbose)
 	cerr << "found bigger step" << endl;
@@ -1199,7 +1199,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       if ( ++iter > 100 )
         mleErrorJoint(nx,ny,nz);
     }
-  } while ( fabs(curr - prop) > 1.0e-8 && fabs(prop_dlogl) > 1.0e-8);
+  } while ( fabs(curr - prop) > (TOL*TOL) && fabs(prop_dlogl) > (TOL*TOL));
   if(verbose)
     {
       cout << "Finally converged to prop: " << prop << " with logl, dlogl, ddlogl: " << prop_logl << ", " << prop_dlogl << ", " << prop_ddlogl << endl;
@@ -1432,7 +1432,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     if(keepZero3)
       delta[2] = 0;
     prop = curr - delta;
-    if(curr[0] > 1.0e-5 && curr[1] > 1.0e-5 && curr[2] > 1.0e-5)
+    if(curr[0] > TOL && curr[1] > TOL && curr[2] > TOL)
       {
 	while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
 	  {
@@ -1448,21 +1448,21 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	  }
       }
     //    cerr << "Delta " << delta.transpose() << endl;
-    if(prop[0] < 0 && curr[0] < 1.0e-5)
+    if(prop[0] < 0 && curr[0] < TOL)
       {
 	if(verbose)
 	  cerr << "found negative for 1st element with curr small, will set to zero" << endl;
     	prop[0] = 0;
 	keepZero1 = true;
       }
-    if(prop[1] < 0 && curr[1] < 1.0e-5)
+    if(prop[1] < 0 && curr[1] < TOL)
       {
 	if(verbose)
 	  cerr << "found negative for 2nd element with curr small, will set to zero" << endl;
     	prop[1] = 0;
 	keepZero2 = true;
       }
-    if(prop[2] < 0 && curr[2] < 1.0e-5)
+    if(prop[2] < 0 && curr[2] < TOL)
       {
 	if(verbose)
 	  cerr << "found negative for 3rd element with curr small, will set to zero" << endl;
@@ -1477,7 +1477,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       mleErrorJoint(nx,ny,nz);
     if(!keepZero1 && !keepZero2 && !keepZero3)
       {
-	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
+	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
 	  {
 	    if(verbose)
 	      cerr << "found bigger step" << endl;
@@ -1494,7 +1494,7 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	      mleErrorJoint(nx,ny,nz);
 	  }
       }
-  } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.0e-8);
+  } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
   Matrix3d cov = (-1) * prop_hessian.inverse();
   par3D << prop[0] << "," << prop[1] << "," << prop[2] << "," << cov(0,0) << "," << cov(0,1) << "," << cov(0,2) << "," << cov(1,0) << "," << cov(1,1) << "," << cov(1,2) << "," << cov(2,0) << "," << cov(2,1) << "," << cov(2,2) << ",";
   if(verbose)
@@ -1588,7 +1588,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	cout << "New proposed: " << prop.transpose() << endl;
 	cout << "with sum: " << sum << endl;
       }
-    if(curr[0] > 1.0e-5 && curr[1] > 1.0e-5)
+    if(curr[0] > TOL && curr[1] > TOL)
       {
 	while ( prop[0] < 0 || prop[1] < 0)
 	  {
@@ -1604,14 +1604,14 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	  }
       }
     //cerr << "Delta " << delta.transpose() << endl;
-    if(prop[0] < 0 && curr[0] < 1.0e-5)
+    if(prop[0] < 0 && curr[0] < TOL)
       {
 	if(verbose)
 	  cerr << "found negative for 1st element with curr small, will set to zero" << endl;
     	prop[0] = 0;
 	keepZero1 = true;
       }
-    if(prop[1] < 0 && curr[1] < 1.0e-5)
+    if(prop[1] < 0 && curr[1] < TOL)
       {
 	if(verbose)
 	  cerr << "found negative for 2nd element with curr small, will set to zero" << endl;
@@ -1625,7 +1625,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       mleErrorJoint(nx,ny,nz);
     if(!keepZero1 && !keepZero2)
       {
-	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > 1.0e-8 )
+	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
 	  {
 	    if(verbose)
 	      cerr << "found bigger step" << endl;
@@ -1644,7 +1644,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	      mleErrorJoint(nx,ny,nz);
 	  }
       }
-  } while ( delta.squaredNorm() > 1.0e-8 && prop_gradient.squaredNorm() > 1.e-8 );
+  } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL) );
   if(verbose)
     cout << "Finally converged" << endl;
   if(prop[0] < 0)
