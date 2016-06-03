@@ -32,7 +32,14 @@ ESS 30%, and better range:
 > summary(data$bl2)
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
 0.01502 0.02734 0.03199 0.03229 0.03655 0.05980
-
+when running in R:
+> (1/sum(data$w.joint^2))/nreps
+[1] 0.9189215
+> (1/sum(data$w.cond^2))/nreps
+[1] 0.3622069
+> summary(data$dxy.cond)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+0.01225 0.02660 0.03190 0.03230 0.03718 0.06139
 
 
 

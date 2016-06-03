@@ -1,0 +1,23 @@
+*** birds 4 taxa:
+
+* mvnormal
+./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675 --mvnormal
+mv logw.txt logw_birds4_norm.txt
+using studyWeights.r:
+> (1/sum(data$w^2))/1000
+[1] 0.2147752
+> summary(data$bl2)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+0.005933 0.016850 0.019770 0.019910 0.022850 0.037370
+
+* gammabeta
+./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
+mv logw.txt logw_birds4_gam.txt
+> (1/sum(data$w^2))/1000
+[1] 0.01372532
+> summary(data$bl2)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+0.006468 0.016610 0.019750 0.020240 0.023450 0.040100
+
+CONCLUSION: mvnormal behaves better, not sure why
+intervals are similar

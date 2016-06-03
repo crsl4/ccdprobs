@@ -65,7 +65,8 @@ double beta(double alpha,double b,mt19937_64& rng)
   if(alpha<0 || b< 0)
     {
       cerr << "Trying to generate beta rv with negative arguments" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   gamma_distribution<double> rgammaA(alpha,1);
   gamma_distribution<double> rgammaB(b,1);
@@ -83,7 +84,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   if(mu[0] < 0)
     {
       cerr << "Error with mu1<0 in multivariateGamma3D" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   if( mu[0] < TOL)
     {
@@ -110,7 +112,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   if( num < 0)
     {
       cerr << "mu2 + L21*z1 in multivariateGamma3D is negative" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   if( num < TOL)
     {
@@ -136,7 +139,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   if( num < 0)
     {
       cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is negative" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   if( num < TOL)
     {
@@ -172,7 +176,8 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
    if( mu[0] < 0)
      {
        cerr << "Error with mu1<0 in multivariateGamma2D" << endl;
-       exit(1);
+       //exit(1);
+       throw 20;
      }
    if( mu[0] < TOL)
      {
@@ -193,7 +198,8 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
        if( mu[0]*(sum-mu[0]) <= (L(0,0)*L(0,0)))
 	 {
 	   cerr << "mu(s-mu)<sigma2 in multivariateGamma2D" << endl;
-	   exit(1);
+	   //exit(1);
+	   throw 20;
 	 }
        double part1 = (mu[0] * mu[0] * (sum-mu[0])) / (sum * L(0,0) * L(0,0));
        double part2 = (mu[0] * (sum-mu[0])*(sum-mu[0])) / (sum * L(0,0) * L(0,0));
@@ -203,7 +209,8 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
    if(alpha1 < TOL || beta1 < TOL )
      {
        cerr << "Alpha or beta negative or too close to zero in multivariate2D: " << alpha1<< ", " << beta1 << endl;
-       exit(1);
+       //exit(1);
+       throw 20;
      }
    //------------------ B ------------------------
    double b = beta(alpha1,beta1,rng);
@@ -217,7 +224,8 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
    if( num < 0)
      {
        cerr << "mu2+L21*z1 in multivariateGamma2D is negative" << endl;
-       exit(1);
+       //exit(1);
+       throw 20;
      }
    if( num < TOL)
      {
@@ -251,7 +259,8 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
    if( mu < 0)
      {
        cerr << "Error with mu<0 in multivariateGamma1D" << endl;
-       exit(1);
+       //exit(1);
+       throw 20;
      }
    if( mu < TOL)
      {
@@ -272,7 +281,8 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
        if( mu*(s-mu) <= var)
 	 {
 	   cerr << "mu(s-mu)<sigma2 in multivariateGamma1D" << endl;
-	   exit(1);
+	   //exit(1);
+	   throw 20;
 	 }
        double part1 = (mu * mu * (s-mu)) / (s * var);
        double part2 = (mu * (s-mu)*(s-mu)) / (s * var);
@@ -284,7 +294,8 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
    if(a < TOL || b < TOL )
      {
        cerr << "Alpha or beta negative or too close to zero in multivariate1D: " << a<< ", " << b << endl;
-       exit(1);
+       //exit(1);
+       throw 20;
      }
    if(verbose)
      {
@@ -324,7 +335,8 @@ void pathologicalBetaPar(double v,double& alpha,double& beta)
   if( den < TOL)
     {
       cerr << "denominator for pathologicalBetaPar is too close to zero: " << den << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   beta = (v+3)/(3*den) + den/(3*v) - (4/3.0); // made positive always
 }
