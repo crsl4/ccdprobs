@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     int errors = 0;
     ofstream logwfile;
     logwfile.open("logw.txt"); //warning: only works for 4taxa tree
-    logwfile << "n1,n2,bl1,n1,n2,bl2,n1,n2,bl3,n1,n2,bl4,n1,n2,bl5,loglik,logprior,logdens,logweight" << endl;
+    //    logwfile << "n1,n2,bl1,n1,n2,bl2,n1,n2,bl3,n1,n2,bl4,n1,n2,bl5,loglik,logprior,logdens,logweight" << endl;
     // files to study form of lik:
     ofstream table3D;
     ofstream table2D;
