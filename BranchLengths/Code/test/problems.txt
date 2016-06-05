@@ -17,20 +17,19 @@ bad seeds:
 ./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
 
 
+Bret:
+- want to do simulated data and test the whole approach, how to?
 
 *** 4 taxa:
-* mvnormal behaving much better than gammabeta (20% vs 1%), not sure why
-
+* mvnormal behaving much better than gammabeta (20% vs 1%), not sure
+ why, in real-life birds; in simulated it is 40 vs 30
 
 
 ****for more than 4 taxa:
 * save individual seed per run with error to replicate errors
 * try/catch not working: need to change exit(1) to throw(...), maybe
 * we want different types of errors
-Bret:
-- set seed per replicate how? create vector of seeds?
-- different types of errors? with nice error msg that we can see and
-* control, and distinguish
+
 
 -------
 To do (later):
