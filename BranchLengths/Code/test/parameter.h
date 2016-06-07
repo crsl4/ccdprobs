@@ -25,6 +25,9 @@ public:
     stationaryP.resize(4,0);
     symmetricQP.resize(6,0);
     seed = 0;
+    sampleSize = 0;
+    verbose = false;
+    mvnormal = false;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }

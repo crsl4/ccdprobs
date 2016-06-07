@@ -1,6 +1,2 @@
-#!/bin/bash
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 >& cats-dogs.out
 
-# Run R to do neighbor-joining on the cats-dogs data
-
-echo 'Running R script'
-Rscript ../../Code/R/nj.R ../../Data/cats-dogs.fasta cats-dogs.tre 100

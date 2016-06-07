@@ -1,0 +1,72 @@
+
+
+Using BFGS method to optimize GTR rate parameters, to disable this specify "--no-bfgs" 
+
+
+
+This is RAxML version 8.2.8 released by Alexandros Stamatakis on March 23 2016.
+
+With greatly appreciated code contributions by:
+Andre Aberer      (HITS)
+Simon Berger      (HITS)
+Alexey Kozlov     (HITS)
+Kassian Kobert    (HITS)
+David Dao         (KIT and HITS)
+Sarah Lutteropp   (KIT and HITS)
+Nick Pattengale   (Sandia)
+Wayne Pfeiffer    (SDSC)
+Akifumi S. Tanabe (NRIFS)
+Charlie Taylor    (UF)
+
+
+Alignment has 230 distinct alignment patterns
+
+Proportion of gaps and completely undetermined characters in this alignment: 0.00%
+
+RAxML rapid hill-climbing mode
+
+Using 1 distinct models/data partitions with joint branch length optimization
+
+
+Executing 1 inferences on the original alignment using 1 distinct randomized MP trees
+
+All free model parameters will be estimated by RAxML
+GAMMA model of rate heteorgeneity, ML estimate of alpha-parameter
+
+GAMMA Model parameters will be estimated up to an accuracy of 0.1000000000 Log Likelihood units
+
+Partition: 0
+Alignment Patterns: 230
+Name: No Name Provided
+DataType: DNA
+Substitution Matrix: GTR
+
+
+
+
+RAxML was called as follows:
+
+raxml -s ../../Data/artiodactyl-6.fasta -m GTRGAMMA -n art -T 8 -p 435561 
+
+
+Partition: 0 with name: No Name Provided
+Base frequencies: 0.309 0.288 0.134 0.269 
+
+Inference[0]: Time 0.104415 GAMMA-based likelihood -4375.744259, best rearrangement setting 3
+alpha[0]: 0.275586 rates[0] ac ag at cg ct gt: 114.980523 172.511131 24.874954 11.405017 457.829224 1.000000 
+
+
+Conducting final model optimizations on all 1 trees under GAMMA-based models ....
+
+Inference[0] final GAMMA-based Likelihood: -4375.332787 tree written to file /Users/larget/Github/ccdprobs/Bistro/Examples/Artiodactyl/RAxML_result.art
+
+
+Starting final GAMMA-based thorough Optimization on tree 0 likelihood -4375.332787 .... 
+
+Final GAMMA-based Score of best tree -4375.332787
+
+Program execution info written to /Users/larget/Github/ccdprobs/Bistro/Examples/Artiodactyl/RAxML_info.art
+Best-scoring ML tree written to: /Users/larget/Github/ccdprobs/Bistro/Examples/Artiodactyl/RAxML_bestTree.art
+
+Overall execution time: 0.223501 secs or 0.000062 hours or 0.000003 days
+

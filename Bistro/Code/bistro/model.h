@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <random>
 
 #include "Eigen/Core"
 #include "Eigen/Eigenvalues"
@@ -32,7 +33,9 @@ private:
   Matrix4d Vinv;
   Matrix4d Q;
 public:
+  void completeConstruction();
   QMatrix(vector<double>,vector<double>); // p and s, assumes sum to 1 and positive
+  QMatrix(Vector4d,VectorXd); // p and s, assumes sum to 1 and positive
   Vector4d vectorExp(double t);
   Matrix4d getTransitionMatrix(double);
   Matrix4d getQ();
@@ -41,6 +44,7 @@ public:
   Vector4d getStationaryP() const { return stationaryP; }
   Vector6d getSymmetricQP() const { return symmetricQP; }
   Vector4d getStatP() const { return stationaryP; }
+  void mcmc(mt19937_64&);
 };
   
 #endif

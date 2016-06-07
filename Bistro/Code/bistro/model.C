@@ -14,14 +14,9 @@
 using namespace std;
 using namespace Eigen;
 
-QMatrix::QMatrix(vector<double> p,vector<double> s) // p and s, assumes sum to 1 and positive
+void QMatrix::completeConstruction()
 {
-  for ( int i=0; i<4; ++i )
-    stationaryP(i) = p[i];
-  for ( int i=0; i<6; ++i )
-    symmetricQP(i) = s[i];
-
-  // map to get correct element of s from (i,j) index
+    // map to get correct element of s from (i,j) index
   map<pair<int,int>,int> ijMap;
   ijMap[ pair<int,int> (0,1) ] = 0;
   ijMap[ pair<int,int> (0,2) ] = 1;
@@ -66,6 +61,23 @@ QMatrix::QMatrix(vector<double> p,vector<double> s) // p and s, assumes sum to 1
   lambda = es.eigenvalues();
   V = pSqrtDiagInv * es.eigenvectors();
   Vinv = es.eigenvectors().transpose() * pSqrtDiag;
+}
+
+QMatrix::QMatrix(vector<double> p,vector<double> s) // p and s, assumes sum to 1 and positive
+{
+  for ( int i=0; i<4; ++i )
+    stationaryP(i) = p[i];
+  for ( int i=0; i<6; ++i )
+    symmetricQP(i) = s[i];
+
+  completeConstruction();
+}
+
+QMatrix::QMatrix(Vector4d p,VectorXd s)
+{
+  stationaryP = p;
+  symmetricQP = s;
+  completeConstruction();
 }
 
 Vector4d QMatrix::vectorExp(double t)

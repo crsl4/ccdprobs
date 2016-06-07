@@ -1,0 +1,1807 @@
+kiwi      : -=9 A=436 C=453 G=246 T=416
+penguin   : -=9 A=433 C=512 G=240 T=366
+owl       : -=9 A=441 C=479 G=248 T=383
+parrot    : -=12 A=445 C=427 G=246 T=430
+Seed: 741499496
+Sample size: 100
+------------- rep 0 -------------
+1 5 --> 0.10761
+(1,(4,3),2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 0: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.10415584
+  2: n[5] <-> n[6] , length = 0.013149625
+  3: n[3] <-> n[5] , length = 0.10404295
+  4: n[4] <-> n[5] , length = 0.080264352
+  5: n[1] <-> n[6] , length = 0.094460841
+
+------------- rep 1 -------------
+1 5 --> 0.11585798
+(1,2,(4,3));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 0: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.078746688
+  2: n[5] <-> n[6] , length = 0.015010138
+  3: n[3] <-> n[5] , length = 0.088373833
+  4: n[4] <-> n[5] , length = 0.094744029
+  5: n[1] <-> n[6] , length = 0.10084784
+
+------------- rep 2 -------------
+3 6 --> 0.080982155
+(3,4,(2,1));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 1: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.10425354
+  2: n[5] <-> n[6] , length = 0.02232923
+  3: n[3] <-> n[5] , length = 0.058652925
+  4: n[4] <-> n[5] , length = 0.10992187
+  5: n[1] <-> n[6] , length = 0.11561606
+
+------------- rep 3 -------------
+2 5 --> 0.075894872
+((4,3),2,1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 0: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.060697087
+  2: n[5] <-> n[6] , length = 0.015197785
+  3: n[3] <-> n[5] , length = 0.080790378
+  4: n[4] <-> n[5] , length = 0.09209593
+  5: n[1] <-> n[6] , length = 0.12192647
+
+------------- rep 4 -------------
+1 5 --> 0.098883511
+(1,2,(4,3));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 0: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.073830645
+  2: n[5] <-> n[6] , length = 0.02125333
+  3: n[3] <-> n[5] , length = 0.079504768
+  4: n[4] <-> n[5] , length = 0.096602853
+  5: n[1] <-> n[6] , length = 0.077630181
+
+------------- rep 5 -------------
+3 6 --> 0.088771924
+((1,2),3,4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 1: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.076063517
+  2: n[5] <-> n[6] , length = 0.013902285
+  3: n[3] <-> n[5] , length = 0.07486964
+  4: n[4] <-> n[5] , length = 0.10374262
+  5: n[1] <-> n[6] , length = 0.11032769
+
+------------- rep 6 -------------
+2 5 --> 0.084248181
+(2,(3,4),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.05424565
+  2: n[5] <-> n[6] , length = 0.030002531
+  3: n[3] <-> n[5] , length = 0.091398155
+  4: n[4] <-> n[5] , length = 0.10435892
+  5: n[1] <-> n[6] , length = 0.11369755
+
+------------- rep 7 -------------
+4 6 --> 0.1001608
+(4,3,(1,2));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 1: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.084887124
+  2: n[5] <-> n[6] , length = 0.023608041
+  3: n[3] <-> n[5] , length = 0.096864181
+  4: n[4] <-> n[5] , length = 0.076552758
+  5: n[1] <-> n[6] , length = 0.093971419
+
+------------- rep 8 -------------
+2 5 --> 0.081995785
+((3,4),2,1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.062155932
+  2: n[5] <-> n[6] , length = 0.019839854
+  3: n[3] <-> n[5] , length = 0.086306106
+  4: n[4] <-> n[5] , length = 0.10078869
+  5: n[1] <-> n[6] , length = 0.13873538
+
+------------- rep 9 -------------
+3 6 --> 0.094134595
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.06382202
+  2: n[5] <-> n[6] , length = 0.016801045
+  3: n[3] <-> n[5] , length = 0.077333549
+  4: n[4] <-> n[5] , length = 0.10890022
+  5: n[1] <-> n[6] , length = 0.11001674
+
+------------- rep 10 -------------
+4 6 --> 0.087927692
+(4,(1,2),3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 1: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.075721481
+  2: n[5] <-> n[6] , length = 0.017908081
+  3: n[3] <-> n[5] , length = 0.09446032
+  4: n[4] <-> n[5] , length = 0.070019612
+  5: n[1] <-> n[6] , length = 0.10387914
+
+------------- rep 11 -------------
+4 6 --> 0.10430263
+((2,1),4,3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 1: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.08252132
+  2: n[5] <-> n[6] , length = 0.022932876
+  3: n[3] <-> n[5] , length = 0.097850905
+  4: n[4] <-> n[5] , length = 0.081369758
+  5: n[1] <-> n[6] , length = 0.10431099
+
+------------- rep 12 -------------
+1 5 --> 0.10780996
+(1,2,(3,4));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.085543225
+  2: n[5] <-> n[6] , length = 0.02527076
+  3: n[3] <-> n[5] , length = 0.10571993
+  4: n[4] <-> n[5] , length = 0.091791828
+  5: n[1] <-> n[6] , length = 0.082539202
+
+------------- rep 13 -------------
+3 6 --> 0.10385672
+(3,4,(1,2));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 1: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.085476739
+  2: n[5] <-> n[6] , length = 0.029481785
+  3: n[3] <-> n[5] , length = 0.074374937
+  4: n[4] <-> n[5] , length = 0.1064696
+  5: n[1] <-> n[6] , length = 0.12600897
+
+------------- rep 14 -------------
+2 5 --> 0.084817083
+(2,(3,4),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.058849526
+  2: n[5] <-> n[6] , length = 0.025967558
+  3: n[3] <-> n[5] , length = 0.096828401
+  4: n[4] <-> n[5] , length = 0.099076731
+  5: n[1] <-> n[6] , length = 0.13023613
+
+------------- rep 15 -------------
+2 5 --> 0.10040592
+(2,(3,4),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.078236344
+  2: n[5] <-> n[6] , length = 0.022169571
+  3: n[3] <-> n[5] , length = 0.084148679
+  4: n[4] <-> n[5] , length = 0.11731591
+  5: n[1] <-> n[6] , length = 0.10726271
+
+------------- rep 16 -------------
+4 6 --> 0.091750634
+(4,(2,1),3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.096250506
+  2: n[5] <-> n[6] , length = 0.011459723
+  3: n[3] <-> n[5] , length = 0.10344719
+  4: n[4] <-> n[5] , length = 0.080290911
+  5: n[1] <-> n[6] , length = 0.098756005
+
+------------- rep 17 -------------
+1 5 --> 0.10762727
+((4,3),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.098824132
+  2: n[5] <-> n[6] , length = 0.022229471
+  3: n[3] <-> n[5] , length = 0.10391419
+  4: n[4] <-> n[5] , length = 0.08773762
+  5: n[1] <-> n[6] , length = 0.085397804
+
+------------- rep 18 -------------
+1 5 --> 0.092606728
+(1,2,(4,3));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 0: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.10000123
+  2: n[5] <-> n[6] , length = 0.02321732
+  3: n[3] <-> n[5] , length = 0.12527347
+  4: n[4] <-> n[5] , length = 0.10581681
+  5: n[1] <-> n[6] , length = 0.069389407
+
+------------- rep 19 -------------
+3 6 --> 0.10170924
+(3,(2,1),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.092240817
+  2: n[5] <-> n[6] , length = 0.027635238
+  3: n[3] <-> n[5] , length = 0.074074006
+  4: n[4] <-> n[5] , length = 0.10290334
+  5: n[1] <-> n[6] , length = 0.099446762
+
+------------- rep 20 -------------
+1 5 --> 0.11064585
+(1,(3,4),2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 0: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.086327978
+  2: n[5] <-> n[6] , length = 0.018439407
+  3: n[3] <-> n[5] , length = 0.086308017
+  4: n[4] <-> n[5] , length = 0.095949428
+  5: n[1] <-> n[6] , length = 0.09220644
+
+------------- rep 21 -------------
+2 5 --> 0.08121984
+(2,1,(3,4));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.062669802
+  2: n[5] <-> n[6] , length = 0.018550038
+  3: n[3] <-> n[5] , length = 0.11577823
+  4: n[4] <-> n[5] , length = 0.088931991
+  5: n[1] <-> n[6] , length = 0.085669778
+
+------------- rep 22 -------------
+4 6 --> 0.11099515
+(4,(2,1),3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 1: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.066047749
+  2: n[5] <-> n[6] , length = 0.022366198
+  3: n[3] <-> n[5] , length = 0.097498249
+  4: n[4] <-> n[5] , length = 0.088628956
+  5: n[1] <-> n[6] , length = 0.10544698
+
+------------- rep 23 -------------
+1 5 --> 0.11185792
+((3,4),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.076185571
+  2: n[5] <-> n[6] , length = 0.017827708
+  3: n[3] <-> n[5] , length = 0.089949783
+  4: n[4] <-> n[5] , length = 0.093685539
+  5: n[1] <-> n[6] , length = 0.09403021
+
+------------- rep 24 -------------
+4 6 --> 0.095421706
+((1,2),4,3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 1: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.085754377
+  2: n[5] <-> n[6] , length = 0.013666902
+  3: n[3] <-> n[5] , length = 0.083509907
+  4: n[4] <-> n[5] , length = 0.081754804
+  5: n[1] <-> n[6] , length = 0.09803471
+
+------------- rep 25 -------------
+3 6 --> 0.1023792
+(3,4,(1,2));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.069508293
+  2: n[5] <-> n[6] , length = 0.025024602
+  3: n[3] <-> n[5] , length = 0.077354596
+  4: n[4] <-> n[5] , length = 0.10223439
+  5: n[1] <-> n[6] , length = 0.11788994
+
+------------- rep 26 -------------
+3 6 --> 0.10068701
+((1,2),3,4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 1: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.076754208
+  2: n[5] <-> n[6] , length = 0.025035818
+  3: n[3] <-> n[5] , length = 0.075651193
+  4: n[4] <-> n[5] , length = 0.09273015
+  5: n[1] <-> n[6] , length = 0.12823725
+
+------------- rep 27 -------------
+1 5 --> 0.11113686
+((4,3),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.073057034
+  2: n[5] <-> n[6] , length = 0.021752595
+  3: n[3] <-> n[5] , length = 0.099020231
+  4: n[4] <-> n[5] , length = 0.085810355
+  5: n[1] <-> n[6] , length = 0.089384269
+
+------------- rep 28 -------------
+2 5 --> 0.076893635
+(2,1,(3,4));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.049665823
+  2: n[5] <-> n[6] , length = 0.027227812
+  3: n[3] <-> n[5] , length = 0.083007204
+  4: n[4] <-> n[5] , length = 0.093574843
+  5: n[1] <-> n[6] , length = 0.12704042
+
+------------- rep 29 -------------
+2 5 --> 0.083863037
+(2,(3,4),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.06506427
+  2: n[5] <-> n[6] , length = 0.018798767
+  3: n[3] <-> n[5] , length = 0.096214157
+  4: n[4] <-> n[5] , length = 0.094690536
+  5: n[1] <-> n[6] , length = 0.11917069
+
+------------- rep 30 -------------
+3 6 --> 0.097854666
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.079423576
+  2: n[5] <-> n[6] , length = 0.019438419
+  3: n[3] <-> n[5] , length = 0.078416247
+  4: n[4] <-> n[5] , length = 0.11123111
+  5: n[1] <-> n[6] , length = 0.11860499
+
+------------- rep 31 -------------
+3 6 --> 0.084506982
+((2,1),3,4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.084424151
+  2: n[5] <-> n[6] , length = 0.014954367
+  3: n[3] <-> n[5] , length = 0.069552616
+  4: n[4] <-> n[5] , length = 0.097882776
+  5: n[1] <-> n[6] , length = 0.12107053
+
+------------- rep 32 -------------
+4 6 --> 0.11301983
+(4,3,(1,2));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 1: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.093872996
+  2: n[5] <-> n[6] , length = 0.021238524
+  3: n[3] <-> n[5] , length = 0.084753931
+  4: n[4] <-> n[5] , length = 0.091781308
+  5: n[1] <-> n[6] , length = 0.10308803
+
+------------- rep 33 -------------
+3 6 --> 0.077946069
+(3,4,(1,2));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 1: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.079837334
+  2: n[5] <-> n[6] , length = 0.023383385
+  3: n[3] <-> n[5] , length = 0.054562684
+  4: n[4] <-> n[5] , length = 0.098108978
+  5: n[1] <-> n[6] , length = 0.11259374
+
+------------- rep 34 -------------
+1 5 --> 0.10285981
+((3,4),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.087072378
+  2: n[5] <-> n[6] , length = 0.013006222
+  3: n[3] <-> n[5] , length = 0.0937499
+  4: n[4] <-> n[5] , length = 0.1018696
+  5: n[1] <-> n[6] , length = 0.089853584
+
+------------- rep 35 -------------
+2 5 --> 0.070717848
+(2,1,(3,4));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.05262896
+  2: n[5] <-> n[6] , length = 0.018088888
+  3: n[3] <-> n[5] , length = 0.073908554
+  4: n[4] <-> n[5] , length = 0.077076325
+  5: n[1] <-> n[6] , length = 0.10741419
+
+------------- rep 36 -------------
+4 6 --> 0.095685133
+(4,(1,2),3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.079237304
+  2: n[5] <-> n[6] , length = 0.013886552
+  3: n[3] <-> n[5] , length = 0.10389567
+  4: n[4] <-> n[5] , length = 0.081798581
+  5: n[1] <-> n[6] , length = 0.096266165
+
+------------- rep 37 -------------
+2 5 --> 0.07858689
+((3,4),2,1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.065547288
+  2: n[5] <-> n[6] , length = 0.013039603
+  3: n[3] <-> n[5] , length = 0.10713032
+  4: n[4] <-> n[5] , length = 0.10471568
+  5: n[1] <-> n[6] , length = 0.096554823
+
+------------- rep 38 -------------
+4 6 --> 0.090668226
+(4,3,(2,1));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 1: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.073402234
+  2: n[5] <-> n[6] , length = 0.020304973
+  3: n[3] <-> n[5] , length = 0.087800134
+  4: n[4] <-> n[5] , length = 0.070363253
+  5: n[1] <-> n[6] , length = 0.098770215
+
+------------- rep 39 -------------
+1 5 --> 0.10312299
+(1,(3,4),2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.076894046
+  2: n[5] <-> n[6] , length = 0.021550887
+  3: n[3] <-> n[5] , length = 0.089787589
+  4: n[4] <-> n[5] , length = 0.10511662
+  5: n[1] <-> n[6] , length = 0.081572104
+
+------------- rep 40 -------------
+1 5 --> 0.12335572
+((3,4),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.082401005
+  2: n[5] <-> n[6] , length = 0.024408036
+  3: n[3] <-> n[5] , length = 0.087388679
+  4: n[4] <-> n[5] , length = 0.089427893
+  5: n[1] <-> n[6] , length = 0.098947688
+
+------------- rep 41 -------------
+4 6 --> 0.10483143
+((2,1),4,3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 1: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.080011592
+  2: n[5] <-> n[6] , length = 0.02204905
+  3: n[3] <-> n[5] , length = 0.092719459
+  4: n[4] <-> n[5] , length = 0.082782384
+  5: n[1] <-> n[6] , length = 0.10255551
+
+------------- rep 42 -------------
+1 5 --> 0.12885373
+((3,4),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.085558248
+  2: n[5] <-> n[6] , length = 0.021575501
+  3: n[3] <-> n[5] , length = 0.096387826
+  4: n[4] <-> n[5] , length = 0.086039358
+  5: n[1] <-> n[6] , length = 0.10727823
+
+------------- rep 43 -------------
+2 5 --> 0.093423538
+(2,(3,4),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.068414954
+  2: n[5] <-> n[6] , length = 0.025008584
+  3: n[3] <-> n[5] , length = 0.076065017
+  4: n[4] <-> n[5] , length = 0.1043411
+  5: n[1] <-> n[6] , length = 0.11126071
+
+------------- rep 44 -------------
+3 6 --> 0.088203436
+((2,1),3,4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 1: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.08469445
+  2: n[5] <-> n[6] , length = 0.015465284
+  3: n[3] <-> n[5] , length = 0.072738152
+  4: n[4] <-> n[5] , length = 0.096828099
+  5: n[1] <-> n[6] , length = 0.10985994
+
+------------- rep 45 -------------
+3 6 --> 0.10618221
+(3,4,(2,1));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 1: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.077193672
+  2: n[5] <-> n[6] , length = 0.024771951
+  3: n[3] <-> n[5] , length = 0.081410263
+  4: n[4] <-> n[5] , length = 0.092336337
+  5: n[1] <-> n[6] , length = 0.11232903
+
+------------- rep 46 -------------
+2 5 --> 0.075673933
+((3,4),2,1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.05693866
+  2: n[5] <-> n[6] , length = 0.018735273
+  3: n[3] <-> n[5] , length = 0.11021643
+  4: n[4] <-> n[5] , length = 0.09464797
+  5: n[1] <-> n[6] , length = 0.12397675
+
+------------- rep 47 -------------
+2 5 --> 0.083997824
+(2,(4,3),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.066388594
+  2: n[5] <-> n[6] , length = 0.01760923
+  3: n[3] <-> n[5] , length = 0.10542268
+  4: n[4] <-> n[5] , length = 0.11931425
+  5: n[1] <-> n[6] , length = 0.1171746
+
+------------- rep 48 -------------
+2 5 --> 0.083317633
+(2,1,(3,4));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.058905027
+  2: n[5] <-> n[6] , length = 0.024412606
+  3: n[3] <-> n[5] , length = 0.085135789
+  4: n[4] <-> n[5] , length = 0.11980157
+  5: n[1] <-> n[6] , length = 0.10575832
+
+------------- rep 49 -------------
+3 6 --> 0.082247312
+((2,1),3,4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 1: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.077944082
+  2: n[5] <-> n[6] , length = 0.021329888
+  3: n[3] <-> n[5] , length = 0.060917424
+  4: n[4] <-> n[5] , length = 0.10288218
+  5: n[1] <-> n[6] , length = 0.10992453
+
+------------- rep 50 -------------
+3 6 --> 0.11091887
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.074956717
+  2: n[5] <-> n[6] , length = 0.033251315
+  3: n[3] <-> n[5] , length = 0.077667552
+  4: n[4] <-> n[5] , length = 0.087667472
+  5: n[1] <-> n[6] , length = 0.10541344
+
+------------- rep 51 -------------
+1 5 --> 0.11701605
+(1,(3,4),2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.079306852
+  2: n[5] <-> n[6] , length = 0.020689388
+  3: n[3] <-> n[5] , length = 0.097929702
+  4: n[4] <-> n[5] , length = 0.085142402
+  5: n[1] <-> n[6] , length = 0.096326664
+
+------------- rep 52 -------------
+3 6 --> 0.096840006
+(3,4,(2,1));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 1: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.071154792
+  2: n[5] <-> n[6] , length = 0.020158928
+  3: n[3] <-> n[5] , length = 0.076681078
+  4: n[4] <-> n[5] , length = 0.094649363
+  5: n[1] <-> n[6] , length = 0.11101126
+
+------------- rep 53 -------------
+4 6 --> 0.12252881
+(4,3,(1,2));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 1: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.071684252
+  2: n[5] <-> n[6] , length = 0.030400651
+  3: n[3] <-> n[5] , length = 0.072611385
+  4: n[4] <-> n[5] , length = 0.092128157
+  5: n[1] <-> n[6] , length = 0.11141675
+
+------------- rep 54 -------------
+4 6 --> 0.082331409
+((2,1),4,3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.090044272
+  2: n[5] <-> n[6] , length = 0.021918018
+  3: n[3] <-> n[5] , length = 0.092590773
+  4: n[4] <-> n[5] , length = 0.060413391
+  5: n[1] <-> n[6] , length = 0.10625973
+
+------------- rep 55 -------------
+2 5 --> 0.072125694
+(2,1,(4,3));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.06022209
+  2: n[5] <-> n[6] , length = 0.011903605
+  3: n[3] <-> n[5] , length = 0.10246447
+  4: n[4] <-> n[5] , length = 0.095057976
+  5: n[1] <-> n[6] , length = 0.11412542
+
+------------- rep 56 -------------
+3 6 --> 0.1051722
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.083141103
+  2: n[5] <-> n[6] , length = 0.024849862
+  3: n[3] <-> n[5] , length = 0.080322342
+  4: n[4] <-> n[5] , length = 0.099085758
+  5: n[1] <-> n[6] , length = 0.10283652
+
+------------- rep 57 -------------
+2 5 --> 0.078228797
+(2,1,(3,4));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.058987987
+  2: n[5] <-> n[6] , length = 0.019240811
+  3: n[3] <-> n[5] , length = 0.097459422
+  4: n[4] <-> n[5] , length = 0.09468648
+  5: n[1] <-> n[6] , length = 0.11585623
+
+------------- rep 58 -------------
+1 5 --> 0.10167558
+((4,3),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.089637409
+  2: n[5] <-> n[6] , length = 0.019696974
+  3: n[3] <-> n[5] , length = 0.096413714
+  4: n[4] <-> n[5] , length = 0.094060176
+  5: n[1] <-> n[6] , length = 0.081978609
+
+------------- rep 59 -------------
+4 6 --> 0.093620186
+((1,2),4,3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 1: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.090100961
+  2: n[5] <-> n[6] , length = 0.012888471
+  3: n[3] <-> n[5] , length = 0.090385376
+  4: n[4] <-> n[5] , length = 0.080731715
+  5: n[1] <-> n[6] , length = 0.088158655
+
+------------- rep 60 -------------
+3 6 --> 0.082749929
+((2,1),3,4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 1: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.080128649
+  2: n[5] <-> n[6] , length = 0.012389189
+  3: n[3] <-> n[5] , length = 0.07036074
+  4: n[4] <-> n[5] , length = 0.099706523
+  5: n[1] <-> n[6] , length = 0.11059425
+
+------------- rep 61 -------------
+1 5 --> 0.11867436
+((4,3),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.088494039
+  2: n[5] <-> n[6] , length = 0.025914747
+  3: n[3] <-> n[5] , length = 0.10671234
+  4: n[4] <-> n[5] , length = 0.084030674
+  5: n[1] <-> n[6] , length = 0.09275961
+
+------------- rep 62 -------------
+1 5 --> 0.10855985
+((3,4),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.090694871
+  2: n[5] <-> n[6] , length = 0.019652939
+  3: n[3] <-> n[5] , length = 0.088754961
+  4: n[4] <-> n[5] , length = 0.083105705
+  5: n[1] <-> n[6] , length = 0.088906909
+
+------------- rep 63 -------------
+2 5 --> 0.078930668
+(2,1,(4,3));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.06028048
+  2: n[5] <-> n[6] , length = 0.018650188
+  3: n[3] <-> n[5] , length = 0.08500786
+  4: n[4] <-> n[5] , length = 0.10707764
+  5: n[1] <-> n[6] , length = 0.11254511
+
+------------- rep 64 -------------
+3 6 --> 0.095310304
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.073829886
+  2: n[5] <-> n[6] , length = 0.021506505
+  3: n[3] <-> n[5] , length = 0.073803799
+  4: n[4] <-> n[5] , length = 0.095258844
+  5: n[1] <-> n[6] , length = 0.12043066
+
+------------- rep 65 -------------
+1 5 --> 0.10825704
+(1,(4,3),2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 0: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.086289255
+  2: n[5] <-> n[6] , length = 0.016172155
+  3: n[3] <-> n[5] , length = 0.09455026
+  4: n[4] <-> n[5] , length = 0.0876051
+  5: n[1] <-> n[6] , length = 0.092084887
+
+------------- rep 66 -------------
+4 6 --> 0.087828556
+((2,1),4,3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 1: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.077456339
+  2: n[5] <-> n[6] , length = 0.019632509
+  3: n[3] <-> n[5] , length = 0.11199972
+  4: n[4] <-> n[5] , length = 0.068196047
+  5: n[1] <-> n[6] , length = 0.099576434
+
+------------- rep 67 -------------
+4 6 --> 0.095281401
+((2,1),4,3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 1: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.074343318
+  2: n[5] <-> n[6] , length = 0.018148384
+  3: n[3] <-> n[5] , length = 0.078023802
+  4: n[4] <-> n[5] , length = 0.077133018
+  5: n[1] <-> n[6] , length = 0.1153464
+
+------------- rep 68 -------------
+4 6 --> 0.10955213
+(4,(2,1),3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.074514671
+  2: n[5] <-> n[6] , length = 0.027319043
+  3: n[3] <-> n[5] , length = 0.096891101
+  4: n[4] <-> n[5] , length = 0.082233084
+  5: n[1] <-> n[6] , length = 0.11198845
+
+------------- rep 69 -------------
+4 6 --> 0.11413436
+(4,(1,2),3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 1: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.089742854
+  2: n[5] <-> n[6] , length = 0.015475045
+  3: n[3] <-> n[5] , length = 0.10360854
+  4: n[4] <-> n[5] , length = 0.098659319
+  5: n[1] <-> n[6] , length = 0.13029365
+
+------------- rep 70 -------------
+1 5 --> 0.11663881
+(1,2,(3,4));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.092768448
+  2: n[5] <-> n[6] , length = 0.020718739
+  3: n[3] <-> n[5] , length = 0.090272851
+  4: n[4] <-> n[5] , length = 0.097768852
+  5: n[1] <-> n[6] , length = 0.095920075
+
+------------- rep 71 -------------
+4 6 --> 0.09791223
+((1,2),4,3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.075197177
+  2: n[5] <-> n[6] , length = 0.018340056
+  3: n[3] <-> n[5] , length = 0.091921147
+  4: n[4] <-> n[5] , length = 0.079572174
+  5: n[1] <-> n[6] , length = 0.11439633
+
+------------- rep 72 -------------
+2 5 --> 0.089644169
+(2,(3,4),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.067893022
+  2: n[5] <-> n[6] , length = 0.021751147
+  3: n[3] <-> n[5] , length = 0.1059354
+  4: n[4] <-> n[5] , length = 0.083821461
+  5: n[1] <-> n[6] , length = 0.10821854
+
+------------- rep 73 -------------
+1 5 --> 0.10011675
+(1,2,(4,3));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 0: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.092888206
+  2: n[5] <-> n[6] , length = 0.012441793
+  3: n[3] <-> n[5] , length = 0.10337997
+  4: n[4] <-> n[5] , length = 0.076556984
+  5: n[1] <-> n[6] , length = 0.087674959
+
+------------- rep 74 -------------
+1 5 --> 0.11563023
+(1,2,(4,3));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 0: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.061318862
+  2: n[5] <-> n[6] , length = 0.016079444
+  3: n[3] <-> n[5] , length = 0.094144204
+  4: n[4] <-> n[5] , length = 0.11726032
+  5: n[1] <-> n[6] , length = 0.09955079
+
+------------- rep 75 -------------
+1 5 --> 0.1098011
+((3,4),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.07576596
+  2: n[5] <-> n[6] , length = 0.020834476
+  3: n[3] <-> n[5] , length = 0.091135676
+  4: n[4] <-> n[5] , length = 0.09287468
+  5: n[1] <-> n[6] , length = 0.088966623
+
+------------- rep 76 -------------
+4 6 --> 0.092570319
+(4,3,(2,1));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 1: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.082904059
+  2: n[5] <-> n[6] , length = 0.014837271
+  3: n[3] <-> n[5] , length = 0.10242118
+  4: n[4] <-> n[5] , length = 0.077733047
+  5: n[1] <-> n[6] , length = 0.1147819
+
+------------- rep 77 -------------
+3 6 --> 0.100055
+((2,1),3,4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.076542883
+  2: n[5] <-> n[6] , length = 0.020449235
+  3: n[3] <-> n[5] , length = 0.079605769
+  4: n[4] <-> n[5] , length = 0.099169224
+  5: n[1] <-> n[6] , length = 0.11394604
+
+------------- rep 78 -------------
+2 5 --> 0.062293362
+(2,(3,4),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.047481404
+  2: n[5] <-> n[6] , length = 0.014811958
+  3: n[3] <-> n[5] , length = 0.095186572
+  4: n[4] <-> n[5] , length = 0.089776821
+  5: n[1] <-> n[6] , length = 0.11142318
+
+------------- rep 79 -------------
+4 6 --> 0.10386467
+((1,2),4,3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[2] -> n[6], e[4] -> n[4], e[3] -> n[3]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.08412375
+  2: n[5] <-> n[6] , length = 0.020195258
+  3: n[3] <-> n[5] , length = 0.072874798
+  4: n[4] <-> n[5] , length = 0.083669415
+  5: n[1] <-> n[6] , length = 0.11015623
+
+------------- rep 80 -------------
+1 5 --> 0.10982776
+((3,4),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.078241753
+  2: n[5] <-> n[6] , length = 0.023334364
+  3: n[3] <-> n[5] , length = 0.090117533
+  4: n[4] <-> n[5] , length = 0.089324285
+  5: n[1] <-> n[6] , length = 0.086493397
+
+------------- rep 81 -------------
+4 6 --> 0.098742168
+(4,(2,1),3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.086253367
+  2: n[5] <-> n[6] , length = 0.023303029
+  3: n[3] <-> n[5] , length = 0.10149874
+  4: n[4] <-> n[5] , length = 0.075439139
+  5: n[1] <-> n[6] , length = 0.11003509
+
+------------- rep 82 -------------
+3 6 --> 0.082405326
+(3,4,(1,2));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.090262361
+  2: n[5] <-> n[6] , length = 0.011218189
+  3: n[3] <-> n[5] , length = 0.071187136
+  4: n[4] <-> n[5] , length = 0.11022183
+  5: n[1] <-> n[6] , length = 0.12991324
+
+------------- rep 83 -------------
+3 6 --> 0.10598879
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.080394612
+  2: n[5] <-> n[6] , length = 0.021639009
+  3: n[3] <-> n[5] , length = 0.084349784
+  4: n[4] <-> n[5] , length = 0.089467837
+  5: n[1] <-> n[6] , length = 0.10417975
+
+------------- rep 84 -------------
+3 6 --> 0.085217907
+(3,(2,1),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.073952143
+  2: n[5] <-> n[6] , length = 0.0085701155
+  3: n[3] <-> n[5] , length = 0.076647791
+  4: n[4] <-> n[5] , length = 0.099868861
+  5: n[1] <-> n[6] , length = 0.12184555
+
+------------- rep 85 -------------
+3 6 --> 0.079133526
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.088183248
+  2: n[5] <-> n[6] , length = 0.017952243
+  3: n[3] <-> n[5] , length = 0.061181283
+  4: n[4] <-> n[5] , length = 0.12436884
+  5: n[1] <-> n[6] , length = 0.11575061
+
+------------- rep 86 -------------
+3 6 --> 0.087687755
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.072778055
+  2: n[5] <-> n[6] , length = 0.020902494
+  3: n[3] <-> n[5] , length = 0.066785262
+  4: n[4] <-> n[5] , length = 0.10711351
+  5: n[1] <-> n[6] , length = 0.10349203
+
+------------- rep 87 -------------
+2 5 --> 0.074525058
+(2,1,(3,4));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.060674714
+  2: n[5] <-> n[6] , length = 0.013850345
+  3: n[3] <-> n[5] , length = 0.090714737
+  4: n[4] <-> n[5] , length = 0.10485304
+  5: n[1] <-> n[6] , length = 0.12553546
+
+------------- rep 88 -------------
+4 6 --> 0.11707825
+(4,3,(2,1));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.076552873
+  2: n[5] <-> n[6] , length = 0.02281059
+  3: n[3] <-> n[5] , length = 0.09127032
+  4: n[4] <-> n[5] , length = 0.094267655
+  5: n[1] <-> n[6] , length = 0.10569277
+
+------------- rep 89 -------------
+1 5 --> 0.10142518
+(1,2,(4,3));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 0: Edges: e[5] -> n[1], e[1] -> n[2], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.093568015
+  2: n[5] <-> n[6] , length = 0.021924238
+  3: n[3] <-> n[5] , length = 0.092847936
+  4: n[4] <-> n[5] , length = 0.084446028
+  5: n[1] <-> n[6] , length = 0.079500939
+
+------------- rep 90 -------------
+2 5 --> 0.082053206
+(2,(3,4),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.06720891
+  2: n[5] <-> n[6] , length = 0.014844296
+  3: n[3] <-> n[5] , length = 0.088578686
+  4: n[4] <-> n[5] , length = 0.09490259
+  5: n[1] <-> n[6] , length = 0.12760121
+
+------------- rep 91 -------------
+1 5 --> 0.11147877
+((4,3),1,2);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 0: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.078936114
+  2: n[5] <-> n[6] , length = 0.021679605
+  3: n[3] <-> n[5] , length = 0.093094321
+  4: n[4] <-> n[5] , length = 0.090453959
+  5: n[1] <-> n[6] , length = 0.08979916
+
+------------- rep 92 -------------
+4 6 --> 0.084446156
+(4,(2,1),3);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[4] -> n[4], e[2] -> n[6], e[3] -> n[3]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.076396774
+  2: n[5] <-> n[6] , length = 0.017316577
+  3: n[3] <-> n[5] , length = 0.092561927
+  4: n[4] <-> n[5] , length = 0.067129579
+  5: n[1] <-> n[6] , length = 0.094031607
+
+------------- rep 93 -------------
+3 6 --> 0.093995496
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[5] -> n[1], e[2] -> n[5], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.073371036
+  2: n[5] <-> n[6] , length = 0.024499841
+  3: n[3] <-> n[5] , length = 0.069495655
+  4: n[4] <-> n[5] , length = 0.096657907
+  5: n[1] <-> n[6] , length = 0.13063144
+
+------------- rep 94 -------------
+3 6 --> 0.08720109
+(3,(2,1),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[2] -> n[5], e[1] -> n[2], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.08130443
+  2: n[5] <-> n[6] , length = 0.014671503
+  3: n[3] <-> n[5] , length = 0.072529587
+  4: n[4] <-> n[5] , length = 0.11524555
+  5: n[1] <-> n[6] , length = 0.095443591
+
+------------- rep 95 -------------
+2 5 --> 0.090099119
+(2,1,(3,4));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[2] -> n[6], e[3] -> n[3], e[4] -> n[4]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.070783318
+  2: n[5] <-> n[6] , length = 0.0193158
+  3: n[3] <-> n[5] , length = 0.097532218
+  4: n[4] <-> n[5] , length = 0.095272915
+  5: n[1] <-> n[6] , length = 0.11634255
+
+------------- rep 96 -------------
+2 5 --> 0.07840313
+(2,(4,3),1);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 0: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.061739884
+  2: n[5] <-> n[6] , length = 0.016663246
+  3: n[3] <-> n[5] , length = 0.10146841
+  4: n[4] <-> n[5] , length = 0.096593642
+  5: n[1] <-> n[6] , length = 0.118526
+
+------------- rep 97 -------------
+3 6 --> 0.090796691
+(3,(1,2),4);
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[2] -> n[6], e[4] -> n[4]
+  6: : 1: Edges: e[2] -> n[5], e[5] -> n[1], e[1] -> n[2]
+Edges:
+  1: n[2] <-> n[6] , length = 0.059286843
+  2: n[5] <-> n[6] , length = 0.020053763
+  3: n[3] <-> n[5] , length = 0.070742928
+  4: n[4] <-> n[5] , length = 0.11582635
+  5: n[1] <-> n[6] , length = 0.096763094
+
+------------- rep 98 -------------
+3 6 --> 0.11021708
+(3,4,(2,1));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 2: Edges: e[5] -> n[6]
+  2: penguin   : 2: Edges: e[1] -> n[6]
+  3: owl       : 1: Edges: e[3] -> n[5]
+  4: parrot    : 1: Edges: e[4] -> n[5]
+  5: : 0: Edges: e[3] -> n[3], e[4] -> n[4], e[2] -> n[6]
+  6: : 1: Edges: e[1] -> n[2], e[2] -> n[5], e[5] -> n[1]
+Edges:
+  1: n[2] <-> n[6] , length = 0.071649488
+  2: n[5] <-> n[6] , length = 0.02262943
+  3: n[3] <-> n[5] , length = 0.087587646
+  4: n[4] <-> n[5] , length = 0.093827285
+  5: n[1] <-> n[6] , length = 0.11288516
+
+------------- rep 99 -------------
+2 5 --> 0.081208646
+(2,1,(4,3));
+numTaxa = 4, numNodes = 6, numEdges = 5
+Nodes:
+  1: kiwi      : 1: Edges: e[5] -> n[6]
+  2: penguin   : 1: Edges: e[1] -> n[6]
+  3: owl       : 2: Edges: e[3] -> n[5]
+  4: parrot    : 2: Edges: e[4] -> n[5]
+  5: : 1: Edges: e[4] -> n[4], e[3] -> n[3], e[2] -> n[6]
+  6: : 0: Edges: e[1] -> n[2], e[5] -> n[1], e[2] -> n[5]
+Edges:
+  1: n[2] <-> n[6] , length = 0.060029276
+  2: n[5] <-> n[6] , length = 0.021179371
+  3: n[3] <-> n[5] , length = 0.092554519
+  4: n[4] <-> n[5] , length = 0.097543264
+  5: n[1] <-> n[6] , length = 0.11885222
+
+Errors: 0

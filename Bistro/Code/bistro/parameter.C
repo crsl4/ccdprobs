@@ -1,8 +1,10 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <sstream>
+
 
 #include "parameter.h"
 
