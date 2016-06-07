@@ -1,3 +1,6 @@
 ../../Code/test/bl -t "(1,2,3);" -p 0.309,0.288,0.134,0.269 -q 0.1847391,0.1289626,0.0373299,0.0079465,0.6403711,0.0006508 -f ../../Data/artiodactyl-3.fasta
 
 ../../Code/test/bl -t "((Pig,((Cow,Giraffe),Sheep)),Dolphin,Camel);" -p 0.309,0.288,0.134,0.269 -q 0.1847391,0.1289626,0.0373299,0.0079465,0.6403711,0.0006508 -f ../../Data/artiodactyl-6.fasta
+
+tree edges for comparison
+((Pig:0.2097,((Cow:0.1417,Giraffe:0.1146):0.0149,Sheep:0.1418):0.1231):0.0274,Dolphin:0.2752,Camel:0.3213):0.0;
