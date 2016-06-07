@@ -685,7 +685,8 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
       cerr << "Sum smaller than summand in partialPathCalculations2D" << endl;
       cerr << "t: " << t.transpose() << endl;
       cerr << "sum: " << sum << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
   Matrix4d QP1 = qmatrix.getQP(t[0]);
@@ -763,7 +764,8 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
   if (sum1 < t1 || sum2 < t1)
     {
       cerr << "Sum " << sum1 << " or " << sum2 << "smaller than summand " << t1 << " in partialPathCalculations1D" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   Matrix4d P1 = qmatrix.getTransitionMatrix(t1);
   Matrix4d QP1 = qmatrix.getQP(t1);
@@ -849,14 +851,16 @@ void mleError(Node* na,Node* nb,double curr,double prop,double curr_dlogl,double
   cerr << "Error: too many iterations in mleDistance." << endl;
   cerr << "Nodes " << na->getNumber() << " and " << nb->getNumber() << endl;
   cerr << "Derivative = " << curr_dlogl << " and " << prop_dlogl << endl;
-  exit(1);
+  //exit(1);
+  throw 20;
 }
 
 void mleErrorJoint(Node* nx,Node* ny,Node* nz)
 {
   cerr << "Error: too many iterations in mleDistanceJoint." << endl;
   cerr << "Nodes " << nx->getNumber() << ", " << ny->getNumber() << ", and " << nz->getNumber() << endl;
-  exit(1); //question: had to comment this
+  //exit(1); 
+  throw 20;
 }
 
 // Find mle distance from node a to b through a path that uses edges ea and eb.
@@ -1099,7 +1103,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   if(sum1 < t1 || sum2 < t1)
     {
       cerr << "Sum smaller than summand in mle distance1D" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   if(verbose)
     cout << "Entering mleDistance1D" << endl;
@@ -1228,7 +1233,8 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   if(t1<0 || t2<0 || t3<0)
     {
       cerr << "Sampled negative branches in mleDistance1D" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
 }
 
@@ -1351,7 +1357,8 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
   if(sxy > 0 && sxz > 0 && syz > 0)
     {
       cerr << "Trying to condition al all three sums, impossible!" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   if ( sxy + sxz + syz == 0) //not conditional
     {
@@ -1523,7 +1530,8 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   if( lx<0 || ly<0 || lz<0)
     {
       cerr << "Sampled negative bl in mleDistance3D" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
 }
 
@@ -1541,7 +1549,8 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   if (sum < t1)
     {
       cerr << "Sum smaller than summand in mleDistance2D" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
   bool recurse=true; //warning: need to keep true
   int iter=0;
@@ -1694,7 +1703,8 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   if(t1<0 || t2<0 || t3<0)
     {
       cerr << "Sampled negative bl in mleDistance2D" << endl;
-      exit(1);
+      //exit(1);
+      throw 20;
     }
 }
 
@@ -1779,7 +1789,8 @@ Node* Node::closeRelative()
   if ( relative == this )
   {
     cerr << "Error: closeRelative failed." << endl;
-    exit(1);
+    //exit(1);
+    throw 20;
   }
   if ( relative->getActiveChildrenSize() == 0 )
     return relative;
@@ -1827,7 +1838,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
         cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
         cerr << root->getActiveChild(0)->getNumber() << endl;
         cerr << (*p)->getNumber() << endl;
-        exit(1);
+        //exit(1);
+	throw 20;
       }
       par = root;
       x = *p++;
@@ -1890,7 +1902,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     if ( foundxy + foundxz + foundyz == 3 ) //all found, error
       {
 	cerr << "Error: three sums found, cannot condition on three sums" << endl;
-	exit(1);
+	//exit(1);
+	throw 20;
       }
     if(verbose)
       cout << "foundxy " << foundxy << ", foundyz " << foundyz << ", foundxz " << foundxz << endl;
@@ -1951,7 +1964,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     if(lengthX0 < 0 || lengthY0 < 0 || lengthZ0 < 0)
       {
 	cerr << "after fixing negative bl, still found negative" << endl;
-	exit(1);
+	//exit(1);
+	throw 20;
       }
 
     double lx = lengthX0;

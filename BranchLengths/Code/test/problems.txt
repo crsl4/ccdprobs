@@ -1,6 +1,8 @@
 ./bl -f "../../Data/cats-dogs.fasta" -t "((1,2),((6,3),(5,4)),((12,11),(((7,8),9),10)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519
 
-./bl -f "../../Data/cats-dogs.fasta" -t "((1,2),((6,3),(5,4)),((12,11),(((7,8),9),10)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519 -s 1234
+./bl -f "../../Data/cats-dogs.fasta" -t "(1,2,((3,((4,5),6)),(((((7,8),9,),10),11),12)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519
+
+
 
 bad seeds:
 - case mu1==0 in multivariateGamma2D (fixed)
@@ -15,39 +17,31 @@ bad seeds:
 ./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
 
 
+Bret:
+- want to do simulated data and test the whole approach, how to?
+- question simData:
+- tree is ape tree?
+- alpha?
+- returned object? I can check this
 
 *** 4 taxa:
-- strange different ESS between loglik C++ and R for same branch
-lengths:
-- seems to be because the gradient is calculated differently, and we
-have huge jumps in C++. thus, we have a difference in the computation
-of loglik, and gradient. this is causing the difference between R and
-C++, but also the wider range of sampling in C++ because we do not
-reach the MLE correctly
-
-
-* simulated data 4 taxa: we get ESS 15% (both R and C++), hard to
-* compare logdensity because we would need to know the order of
-* sampled. but, it seems that bl have a wider range from c++ than R, why?
-
-* find birds/cats data for 4 taxa and test. recall that we did not
-have a good ess in R on these examples, we suspected because the
-normal was not good fit when bl~0. rerun in R to compare dist of
-weights
+* mvnormal behaving much better than gammabeta (20% vs 1%), not sure
+ why, in real-life birds; in simulated it is 40 vs 30
 
 
 ****for more than 4 taxa:
 * save individual seed per run with error to replicate errors
-* try/catch not working: need to change exit(1) to throw(...)
-Bret:
-- set seed per replicate how? create vector of seeds?
-- how to save bl? not always in the same order: although for 4 birds
-it looks in the same order
+* try/catch not working: need to change exit(1) to throw(...), maybe
+* we want different types of errors
+
 
 -------
 To do (later):
 - check theory for gamma (correct mean, var and cov)
 - still need checks for t==sum in mleDistance?D, when to set it ==sum?
+- still need to check slightly better ESS in R for gammabeta than in
+C++. for example, in 4 taxa simulated data: R 36%, C++ 30%.
+for mvnormal it is different also, R: 40%, c++ 45%.
 
 --------
 later:

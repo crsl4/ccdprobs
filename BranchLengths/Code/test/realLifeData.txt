@@ -1,0 +1,52 @@
+*** birds 4 taxa:
+
+* mvnormal
+./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675 --mvnormal
+mv logw.txt logw_birds4_norm.txt
+using studyWeights.r:
+> (1/sum(data$w^2))/1000
+[1] 0.2147752
+> summary(data$bl2)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+0.005933 0.016850 0.019770 0.019910 0.022850 0.037370
+
+* gammabeta
+./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
+mv logw.txt logw_birds4_gam.txt
+> (1/sum(data$w^2))/1000
+[1] 0.01372532
+> summary(data$bl2)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+0.006468 0.016610 0.019750 0.020240 0.023450 0.040100
+
+CONCLUSION: mvnormal behaves better, not sure why,
+intervals are similar
+
+*** cats dogs: 12 taxa
+* mvnormal random tree
+./bl -f "../../Data/cats-dogs.fasta" -t "((1,2),((6,3),(5,4)),((12,11),(((7,8),9),10)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519 --mvnormal
+Errors: 90
+> (1/sum(data$w^2))/1000
+[1] 0.001610692
+> (1/sum(data$w^2))/910
+[1] 0.001769991
+> data[data$w>0.01,]$w
+[1] 0.01605093 0.78381005 0.04780674 0.01725439 0.01094482 0.05623092
+
+* mvnormal best NJ tree
+./bl -f "../../Data/cats-dogs.fasta" -t "(1,2,((3,((4,5),6)),(((((7,8),9),10),11),12)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519 --mvnormal
+Errors: 93
+> data[data$w>0.01,]$w
+ [1] 0.13223807 0.01423785 0.01478191 0.03248583 0.27498151 0.01616105
+ [7] 0.01102653 0.02081354 0.02322441 0.01251220 0.10061525 0.07881504
+[13] 0.01000719 0.02365096 0.07558848 0.01080170 0.03336154
+> length(data[data$w>0.01,]$w)
+[1] 17
+> hist(data$w)
+> plot(1:length(data$w),cumsum(rev(sort(data$w))))
+> (1/sum(data$w^2))/1000
+[1] 0.008301932
+> 1000-93
+[1] 907
+> (1/sum(data$w^2))/907
+[1] 0.009153178
