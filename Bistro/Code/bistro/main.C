@@ -54,23 +54,6 @@ int main(int argc, char* argv[])
   cerr << endl << "Tree topology:" << endl;
   cerr << tree.makeTopologyNumbers() << endl << endl;
 
-  // Run MCMC on tree to estimate Q matrix parameters
-  //   initial Q matrix
-  vector<double> p_init(4,0.25);
-  vector<double> s_init(6,0.1);
-  s_init[1] = 0.3;
-  s_init[4] = 0.3;
-  
-  QMatrix q_init(p_init,s_init);
-
-  cout << q_init.getQ() << endl;
-
-  // set up Q matrix
-  
-  // QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
-
-  // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
-
   // Initialize random number generator
   cerr << "Initializing random number generator ...";
   if ( parameters.getSeed() == 0 )
@@ -81,6 +64,22 @@ int main(int argc, char* argv[])
   mt19937_64 rng(parameters.getSeed());
   cerr << " done." << endl;
   cerr << "Seed = " << parameters.getSeed() << endl;
+
+  // Run MCMC on tree to estimate Q matrix parameters
+  //   initial Q matrix
+  vector<double> p_init(4,0.25);
+  vector<double> s_init(6,0.1);
+  s_init[1] = 0.3;
+  s_init[4] = 0.3;
+  
+  QMatrix q_init(p_init,s_init);
+  cout << q_init.getQ() << endl;
+
+  q_init.mcmc(rng)
+
+  // QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
+
+  // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
 
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
@@ -102,7 +101,7 @@ int main(int argc, char* argv[])
 
   cerr << endl << "Topology counts:" << endl;
   for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
-    cout << (*m).first << " " << setw(5) << (*m).second << endl;
+    cerr << (*m).first << " " << setw(5) << (*m).second << endl;
   cerr << endl;
 
   vector<int> taxaNumbers;
@@ -110,11 +109,14 @@ int main(int argc, char* argv[])
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
   CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
 
-  int numRandom = 10000;
-  cerr << "Generating " << numRandom << " random trees:" << endl;
-  for ( int k=0; k<numRandom; ++k )
+  if ( parameters.getNumBootstrap() > 0 )
   {
-    cout << ccd.randomTree(rng) << endl;
+    int numRandom = 10000;
+    cerr << "Generating " << numRandom << " random trees:" << endl;
+    for ( int k=0; k<numRandom; ++k )
+    {
+      cout << ccd.randomTree(rng) << endl;
+    }
   }
   
   return 0;
