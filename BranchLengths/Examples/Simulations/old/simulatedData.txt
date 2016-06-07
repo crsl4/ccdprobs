@@ -1,3 +1,6 @@
+WARNING: files changed place on 6/7/16, so the commands might not work
+exactly as they are
+
 seed=0646 in simulateData.r with
 d1x0 = 0.11
 d2x0 = 0.078
