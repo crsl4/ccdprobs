@@ -19,6 +19,10 @@ bad seeds:
 
 Bret:
 - want to do simulated data and test the whole approach, how to?
+- question simData:
+- tree is ape tree?
+- alpha?
+- returned object? I can check this
 
 *** 4 taxa:
 * mvnormal behaving much better than gammabeta (20% vs 1%), not sure
