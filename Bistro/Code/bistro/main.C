@@ -55,6 +55,15 @@ int main(int argc, char* argv[])
   cerr << tree.makeTopologyNumbers() << endl << endl;
 
   // Run MCMC on tree to estimate Q matrix parameters
+  //   initial Q matrix
+  vector<double> p_init(4,0.25);
+  vector<double> s_init(6,0.1);
+  s_init[1] = 0.3;
+  s_init[4] = 0.3;
+  
+  QMatrix q_init(p_init,s_init);
+
+  cout << q_init.getQ() << endl;
 
   // set up Q matrix
   

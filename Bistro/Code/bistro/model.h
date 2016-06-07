@@ -32,7 +32,9 @@ private:
   Matrix4d Vinv;
   Matrix4d Q;
 public:
+  void completeConstruction();
   QMatrix(vector<double>,vector<double>); // p and s, assumes sum to 1 and positive
+  QMatrix(Vector4d,VectorXd); // p and s, assumes sum to 1 and positive
   Vector4d vectorExp(double t);
   Matrix4d getTransitionMatrix(double);
   Matrix4d getQ();
