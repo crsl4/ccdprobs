@@ -4,7 +4,6 @@ d2x0 = 0.078
 dxy0 = 0.03
 d3y0 = 0.091
 d4y0 = 0.098
-** testData includes all the output files now
 
 -----------------------------------------------------------------------
 problem found: mleDistance2D not correct nodes associated with t1,t2,t3
