@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     Tree tree(parameters.getTopology());
     tree.relabel(alignment);
 //    tree.randomBranchLengths(rng,20); // only here to test likelihood calculations
-//    tree.print(cout);
+    tree.print(cout);
 //    tree.setSitePatterns(sequences);
 
     // log-likelihood calculation

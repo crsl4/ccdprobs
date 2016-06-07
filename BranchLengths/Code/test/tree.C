@@ -1346,55 +1346,66 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // it calls different functions depending on the number of sums known
 // double& to modify inside? yes
 // warning: this would break if a sum is in fact 0, but i don't think this would happen
-void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,mt19937_64& rng, bool verbose, bool mvnormal, ofstream& par3D, ofstream& par2D)
+void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, double sxy, double sxz, double syz,
+			    bool foundXY, bool foundXZ, bool foundYZ, mt19937_64& rng, bool verbose, bool mvnormal, ofstream& par3D, ofstream& par2D)
 { //todo: add ofstream to each mledistance3d,2d and write needed things to file
-  if(verbose)
-    {
-      cout << "Entering mleDistanceJoint" << endl;
-      cout << "lx,ly,lz: " << lx << ", " << ly << ", " << lz << endl;
-      cout << "sxy,sxz,syz: " << sxy << ", " << sxz << ", " << syz << endl;
-    }
-  if(sxy > 0 && sxz > 0 && syz > 0)
-    {
-      cerr << "Trying to condition al all three sums, impossible!" << endl;
-      //exit(1);
-      throw 20;
-    }
-  if ( sxy + sxz + syz == 0) //not conditional
-    {
-      mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng, verbose,mvnormal, par3D);
-      return;
-    }
-  if( sxy > 0 && sxz + syz == 0) //conditional on sxy
-    {
-      mleDistance2D(alignment, nx,ex,nz,ez,ny,ey,qmatrix,lx,lz,ly,sxy,rng, verbose,mvnormal, par2D); //warning in order branches
-      return;
-    }
-  if( sxz > 0 && sxy + syz == 0) //conditional on sxz
-    {
-      mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,ly,lz,sxz,rng, verbose,mvnormal, par2D); //warning in order branches
-      return;
-    }
-  if( syz > 0 && sxz + sxy == 0) //conditional on syz
-    {
-      mleDistance2D(alignment, ny,ey,nx,ex,nz,ez,qmatrix,ly,lx,lz,syz,rng, verbose,mvnormal, par2D); //warning in order branches
-      return;
-    }
-  if( sxy > 0 && sxz > 0) //conditional on sxy,sxz
-    {
-      mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz, sxy, sxz, rng, verbose,mvnormal);
-      return;
-    }
-  if( sxy > 0 && syz > 0) //conditional on sxy,syz
-    {
-      mleDistance1D(alignment,ny,ey,nx,ex,nz,ez,qmatrix, ly, lx, lz, sxy, syz, rng, verbose,mvnormal);
-      return;
-    }
-  if( sxz > 0 && syz > 0) //conditional on sxz,syz
-    {
-      mleDistance1D(alignment,nz,ez,nx,ex,ny,ey,qmatrix, lz, lx, ly, sxz, syz, rng, verbose,mvnormal);
-      return;
-    }
+  if ( verbose )
+  {
+    cout << "Entering mleDistanceJoint" << endl;
+    cout << "lx,ly,lz: " << lx << ", " << ly << ", " << lz << endl;
+    cout << "sxy,sxz,syz: " << sxy << ", " << sxz << ", " << syz << endl;
+  }
+//  if(sxy > 0 && sxz > 0 && syz > 0)
+  if ( foundXY && foundXZ && foundYZ )
+  {
+    cerr << "Trying to condition al all three sums, impossible!" << endl;
+    //exit(1);
+    throw 20;
+  }
+//  if ( sxy + sxz + syz == 0) //not conditional
+  if ( !foundXY && !foundXZ && !foundYZ ) //not conditional
+  {
+    mleDistance3D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz,rng, verbose,mvnormal, par3D);
+    return;
+  }
+//  if( sxy > 0 && sxz + syz == 0) //conditional on sxy
+  if ( foundXY && !foundXZ && !foundYZ ) //conditional on sxy
+  {
+    mleDistance2D(alignment, nx,ex,nz,ez,ny,ey,qmatrix,lx,lz,ly,sxy,rng, verbose,mvnormal, par2D); //warning in order branches
+    return;
+  }
+//  if( sxz > 0 && sxy + syz == 0) //conditional on sxz
+  if ( !foundXY && foundXZ && !foundYZ ) //conditional on sxz
+  {
+    mleDistance2D(alignment, nx,ex,ny,ey,nz,ez,qmatrix,lx,ly,lz,sxz,rng, verbose,mvnormal, par2D); //warning in order branches
+    return;
+  }
+//  if( syz > 0 && sxz + sxy == 0) //conditional on syz
+  if ( !foundXY && !foundXZ && foundYZ ) //conditional on syz
+  {
+    mleDistance2D(alignment, ny,ey,nx,ex,nz,ez,qmatrix,ly,lx,lz,syz,rng, verbose,mvnormal, par2D); //warning in order branches
+    return;
+  }
+//  if( sxy > 0 && sxz > 0) //conditional on sxy,sxz
+  if ( foundXY && foundXZ ) //conditional on sxy,sxz
+  {
+    mleDistance1D(alignment,nx,ex,ny,ey,nz,ez,qmatrix, lx, ly, lz, sxy, sxz, rng, verbose,mvnormal);
+    return;
+  }
+//  if( sxy > 0 && syz > 0) //conditional on sxy,syz
+  if ( foundXY && foundYZ ) //conditional on sxy,syz
+  {
+    mleDistance1D(alignment,ny,ey,nx,ex,nz,ez,qmatrix, ly, lx, lz, sxy, syz, rng, verbose,mvnormal);
+    return;
+  }
+//  if( sxz > 0 && syz > 0) //conditional on sxz,syz
+  if ( foundXZ && foundYZ ) //conditional on sxz,syz
+  {
+    mleDistance1D(alignment,nz,ez,nx,ex,ny,ey,qmatrix, lz, lx, ly, sxz, syz, rng, verbose,mvnormal);
+    return;
+  }
+  cerr << "Error: called mleDistanceJoint and no case found" << endl;
+  throw 20;
 }
 
 // Find joint mle distance between nodes nx,ny,nz with edges ex,ey,ez
@@ -1980,7 +1991,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	cout << "lx " << lx << ", ly " << ly << ", lz " << lz << endl;
       }
 
-    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz, rng, verbose, mvnormal, par3D, par2D);
+    mleDistanceJoint(alignment, x, x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, lx,ly,lz, sxy,sxz,syz,
+		     foundxy,foundxz,foundyz,rng, verbose, mvnormal, par3D, par2D);
     //change to pass the parent
     if(verbose)
       {

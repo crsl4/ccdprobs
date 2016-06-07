@@ -3,8 +3,8 @@
 ## Claudia May 2016
 ## Modified by Bret on June 1, 2016
 
-dat = read.csv("logw.txt",header=TRUE)
-#dat = read.csv("logw.txt",header=FALSE)
+#dat = read.csv("logw.txt",header=TRUE)
+dat = read.csv("logw.txt",header=FALSE)
 logweight = dat[,ncol(dat)]
 #logweight = logweight[!is.nan(logweight)]
 logw = logweight - max(logweight)
