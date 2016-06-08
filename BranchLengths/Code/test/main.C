@@ -20,7 +20,7 @@ using namespace Eigen;
 
 void checkDistances(Tree& tree,Alignment& alignment,QMatrix& model)
 {
-  bool verbose = true;
+  bool verbose = false;
   cout << tree.makeTopologyNumbers() << endl;
   int numTaxa = alignment.getNumTaxa();
   for ( int i=0; i < numTaxa-1; ++i )
@@ -95,7 +95,13 @@ int main(int argc, char* argv[])
 //    tree.setSitePatterns(sequences);
 
     // log-likelihood calculation
-    //checkDistances(tree,alignment,model);
+    if ( verbose )
+    {
+      cerr << "Check distances" << endl;
+      checkDistances(tree,alignment,model);
+      cerr << "----------------------------------------------------------------" << endl;
+    }
+	
     if(verbose)
       cout << tree.makeTopologyNumbers() << endl;
     int errors = 0;
@@ -121,6 +127,8 @@ int main(int argc, char* argv[])
 	try
 	  {
 	    tree.randomize(rng);
+	    if ( verbose )
+	      tree.print(cerr);
 	    tree.clearProbMaps();
 	    tree.generateBranchLengths(alignment,model,rng, verbose, mvnormal, par3D, par2D);
 	    double weight = tree.calculateWeight(alignment, model, 0.05, verbose, logwfile);

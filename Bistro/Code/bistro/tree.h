@@ -68,10 +68,10 @@ private:
   int minNumber; // smallest number in subtree rooted at node
 public:
   map<string,pair<double,Vector4d> > patternToProbMap;
-  Node() { number = -1; }
+  Node() { number = -1; level = 0; }
   ~Node() { edges.clear(); }
-  Node(int n,bool l) : number(n), leaf(l) {}
-  Node(bool l) : leaf(l) {}
+  Node(int n,bool l) : number(n), leaf(l) { level = 0;}
+  Node(bool l) : leaf(l) { level = 0; }
   int getNumber() const { return number; }
   void setNumber(int x) { number = x; }
   string getName() const { return name; }

@@ -240,7 +240,10 @@ Tree::Tree(string line)
   for ( int i=0; i<nodes.size(); ++i )
     nodes[i]->setNumber(i+1);
   for ( int i=0; i<edges.size(); ++i )
+  {
     edges[i]->setNumber(i+1);
+    edges[i]->setLength(0.0);
+  }
 
   numNodes = nodes.size();
   numEdges = edges.size();
@@ -1442,6 +1445,11 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
 	cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
 	cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+	Matrix3d corr_matrix = -curr_hessian.inverse();
+	Vector3d sigma = corr_matrix.diagonal();
+	for ( int i=0; i<3; ++i )
+	  sigma(i) = 1.0 / sqrt(sigma(i));
+	cout << "mleDistance3D approx correlation: " << endl << sigma.asDiagonal() * corr_matrix * sigma.asDiagonal() << endl;
       }
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
@@ -1555,8 +1563,11 @@ void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
 void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& t1, double& t2, double& t3, double& sum, mt19937_64& rng, bool verbose, bool mvnormal, ofstream& par2D)
 {
-  if(verbose)
+  if ( verbose )
+  {
     cout << "Entering mleDistance2D" << endl;
+    cerr << "node x = " << nx->getNumber() << ", node y = " << ny->getNumber() << ", node z = nz->getNumber() " << endl;
+  }
   if (sum < t1)
     {
       cerr << "Sum smaller than summand in mleDistance2D" << endl;
@@ -1576,6 +1587,12 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
       cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
       cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+      Matrix2d corr_matrix = -curr_hessian.inverse();
+      Vector2d sigma = corr_matrix.diagonal();
+      for ( int i=0; i<2; ++i )
+	sigma(i) = 1.0 / sqrt(sigma(i));
+      cout << "mleDistance2D approx correlation: " << endl << sigma.asDiagonal() * corr_matrix * sigma.asDiagonal() << endl;
+
     }
   Vector2d prop = curr;
   double prop_logl = curr_logl;
@@ -1596,6 +1613,11 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	cout << "mleDistance2D Newton-Raphson curr: " << curr.transpose() << endl;
 	cout << "mleDistance2D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
 	cout << "mleDistance2D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+	Matrix2d corr_matrix = -curr_hessian.inverse();
+	Vector2d sigma = corr_matrix.diagonal();
+	for ( int i=0; i<2; ++i )
+	  sigma(i) = 1.0 / sqrt(sigma(i));
+	cout << "mleDistance2D approx correlation: " << endl << sigma.asDiagonal() * corr_matrix * sigma.asDiagonal() << endl;
       }
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
@@ -2019,13 +2041,21 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       lz = 0.0;
     }
 
-
+    if ( verbose )
+    {
+      cerr << "Setting edge " << x->getEdgeParent()->getNumber() << " length to " << lx << endl;
+      cerr << "Setting edge " << y->getEdgeParent()->getNumber() << " length to " << ly << endl;
+    }
     x->getEdgeParent()->setLength( lx );
     y->getEdgeParent()->setLength( ly );
 
     if ( par==root )
     {
       z->getEdgeParent()->setLength( lz );
+      if ( verbose )
+      {
+	cerr << "Setting edge " << z->getEdgeParent()->getNumber() << " length to " << lz << endl;
+      }
       break;
     }
     distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lz; //why it seems you are only putting lengthZ in distanceMap? dont we need to input X,Y?

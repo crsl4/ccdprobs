@@ -45,6 +45,8 @@ int main(int argc, char* argv[])
   alignment.calculateJCDistances(jcDistanceMatrix);
   cerr << " done." << endl;
 
+  cerr << endl << jcDistanceMatrix << endl << endl;
+
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ... ";
   Tree tree(jcDistanceMatrix);
@@ -53,6 +55,9 @@ int main(int argc, char* argv[])
   cerr << " done." << endl;
   cerr << endl << "Tree topology:" << endl;
   cerr << tree.makeTopologyNumbers() << endl << endl;
+  cerr << endl << "Tree:" << endl;
+  tree.print(cerr);
+  cerr << endl << endl;
 
   // Initialize random number generator
   cerr << "Initializing random number generator ...";
@@ -75,7 +80,7 @@ int main(int argc, char* argv[])
   QMatrix q_init(p_init,s_init);
   cout << q_init.getQ() << endl;
 
-  q_init.mcmc(rng)
+//  q_init.mcmc(rng);
 
   // QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
 

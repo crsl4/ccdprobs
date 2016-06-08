@@ -29,7 +29,7 @@ private:
   // things for likelihood calculation
   Matrix4d transitionMatrix;
 public:
-  Edge() {}
+  Edge() { length = 0; }
   ~Edge() {
     nodes[0] = nodes[1] = NULL;
   }

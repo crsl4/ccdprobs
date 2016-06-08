@@ -875,7 +875,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
 }
 
-void njCalculateAdjustedMatrix(MatrixXd& dist,list<pair<int,Node*> >& active,MatrixXd& adj)
+void njCalculateAdjustedMatrix(MatrixXd& dist,list<pair<int,Node*> >& active,MatrixXd& adj,VectorXd& sums)
 {
   // copy active part of dist to adj
   int i=0;
@@ -891,7 +891,8 @@ void njCalculateAdjustedMatrix(MatrixXd& dist,list<pair<int,Node*> >& active,Mat
     ++i;
   }
   // calculate adj
-  VectorXd sums = adj.colwise().sum();
+//  VectorXd sums = adj.colwise().sum();
+  sums = adj.colwise().sum();
   adj *= (active.size() - 2);
   adj.colwise() -= sums;
   adj.rowwise() -= sums.transpose();
@@ -937,7 +938,7 @@ void njUpdateDistanceMatrix(MatrixXd& dist,list<pair<int,Node*> >& active,list<p
 Tree::Tree(MatrixXd& dist)
 {
   numTaxa = dist.rows();
-  int nextNodeIndex = numTaxa;
+  int nextNodeIndex = numTaxa + 1;
   int nextEdgeIndex = 0;
   list<pair<int,Node*> > active;
 
@@ -951,7 +952,8 @@ Tree::Tree(MatrixXd& dist)
   while ( active.size() > 3 )
   {
     MatrixXd adj(active.size(),active.size());
-    njCalculateAdjustedMatrix(dist,active,adj);
+    VectorXd sums(active.size());
+    njCalculateAdjustedMatrix(dist,active,adj,sums);
 
     // find indices where adj is at minimum
     int i,j;
@@ -976,6 +978,11 @@ Tree::Tree(MatrixXd& dist)
     n->addEdge(ej);
     pj->second->addEdge(ej);
     ej->setNodes(pj->second,n);
+    // set edge lengths
+    double d = 0.5*dist(pi->first,pj->first);
+    double foo = 0.5*(sums(i) - sums(j))/(active.size()-2);
+    ei->setLength( d+foo > 0 ? d+foo : 0.00001 );
+    ej->setLength( d-foo > 0 ? d-foo : 0.00001 );
     // add these edges and the nodes to the tree
     nodes.push_back(n);
     edges.push_back(ei);
@@ -983,8 +990,22 @@ Tree::Tree(MatrixXd& dist)
     // update the distance matrix and active list
     njUpdateDistanceMatrix(dist,active,pi,pj,n);
   }
-  // join last three nodes
+  // join last three nodes and set lengths
+  vector<int> x;
+  for ( list<pair<int,Node*> >::iterator p = active.begin(); p != active.end(); ++p )
+  {
+    x.push_back(p->first);
+  }
+  vector<double> d(3);
+  d[0] = 0.5*(dist(x[0],x[1]) + dist(x[0],x[1]) - dist(x[1],x[2]));
+  d[1] = 0.5*(dist(x[0],x[1]) + dist(x[1],x[2]) - dist(x[0],x[2]));
+  d[2] = 0.5*(dist(x[0],x[2]) + dist(x[1],x[1]) - dist(x[0],x[1]));
+  for ( int i=0; i<3; ++i )
+    if ( d[i] < 0 )
+      d[i] = 0.00001;
+   
   Node* n = new Node(nextNodeIndex++,false);
+  int ii=0;
   for ( list<pair<int,Node*> >::iterator p = active.begin(); p != active.end(); ++p )
   {
     Edge* e = new Edge();
@@ -992,7 +1013,10 @@ Tree::Tree(MatrixXd& dist)
     n->addEdge(e);
     p->second->addEdge(e);
     e->setNodes(n,p->second);
+    e->setLength(d[ii++]);
+    edges.push_back(e);
   }
+  nodes.push_back(n);
   root = n;
 }
 
