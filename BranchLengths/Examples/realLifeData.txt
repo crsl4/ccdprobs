@@ -1,3 +1,7 @@
+WARNING:
+files changed path on 6/7/16, so the commands might not work exactly
+as written here
+
 *** birds 4 taxa:
 
 * mvnormal

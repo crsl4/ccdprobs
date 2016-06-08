@@ -1,0 +1,6 @@
+1) Simulated data with Scripts/simulateDataStudy.r
+   Data saved as Data/sim?.fasta, for ?=3,...,12
+   Used seeds: 1244, 41208, 9514, 118, 2367, 135, 28, 474, 818, 1916
+   nsites = 1500
+   alpha = 1000
+   tree = cats-dogs with bl from mrbayes

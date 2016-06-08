@@ -2,19 +2,19 @@
 ## after ./bl ....
 ## Claudia May 2016
 ## Modified by Bret on June 1, 2016
+## Modified by Claudia to save info on table for simulation study (6/7/16)
 
-#dat = read.csv("logw.txt",header=TRUE)
+
 dat = read.csv("logw.txt",header=FALSE)
 logweight = dat[,ncol(dat)]
-#logweight = logweight[!is.nan(logweight)]
 logw = logweight - max(logweight)
 w = exp(logw) / sum(exp(logw))
-print(summary(w))
-cat("# weights larger than 1%\n")
-print(length(w[w>0.01]))
-print(w[w>0.01])
-plot(1:length(w),cumsum(rev(sort(w))),type="l")
-cat("ESS proportion:\n")
-print( (1/(length(w)*sum(w^2)) ) )
-cat("ESS:\n")
-print( (1/sum(w^2) ) )
+m = mean(w)
+mi = min(w)
+ma = max(w)
+nbig = length(w[w>0.01])
+nrep = length(w)
+ess = 1/sum(w^2)
+essp = ess/nrep
+
+write.table(data.frame(mi,m,ma,nbig,nrep,ess,essp), file="weights.txt", append=TRUE, row.names=FALSE, col.names=FALSE, sep=",")
