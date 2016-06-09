@@ -14,7 +14,7 @@ if(length(args) == 0){
     seed = args[2]
 }
 
-seed = 1234 # to debug first
+##seed = 1234 # to debug first
 source("genetrees.R")
 source("../../scripts/branch-length_lik.R")
 ntaxa = c(3,4,5,6,7,8,9,10,11,12)

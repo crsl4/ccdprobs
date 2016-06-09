@@ -63,7 +63,7 @@ my $duration;
 my $newfile;
 
 # one replicate will run analysis for each ntaxa
-foreach my $ntax (3,4,6,12){
+foreach my $ntax (3,4,5,6,7,8,9,10,11,12){
     print FHlog "-----------------ntaxa = $ntax------------------\n";
     print "ntaxa = $ntax, ";
     # the actual tree, rates and probs is the third element after splitting by space
