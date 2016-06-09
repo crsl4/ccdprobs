@@ -17,15 +17,6 @@ bad seeds:
 ./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
 
 
-to do:
-- for only bl, it is ok:
-- question simData:
-- tree is ape tree? yes
-- alpha? big, 1000 or 10000
-- returned object? I can check this
-- for fixed tree for now ok
-- test for 3 sequences: art3
-- move things to Example folder, clean Code/test
 - problems in the gammabeta 2D (because problem start with 2D)
 
 
