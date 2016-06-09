@@ -990,6 +990,7 @@ Tree::Tree(MatrixXd& dist)
     // update the distance matrix and active list
     njUpdateDistanceMatrix(dist,active,pi,pj,n);
   }
+
   // join last three nodes and set lengths
   vector<int> x;
   for ( list<pair<int,Node*> >::iterator p = active.begin(); p != active.end(); ++p )
@@ -997,9 +998,9 @@ Tree::Tree(MatrixXd& dist)
     x.push_back(p->first);
   }
   vector<double> d(3);
-  d[0] = 0.5*(dist(x[0],x[1]) + dist(x[0],x[1]) - dist(x[1],x[2]));
+  d[0] = 0.5*(dist(x[0],x[1]) + dist(x[0],x[2]) - dist(x[1],x[2]));
   d[1] = 0.5*(dist(x[0],x[1]) + dist(x[1],x[2]) - dist(x[0],x[2]));
-  d[2] = 0.5*(dist(x[0],x[2]) + dist(x[1],x[1]) - dist(x[0],x[1]));
+  d[2] = 0.5*(dist(x[0],x[2]) + dist(x[1],x[2]) - dist(x[0],x[1]));
   for ( int i=0; i<3; ++i )
     if ( d[i] < 0 )
       d[i] = 0.00001;
