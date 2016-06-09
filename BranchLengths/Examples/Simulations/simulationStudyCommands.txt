@@ -1,6 +1,15 @@
-1) Simulated data with Scripts/simulateDataStudy.r
-   Data saved as Data/sim?.fasta, for ?=3,...,12
-   Used seeds: 1244, 41208, 9514, 118, 2367, 135, 28, 474, 818, 1916
-   nsites = 1500
-   alpha = 1000
-   tree = cats-dogs with bl from mrbayes
+* 6/9 930am
+darwin00:
+** we cannot compile for darwin00 now, so we will run the first 10 in
+mac, maybe we will need to do git pull before running new in darwin
+
+1) compile bl for darwin with:
+CladeDist/
+	CladeDist1/ccdprobs/BranchLengths/Scripts
+		perl blAllReps.pl -from 1 -to 5
+	CladeDist2/ccdprobs/BranchLengths/Scripts
+		perl blAllReps.pl -from 6 -to 10
+	CladeDist3/ccdprobs/BranchLengths/Scripts
+		perl blAllReps.pl -from 11 -to 15
+	CladeDist4/ccdprobs/BranchLengths/Scripts
+		perl blAllReps.pl -from 16 -to 20
