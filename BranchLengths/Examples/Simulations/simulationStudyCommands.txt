@@ -1,8 +1,11 @@
 * 6/9 930am
 darwin00:
 ** we cannot compile for darwin00 now, so we will run the first 10 in
-mac, maybe we will need to do git pull before running new in darwin
+mac:
+mac daniel 6/9 10am: perl blAllReps.pl -from 1 -to 10
+expected finished 10pm
 
+maybe we will need to do git pull before running new in darwin
 1) compile bl for darwin with:
 CladeDist/
 	CladeDist1/ccdprobs/BranchLengths/Scripts
