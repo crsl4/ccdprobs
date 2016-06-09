@@ -22,5 +22,6 @@ GetOptions( 'from=i' => \$from,
     );
 
 for my $i ($from..$to){
+    print "REPLICATE $i =================================\n";
     system("perl blOneRep.pl -irep $i");
 }

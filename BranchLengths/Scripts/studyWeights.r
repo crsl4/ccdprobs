@@ -3,7 +3,7 @@
 ## Claudia May 2016
 ## Modified by Bret on June 1, 2016
 ## Modified by Claudia to save info on table for simulation study (6/7/16)
-## run: R CMD BATCH studyWeights.r ntax rep time seed
+## run: Rscript studyWeights.r ntax rep time seed
 ## will append to weights.txt for all replicates
 
 args = commandArgs(trailingOnly=TRUE)

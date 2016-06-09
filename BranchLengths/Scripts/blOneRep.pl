@@ -26,7 +26,7 @@ my $seed = substr($longseed, -5);
 GetOptions( 'irep=i' => \$irep,
     );
 
-my $logfile = "blOneRep$irep.txt";
+my $logfile = "blOneRep.txt";
 open FHlog, ">> $logfile";
 print FHlog "============================================\n";
 print FHlog "blOneRep for replicate $irep\n";

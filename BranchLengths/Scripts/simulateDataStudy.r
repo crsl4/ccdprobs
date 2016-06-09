@@ -1,7 +1,7 @@
 ## R script to simulate data with simData() in genetrees.R
 ## for ntaxa=3,4,...,12 to run bl
 ## Claudia June 2016
-## run as R CMD BATCH simulateDataStudy.r rep seed
+## run as Rscript simulateDataStudy.r rep seed
 ## and it will create all simulated datasets by selecting a subset of ntax species
 ## from the cats-dogs example
 
@@ -11,7 +11,7 @@ if(length(args) == 0){
     seed = 1234
 }else{
     rep = args[1]
-    seed = args[2]
+    seed = strtoi(args[2])
 }
 
 ##seed = 1234 # to debug first
