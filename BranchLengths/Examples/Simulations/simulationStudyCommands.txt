@@ -1,12 +1,21 @@
-* 6/9 930am
-darwin00:
-** we cannot compile for darwin00 now, so we will run the first 10 in
-mac:
-mac daniel 6/9 10am: perl blAllReps.pl -from 1 -to 10
+======= simulations1===================
+30 replicates for nice bl, 12 replicates for ugly bl
+using cats-dogs data, and subsets for ntaxa=3,4,...,12
+for nice bl: all bl 0.15; for ugly bl, depending on subset taxa
+using: blOneRep.pl and blAllReps.pl
+summarizing with plotWeights.r: ess% and time.
+
+* mac daniel 6/9 10am: nice bl
+perl blAllReps.pl -from 1 -to 10
 expected finished 10pm
 
-maybe we will need to do git pull before running new in darwin
-1) compile bl for darwin with:
+* 6/9 12pm: nice branches
+darwin00:
+1) compile bl for darwin.
+2) check that ape is installed in R: yes
+/s/std/bin/stashticket
+/s/std/bin/runauth /usr/bin/screen -S blreps?
+ssh darwin00
 CladeDist/
 	CladeDist1/ccdprobs/BranchLengths/Scripts
 		perl blAllReps.pl -from 1 -to 5
@@ -16,3 +25,25 @@ CladeDist/
 		perl blAllReps.pl -from 11 -to 15
 	CladeDist4/ccdprobs/BranchLengths/Scripts
 		perl blAllReps.pl -from 16 -to 20
+screen -r blreps?
+expected to finish in 6 hours: 6/9 6pm
+
+* 6/9 12pm: ugly branches
+darwin04:
+1) compile bl
+2) check that ape is installed
+/s/std/bin/stashticket
+/s/std/bin/runauth /usr/bin/screen -S blreps?
+ssh darwin04
+CladeDist/
+	CladeDist5/ccdprobs/BranchLengths/Scripts
+		perl blAllReps.pl -from 1 -to 3
+	CladeDist6/ccdprobs/BranchLengths/Scripts
+		perl blAllReps.pl -from 4 -to 6
+	CladeDist7/ccdprobs/BranchLengths/Scripts
+		perl blAllReps.pl -from 7 -to 9
+	CladeDist8/ccdprobs/BranchLengths/Scripts
+		perl blAllReps.pl -from 10 -to 12
+screen -r blreps?
+expected to finish in 4 hours: 6/9 4pm
+but this can take longer because ugly bl are harder
