@@ -5,6 +5,9 @@
 #include <iomanip>
 #include <string>
 #include <vector>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 using namespace std;
 

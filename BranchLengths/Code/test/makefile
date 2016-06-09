@@ -6,7 +6,7 @@ OBJS = parameter.o sequence.o random.o tree.o model.o
 TARGET = all
 
 CC = g++
-CFLAGS = -O3 -I.
+CFLAGS = -O3 -I. -std=c++11
 #CFLAGS = -I. -g
 
 .SUFFIXES: .C .o 
