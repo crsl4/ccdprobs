@@ -35,7 +35,7 @@ for(j in 1:10){
     species <- sample(tree$tip.label,size=ntax)
     pruned.tree<-drop.tip(tree, setdiff(tree$tip.label, species))
     nl = length(pruned.tree$edge.length)
-    pruned.tree$edge.length <- rep(0.15,nl) ## cheating to make bl comparable
+    ##pruned.tree$edge.length <- rep(0.15,nl) ## cheating to make bl comparable
     tr2 <- pruned.tree # copy tree
     tr2$edge.length <- NULL
     tr2 <- unroot(tr2)
