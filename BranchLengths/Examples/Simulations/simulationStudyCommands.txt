@@ -4,6 +4,8 @@ using cats-dogs data, and subsets for ntaxa=3,4,...,12
 for nice bl: all bl 0.15; for ugly bl, depending on subset taxa
 using: blOneRep.pl and blAllReps.pl
 summarizing with plotWeights.r: ess% and time.
+using mvnormal.
+out and fasta files from last run in mac: ntax=12
 
 * mac daniel 6/9 10am: nice bl
 perl blAllReps.pl -from 1 -to 10
