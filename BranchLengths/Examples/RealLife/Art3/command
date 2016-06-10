@@ -7,7 +7,7 @@ tree edges for comparison
 ((Pig:0.2097,((Cow:0.1417,Giraffe:0.1146):0.0149,Sheep:0.1418):0.1231):0.0274,Dolphin:0.2752,Camel:0.3213):0.0;
 
 From MrBayes with GTR model (modified for reparameterization)
-../../Code/test/bl -t "((Pig,((Cow,Giraffe),Sheep)),Dolphin,Camel);" -p 0.2865626,0.2718173,0.1456956,0.2959245 -q 0.240978665,0.156416641,0.084566670,0.019153898,0.491314599,0.007569527 -f ../../Data/artiodactyl-6.fasta
+../../Code/test/bl -t "((Pig,((Cow,Giraffe),Sheep)),Dolphin,Camel);" -p 0.2865626,0.2718173,0.1456956,0.2959245 -q 0.240978665,0.156416641,0.084566670,0.019153898,0.491314599,0.007569527 -f ../../Data/artiodactyl-6.fasta -n 1 -s 572690849 --verbose
 
 Here is the MrBayes consensus tree with branch lengths.
 (Camel:0.1459,Dolphin:0.1214,(Pig:0.1071,(Cow:0.0896,(Sheep:0.0861,Giraffw:0.0765):0.0186):0.0514):0.0278);
