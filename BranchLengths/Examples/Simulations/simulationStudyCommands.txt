@@ -10,6 +10,7 @@ out and fasta files from last run in mac: ntax=12
 * mac daniel 6/9 10am: nice bl
 perl blAllReps.pl -from 1 -to 10
 expected finished 10pm
+(settings?.txt changed to settings-?.txt to avoid name conflict)
 
 * 6/9 12pm: nice branches
 darwin00:
