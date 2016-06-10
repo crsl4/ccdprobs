@@ -5,7 +5,7 @@ for nice bl: all bl 0.15; for ugly bl, depending on subset taxa
 using: blOneRep.pl and blAllReps.pl
 summarizing with plotWeights.r: ess% and time.
 using mvnormal.
-out and fasta files from last run in mac: ntax=12
+out and fasta files from last run in mac: ntax=12, rep=10
 
 * mac daniel 6/9 10am: nice bl
 perl blAllReps.pl -from 1 -to 10
@@ -28,6 +28,7 @@ CladeDist/
 		perl blAllReps.pl -from 6 -to 10
 	CladeDist3/ccdprobs/BranchLengths/Scripts
 		perl blAllReps.pl -from 11 -to 15
+        **weird: no results produced for rep=15
 	CladeDist4/ccdprobs/BranchLengths/Scripts
 		perl blAllReps.pl -from 16 -to 20
 screen -r blreps?
