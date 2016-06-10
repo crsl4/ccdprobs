@@ -1,3 +1,14 @@
+- Instructions after run:
+1) rename weights, trees, and blOneRep.txt based on fromto and nice/ugly bl
+2) remove out, fasta, par2D/3D files (except of mac), make clean
+3) check git status in each computer, and do git add, git commit (should be on different files)
+4) also do git pull
+5) after merging, do git push in all computers
+6) do git pull in my mac, should have all weights files
+7) move weights, trees, blOneRep.txt, logw files to Examples/Simulations/simulations1
+9) run plotWeights.r, modify code to read all weights and merge data, create plot for nice/ugly bl
+
+
 ======= simulations1===================
 30 replicates for nice bl, 12 replicates for ugly bl
 using cats-dogs data, and subsets for ntaxa=3,4,...,12

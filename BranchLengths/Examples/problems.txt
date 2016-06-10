@@ -23,10 +23,12 @@ bad seeds:
 
 - problems in the gammabeta 2D (because problem start with 2D)
 
+- NR seems to be not converging to MLE
 
 *** 4 taxa:
 * mvnormal behaving much better than gammabeta (20% vs 1%), not sure
  why, in real-life birds; in simulated it is 40 vs 30
+
 
 
 ****for more than 4 taxa:
@@ -41,7 +43,8 @@ To do (later):
 - still need checks for t==sum in mleDistance?D, when to set it ==sum?
 - still need to check slightly better ESS in R for gammabeta than in
 C++. for example, in 4 taxa simulated data: R 36%, C++ 30%.
-for mvnormal it is different also, R: 40%, c++ 45%.
+for mvnormal it is different also, R: 40%, c++ 45%:
+possible reason: beta not correctly assigned to branch (bret idea)
 
 --------
 later:
