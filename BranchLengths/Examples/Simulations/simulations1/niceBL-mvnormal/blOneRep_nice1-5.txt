@@ -1,0 +1,185 @@
+============================================
+blOneRep for replicate 1
+Thu Jun  9 11:29:11 CDT 2016
+darwin00.stat.wisc.edu
+running simulateDataStudy.r
+Rscript simulateDataStudy.r 1 89751
+reading file ../Examples/Simulations/settings1.txt
+-----------------ntaxa = 3------------------
+../Code/test/bl -f ../Data/sim3.fasta -t "(clouded_leopard,coyote,dhole);" -q 0.248393900314092,0.0828702003259419,0.0551131326087927,0.566442186849203,0.0283361907247865,0.0188443891771833 -p 0.331996976983248,0.227729669125782,0.413282367805738,0.0269909860852321 --mvnormal -s 89751 >& out3
+Rscript studyWeights.r 3 1 30 89751
+-----------------ntaxa = 4------------------
+../Code/test/bl -f ../Data/sim4.fasta -t "(snow_leopard,leopard,(gray_wolf,dhole));" -q 0.328556761184294,0.156278401850247,0.0800394538439017,0.0551439813683292,0.19844437351745,0.181537028235778 -p 0.311264653594892,0.289808784362358,0.154403557451205,0.244523004591545 --mvnormal -s 89769 >& out4
+Rscript studyWeights.r 4 1 65 89769
+-----------------ntaxa = 5------------------
+../Code/test/bl -f ../Data/sim5.fasta -t "(cheetah,snow_leopard,((gray_wolf,dhole),raccoon_dog));" -q 0.0220503391498482,0.0696131048750875,0.158297192662286,0.309609099982807,0.349869199719129,0.0905610636108416 -p 0.153314346695702,0.354137082120285,0.23581555229784,0.256733018886173 --mvnormal -s 90731 >& out5
+Rscript studyWeights.r 5 1 111 90731
+-----------------ntaxa = 6------------------
+../Code/test/bl -f ../Data/sim6.fasta -t "(cheetah,(snow_leopard,clouded_leopard),((coyote,dog),raccoon_dog));" -q 0.0826497432534073,0.222248695663073,0.10322509175162,0.0909015565503035,0.442661425163815,0.0583134876177817 -p 0.158079460551762,0.154665169562744,0.231825348338533,0.455430021546961 --mvnormal -s 92396 >& out6
+Rscript studyWeights.r 6 1 163 92396
+-----------------ntaxa = 7------------------
+../Code/test/bl -f ../Data/sim7.fasta -t "(cheetah,((leopard,tiger),clouded_leopard),(red_fox,(coyote,dhole)));" -q 0.435743546474724,0.174958797750812,0.201918543880749,0.0283015798404266,0.125084672228524,0.033992859824765 -p 0.224342507251228,0.549798958952383,0.101004759304256,0.124853774492133 --mvnormal -s 92560 >& out7
+Rscript studyWeights.r 7 1 206 92560
+-----------------ntaxa = 8------------------
+../Code/test/bl -f ../Data/sim8.fasta -t "(((leopard,tiger),clouded_leopard),(red_fox,((coyote,dog),raccoon_dog)),cat);" -q 0.317546681388783,0.359039105293419,0.177563323115517,0.027497144443803,0.0233568290953996,0.094996916663079 -p 0.522281044873081,0.100438926597393,0.238740526799085,0.138539501730441 --mvnormal -s 95160 >& out8
+Rscript studyWeights.r 8 1 261 95160
+-----------------ntaxa = 9------------------
+../Code/test/bl -f ../Data/sim9.fasta -t "(cheetah,(((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,((gray_wolf,dog),dhole)));" -q 0.00369734038275895,0.247645973506592,0.399223718028265,0.00839786406839008,0.00478387604977264,0.336251227964221 -p 0.336583482318028,0.0137084392266976,0.313261942506755,0.336446135948519 --mvnormal -s 97350 >& out9
+Rscript studyWeights.r 9 1 312 97350
+-----------------ntaxa = 10------------------
+../Code/test/bl -f ../Data/sim10.fasta -t "(cheetah,(((snow_leopard,tiger),clouded_leopard),(((coyote,(gray_wolf,dog)),dhole),raccoon_dog)),cat);" -q 0.274460513819056,0.222492922496528,0.0815904470450457,0.164258996673783,0.0856603686177062,0.171536751347881 -p 0.297924942327138,0.287197525631979,0.154211961256398,0.260665570784485 --mvnormal -s 101921 >& out10
+Rscript studyWeights.r 10 1 384 101921
+-----------------ntaxa = 11------------------
+../Code/test/bl -f ../Data/sim11.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,((coyote,(gray_wolf,dog)),raccoon_dog))),cat);" -q 0.0938911127746852,0.190910330858364,0.305064639648545,0.0531076383258093,0.129755880824515,0.227270397568081 -p 0.252659580185764,0.0917801245795446,0.159443105625312,0.496117189609379 --mvnormal -s 108953 >& out11
+Rscript studyWeights.r 11 1 460 108953
+-----------------ntaxa = 12------------------
+../Code/test/bl -f ../Data/sim12.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" -q 0.000734364051436065,0.0706996531458139,0.712613086192626,0.0825024165294824,0.0815000691668842,0.0519504109137578 -p 0.429769006426206,0.0674912030060001,0.217423094173605,0.285316696394188 --mvnormal -s 110798 >& out12
+Rscript studyWeights.r 12 1 541 110798
+============================================
+blOneRep for replicate 2
+Thu Jun  9 12:11:29 CDT 2016
+darwin00.stat.wisc.edu
+running simulateDataStudy.r
+Rscript simulateDataStudy.r 2 92289
+reading file ../Examples/Simulations/settings2.txt
+-----------------ntaxa = 3------------------
+../Code/test/bl -f ../Data/sim3.fasta -t "(red_fox,dog,cat);" -q 0.336585867002826,0.0612331097966663,0.118016070502888,0.210287645913152,0.202538992236425,0.071338314548043 -p 0.127502225240681,0.366993004585718,0.261224365150959,0.244280405022642 --mvnormal -s 92289 >& out3
+Rscript studyWeights.r 3 2 30 92289
+-----------------ntaxa = 4------------------
+../Code/test/bl -f ../Data/sim4.fasta -t "(cheetah,(leopard,clouded_leopard),cat);" -q 0.0462815698008474,0.0969687471225618,0.041557566022584,0.0354819210311242,0.0241589877956666,0.755551208227216 -p 0.209138430651544,0.0492313330688956,0.33130948636371,0.41032074991585 --mvnormal -s 93257 >& out4
+Rscript studyWeights.r 4 2 65 93257
+-----------------ntaxa = 5------------------
+../Code/test/bl -f ../Data/sim5.fasta -t "(cheetah,(tiger,clouded_leopard),(dog,raccoon_dog));" -q 0.180186721683317,0.0344567295296719,0.25267977491682,0.0798373977902967,0.446098959057706,0.00674041702218872 -p 0.168806963655974,0.228754421114417,0.232784287265717,0.369654327963892 --mvnormal -s 94011 >& out5
+Rscript studyWeights.r 5 2 111 94011
+-----------------ntaxa = 6------------------
+../Code/test/bl -f ../Data/sim6.fasta -t "((snow_leopard,tiger),clouded_leopard,(red_fox,(coyote,dhole)));" -q 0.0623469636417466,0.0665267788089692,0.100005849865817,0.637000370905234,0.122621327013059,0.0114987097651744 -p 0.0539138979129731,0.375610928013175,0.238129070227124,0.332346103846728 --mvnormal -s 94650 >& out6
+Rscript studyWeights.r 6 2 153 94650
+-----------------ntaxa = 7------------------
+../Code/test/bl -f ../Data/sim7.fasta -t "(((leopard,tiger),clouded_leopard),(red_fox,(gray_wolf,dog)),cat);" -q 0.0220855513109735,0.102360105366188,0.158599804831055,0.585721018073026,0.0901283907699534,0.0411051296488033 -p 0.157842625857694,0.336554695570065,0.194245261363987,0.311357417208255 --mvnormal -s 95630 >& out7
+Rscript studyWeights.r 7 2 207 95630
+-----------------ntaxa = 8------------------
+../Code/test/bl -f ../Data/sim8.fasta -t "(cheetah,((snow_leopard,clouded_leopard),(red_fox,((coyote,dhole),raccoon_dog))),cat);" -q 0.0387575670468877,0.147574493538748,0.240941193251563,0.00339300901301809,0.0268451268157974,0.542488610333986 -p 0.384557284115019,0.0216688217505029,0.268692755324254,0.325081138810224 --mvnormal -s 96510 >& out8
+Rscript studyWeights.r 8 2 252 96510
+-----------------ntaxa = 9------------------
+../Code/test/bl -f ../Data/sim9.fasta -t "(cheetah,(((snow_leopard,leopard),tiger),clouded_leopard),(((gray_wolf,dog),dhole),raccoon_dog));" -q 0.0829006141524399,0.0436679901387021,0.284181656596561,0.169325529497285,0.167147955403963,0.252776254211049 -p 0.275004789575591,0.170052674623911,0.264105419489767,0.290837116310731 --mvnormal -s 102318 >& out9
+Rscript studyWeights.r 9 2 329 102318
+-----------------ntaxa = 10------------------
+../Code/test/bl -f ../Data/sim10.fasta -t "((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,((coyote,(gray_wolf,dog)),raccoon_dog)),cat);" -q 0.130297920892447,0.00990304221386594,0.49870446003853,0.0134894092131871,0.269789941135748,0.0778152265062221 -p 0.411101069625047,0.0936741994366355,0.0542046685853006,0.441020062353017 --mvnormal -s 104418 >& out10
+Rscript studyWeights.r 10 2 383 104418
+-----------------ntaxa = 11------------------
+../Code/test/bl -f ../Data/sim11.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,dog),dhole),raccoon_dog))),cat);" -q 0.235377799919934,0.343231371437168,0.291099451240028,0.0208559728968284,0.00478806473043069,0.104647339775611 -p 0.432600076586815,0.170788807388484,0.201616250254167,0.194994865770535 --mvnormal -s 111202 >& out11
+Rscript studyWeights.r 11 2 451 111202
+-----------------ntaxa = 12------------------
+../Code/test/bl -f ../Data/sim12.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" -q 0.0138179583291692,0.28520703733827,0.373876828474532,0.0502608396431711,0.0525710872925495,0.224266248922308 -p 0.506909817815166,0.0670822938236867,0.1340373479091,0.291970540452047 --mvnormal -s 116476 >& out12
+Rscript studyWeights.r 12 2 538 116476
+============================================
+blOneRep for replicate 3
+Thu Jun  9 12:53:34 CDT 2016
+darwin00.stat.wisc.edu
+running simulateDataStudy.r
+Rscript simulateDataStudy.r 3 94814
+reading file ../Examples/Simulations/settings3.txt
+-----------------ntaxa = 3------------------
+../Code/test/bl -f ../Data/sim3.fasta -t "(tiger,raccoon_dog,cat);" -q 0.281196051657409,0.0589786343983461,0.0624880890501673,0.554880637229024,0.00766481587641127,0.0347917717886425 -p 0.319005363550451,0.403279216736766,0.223601353898838,0.0541140658139447 --mvnormal -s 94814 >& out3
+Rscript studyWeights.r 3 3 30 94814
+-----------------ntaxa = 4------------------
+../Code/test/bl -f ../Data/sim4.fasta -t "((snow_leopard,tiger),clouded_leopard,raccoon_dog);" -q 0.530217162250843,0.131350185278772,0.00264103549700332,0.306824396696528,0.00187356394262725,0.027093656334227 -p 0.197844897547931,0.489072787048655,0.296311732585507,0.0167705828179068 --mvnormal -s 95023 >& out4
+Rscript studyWeights.r 4 3 67 95023
+-----------------ntaxa = 5------------------
+../Code/test/bl -f ../Data/sim5.fasta -t "(leopard,(red_fox,(coyote,gray_wolf)),cat);" -q 0.187109473149057,0.361663559307872,0.0971099610155277,0.311574991650589,0.0297096122916887,0.0128324025852651 -p 0.348402117266021,0.292322367804858,0.28227024405271,0.0770052708764117 --mvnormal -s 95837 >& out5
+Rscript studyWeights.r 5 3 105 95837
+-----------------ntaxa = 6------------------
+../Code/test/bl -f ../Data/sim6.fasta -t "(cheetah,(tiger,(red_fox,(coyote,gray_wolf))),cat);" -q 0.010909339552848,0.229134141642882,0.282869398660872,0.0456365938114896,0.00575122586070683,0.425699300471201 -p 0.234473153165838,0.0389622271635017,0.387019563489033,0.339545056181627 --mvnormal -s 97808 >& out6
+Rscript studyWeights.r 6 3 149 97808
+-----------------ntaxa = 7------------------
+../Code/test/bl -f ../Data/sim7.fasta -t "(cheetah,(snow_leopard,leopard),(red_fox,((gray_wolf,dog),raccoon_dog)));" -q 0.629455597008441,0.0734377855172352,0.102989221612712,0.0286790494208897,0.133597775196806,0.0318405712439166 -p 0.242687291078311,0.304245524332185,0.100241741542049,0.352825443047455 --mvnormal -s 98364 >& out7
+Rscript studyWeights.r 7 3 215 98364
+-----------------ntaxa = 8------------------
+../Code/test/bl -f ../Data/sim8.fasta -t "((((snow_leopard,leopard),tiger),clouded_leopard),(coyote,(gray_wolf,dog)),cat);" -q 0.0181303293755001,0.185948432568491,0.0877108358976063,0.0412253903847051,0.11582644460774,0.551158567165957 -p 0.0772218026174173,0.28261871290539,0.398679472432149,0.241480012045044 --mvnormal -s 100579 >& out8
+Rscript studyWeights.r 8 3 262 100579
+-----------------ntaxa = 9------------------
+../Code/test/bl -f ../Data/sim9.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),((gray_wolf,dog),raccoon_dog)),cat);" -q 0.125680392600747,0.0686955400988711,0.22825889556899,0.0773061776237272,0.202041223773357,0.298017770334307 -p 0.18291805947792,0.216923519743018,0.268025390398842,0.33213303038022 --mvnormal -s 105571 >& out9
+Rscript studyWeights.r 9 3 321 105571
+-----------------ntaxa = 10------------------
+../Code/test/bl -f ../Data/sim10.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(coyote,(gray_wolf,dog)))),cat);" -q 0.0323458657955893,0.831254013870925,0.0352185427586428,0.0600944004217544,0.0234598603804127,0.017627316772676 -p 0.450348887285537,0.140920620945219,0.383810846756699,0.0249196450125458 --mvnormal -s 105844 >& out10
+Rscript studyWeights.r 10 3 375 105844
+-----------------ntaxa = 11------------------
+../Code/test/bl -f ../Data/sim11.fasta -t "(cheetah,(((leopard,tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" -q 0.677594071389978,0.222195447440436,0.0199976837889308,0.0472375014219449,0.0217128236331936,0.0112624723255169 -p 0.383734312940361,0.418401026714898,0.159613211155437,0.0382514491893042 --mvnormal -s 106396 >& out11
+Rscript studyWeights.r 11 3 446 106396
+-----------------ntaxa = 12------------------
+../Code/test/bl -f ../Data/sim12.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" -q 0.639410129473478,0.105710540519448,0.0285226311209881,0.166406996246447,0.0534806250103289,0.00646907762930992 -p 0.296307334689134,0.604400738429017,0.0727437895808161,0.0265481373010329 --mvnormal -s 112579 >& out12
+Rscript studyWeights.r 12 3 542 112579
+============================================
+blOneRep for replicate 4
+Thu Jun  9 13:35:30 CDT 2016
+darwin00.stat.wisc.edu
+running simulateDataStudy.r
+Rscript simulateDataStudy.r 4 97330
+reading file ../Examples/Simulations/settings4.txt
+-----------------ntaxa = 3------------------
+../Code/test/bl -f ../Data/sim3.fasta -t "(snow_leopard,leopard,cat);" -q 0.104541787176682,0.166556423693425,0.447406070630546,0.0406007861743859,0.0640127575777253,0.176882174747235 -p 0.263450434409589,0.106157790393054,0.357362781333178,0.27302899386418 --mvnormal -s 97330 >& out3
+Rscript studyWeights.r 3 4 31 97330
+-----------------ntaxa = 4------------------
+../Code/test/bl -f ../Data/sim4.fasta -t "(snow_leopard,(coyote,dog),dhole);" -q 0.553257977756742,0.161973000348056,0.0677766338482903,0.0246388991187976,0.137888185894198,0.0544653030339159 -p 0.295180130821899,0.467462482453348,0.15328336900133,0.0840740177234234 --mvnormal -s 97528 >& out4
+Rscript studyWeights.r 4 4 69 97528
+-----------------ntaxa = 5------------------
+../Code/test/bl -f ../Data/sim5.fasta -t "(cheetah,(tiger,clouded_leopard),(dog,dhole));" -q 0.387889432323684,0.13629381961843,0.0910395676835795,0.194767545017978,0.138429573226598,0.0515800621297301 -p 0.18335012682784,0.409756733321387,0.175965258743621,0.230927881107151 --mvnormal -s 98308 >& out5
+Rscript studyWeights.r 5 4 105 98308
+-----------------ntaxa = 6------------------
+../Code/test/bl -f ../Data/sim6.fasta -t "(cheetah,(tiger,clouded_leopard),((coyote,gray_wolf),raccoon_dog));" -q 0.0467619818708897,0.133108514962823,0.430436511405749,0.0561668072849404,0.123712366564298,0.2098138179113 -p 0.317899273835004,0.100894878554446,0.332096023079284,0.249109824531265 --mvnormal -s 98803 >& out6
+Rscript studyWeights.r 6 4 155 98803
+-----------------ntaxa = 7------------------
+../Code/test/bl -f ../Data/sim7.fasta -t "(cheetah,((leopard,tiger),(red_fox,(dog,raccoon_dog))),cat);" -q 0.296619612195314,0.0554587203052797,0.46781783296704,0.0390061923765842,0.0971499536142564,0.0439476885415253 -p 0.360217505700587,0.268805405323465,0.0374786332755175,0.33349845570043 --mvnormal -s 101851 >& out7
+Rscript studyWeights.r 7 4 199 101851
+-----------------ntaxa = 8------------------
+../Code/test/bl -f ../Data/sim8.fasta -t "(cheetah,((snow_leopard,tiger),(((coyote,gray_wolf),dhole),raccoon_dog)),cat);" -q 0.00601256424942203,0.0224011997222533,0.111119716238821,0.0169644616053399,0.115010002298231,0.728492055885933 -p 0.109635891288317,0.0764176854905622,0.439125115054231,0.37482130816689 --mvnormal -s 102371 >& out8
+Rscript studyWeights.r 8 4 259 102371
+-----------------ntaxa = 9------------------
+../Code/test/bl -f ../Data/sim9.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),((coyote,dog),raccoon_dog)),cat);" -q 0.303825401740278,0.0295097167137841,0.0734554548789908,0.242108441994619,0.17106067254483,0.180040312127497 -p 0.346253685762045,0.255659431214809,0.201401205782837,0.196685677240309 --mvnormal -s 104531 >& out9
+Rscript studyWeights.r 9 4 315 104531
+-----------------ntaxa = 10------------------
+../Code/test/bl -f ../Data/sim10.fasta -t "(cheetah,(((snow_leopard,leopard),clouded_leopard),(red_fox,(((coyote,gray_wolf),dhole),raccoon_dog))),cat);" -q 0.429554239435204,0.195020508495806,0.0978346998408043,0.0681295794888622,0.100335137929181,0.109125834810142 -p 0.325291837476136,0.325290823656424,0.117725929891909,0.231691408975532 --mvnormal -s 109123 >& out10
+Rscript studyWeights.r 10 4 387 109123
+-----------------ntaxa = 11------------------
+../Code/test/bl -f ../Data/sim11.fasta -t "(cheetah,(((snow_leopard,tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" -q 0.173307477782959,0.0524277321490705,0.204482580983678,0.150449824312161,0.32573914543566,0.0935932393364713 -p 0.122797232781132,0.310954997599854,0.145784954710114,0.420462814908899 --mvnormal -s 114611 >& out11
+Rscript studyWeights.r 11 4 472 114611
+-----------------ntaxa = 12------------------
+../Code/test/bl -f ../Data/sim12.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" -q 0.00132236195146667,0.00216082426490722,0.00181639210233088,0.210029306299878,0.249427127770812,0.535243987610606 -p 0.00488979286872778,0.180089691238192,0.53190511946414,0.28311539642894 --mvnormal -s 115988 >& out12
+Rscript studyWeights.r 12 4 524 115988
+============================================
+blOneRep for replicate 5
+Thu Jun  9 14:17:31 CDT 2016
+darwin00.stat.wisc.edu
+running simulateDataStudy.r
+Rscript simulateDataStudy.r 5 99851
+reading file ../Examples/Simulations/settings5.txt
+-----------------ntaxa = 3------------------
+../Code/test/bl -f ../Data/sim3.fasta -t "(coyote,gray_wolf,dhole);" -q 0.0952723252468149,0.193887267607211,0.522210137767939,0.11287442938909,0.0616405867186678,0.0141152532702779 -p 0.0560390871362343,0.0968464131548929,0.3555917939146,0.491522705794273 --mvnormal -s 99851 >& out3
+Rscript studyWeights.r 3 5 31 99851
+-----------------ntaxa = 4------------------
+../Code/test/bl -f ../Data/sim4.fasta -t "((leopard,clouded_leopard),dhole,cat);" -q 0.0949807592205125,0.33652798626352,0.00799987704107184,0.114370940911765,0.136525295764961,0.30959514079817 -p 0.103085326663921,0.164126116554642,0.612612652525712,0.120175904255726 --mvnormal -s 100670 >& out4
+Rscript studyWeights.r 4 5 63 100670
+-----------------ntaxa = 5------------------
+../Code/test/bl -f ../Data/sim5.fasta -t "(cheetah,(leopard,(gray_wolf,raccoon_dog)),cat);" -q 0.196921532145427,0.071309294335745,0.279988440736588,0.0175720221498745,0.312002683261992,0.122206027370373 -p 0.414428242557606,0.189896418317557,0.0573476028763138,0.338327736248523 --mvnormal -s 102264 >& out5
+Rscript studyWeights.r 5 5 104 102264
+-----------------ntaxa = 6------------------
+../Code/test/bl -f ../Data/sim6.fasta -t "(((snow_leopard,leopard),clouded_leopard),(dog,raccoon_dog),cat);" -q 0.00776602819267149,0.148257139058029,0.0423240363241034,0.668731238701997,0.0625221431175643,0.0703994146056352 -p 0.213411338223778,0.295493576410765,0.33708419511631,0.154010890249148 --mvnormal -s 105123 >& out6
+Rscript studyWeights.r 6 5 151 105123
+-----------------ntaxa = 7------------------
+../Code/test/bl -f ../Data/sim7.fasta -t "(cheetah,(tiger,(red_fox,((dog,dhole),raccoon_dog))),cat);" -q 0.253467760578906,0.0145112642537018,0.239558787418357,0.0221015481999218,0.31130878662603,0.159051852923085 -p 0.322833741115742,0.267468304357461,0.0817535391812424,0.327944415345554 --mvnormal -s 108519 >& out7
+Rscript studyWeights.r 7 5 207 108519
+-----------------ntaxa = 8------------------
+../Code/test/bl -f ../Data/sim8.fasta -t "(cheetah,((snow_leopard,clouded_leopard),(red_fox,((dog,dhole),raccoon_dog))),cat);" -q 0.133158901162793,0.0415212661204714,0.128883044072683,0.184439360182035,0.405457694484533,0.106539733977485 -p 0.17646117974631,0.31232071838707,0.182610931507175,0.328607170359445 --mvnormal -s 109099 >& out8
+Rscript studyWeights.r 8 5 252 109099
+-----------------ntaxa = 9------------------
+../Code/test/bl -f ../Data/sim9.fasta -t "(cheetah,(((snow_leopard,leopard),tiger),(red_fox,((coyote,dog),raccoon_dog))),cat);" -q 0.0191130916399047,0.014206045980017,0.0277153509431477,0.0895845359351174,0.332909771867859,0.516471203633954 -p 0.0190823840457931,0.221851679663499,0.221788317154194,0.537277619136514 --mvnormal -s 109261 >& out9
+Rscript studyWeights.r 9 5 311 109261
+-----------------ntaxa = 10------------------
+../Code/test/bl -f ../Data/sim10.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,((gray_wolf,dog),dhole))),cat);" -q 0.252129996371391,0.242443880507317,0.0408936220456236,0.272110735875495,0.0435776565143383,0.148844108685834 -p 0.366330343956144,0.198213533433917,0.255765116289096,0.179691006320843 --mvnormal -s 110458 >& out10
+Rscript studyWeights.r 10 5 378 110458
+-----------------ntaxa = 11------------------
+../Code/test/bl -f ../Data/sim11.fasta -t "(cheetah,(((snow_leopard,tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" -q 0.166522887932463,0.153267065708988,0.0103057068135018,0.551863514721327,0.00833776328976593,0.109703061533953 -p 0.0934103401953225,0.5891770282683,0.245994289808262,0.0714183417281162 --mvnormal -s 110922 >& out11
+Rscript studyWeights.r 11 5 465 110922
+-----------------ntaxa = 12------------------
+../Code/test/bl -f ../Data/sim12.fasta -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" -q 0.174033387654048,0.138913052163798,0.0573907881427058,0.273129120368062,0.0843887827707677,0.272144868900618 -p 0.210454188337649,0.147729445548026,0.281527324596966,0.360289041517359 --mvnormal -s 113640 >& out12
+Rscript studyWeights.r 12 5 562 113640
