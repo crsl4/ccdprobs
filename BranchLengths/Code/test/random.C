@@ -30,6 +30,7 @@ using namespace Eigen;
 //   because the small matrices are optimized in the Eigen library
 VectorXd multivariateNormal(VectorXd mu,MatrixXd vc,mt19937_64& rng, double& logdensity)
 {
+  vc = (1.0/0.5) * vc; //added eta
   int r = vc.rows();
   VectorXd v( r );
   MatrixXd L( vc.llt().matrixL() );
@@ -77,6 +78,7 @@ double beta(double alpha,double b,mt19937_64& rng)
 
 Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& logdensity, bool verbose, ofstream& par3D)
 {
+  vc = (1.0/0.5) * vc; //added eta
   Vector3d bl;
   Matrix3d L( vc.llt().matrixL() );
   double alpha1;
@@ -101,10 +103,10 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       lambda1 = mu[0] / (L(0,0) * L(0,0));
     }
   // ------------ T1 ------------------
-  
+
   if ( verbose )
     cerr << "Random gamma: alpha = " << alpha1 << ", lambda = " << lambda1 << ", mu = " << alpha1 / lambda1 << ", sigma = " << sqrt(alpha1) / lambda1 << endl;
-  
+
   bl[0] = gamma(alpha1,1/lambda1,rng); //c++ gamma has different parametrization
   if(verbose)
     cout << "T1: " << bl[0] << endl;
@@ -132,10 +134,10 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       alpha2 = (num * num) / (L(1,1) * L(1,1));
       lambda2 = num / (L(1,1) * L(1,1));
     }
-  
+
   if ( verbose )
     cerr << "Random gamma: alpha = " << alpha2 << ", lambda = " << lambda2 << ", mu = " << alpha2 / lambda2 << ", sigma = " << sqrt(alpha2) / lambda2 << endl;
-  
+
   bl[1] = gamma(alpha2,1/lambda2,rng); //c++ gamma has different parametrization
   if(verbose)
     cout << "T2: " << bl[1] << endl;
@@ -163,10 +165,10 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       alpha3 = (num * num) / (L(2,2) * L(2,2));
       lambda3 = num / (L(2,2) * L(2,2));
     }
-    
+
   if ( verbose )
     cerr << "Random gamma: alpha = " << alpha3 << ", lambda = " << lambda3 << ", mu = " << alpha3 / lambda3 << ", sigma = " << sqrt(alpha3) / lambda3 << endl;
-  
+
   bl[2] = gamma(alpha3,1/lambda3,rng); //c++ gamma has different parametrization
   if(verbose)
     cout << "T3: " << bl[2] << endl;
@@ -179,6 +181,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   // t1,t2,sum-t1; so mu, vc are for t1,t2
 Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng, double& logdensity, bool verbose, ofstream& par2D)
  {
+   vc = (1.0/0.5) * vc; //added eta
    if ( verbose )
      cout << "multivariateGamma2D with mu: " << mu.transpose() << endl;
    double alpha1;
@@ -225,13 +228,13 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
        throw 20;
      }
    //------------------ B ------------------------
-   
+
    if ( verbose )
    {
      double ab = alpha1 + beta1;
      cerr << "Random beta: alpha = " << alpha1 << ", beta = " << beta1 << ", mu = " << sum*alpha1/ab << ", sigma = " << sum * sqrt(alpha1*beta1/(ab+1)) / ab << endl;
    }
-   
+
    double b = beta(alpha1,beta1,rng);
    bl[0] = sum * b; //t1
    bl[2] = sum *(1-b); //t3
@@ -259,10 +262,10 @@ Vector3d multivariateGamma2D(Vector2d mu,Matrix2d vc,double sum, mt19937_64& rng
        alpha2 = (num * num) / (L(1,1) * L(1,1));
        lambda2 = num / (L(1,1) * L(1,1));
      }
-   
+
    if ( verbose )
      cerr << "Random gamma: alpha = " << alpha2 << ", lambda = " << lambda2 << ", mu = " << alpha2 / lambda2 << ", sigma = " << sqrt(alpha2) / lambda2 << endl;
-   
+
    bl[1] = gamma(alpha2,1/lambda2,rng); //c++ gamma has different parametrization
    logdensity += lgamma(alpha1+beta1) - lgamma(alpha1) - lgamma(beta1) + (alpha1-1)*log(bl[0])+(beta1-1)*log(sum-bl[0])-(alpha1+beta1-1)*log(sum)+alpha2*log(lambda2) - lgamma(alpha2) + (alpha2-1)*log(bl[1])-lambda2*bl[1];
    par2D << alpha1 << "," << beta1 << "," << alpha2 << "," << lambda2 << endl;
@@ -333,7 +336,7 @@ Vector3d multivariateGamma1D(double mu,double var,double sum1, double sum2, mt19
      double ab = a + b;
      cerr << "Random beta: alpha = " << a << ", beta = " << b << ", mu = " << s*a/ab << ", sigma = " << s * sqrt(a*b/(ab+1)) / ab << endl;
    }
-   
+
    double rbeta = beta(a,b,rng);
    if(verbose)
      cout << "rbeta: " << rbeta << " with a,b " << a << " , " << b << endl;

@@ -64,3 +64,6 @@ CladeDist/
 screen -r blreps?
 expected to finish in 4 hours: 6/9 4pm
 but this can take longer because ugly bl are harder
+** killed on 6/13 because it got stuck in ntaxa=5
+** CladeDist5 was deleted when trying to push
+** will push CladeDist6

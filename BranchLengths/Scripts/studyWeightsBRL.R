@@ -6,6 +6,8 @@
 dat = read.csv("logw.txt",header=TRUE)
 #dat = read.csv("logw.txt",header=FALSE)
 logweight = dat[,ncol(dat)]
+logweight <- logweight[!is.nan(logweight)]
+logweight <- logweight[is.finite(logweight)]
 #logweight = logweight[!is.nan(logweight)]
 logw = logweight - max(logweight)
 w = exp(logw) / sum(exp(logw))

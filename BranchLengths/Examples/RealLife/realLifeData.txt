@@ -13,6 +13,16 @@ using studyWeights.r:
 > summary(data$bl2)
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
 0.005933 0.016850 0.019770 0.019910 0.022850 0.037370
+**** eta=0.5 ------------------------
+mv logw.txt logw_birds4_norm_eta05.txt
+> print(summary(w))
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max.
+0.000e+00 1.808e-06 4.989e-05 1.001e-03 7.020e-04 1.715e-02
+> print(length(w[w>0.01]))
+[1] 20
+> print( (1/(length(w)*sum(w^2)) ) )
+[1] 0.1554076
+** worse ESS than eta=1.0
 
 * gammabeta
 ./bl -f "../../Data/birds4-clean.fasta" -t "(2,(3,4),1);" -q 0.2463,0.1764,0.1231,0.0187,0.4185,0.0170 -p 0.2776,0.2937,0.1612,0.2675
@@ -22,6 +32,16 @@ mv logw.txt logw_birds4_gam.txt
 > summary(data$bl2)
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
 0.006468 0.016610 0.019750 0.020240 0.023450 0.040100
+*** eta=0.5 ------------------------
+mv logw.txt logw_birds4_gam_eta05.txt
+> print(summary(w))
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max.
+0.000e+00 1.900e-06 2.582e-05 1.000e-03 2.702e-04 4.328e-02
+> print(length(w[w>0.01]))
+[1] 28
+> print( (1/(length(w)*sum(w^2)) ) )
+[1] 0.07618455
+** better than eta=1.0
 
 CONCLUSION: mvnormal behaves better, not sure why,
 intervals are similar
@@ -54,3 +74,25 @@ Errors: 93
 [1] 907
 > (1/sum(data$w^2))/907
 [1] 0.009153178
+** eta=0.5 ---------------------------
+mv logw.txt logw_catsdogs_norm_eta05.txt
+Errors: 233
+> print(summary(w))
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max.
+0.0000000 0.0000000 0.0000000 0.0013040 0.0000001 0.5724000
+> print(w[w>0.01])
+[1] 0.12491887 0.57241513 0.01859262 0.01603325 0.01487177 0.19002668
+> print( (1/(length(w)*sum(w^2)) ) )
+[1] 0.003426483
+** worse than eta=1.0
+
+
+* gammabeta best NJ tree
+./bl -f "../../Data/cats-dogs.fasta" -t "(1,2,((3,((4,5),6)),(((((7,8),9),10),11),12)));" -p 0.267,0.2347,0.1817,0.3166 -q 0.008687964,0.451897075,0.012421873,0.002237899,0.487459670,0.037295519
+mv logw.txt logw_catsdogs_gam_eta05.txt
+Errors: 11
+> print(w[w>0.01])
+[1] 1
+> print( (1/(length(w)*sum(w^2)) ) )
+[1] 0.001044932
+** very bad!
