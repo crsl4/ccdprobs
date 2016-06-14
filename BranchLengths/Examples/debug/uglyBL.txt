@@ -1,0 +1,4 @@
+From Data/sim5ugly.fasta
+inside Examples/debug
+
+../Code/test/bl -f ../Data/sim5ugly.fasta -t "(cheetah,(leopard,(gray_wolf,raccoon_dog)),cat);" -q $ntaxrates -p $ntaxprobs --mvnormal -s $seed >& out$ntax
