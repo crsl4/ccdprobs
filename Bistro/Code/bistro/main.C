@@ -128,6 +128,7 @@ int main(int argc, char* argv[])
       double logProposalDensity = 0;
       tree.randomEdges(alignment,model,rng,logProposalDensity);
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
+      double logLikelihood = tree.
       
       cerr << tree.makeTreeNumbers() << endl;
     }
