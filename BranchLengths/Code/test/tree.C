@@ -762,8 +762,12 @@ void Tree::partialPathCalculations2D(Vector2d t, double sum,Alignment& alignment
 }
 
 // similar to partialPathCalculations2D, t=t1, sum1,sum2
-  void Tree::partialPathCalculations1D(double t1, double sum1, double sum2, Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl,bool recurse)
+void Tree::partialPathCalculations1D(double t1, double sum1, double sum2, Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl,bool recurse, bool verbose)
 {
+  if(verbose)
+    {
+      cerr << "Inside partialPathCalculations1D with t: " << t1 << " and sums: " << sum1 << ", " << sum2 << endl;
+    }
   if (sum1 < t1 || sum2 < t1)
     {
       cerr << "Sum " << sum1 << " or " << sum2 << "smaller than summand " << t1 << " in partialPathCalculations1D" << endl;
@@ -1118,7 +1122,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   int iter=0;
   double curr = t1;
   double curr_logl,curr_dlogl,curr_ddlogl;
-  partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse); //true un original mleDist
+  partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse, verbose); //true un original mleDist
   double prop = curr;
   double prop_logl = curr_logl;
   double prop_dlogl = curr_dlogl;
@@ -1135,8 +1139,12 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       curr_ddlogl = prop_ddlogl;
       prop = 2*curr;
       while ( prop > min(sum1,sum2) )
-	prop = (prop+curr)/2;
-      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+	{
+	  prop = (prop+curr)/2;
+	  if ( ++iter > 100 )
+	      mleErrorJoint(nx,ny,nz);
+	}
+      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse, verbose);
       if ( ++iter > 100 )
         mleErrorJoint(nx,ny,nz);
     } while ( prop_dlogl > 0);
@@ -1150,7 +1158,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       curr_dlogl = prop_dlogl;
       curr_ddlogl = prop_ddlogl;
       prop = 0.5*curr;
-      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse, verbose);
       if ( ++iter > 100 )
         mleErrorJoint(nx,ny,nz);
     } while ( prop_dlogl < 0 );
@@ -1162,7 +1170,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       cout << "Derivatives: " << curr_dlogl << ", " << prop_dlogl << endl;
     }
   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
-  partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+  partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse, verbose);
   if(verbose)
     {
       cout << "Starting prop: " << prop << endl;
@@ -1171,7 +1179,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   do
   {
     curr = prop;
-    partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
+    partialPathCalculations1D(curr,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse, verbose);
     if(verbose)
       {
 	cout << "mleDistance1D Newton-Raphson curr: " << curr << endl;
@@ -1197,7 +1205,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	prop = curr - delta;
       }
     //cerr << "Delta " << delta << endl;
-    partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+    partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse, verbose);
     if ( ++iter > 100 )
       mleErrorJoint(nx,ny,nz);
     while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) > (TOL*TOL) )
@@ -1206,7 +1214,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
 	cerr << "found bigger step" << endl;
       delta = 0.5*delta;
       prop = curr - delta;
-      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+      partialPathCalculations1D(prop,sum1,sum2,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse, verbose);
       if ( ++iter > 100 )
         mleErrorJoint(nx,ny,nz);
     }
