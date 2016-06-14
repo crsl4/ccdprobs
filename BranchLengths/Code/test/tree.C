@@ -1138,7 +1138,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       curr_dlogl = prop_dlogl;
       curr_ddlogl = prop_ddlogl;
       prop = 2*curr;
-      while ( prop > min(sum1,sum2) )
+      while ( prop > min(sum1,sum2) ) //split the remaining diff
 	{
 	  prop = (prop+curr)/2;
 	  if ( ++iter > 100 )

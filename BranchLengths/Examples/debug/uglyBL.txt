@@ -4,6 +4,29 @@ Claudia June 2016
 
 ../../Code/test/bl -f ../../Data/sim5ugly.fasta -t "(cheetah,(leopard,tiger),(dog,raccoon_dog));" -q 0.40127673622647,0.0309909479440409,0.247433448672884,0.0461794511599764,0.267693882323466,0.00642553367316287 -p 0.39396133888844,0.430928258908935,0.0276893849865081,0.147421017216117 --verbose >& outUglyBL
 
-** infinite loop in mleDistance1D: will run again because it should stop, it does not: weird
-** it seems to get stuck in partialPathCalculations1D
-** added print inside partialPathCaculations1D
+** fixed infinite loop! 6/14/16
+Errors: 84
+with studyWeightsBRL.r:
+> print(summary(w))
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+0.000000 0.000000 0.000000 0.001233 0.000000 0.877900
+> print(w[w>0.01])
+[1] 0.05975054 0.03784801 0.87794002 0.02062860
+> print( (1/(length(w)*sum(w^2)) ) )
+[1] 0.001588548
+
+* mvnormal
+../../Code/test/bl -f ../../Data/sim5ugly.fasta -t "(cheetah,(leopard,tiger),(dog,raccoon_dog));" -q 0.40127673622647,0.0309909479440409,0.247433448672884,0.0461794511599764,0.267693882323466,0.00642553367316287 -p 0.39396133888844,0.430928258908935,0.0276893849865081,0.147421017216117 --mvnormal
+Errors: 279
+> print(summary(w))
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max.
+0.000e+00 8.500e-07 5.544e-05 1.389e-03 8.525e-04 5.424e-02
+> print(w[w>0.01])
+ [1] 0.01110619 0.01001519 0.05423915 0.01224482 0.01984799 0.01175881
+ [7] 0.01697434 0.01452982 0.02266230 0.04054867 0.01313792 0.01690658
+[13] 0.01087322 0.01118980 0.01424781 0.01327527 0.02833231 0.01891212
+[19] 0.03815295 0.01574154 0.01024309 0.01010776 0.02366040 0.01145244
+[25] 0.02076156
+> print( (1/(length(w)*sum(w^2)) ) )
+[1] 0.09922744
+
