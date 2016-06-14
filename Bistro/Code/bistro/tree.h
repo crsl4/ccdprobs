@@ -8,6 +8,7 @@
 #include <list>
 #include <string>
 #include <random>
+#include <algorithm>
 
 #include "Eigen/Core"
 #include "Eigen/Eigenvalues"
@@ -29,7 +30,7 @@ private:
   // things for likelihood calculation
   Matrix4d transitionMatrix;
 public:
-  Edge() {}
+  Edge() { length = 0; }
   ~Edge() {
     nodes[0] = nodes[1] = NULL;
   }
@@ -83,6 +84,12 @@ public:
   void addEdge(Edge* e) { edges.push_back(e); }
   void setEdge(Edge *e,int n) { edges[n] = e; }
   void clearEdges() { edges.clear(); }
+  void deleteEdge(Edge* e)
+  {
+    vector<Edge*>::iterator p = find(edges.begin(),edges.end(),e);
+    if ( p != edges.end() )
+      edges.erase(p);
+  }
   Node* getNeighbor(Edge* e) { return e->getOtherNode(this); }
   Node* getNeighbor(int i) { return edges[i]->getOtherNode(this); }
   Edge* findEdge(Node* n) {
@@ -96,6 +103,7 @@ public:
   }
   void print(ostream&);
   void makeTopology(stringstream&,Edge*,bool);
+  void makeTreeNumbers(stringstream&,Edge*);
   string getPattern() const { return pattern; }
   int getLevel() const { return level; }
   void setLevel(Edge*);
@@ -150,6 +158,7 @@ public:
   string makeTopology(bool);
   string makeTopologyNames() { return makeTopology(true); }
   string makeTopologyNumbers() { return makeTopology(false); }
+  string makeTreeNumbers();
   void randomBranchLengths(mt19937_64&,double);
   double calculate(const Alignment&,QMatrix&);
   void randomize(mt19937_64&);
@@ -170,6 +179,8 @@ public:
     root->setMinNumber(NULL);
     root->sortCanonical(NULL);
   }
+  void setNJDistances(MatrixXd&,mt19937_64&);
+  void unroot();
 };
 
 #endif

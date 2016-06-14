@@ -47,12 +47,12 @@ int main(int argc, char* argv[])
 
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
-  Tree tree(jcDistanceMatrix);
-  tree.reroot(1);
-  tree.sortCanonical();
+  Tree jctree(jcDistanceMatrix);
+  jctree.reroot(1);
+  jctree.sortCanonical();
   cerr << " done." << endl;
   cerr << endl << "Tree topology:" << endl;
-  cerr << tree.makeTopologyNumbers() << endl << endl;
+  cerr << jctree.makeTopologyNumbers() << endl << endl;
 
   // Initialize random number generator
   cerr << "Initializing random number generator ...";
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 
 //  q_init.mcmc(rng);
 
-  // QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
+  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
 
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
 
@@ -111,11 +111,17 @@ int main(int argc, char* argv[])
 
   if ( parameters.getNumBootstrap() > 0 )
   {
-    int numRandom = 10000;
+    int numRandom = parameters.getNumRandom();
     cerr << "Generating " << numRandom << " random trees:" << endl;
     for ( int k=0; k<numRandom; ++k )
     {
-      cout << ccd.randomTree(rng) << endl;
+      string treeString = ccd.randomTree(rng);
+      Tree tree(treeString);
+      tree.relabel(alignment);
+      tree.unroot();
+      tree.setNJDistances(jcDistanceMatrix,rng);
+      tree.sortCanonical();
+      cerr << tree.makeTreeNumbers() << endl;
     }
   }
   

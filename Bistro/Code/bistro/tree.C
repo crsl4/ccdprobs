@@ -7,7 +7,7 @@
 #include <string>
 #include <locale> // isdigit(), tolower()
 #include <cctype>
-#include <algorithm> // sort()
+#include <algorithm> // sort(), find for vector<>
 #include <random>
 
 #include "Eigen/Core"
@@ -177,7 +177,7 @@ void Tree::readSubtree(istringstream& s,Node* parent,vector<Node*>& leafNodes,ve
 
 // This function numbers leaves in the order they are read in.
 // Names are treated as strings.
-// The function relabelTree() will change node numbers and names to match the sequences.
+// The function relabel() will change node numbers and names to match the sequences.
 
 Tree::Tree(string line) 
 {
@@ -232,7 +232,10 @@ Tree::Tree(string line)
   for ( int i=0; i<nodes.size(); ++i )
     nodes[i]->setNumber(i+1);
   for ( int i=0; i<edges.size(); ++i )
+  {
     edges[i]->setNumber(i+1);
+    edges[i]->setLength(0);
+  }
 
   setNodeLevels();
   
@@ -324,6 +327,32 @@ void Node::makeTopology(stringstream& s,Edge* parent,bool useName)
   s << ')';
 }
 
+void Node::makeTreeNumbers(stringstream& s,Edge* parent)
+{
+  if ( leaf )
+  {
+    s << number;
+  }
+  else // internal node
+  {
+    s << '(';
+    bool first=true;
+    for ( vector<Edge*>::iterator e=edges.begin(); e !=edges.end(); ++e )
+    {
+      if ( (*e)==parent )
+	continue;
+      if ( first )
+	first = false;
+      else
+	s << ',';
+      getNeighbor(*e)->makeTreeNumbers(s,*e);
+    }
+    s << ')';
+  }
+  if ( parent != NULL )
+    s << ":" << setprecision(7) << fixed << parent->getLength();
+}
+
 string Tree::makeTopology(bool useName)
 {
   stringstream s;
@@ -332,6 +361,16 @@ string Tree::makeTopology(bool useName)
   string top;
   s >> top;
   return top;
+}
+
+string Tree::makeTreeNumbers()
+{
+  stringstream s;
+  root->makeTreeNumbers(s,NULL);
+  s << ";";
+  string tree;
+  s >> tree;
+  return tree;
 }
 
 void Tree::randomBranchLengths(mt19937_64& rng,double lambda)
@@ -677,6 +716,35 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
     }
   } while ( fabs(curr - prop) > 1.0e-8);
   return prop;
+}
+
+// assumes tree already has some decent starting values for all edges
+// can improve efficiency by not calculating with full recursion when not needed, but worry about that later
+//
+void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt199,mt19937_64& rng,Edge* parent)
+{
+  if ( !leaf )
+  {
+    for ( vector<Edge*>::iterator e=edges.begin(); e != edges.end(); ++e )
+      randomEdges(alignment,qmatrix,rng,*e);
+  }
+  if ( parent != NULL )
+  {
+    Node* n = getNeighbor(parent);
+    for ( int k=0; k<alignment.getNumSites(); ++k )
+    {
+      n->calculate(k,alignment,parent,true);
+    }
+    // find mle
+    
+  }
+
+  
+}
+
+void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng)
+{
+  root->randomEdges(alignment,qmatrix,rng,NULL);
 }
 
 void Node::setLevel(Edge* parent)
@@ -1088,4 +1156,114 @@ void Node::sortCanonical(Edge* parent)
   sort(v.begin(),v.end());
   for ( int i=0; i<edges.size(); ++i )
     edges[i] = (v[i]).second;
+}
+
+// use NJ algorithm to set edge lengths cherry by cherry to a tree topology
+void Tree::setNJDistances(MatrixXd& dist,mt19937_64& rng)
+{
+  randomize(rng);
+  map<Node*,int> nodeToDistIndexMap;
+  // this assumes nodes[0]..nodes[numTaxa-1] are the leaf nodes in order
+  for ( int i=0; i<numTaxa; ++i )
+  {
+    nodeToDistIndexMap[nodes[i]] = i;
+  }
+  list<Node*> nodeList; // list of all nodes in tree in depth first order
+  depthFirstNodeList(nodeList);
+  setActiveChildrenAndNodeParents();
+  list<Node*>::iterator p=nodeList.begin();
+  
+  while ( nodeToDistIndexMap.size() > 3)
+  {
+    Node* x = *p++;
+    Node* y = *p++;
+    int xi = nodeToDistIndexMap[x];
+    int yi = nodeToDistIndexMap[y];
+    double sumx=0;
+    double sumy=0;
+    
+    for ( map<Node*,int>::iterator m=nodeToDistIndexMap.begin(); m!=nodeToDistIndexMap.end(); ++m)
+    {
+      sumx += dist(xi,m->second);
+      sumy += dist(yi,m->second);
+    }
+    // set edge lengths
+    double dxy = dist(xi,yi);
+    double d = 0.5*dxy;
+    double foo = 0.5*(sumx - sumy)/(nodeToDistIndexMap.size()-2);
+    x->getEdgeParent()->setLength( d+foo > 0 ? d+foo : 0.00001 );
+    y->getEdgeParent()->setLength( d-foo > 0 ? d-foo : 0.00001 );
+    // update the distance matrix and map
+    for ( map<Node*,int>::iterator m=nodeToDistIndexMap.begin(); m!=nodeToDistIndexMap.end(); ++m)
+    {
+      if ( m->first == x || m->first == y )
+	continue;
+      d = 0.5 * ( dist(xi,m->second) + dist(yi,m->second) - dxy );
+      if ( d < 0 )
+	d = 0;
+      dist(xi,m->second) = dist(m->second,xi) = d;
+    }
+    nodeToDistIndexMap[x->getNodeParent()] = xi;
+    nodeToDistIndexMap.erase(x);
+    nodeToDistIndexMap.erase(y);
+  }
+  // now, root and three children of root left
+  Node* x = *p++;
+  Node* y = *p++;
+  Node* z = *p++;
+  int xi = nodeToDistIndexMap[x];
+  int yi = nodeToDistIndexMap[y];
+  int zi = nodeToDistIndexMap[z];
+  double d = 0.5 * (dist(xi,yi) + dist(xi,yi) - dist(yi,zi));
+  x->getEdgeParent()->setLength( d > 0 ? d : 0.00001 );
+  d = 0.5 * (dist(xi,yi) + dist(yi,zi) - dist(xi,zi));
+  y->getEdgeParent()->setLength( d > 0 ? d : 0.00001 );
+  d = 0.5 * (dist(xi,zi) + dist(yi,zi) - dist(xi,yi));
+  z->getEdgeParent()->setLength( d > 0 ? d : 0.00001 );
+}
+
+// if root node has degree two, remove the node and one of the edges from the tree
+// use remaining edge to attach the children.
+// set one of these children (a non-leaf) to be the root of the tree
+
+void Tree::unroot()
+{
+  if ( root == NULL ) // no node is set to be the root
+    return;
+  if ( root->getNumEdges() < 2 ) // root is a leaf!
+    return;
+  if ( root->getNumEdges() > 2 ) // already unrooted
+  {
+    return;
+  }
+  // root has exactly two children
+  Edge* ex = root->getEdge(0);
+  Node* x = root->getNeighbor(ex);
+  Edge* ey = root->getEdge(1);
+  Node* y = root->getNeighbor(ey);
+  ex->setNodes(x,y);
+  y->deleteEdge(ey);
+  y->addEdge(ex);
+  vector<Edge*>::iterator p = find(edges.begin(),edges.end(),ey);
+  if ( p != edges.end() )
+    edges.erase(p);
+  vector<Node*>::iterator n = find(nodes.begin(),nodes.end(),root);
+  if ( n != nodes.end() )
+    nodes.erase(n);
+
+  int deletedNumber = ey->getNumber();
+
+  for ( p=edges.begin(); p!=edges.end(); ++p )
+  {
+    int num = (*p)->getNumber();
+    if ( num > deletedNumber )
+      (*p)->setNumber(num-1);
+  }
+  
+  delete ey;
+  delete root;
+  if ( !x->getLeaf() )
+    root = x;
+  else
+    root = y;
 }

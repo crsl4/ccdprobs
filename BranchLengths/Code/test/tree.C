@@ -1109,8 +1109,11 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       //exit(1);
       throw 20;
     }
-  if(verbose)
-    cout << "Entering mleDistance1D" << endl;
+  if ( verbose )
+  {
+    cout << "Entering mleDistance1D:";
+    cerr << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+  }
   bool recurse=true; //warning: need to keep true
   int iter=0;
   double curr = t1;
@@ -1354,9 +1357,10 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
 { //todo: add ofstream to each mledistance3d,2d and write needed things to file
   if ( verbose )
   {
-    cout << "Entering mleDistanceJoint" << endl;
-    cout << "lx,ly,lz: " << lx << ", " << ly << ", " << lz << endl;
-    cout << "sxy,sxz,syz: " << sxy << ", " << sxz << ", " << syz << endl;
+    cerr << "Entering mleDistanceJoint";
+    cerr << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+    cerr << "lx,ly,lz: " << lx << ", " << ly << ", " << lz << endl;
+    cerr << "sxy,sxz,syz: " << sxy << ", " << sxz << ", " << syz << endl;
   }
 //  if(sxy > 0 && sxz > 0 && syz > 0)
   if ( foundXY && foundXZ && foundYZ )
@@ -1417,8 +1421,11 @@ void Tree::mleDistanceJoint(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge
 // and that the patternToProbMaps are accurate if edges ex and ey head toward the root.
 void Tree::mleDistance3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix, double& lx, double& ly, double& lz, mt19937_64& rng, bool verbose, bool mvnormal, ofstream& par3D)
 {
-  if(verbose)
-    cout << "Entering mleDistance3D" << endl;
+  if ( verbose )
+  {
+    cerr << "Entering mleDistance3D";
+    cerr << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+  }
   bool recurse=true; //warning: need to keep true
   int iter=0;
   Vector3d curr(lx,ly,lz);
@@ -1566,7 +1573,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
   if ( verbose )
   {
     cout << "Entering mleDistance2D" << endl;
-    cerr << "node x = " << nx->getNumber() << ", node y = " << ny->getNumber() << ", node z = nz->getNumber() " << endl;
+    cerr << "node x = " << nx->getNumber() << ", node y = " << ny->getNumber() << ", node z = " << nz->getNumber() << endl;
   }
   if (sum < t1)
     {
@@ -1691,7 +1698,7 @@ void Tree::mleDistance2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
     // 	      mleErrorJoint(nx,ny,nz);
     // 	  }
     //   }
-    } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL) );
+    } while ( delta.squaredNorm() > (TOL*TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL) );
   if(verbose)
     cout << "Finally converged. delta squared norm: " << delta.squaredNorm() << " and prop gradient squared norm " << prop_gradient.squaredNorm() << "with TOL " << TOL << endl;
   if(prop[0] < 0)
@@ -2058,6 +2065,12 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       }
       break;
     }
+    
+    if ( verbose )
+    {
+      cerr << "Setting distance from " << z->getNumber() << " to " << par->getNumber() << " = " << lz << endl;
+    }
+    
     distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lz; //why it seems you are only putting lengthZ in distanceMap? dont we need to input X,Y?
                                                                         // is it because dist X,par and Y,par is always one edge only? will it be?
                                                                         // clau: I think yes, we only need lengthZ because that is more than 1 edge

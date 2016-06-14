@@ -17,6 +17,7 @@ private:
   vector<double> symmetricQP;
   unsigned int seed;
   int numBootstrap;
+  int numRandom;
 public:
   Parameter()
   {
@@ -24,6 +25,7 @@ public:
     symmetricQP.resize(6,1.0/6.0);
     seed = 0;
     numBootstrap = 0;
+    numRandom = 0;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -37,6 +39,8 @@ public:
   void setSeed(unsigned int x) { seed = x; }
   int getNumBootstrap() { return numBootstrap; }
   void setNumBootstrap(int n) { numBootstrap = n; }
+  int getNumRandom() { return numRandom; }
+  void setNumRandom(int n) { numRandom = n; }
 
   void processCommandLine(int,char* []);
 };
