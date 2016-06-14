@@ -115,12 +115,20 @@ int main(int argc, char* argv[])
     cerr << "Generating " << numRandom << " random trees:" << endl;
     for ( int k=0; k<numRandom; ++k )
     {
+      cerr << k << endl;
       string treeString = ccd.randomTree(rng);
       Tree tree(treeString);
       tree.relabel(alignment);
       tree.unroot();
       tree.setNJDistances(jcDistanceMatrix,rng);
       tree.sortCanonical();
+      cerr << tree.makeTreeNumbers() << endl;
+      tree.randomize(rng);
+      cerr << tree.makeTreeNumbers() << endl;
+      double logProposalDensity = 0;
+      tree.randomEdges(alignment,model,rng,logProposalDensity);
+      double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
+      
       cerr << tree.makeTreeNumbers() << endl;
     }
   }

@@ -473,6 +473,7 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
     if ( m == patternToProbMap.end() ) // first time this pattern calculated
     {
       patternToProbMap[ pattern ] = pair<double,Vector4d> (0,translate(base));
+//      cerr << "  " << pattern << " --> " << 0 << "," << translate(base).transpose() << endl;
     }
     return;
   }
@@ -507,6 +508,7 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
     scale += log( vmax );
     tempProb /= vmax;
     patternToProbMap[ pattern ] = pair<double,Vector4d> (scale,tempProb);
+//    cerr << "  " << pattern << " --> " << scale << "," << tempProb.transpose() << endl;
   }
 }
 
@@ -644,15 +646,23 @@ void mleError(Node* na,Node* nb,double curr,double prop,double curr_dlogl,double
   cerr << "Derivative = " << curr_dlogl << " and " << prop_dlogl << endl;
   exit(1);
 }
+
+void Edge::mleError(bool& converge)
+{
+  cerr << "Warning: too many iterations in Edge::mleLength()." << endl;
+  converge = false;
+}
+
 // Find mle distance from node a to b through a path that uses edges ea and eb.
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ea and eb head toward the root.
-double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix)
+double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double initialLength)
 {
   bool recurse=true;
   int iter=0;
-  double curr = 0.05;
+//  double curr = 0.05;
+  double curr = initialLength;
   // get a decent starting point
   double curr_logl,curr_dlogl,curr_ddlogl;
   partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
@@ -718,33 +728,227 @@ double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* e
   return prop;
 }
 
+void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl)
+{
+  Matrix4d P = qmatrix.getTransitionMatrix( t );
+  Matrix4d QP = qmatrix.getQP( t );
+  Matrix4d QQP = qmatrix.getQQP( t );
+  int numSites = alignment.getNumSites();
+
+//  cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl;
+//  cerr << "P =" << endl << P << endl << endl;
+//  cerr << "QP =" << endl << QP << endl << endl;
+//  cerr << "QQP =" << endl << QQP << endl << endl;
+  
+  logl = 0;
+  dlogl = 0;
+  ddlogl = 0;
+  for ( int k=0; k<numSites; ++k )
+  {
+//    cerr << "k=" << k << endl;
+    nodes[0]->calculate(k,alignment,this,true); // sets pattern for this site
+    nodes[1]->calculate(k,alignment,this,true);
+//    cerr << nodes[0]->getPattern() << endl;
+//    cerr << nodes[1]->getPattern() << endl;
+    pair<double,Vector4d> pa = nodes[0]->patternToProbMap[nodes[0]->getPattern()];
+    pair<double,Vector4d> pb = nodes[1]->patternToProbMap[nodes[1]->getPattern()];
+//    cerr << pa.second.transpose() << " // " << pb.second.transpose() << endl;
+    Vector4d va = pa.second;
+    Vector4d vq = qmatrix.getStationaryP();
+    for ( int i=0; i<4; ++i )
+      va(i) *= vq(i);
+    Vector4d vb = pb.second;
+//    cerr << va.transpose() << " // " << vb.transpose() << endl;
+    double f0 = (va.asDiagonal() * P * vb.asDiagonal()).sum();
+    double f1 = (va.asDiagonal() * QP * vb.asDiagonal()).sum();
+    double f2 = (va.asDiagonal() * QQP * vb.asDiagonal()).sum();
+//    cerr << "f0,f1,f2 = " << f0 << ", " << f1 << ", " << f2 << endl;
+    logl += pa.first + pb.first + log( f0 );
+    dlogl += f1/f0;
+    ddlogl += (f0*f2 - f1*f1)/(f0*f0);
+  }
+}
+
+double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
+{
+  int iter=0;
+  double curr = length;
+//  cerr << "Edge::mleLength, initial length = " << length << endl;;
+
+  /*
+  if ( number == 2 )
+  {
+    ofstream f("edge2.txt");
+    f << "t logl dlogl ddlogl" << endl;
+    for ( int i=1; i<=2000; ++i )
+    {
+      double t,logl,dlogl,ddlogl;
+      t = i* 0.001;
+      calculate(t,alignment,qmatrix,logl,dlogl,ddlogl);
+      f << t << " " << logl << " " << dlogl << " " << ddlogl << endl;
+    }
+    f.close();
+  }
+  */
+  // try to find two spanning points
+  double curr_logl,curr_dlogl,curr_ddlogl;
+  calculate(curr,alignment,qmatrix,curr_logl,curr_dlogl,curr_ddlogl);
+
+//  cerr << "curr,logl,dlogl,ddlogl = " << curr << ", " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
+
+  double prop = curr;
+  double prop_logl = curr_logl;
+  double prop_dlogl = curr_dlogl;
+  double prop_ddlogl = curr_ddlogl;
+  if ( curr_dlogl > 0 )
+  {
+    do
+    {
+      curr = prop;
+      curr_logl = prop_logl;
+      curr_dlogl = prop_dlogl;
+      curr_ddlogl = prop_ddlogl;
+      prop = 2*curr;
+      calculate(prop,alignment,qmatrix,prop_logl,prop_dlogl,prop_ddlogl);
+      if ( ++iter > 100 )
+      {
+        mleError(converge);
+	cerr << "Infinite MLE?" << endl;
+	prop = MAX_EDGE_LENGTH;
+	return prop;
+      }
+    } while ( prop_dlogl > 0 && (prop_logl > curr_logl) );
+  }
+  else
+  {
+    do
+    {
+      curr = prop;
+      curr_logl = prop_logl;
+      curr_dlogl = prop_dlogl;
+      curr_ddlogl = prop_ddlogl;
+      prop = 0.5*curr;
+      calculate(prop,alignment,qmatrix,prop_logl,prop_dlogl,prop_ddlogl);
+      if ( ++iter > 100 )
+      {
+        mleError(converge);
+	cerr << "Warning: edge length set to minimum." << endl;
+	prop = MIN_EDGE_LENGTH;
+	return prop;
+      }
+    } while ( prop_dlogl < 0 && (prop_logl > curr_logl) && prop > MIN_EDGE_LENGTH );
+    if ( prop < MIN_EDGE_LENGTH )
+    {
+      prop = MIN_EDGE_LENGTH;
+      return prop;
+    }
+  }
+  // switch to protected Newton-Raphson
+//  cerr << "protected" << endl;
+
+  prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
+  do
+  {
+    curr = prop;
+    calculate(curr,alignment,qmatrix,curr_logl,curr_dlogl,curr_ddlogl);
+//    cerr << "curr,logl,dlogl,ddlogl = " << curr << ", " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
+
+    if ( ++iter > 100 )
+    {
+      cerr << "Warning: too many iterations in protected Newton-Raphson";
+      length = curr;
+      mleError(converge);
+    }
+    double delta = -curr_dlogl / curr_ddlogl;
+    prop = curr + delta;
+    while ( prop < MIN_EDGE_LENGTH )
+    {
+      delta = 0.5*delta;
+      prop = curr + delta;
+    }
+    calculate(prop,alignment,qmatrix,prop_logl,prop_dlogl,prop_ddlogl);
+    if ( ++iter > 100 )
+      mleError(converge);
+    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
+    {
+      delta = 0.5*delta;
+      prop = curr + delta;
+      calculate(prop,alignment,qmatrix,prop_logl,prop_dlogl,prop_ddlogl);
+      if ( ++iter > 100 )
+        mleError(converge);
+    }
+  } while ( fabs(curr - prop) > 1.0e-8);
+  return prop;
+}
+
+// clear prob maps of both nodes
+// do all conditional calculations for both subtrees
+// find MLE of edge length conditional on rest of tree
+// generate gamma distributed random length
+void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
+{
+  // clear prob maps recursively through entire tree
+  // there is a smarter way to do this for only part of the tree, depending on order of edges
+  // worry about increased efficiency later
+  nodes[0]->clearProbMaps(this);
+  nodes[1]->clearProbMaps(this);
+
+  bool converge;
+  // set length to MLE distance
+  length = mleLength(alignment,qmatrix,converge);
+  if ( length < MIN_EDGE_LENGTH + 1.0e-08 ) // generate form exponential
+  {
+    double lambda = 1.0 / (MIN_EDGE_LENGTH) ;
+    exponential_distribution<double> rexp(lambda);
+    length = rexp(rng);
+    logProposalDensity += log(lambda) - lambda*length;
+  }
+  else // generate from gamma
+  {
+    double logl,dlogl,ddlogl;
+    calculate(length,alignment,qmatrix,logl,dlogl,ddlogl);
+    double lambda = -1 * length * ddlogl;
+    double alpha = length*lambda;
+    gamma_distribution<double> rgamma(alpha,1.0 / lambda);
+    length = rgamma(rng);
+    logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length) - lambda*length;
+  }
+//  cerr << "Setting edge " << number << " length to " << length << endl;
+  // still to do: generate a random length
+  
+  // recalculate the transition matrices
+  calculate(qmatrix);
+}
+
 // assumes tree already has some decent starting values for all edges
 // can improve efficiency by not calculating with full recursion when not needed, but worry about that later
 //
-void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt199,mt19937_64& rng,Edge* parent)
+void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edge* parent,double& logProposalDensity)
 {
-  if ( !leaf )
+//  cerr << "node::randomEdges called on" << number << endl;
+  // first call on all children
+  for ( vector<Edge*>::iterator e=edges.begin(); e != edges.end(); ++e )
   {
-    for ( vector<Edge*>::iterator e=edges.begin(); e != edges.end(); ++e )
-      randomEdges(alignment,qmatrix,rng,*e);
+    if ( *e != parent )
+      getNeighbor(*e)->randomEdges(alignment,qmatrix,rng,*e);
   }
-  if ( parent != NULL )
+  //  get random length for parent edge
+  if ( parent != NULL ) // call edge command on parent
   {
-    Node* n = getNeighbor(parent);
-    for ( int k=0; k<alignment.getNumSites(); ++k )
-    {
-      n->calculate(k,alignment,parent,true);
-    }
-    // find mle
-    
+    parent->randomLength(alignment,qmatrix,rng,logProposalDensity);
   }
-
-  
 }
 
-void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng)
+void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
 {
-  root->randomEdges(alignment,qmatrix,rng,NULL);
+  // clear probability maps from all nodes for fresh calculation
+  clearProbMaps();
+  // compute transition matrices for all edges using provisional edge lengths
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    (*e)->calculate(qmatrix);
+//  cerr << "root = " << root->getNumber() << endl;
+  // traverse tree and find MLE's for each edge
+  root->randomEdges(alignment,qmatrix,rng,NULL,logProposalDensity);
 }
 
 void Node::setLevel(Edge* parent)
@@ -842,7 +1046,7 @@ pair<int,int> getPair(int x,int y)
   return pair<int,int> (x,y);
 }
 
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix,double initialLength)
 {
   map<pair<int,int>,double> distanceMap;
   list<Node*> nodeList;
@@ -896,17 +1100,17 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix)
     double dxy, dxz, dyz;
     m = distanceMap.find( getPair(x->getNumber(),y->getNumber()) );
     if ( m == distanceMap.end() )
-      dxy = mleDistance(alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),qmatrix);
+      dxy = mleDistance(alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),qmatrix,initialLength);
     else
       dxy = m->second;
     m = distanceMap.find( getPair(x->getNumber(),z->getNumber()) );
     if ( m == distanceMap.end() )
-      dxz = mleDistance(alignment,x,x->getEdgeParent(),z,z->getEdgeParent(),qmatrix);
+      dxz = mleDistance(alignment,x,x->getEdgeParent(),z,z->getEdgeParent(),qmatrix,initialLength);
     else
       dxz = m->second;
     m = distanceMap.find( getPair(y->getNumber(),z->getNumber()) );
     if ( m == distanceMap.end() )
-      dyz = mleDistance(alignment,y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix);
+      dyz = mleDistance(alignment,y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,initialLength);
     else
       dyz = m->second;
     double lengthX = (dxy + dxz - dyz)*0.5;
@@ -1267,3 +1471,15 @@ void Tree::unroot()
   else
     root = y;
 }
+
+double Tree::logPriorExp(double mean)
+{
+  double sum = 0;
+  double lambda = 1/mean;
+  for ( vector<Edge*>::iterator e=edges.begin();e!=edges.end();e++ )
+  {
+    sum += (*e)->getLength();
+  }
+  return edges.size()*log(lambda) - lambda*sum;
+}
+

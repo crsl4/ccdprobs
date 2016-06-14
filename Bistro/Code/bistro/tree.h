@@ -1,6 +1,9 @@
 #ifndef __TREE_H
 #define __TREE_H
 
+#define MIN_EDGE_LENGTH 0.00001
+#define MAX_EDGE_LENGTH 10
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -51,6 +54,10 @@ public:
   void print(ostream&);
   void calculate(QMatrix& qmatrix) { transitionMatrix = qmatrix.getTransitionMatrix(length); }
   Matrix4d getTransitionMatrix() { return transitionMatrix; }
+  void mleError(bool&);
+  void calculate(double,Alignment&,QMatrix&,double&,double&,double&);
+  double mleLength(Alignment&,QMatrix&,bool&);
+  void randomLength(Alignment&,QMatrix&,mt19937_64&,double&);
 };
 
 class Node
@@ -123,6 +130,7 @@ public:
   int getMinNumber() const { return minNumber; }
   int setMinNumber(Edge*);
   void sortCanonical(Edge*);
+  void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&);
 };
 
 class Tree
@@ -167,11 +175,11 @@ public:
   double pathLogLikelihood(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool);
   double pathLogLikelihoodDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool);
   double pathLogLikelihoodSecondDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool);
-  double mleDistance(Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&);
+  double mleDistance(Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double);
   void setNodeLevels();
   void depthFirstNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
-  void generateBranchLengths(Alignment&,QMatrix&);
+  void generateBranchLengths(Alignment&,QMatrix&,double);
   void reroot(int);
   void setMinNumber() { root->setMinNumber(NULL); }
   void sortCanonical()
@@ -181,6 +189,8 @@ public:
   }
   void setNJDistances(MatrixXd&,mt19937_64&);
   void unroot();
+  void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&);
+  double logPriorExp(double);
 };
 
 #endif
