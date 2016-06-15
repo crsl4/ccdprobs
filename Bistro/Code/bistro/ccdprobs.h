@@ -65,8 +65,11 @@ public:
   friend bool operator> (const Clade&,const Clade&);
   friend bool operator== (const Clade&,const Clade&);
   friend Clade operator- (const Clade&,const Clade&);
-  string randomTree(multimap<Clade,pair<Clade,int> >&,map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,mt19937_64&);
-
+  string randomTree(multimap<Clade,pair<Clade,int> >&,
+		    map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,
+		    map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>&,
+		    mt19937_64&,
+		    double&);
 };
 
 // ############################################################
@@ -166,7 +169,7 @@ public:
   void add(Clade c) { clade.add(c); }
   void copyClade(Clade c) { clade = c; }
   void setNumTaxa(int n) { clade.resize(n); }
-  string randomTree(multimap<Clade,pair<Clade,int> >&,map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,mt19937_64&);
+  string randomTree(multimap<Clade,pair<Clade,int> >&,map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,mt19937_64&,double&);
 };
 
 class RootedTree
@@ -206,12 +209,14 @@ private:
 public:
   multimap<Clade,pair<Clade,int> > mm;
   map<Clade,Alias<dynamic_bitset<unsigned char> >* > am;
+  // add a map from pair<Clade,Clade> to double to store the log of the probability of selecting the second clade from the first
+  map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double> cladeLogProbMap;
 public:
   CCDProbs(map<string,int>&,vector<int>&,vector<string>&);
   void writeTranslateTable(ostream&);
   void writeCladeCount(ostream&);
   void writePairCount(ostream&);
-  string randomTree(mt19937_64&);
+  string randomTree(mt19937_64&,double&);
 //  Tree rtop(mt19937_64&);
 };
 

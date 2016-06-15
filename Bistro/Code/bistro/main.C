@@ -109,6 +109,10 @@ int main(int argc, char* argv[])
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
   CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
 
+  ofstream f("out.txt");
+
+  f << "tree logl logTop logProp logPrior logWt" << endl;
+  
   if ( parameters.getNumBootstrap() > 0 )
   {
     int numRandom = parameters.getNumRandom();
@@ -116,25 +120,30 @@ int main(int argc, char* argv[])
     for ( int k=0; k<numRandom; ++k )
     {
       cerr << k << endl;
-      string treeString = ccd.randomTree(rng);
+      double logTopologyProbability=0;
+      string treeString = ccd.randomTree(rng,logTopologyProbability);
+      cerr << "LogTopologyProbability = " << logTopologyProbability << endl;
       Tree tree(treeString);
       tree.relabel(alignment);
       tree.unroot();
-      tree.setNJDistances(jcDistanceMatrix,rng);
+      MatrixXd jcDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
+      jcDistanceMatrixCopy = jcDistanceMatrix;
+      tree.setNJDistances(jcDistanceMatrixCopy,rng);
       tree.sortCanonical();
       cerr << tree.makeTreeNumbers() << endl;
       tree.randomize(rng);
       cerr << tree.makeTreeNumbers() << endl;
       double logProposalDensity = 0;
       tree.randomEdges(alignment,model,rng,logProposalDensity);
+      cerr << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
       cerr << "Loglik for tree: " << logLik << endl;
       cerr << "LogDensity for tree: " <<  logProposalDensity << endl;
       cerr << "LogPrior for tree: " << logBranchLengthPriorDensity << endl;
-      double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity;
+      double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
       cerr << "LogWeight for tree: " << logWeight << endl;
-      cerr << tree.makeTreeNumbers() << endl;
+      f << tree.makeTreeNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
     }
   }
 

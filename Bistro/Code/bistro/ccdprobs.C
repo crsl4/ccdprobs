@@ -298,7 +298,11 @@ void CCDProbs::writePairCount(ostream& f)
   }
 }
 
-string Clade::randomTree(multimap<Clade,pair<Clade,int> >& mm, map<Clade,Alias<dynamic_bitset<unsigned char> >* >& am, mt19937_64& rng)
+string Clade::randomTree(multimap<Clade,pair<Clade,int> >& mm,
+			 map<Clade,Alias<dynamic_bitset<unsigned char> >* >& am,
+			 map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>& cladeLogProbMap,
+			 mt19937_64& rng,
+			 double& logTopologyProbability)
 {
   if ( count()==1 ) {
     stringstream ss;
@@ -320,24 +324,26 @@ string Clade::randomTree(multimap<Clade,pair<Clade,int> >& mm, map<Clade,Alias<d
     }  
     for (int i = 0; i < probs.size(); ++i) {
       probs[i] = probs[i]/(double)total;
+      cladeLogProbMap[ pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >(get(),indices[i]) ] = log(probs[i]);
     }
     am[*this] = new Alias<dynamic_bitset<unsigned char> >(probs,indices);
   }
   Clade c1( (am[*this])->pick(rng) );
   Clade c2(clade - c1.get());
-  string s1 = c1.randomTree(mm,am,rng);
-  string s2 = c2.randomTree(mm,am,rng);
+  string s1 = c1.randomTree(mm,am,cladeLogProbMap,rng,logTopologyProbability);
+  string s2 = c2.randomTree(mm,am,cladeLogProbMap,rng,logTopologyProbability);
   string out;
   if ( c1 > c2 )
     out = '(' + s1 + ',' + s2 + ')';
   else
     out = '(' + s2 + ',' + s1 + ')';
+  logTopologyProbability += cladeLogProbMap[ pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >(get(),c1.get()) ];
   return out;
 }
 
-string CCDProbs::randomTree(mt19937_64& rng)
+string CCDProbs::randomTree(mt19937_64& rng,double& logTopologyProbability)
 {
-  return all.randomTree(mm,am,rng) + ';';
+  return all.randomTree(mm,am,cladeLogProbMap,rng,logTopologyProbability) + ';';
 }
 
 /*
