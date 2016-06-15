@@ -57,7 +57,7 @@ public:
   void mleError(bool&);
   void calculate(double,Alignment&,QMatrix&,double&,double&,double&);
   double mleLength(Alignment&,QMatrix&,bool&);
-  void randomLength(Alignment&,QMatrix&,mt19937_64&,double&);
+  void randomLength(Alignment&,QMatrix&,mt19937_64&,double&,bool);
 };
 
 class Node
@@ -130,7 +130,7 @@ public:
   int getMinNumber() const { return minNumber; }
   int setMinNumber(Edge*);
   void sortCanonical(Edge*);
-  void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&);
+  void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&,bool);
 };
 
 class Tree
@@ -189,7 +189,7 @@ public:
   }
   void setNJDistances(MatrixXd&,mt19937_64&);
   void unroot();
-  void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&);
+  void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&,bool);
   double logPriorExp(double);
 };
 
