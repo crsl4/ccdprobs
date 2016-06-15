@@ -169,14 +169,10 @@ int main(int argc, char* argv[])
     for ( int k=0; k<numRandom; ++k )
     {
       wt[k] /= sum;
-      essInverse += wt[k];
+      essInverse += wt[k]*wt[k];
     }
     cout << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
 	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
   }
-
-
-  
-
   return 0;
 }
