@@ -21,6 +21,7 @@ head(dat1)
 
 ## here we need to first do rbind for all weights.txt
 dat <- rbind(dat1,dat2,dat3,dat4,dat5)
+dat=read.table("weights.txt", header=FALSE,sep=",")
 head(dat)
 nrep = nrow(dat)/10
 

@@ -18,7 +18,7 @@
 using namespace std;
 using namespace Eigen;
 
-void Node::print(ostream& f) 
+void Node::print(ostream& f)
 {
   f << setw(3) << number << ": " << name << ": " << level << ": ";
   f << "Edges:";
@@ -130,10 +130,10 @@ void Tree::readSubtree(istringstream& s,Node* parent,vector<Node*>& leafNodes,ve
   Edge* e = new Edge(); // edge connecting n to parent
   edges.push_back(e);
 
-  e->setNodes(n,parent);  
+  e->setNodes(n,parent);
   n->addEdge(e);
   parent->addEdge(e);
-	  
+
   char c = s.peek();
 
   if ( c=='(' )
@@ -179,12 +179,12 @@ void Tree::readSubtree(istringstream& s,Node* parent,vector<Node*>& leafNodes,ve
 // Names are treated as strings.
 // The function relabel() will change node numbers and names to match the sequences.
 
-Tree::Tree(string line) 
+Tree::Tree(string line)
 {
   // Create the tree from parenthetic representation in line.
   // Create new nodes and edges on the fly.
   // Leaf node and internal node pointers placed in separate vectors.  Combine to vector nodes at end.
-	
+
   numTaxa = 0;
   treeString = line;
 
@@ -199,15 +199,15 @@ Tree::Tree(string line)
     checkTreeEnd(s);
     return;
   }
-  
+
   // string begins with '(', so tree is not trivial
   vector<Node*> leafNodes;
   vector<Node*> internalNodes;
- 
+
   internalNodes.push_back(new Node(false));
   root = internalNodes[0];
   s >> c; // read in left parenthesis
-  
+
   while ( true ) {
     readSubtree(s,root,leafNodes,internalNodes);
     c = readOneTreeCharacter(s);
@@ -238,7 +238,7 @@ Tree::Tree(string line)
   }
 
   setNodeLevels();
-  
+
   leafNodes.resize(0);
   internalNodes.resize(0);
 }
@@ -253,7 +253,7 @@ void Tree::relabel(Alignment& alignment)
   {
     if ( !(*p)->getLeaf() )
       continue;
-    
+
     string name = (*p)->getName();
     if ( isdigit( name[0] ) )
     {
@@ -492,7 +492,7 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
   {
     double scale=0;
     Vector4d tempProb(1,1,1,1);
-    
+
     for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     {
       if ( (*e) != parent )
@@ -739,7 +739,7 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
 //  cerr << "P =" << endl << P << endl << endl;
 //  cerr << "QP =" << endl << QP << endl << endl;
 //  cerr << "QQP =" << endl << QQP << endl << endl;
-  
+
   logl = 0;
   dlogl = 0;
   ddlogl = 0;
@@ -915,7 +915,7 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
   }
 //  cerr << "Setting edge " << number << " length to " << length << endl;
   // still to do: generate a random length
-  
+
   // recalculate the transition matrices
   calculate(qmatrix);
 }
@@ -930,7 +930,7 @@ void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edg
   for ( vector<Edge*>::iterator e=edges.begin(); e != edges.end(); ++e )
   {
     if ( *e != parent )
-      getNeighbor(*e)->randomEdges(alignment,qmatrix,rng,*e);
+      getNeighbor(*e)->randomEdges(alignment,qmatrix,rng,*e, logProposalDensity);
   }
   //  get random length for parent edge
   if ( parent != NULL ) // call edge command on parent
@@ -1095,7 +1095,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix,double in
       y->calculate(k,alignment,y->getEdgeParent(),false);
       z->calculate(k,alignment,z->getEdgeParent(),false);
     }
-    
+
     map<pair<int,int>,double>::iterator m;
     double dxy, dxz, dyz;
     m = distanceMap.find( getPair(x->getNumber(),y->getNumber()) );
@@ -1123,14 +1123,14 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix,double in
     if ( lengthY < 0 )
     {
       cerr << "Warning: fix negative edge length." << endl;
-      lengthY = 0;      
+      lengthY = 0;
     }
     x->getEdgeParent()->setLength( lengthX );
     y->getEdgeParent()->setLength( lengthY );
     double lengthZ = (dxz + dyz - dxy)*0.5;
     if ( lengthZ < 0 )
     {
-      cerr << "Warning: fix negative edge length." << endl;        
+      cerr << "Warning: fix negative edge length." << endl;
       lengthZ = 0;
     }
     if ( par==root )
@@ -1142,7 +1142,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix,double in
     par->deactivateChild(1);
     par->deactivateChild(0);
   }
-  
+
   for ( map<pair<int,int>,double>::iterator m=distanceMap.begin(); m!= distanceMap.end(); ++m )
     cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
 }
@@ -1276,7 +1276,7 @@ Tree::Tree(MatrixXd& dist)
   for ( int i=0; i<3; ++i )
     if ( d[i] < 0 )
       d[i] = 0.00001;
-   
+
   Node* n = new Node(nextNodeIndex++,false);
   int ii=0;
   for ( list<pair<int,Node*> >::iterator p = active.begin(); p != active.end(); ++p )
@@ -1376,7 +1376,7 @@ void Tree::setNJDistances(MatrixXd& dist,mt19937_64& rng)
   depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents();
   list<Node*>::iterator p=nodeList.begin();
-  
+
   while ( nodeToDistIndexMap.size() > 3)
   {
     Node* x = *p++;
@@ -1385,7 +1385,7 @@ void Tree::setNJDistances(MatrixXd& dist,mt19937_64& rng)
     int yi = nodeToDistIndexMap[y];
     double sumx=0;
     double sumy=0;
-    
+
     for ( map<Node*,int>::iterator m=nodeToDistIndexMap.begin(); m!=nodeToDistIndexMap.end(); ++m)
     {
       sumx += dist(xi,m->second);
@@ -1463,7 +1463,7 @@ void Tree::unroot()
     if ( num > deletedNumber )
       (*p)->setNumber(num-1);
   }
-  
+
   delete ey;
   delete root;
   if ( !x->getLeaf() )

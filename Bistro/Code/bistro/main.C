@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;
   s_init[4] = 0.3;
-  
+
   QMatrix q_init(p_init,s_init);
   cout << q_init.getQ() << endl;
 
@@ -128,11 +128,15 @@ int main(int argc, char* argv[])
       double logProposalDensity = 0;
       tree.randomEdges(alignment,model,rng,logProposalDensity);
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
-      double logLikelihood = tree.
-      
+      double logLik = tree.calculate(alignment, model);
+      cerr << "Loglik for tree: " << logLik << endl;
+      cerr << "LogDensity for tree: " <<  logProposalDensity << endl;
+      cerr << "LogPrior for tree: " << logBranchLengthPriorDensity << endl;
+      double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity;
+      cerr << "LogWeight for tree: " << logWeight << endl;
       cerr << tree.makeTreeNumbers() << endl;
     }
   }
-  
+
   return 0;
 }

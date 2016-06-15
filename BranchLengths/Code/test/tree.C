@@ -866,7 +866,7 @@ void mleErrorJoint(Node* nx,Node* ny,Node* nz)
 {
   cerr << "Error: too many iterations in mleDistanceJoint." << endl;
   cerr << "Nodes " << nx->getNumber() << ", " << ny->getNumber() << ", and " << nz->getNumber() << endl;
-  //exit(1); 
+  //exit(1);
   throw 20;
 }
 
@@ -1138,7 +1138,7 @@ void Tree::mleDistance1D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* e
       curr_dlogl = prop_dlogl;
       curr_ddlogl = prop_ddlogl;
       prop = 2*curr;
-      while ( prop > min(sum1,sum2) )
+      while ( prop > min(sum1,sum2) ) //split the remaining diff
 	{
 	  prop = (prop+curr)/2;
 	  if ( ++iter > 100 )
@@ -2073,12 +2073,12 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       }
       break;
     }
-    
+
     if ( verbose )
     {
       cerr << "Setting distance from " << z->getNumber() << " to " << par->getNumber() << " = " << lz << endl;
     }
-    
+
     distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lz; //why it seems you are only putting lengthZ in distanceMap? dont we need to input X,Y?
                                                                         // is it because dist X,par and Y,par is always one edge only? will it be?
                                                                         // clau: I think yes, we only need lengthZ because that is more than 1 edge
