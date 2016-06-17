@@ -18,6 +18,7 @@ private:
   unsigned int seed;
   int numBootstrap;
   int numRandom;
+  int numMLE;
 public:
   Parameter()
   {
@@ -26,6 +27,7 @@ public:
     seed = 0;
     numBootstrap = 0;
     numRandom = 0;
+    numMLE = 0;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -41,6 +43,8 @@ public:
   void setNumBootstrap(int n) { numBootstrap = n; }
   int getNumRandom() { return numRandom; }
   void setNumRandom(int n) { numRandom = n; }
+  int getNumMLE() { return numMLE; }
+  void setNumMLE(int n) { numMLE = n; }
 
   void processCommandLine(int,char* []);
 };
