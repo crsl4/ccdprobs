@@ -885,7 +885,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 // do all conditional calculations for both subtrees
 // find MLE of edge length conditional on rest of tree
 // generate gamma distributed random length
-void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
+void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity, bool onlyMLE)
 {
   // clear prob maps recursively through entire tree
   // there is a smarter way to do this for only part of the tree, depending on order of edges
@@ -896,22 +896,25 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
   bool converge;
   // set length to MLE distance
   length = mleLength(alignment,qmatrix,converge);
-  if ( length < MIN_EDGE_LENGTH + 1.0e-08 ) // generate form exponential
+  if ( !onlyMLE )
   {
-    double lambda = 1.0 / (MIN_EDGE_LENGTH) ;
-    exponential_distribution<double> rexp(lambda);
-    length = rexp(rng);
-    logProposalDensity += log(lambda) - lambda*length;
-  }
-  else // generate from gamma
-  {
-    double logl,dlogl,ddlogl;
-    calculate(length,alignment,qmatrix,logl,dlogl,ddlogl);
-    double lambda = -1 * length * ddlogl;
-    double alpha = length*lambda;
-    gamma_distribution<double> rgamma(alpha,1.0 / lambda);
-    length = rgamma(rng);
-    logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length) - lambda*length;
+    if ( length < MIN_EDGE_LENGTH + 1.0e-08 ) // generate from exponential
+    {
+      double lambda = 1.0 / (MIN_EDGE_LENGTH) ;
+      exponential_distribution<double> rexp(lambda);
+      length = rexp(rng);
+      logProposalDensity += log(lambda) - lambda*length;
+    }
+    else // generate from gamma
+    {
+      double logl,dlogl,ddlogl;
+      calculate(length,alignment,qmatrix,logl,dlogl,ddlogl);
+      double lambda = -1 * length * ddlogl;
+      double alpha = length*lambda;
+      gamma_distribution<double> rgamma(alpha,1.0 / lambda);
+      length = rgamma(rng);
+      logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length) - lambda*length;
+    }
   }
 //  cerr << "Setting edge " << number << " length to " << length << endl;
   // still to do: generate a random length
@@ -923,23 +926,23 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
 // assumes tree already has some decent starting values for all edges
 // can improve efficiency by not calculating with full recursion when not needed, but worry about that later
 //
-void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edge* parent,double& logProposalDensity)
+void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edge* parent,double& logProposalDensity,bool onlyMLE)
 {
 //  cerr << "node::randomEdges called on" << number << endl;
   // first call on all children
   for ( vector<Edge*>::iterator e=edges.begin(); e != edges.end(); ++e )
   {
     if ( *e != parent )
-      getNeighbor(*e)->randomEdges(alignment,qmatrix,rng,*e, logProposalDensity);
+      getNeighbor(*e)->randomEdges(alignment,qmatrix,rng,*e, logProposalDensity,onlyMLE);
   }
   //  get random length for parent edge
   if ( parent != NULL ) // call edge command on parent
   {
-    parent->randomLength(alignment,qmatrix,rng,logProposalDensity);
+    parent->randomLength(alignment,qmatrix,rng,logProposalDensity,onlyMLE);
   }
 }
 
-void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
+void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity,bool onlyMLE)
 {
   // clear probability maps from all nodes for fresh calculation
   clearProbMaps();
@@ -948,7 +951,7 @@ void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,dou
     (*e)->calculate(qmatrix);
 //  cerr << "root = " << root->getNumber() << endl;
   // traverse tree and find MLE's for each edge
-  root->randomEdges(alignment,qmatrix,rng,NULL,logProposalDensity);
+  root->randomEdges(alignment,qmatrix,rng,NULL,logProposalDensity,onlyMLE);
 }
 
 void Node::setLevel(Edge* parent)

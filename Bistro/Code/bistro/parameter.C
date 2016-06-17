@@ -15,11 +15,11 @@ void usage(ostream& f)
   f << "Usage: bistro [options]" << endl;
   f << "Options:" << endl;
   f << "    -f sequence-file-name          |  the FASTA format file name with the sequence data" << endl;
-  f << "    -t topology-string             |  the quoted string with the tree topology" << endl;
   f << "    -p stationary-distribution     |  four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
   f << "    -q symmetric-q-parameters      |  six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -b num-bootstrap               |  nonnegative integer number of bootstrap trees" << endl;
   f << "    -r num-random                  |  nonnegative integer number of random trees" << endl;
+  f << "    -m num-mle                     |  nonnegative integer number of MLE passes before generating random gamma lengths" << endl;
   f << "    -s seed                        |  positive integer random seed (machine chosen if not provided)" << endl;
   f << "    -h || --help                   |  print this help message" << endl;
   exit(1);
@@ -116,6 +116,20 @@ void Parameter::processCommandLine(int argc,char* argv[])
         usage(cerr);
       }
 
+    }
+    else if ( strcmp(argv[k],"-m") == 0)
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> numMLE;
+      }
+      else
+      {
+        cerr << "Error: flag `-m' not followed by an integer" << endl;
+        usage(cerr);
+      }
     }
     else if ( strcmp(argv[k],"-s") == 0 )
     {

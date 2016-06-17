@@ -112,10 +112,14 @@ int main(int argc, char* argv[])
   ofstream f("out.txt");
 
   f << "tree logl logTop logProp logPrior logWt" << endl;
-  
+
+  int numRandom = parameters.getNumRandom();
+
+  vector<double> logwt(numRandom,0);
+  double maxLogWeight;
+
   if ( parameters.getNumBootstrap() > 0 )
   {
-    int numRandom = parameters.getNumRandom();
     cerr << "Generating " << numRandom << " random trees:" << endl;
     for ( int k=0; k<numRandom; ++k )
     {
@@ -134,7 +138,12 @@ int main(int argc, char* argv[])
       tree.randomize(rng);
       cerr << tree.makeTreeNumbers() << endl;
       double logProposalDensity = 0;
-      tree.randomEdges(alignment,model,rng,logProposalDensity);
+      for ( int i=0; i<parameters.getNumMLE(); ++i )
+      {
+	tree.randomEdges(alignment,model,rng,logProposalDensity,true);
+	cerr << tree.makeTreeNumbers() << endl;
+      }
+      tree.randomEdges(alignment,model,rng,logProposalDensity,false);
       cerr << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
@@ -143,9 +152,27 @@ int main(int argc, char* argv[])
       cerr << "LogPrior for tree: " << logBranchLengthPriorDensity << endl;
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
       cerr << "LogWeight for tree: " << logWeight << endl;
-      f << tree.makeTreeNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+      tree.sortCanonical();
+      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+      logwt[k] = logWeight;
+      if ( k==0 || logWeight > maxLogWeight )
+	maxLogWeight = logWeight;
     }
+    vector<double> wt(numRandom,0);
+    double sum=0;
+    for ( int k=0; k<numRandom; ++k )
+    {
+      wt[k] = exp(logwt[k] - maxLogWeight);
+      sum += wt[k];
+    }
+    double essInverse=0;
+    for ( int k=0; k<numRandom; ++k )
+    {
+      wt[k] /= sum;
+      essInverse += wt[k]*wt[k];
+    }
+    cout << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
+	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
   }
-
   return 0;
 }

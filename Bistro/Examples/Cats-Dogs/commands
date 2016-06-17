@@ -7,3 +7,5 @@ and its topology
 (Acinonyx_jubatus___cheetah,((((Uncia_uncia___snow_leopard,Panthera_pardus___leopard),Panthera_tigris___tiger),Neofelis_nebulosa___clouded_leopard),(Vulpes_vulpes___red_fox,(((Canis_latrans___coyote,(Canis_lupus___gray_wolf,Canis_lupus_familiaris___domestic_dog)),Cuon_alpinus___dhole),Nyctereutes_procyonoides___raccoon_dog))),Felis_catus___domestic_cat);
 
 -p 0.267,0.235,0.181,0.317 -q 0.0108929,0.3428420,0.0398413,0.0106884,0.5949126,0.0008228
+
+../../Code/bistro/bistro -p 0.267,0.235,0.181,0.317 -q 0.0108929,0.3428420,0.0398413,0.0106884,0.5949126,0.0008228 -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 

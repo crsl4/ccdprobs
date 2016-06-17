@@ -1,0 +1,59 @@
+- Instructions after run:
+1) rename weights, trees, and blOneRep.txt based on fromto and nice/ugly bl
+2) remove out, fasta, make clean
+3) check git status in each computer, and do git add, git commit (should be on different files)
+4) also do git pull
+5) after merging, do git push in all computers
+6) do git pull in my mac, should have all weights files
+7) move weights, trees, blOneRep.txt, logw files to Examples/Simulations/
+9) run plotWeights.r, modify code to read all weights and merge data, create plot for nice/ugly bl
+
+
+======= simulations1===================
+20 replicates for nice bl, 20 replicates for ugly bl
+using cats-dogs data, and subsets for ntaxa=3,4,...,12
+for nice bl: all bl 0.15; for ugly bl, depending on subset taxa
+using: blOneRep.pl and blAllReps.pl
+summarizing with plotWeights.r: ess% and time.
+
+* 6/15 12pm: nice branches
+darwin00:
+1) compile bistro for darwin.
+2) check that ape is installed in R: yes
+3) Create folder Examples/Simulations
+/s/std/bin/stashticket
+/s/std/bin/runauth /usr/bin/screen -S blreps?
+ssh darwin00
+CladeDist/
+	CladeDist1/ccdprobs/Bistro/Scripts
+		perl blAllReps.pl -from 1 -to 5
+	CladeDist2/ccdprobs/Bistro/Scripts
+		perl blAllReps.pl -from 6 -to 10
+	CladeDist3/ccdprobs/Bistro/Scripts
+		perl blAllReps.pl -from 11 -to 15
+	CladeDist4/ccdprobs/Bistro/Scripts
+		perl blAllReps.pl -from 16 -to 20
+screen -r blreps?
+expected to finish in 5 hours: 6/15 5pm
+
+* 6/9 12pm: ugly branches
+darwin00:
+1) compile bl
+2) check that ape is installed
+3) create folder Examples/Simulations
+4) comment out the line with nice BL
+/s/std/bin/stashticket
+/s/std/bin/runauth /usr/bin/screen -S blreps?
+ssh darwin00
+CladeDist/
+	CladeDist5/ccdprobs/Bistro/Scripts
+		perl blAllReps.pl -from 1 -to 5
+	CladeDist6/ccdprobs/Bistro/Scripts
+		perl blAllReps.pl -from 6 -to 10
+	CladeDist7/ccdprobs/Bistro/Scripts
+		perl blAllReps.pl -from 11 -to 15
+	CladeDist8/ccdprobs/Bistro/Scripts
+		perl blAllReps.pl -from 16 -to 20
+screen -r blreps?
+expected to finish in 6 hours: 6/15 6pm
+but this can take longer because ugly bl are harder
