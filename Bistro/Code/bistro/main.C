@@ -45,6 +45,8 @@ int main(int argc, char* argv[])
   alignment.calculateJCDistances(jcDistanceMatrix);
   cerr << " done." << endl;
 
+  cerr << endl << jcDistanceMatrix << endl << endl;
+  
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
   MatrixXd jcDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -78,7 +80,7 @@ int main(int argc, char* argv[])
   QMatrix q_init(p_init,s_init);
 
   // burnin
-  q_init.mcmc(alignment,jctree,100,alignment.getNumSites(),rng);
+  q_init.mcmc(alignment,jctree,1000,alignment.getNumSites(),rng);
 
   // mcmc to get final Q
   q_init.mcmc(alignment,jctree,1000,alignment.getNumSites(),rng);
@@ -92,6 +94,8 @@ int main(int argc, char* argv[])
   alignment.calculateGTRDistances(model,jcDistanceMatrix,gtrDistanceMatrix);
   cerr << " done." << endl;
 
+  cerr << endl << gtrDistanceMatrix << endl << endl;
+  
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
@@ -105,7 +109,8 @@ int main(int argc, char* argv[])
     if ( (b+1) % (parameters.getNumBootstrap() / 10) == 0 )
       cerr << '|';
     alignment.setBootstrapWeights(weights,rng);
-    alignment.calculateJCDistancesUsingWeights(weights,bootDistanceMatrix);
+    alignment.calculateGTRDistancesUsingWeights(weights,model,gtrDistanceMatrix,bootDistanceMatrix);
+//    alignment.calculateJCDistancesUsingWeights(weights,bootDistanceMatrix);
     Tree bootTree(bootDistanceMatrix);
     bootTree.reroot(1);
     bootTree.sortCanonical();

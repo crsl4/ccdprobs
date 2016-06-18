@@ -51,6 +51,7 @@ public:
   void summarize(ostream&);
   void calculateJCDistancesUsingWeights(vector<int>&,MatrixXd&);
   void calculateJCDistances(MatrixXd&);
+  void calculateGTRDistancesUsingWeights(vector<int>&,QMatrix,MatrixXd&,MatrixXd&);
   void calculateGTRDistances(QMatrix,MatrixXd&,MatrixXd&);
   void setBootstrapWeights(vector<int>&,mt19937_64&);
   void getTaxaNumbersAndNames(vector<int>&,vector<string>&);

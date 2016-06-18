@@ -109,6 +109,20 @@ bool baseNotUncertain(char a)
   return ( (a=='a') || (a=='c') || (a=='g') || (a=='t') );
 }
 
+int baseToInt(char a)
+{
+  switch ( a )
+  {
+  case 'a' : return 0;
+  case 'c' : return 1;
+  case 'g' : return 2;
+  case 't' : return 3;
+  default :
+    cerr << "Error: baseToInt called on character that is not 'a', 'c', 'g', or 't'." << endl;
+    exit(1);
+  }
+}
+    
 // Assumes that matrix is correctly sized before
 // Even though matrix is symmetric, store distance in both upper and lower triangle to faciliate
 //   calculation of row sums
@@ -178,6 +192,96 @@ void Alignment::getTaxaNumbersAndNames(vector<int>& taxaNumbers,vector<string>& 
   }
 }
 
-void Alignment::calculateGTRDistances(QMatrix model,MatrixXd& jcDistanceMatrix,MatrixXd& gtrDistanceMatrix)
+
+// ignore constant from log stationary prob in log likelihood
+void gtrLogLike(Matrix4i& dnaCounts,QMatrix& qmatrix,double t,double& logl,double& dlogl,double& ddlogl)
 {
+  Matrix4d P = qmatrix.getTransitionMatrix(t);
+  Matrix4d QP = qmatrix.getQP(t);
+  Matrix4d QQP = qmatrix.getQQP(t);
+  logl=0;
+  dlogl=0;
+  ddlogl=0;
+  for ( int i=0; i<4; ++i)
+  {
+    for ( int j=0; j<4; ++j )
+    {
+      logl += dnaCounts(i,j) * log( P(i,j) );
+      dlogl += dnaCounts(i,j) * QP(i,j) / P(i,j);
+      ddlogl += dnaCounts(i,j) * (P(i,j)*QQP(i,j) - QP(i,j)*QP(i,j)) / (P(i,j)*P(i,j));
+    }
+  }
+}
+
+double gtrMLE(Matrix4i& dnaCounts,QMatrix& model,double t0)
+{
+  double curr,prop;
+  double curr_logl,prop_logl;
+  double curr_dlogl,prop_dlogl;
+  double curr_ddlogl,prop_ddlogl;
+  prop = t0;
+  gtrLogLike(dnaCounts,model,prop,prop_logl,prop_dlogl,prop_ddlogl);
+  do
+  {
+    curr = prop;
+    curr_logl = prop_logl;
+    curr_dlogl = prop_dlogl;
+    curr_ddlogl = prop_ddlogl;
+    double delta = -curr_dlogl / curr_ddlogl;
+    prop = curr + delta;
+    while ( prop < 0 )
+    {
+      delta = 0.5*delta;
+      prop = curr + delta;
+    }
+    gtrLogLike(dnaCounts,model,prop,prop_logl,prop_dlogl,prop_ddlogl);
+    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
+    {
+      delta = 0.5*delta;
+      prop = curr + delta;
+      gtrLogLike(dnaCounts,model,prop,prop_logl,prop_dlogl,prop_ddlogl);
+    }
+  } while ( fabs(curr - prop) > 1.0e-8);
+  return prop;
+}
+
+// use init for initial lengths
+// store mle distances in gtr
+void Alignment::calculateGTRDistancesUsingWeights(vector<int>& weights,QMatrix model,MatrixXd& init,MatrixXd& gtr)
+{
+  for ( int i=0; i<numTaxa; ++i ) // when i==numTaxa-1, j loop not executed
+  {
+    gtr(i,i) = 0;
+    for ( int j=i+1; j<numTaxa; ++j )
+    {
+      int numTotal = 0;
+      Matrix4i dnaCounts;
+      dnaCounts << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+      for ( int k=0; k<numSites; ++k )
+      {
+	if ( weights[k] > 0 )
+	{
+	  char a = tolower( getBase(i+1,k) );
+	  char b = tolower( getBase(j+1,k) );
+	  if ( baseNotUncertain(a) && baseNotUncertain(b) )
+	  {
+	    numTotal += weights[k];
+	    dnaCounts( baseToInt(a), baseToInt(b) ) += weights[k];
+	  }
+	}
+      }
+      if ( numTotal == 0 )
+      {
+	cerr << "Error: sequences " << i+1 << " and " << j+1 << " have no sites in common with certain bases." << endl;
+	exit(1);
+      }
+      gtr(i,j) = gtr(j,i) = gtrMLE(dnaCounts,model,init(i,j));
+    }
+  }
+}
+
+void Alignment::calculateGTRDistances(QMatrix model,MatrixXd& init,MatrixXd& gtr)
+{
+  vector<int> weights(numSites,1);
+  calculateGTRDistancesUsingWeights(weights,model,init,gtr);
 }
