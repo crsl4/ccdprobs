@@ -23,7 +23,8 @@ public:
   Parameter()
   {
     stationaryP.resize(4,0.25);
-    symmetricQP.resize(6,1.0/6.0);
+    symmetricQP.resize(6,0.1);
+    symmetricQP[1] = symmetricQP[4] = 0.3;
     seed = 0;
     numBootstrap = 0;
     numRandom = 0;

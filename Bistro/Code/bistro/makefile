@@ -14,7 +14,7 @@ CFLAGS = -O3 -I. -std=c++11 #-Wno-deprecated
 
 all: bistro
 
-bistro: main.C parameter.h sequence.h alias.h ccdprobs.h tree.h model.h $(OBJS)
+bistro: main.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h $(OBJS)
 	$(CC) $(CFLAGS) -o bistro main.C $(OBJS)
 
 .C.o:

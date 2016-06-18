@@ -10,6 +10,9 @@
 #include "Eigen/Eigenvalues"
 
 #include "parameter.h"
+#include "sequence.h"
+
+class Tree;
 
 using namespace std;
 using namespace Eigen;
@@ -44,7 +47,23 @@ public:
   Vector4d getStationaryP() const { return stationaryP; }
   Vector6d getSymmetricQP() const { return symmetricQP; }
   Vector4d getStatP() const { return stationaryP; }
-  void mcmc(mt19937_64&);
+  void resetStationaryP(Vector4d p)
+  {
+    stationaryP = p;
+    completeConstruction();
+  }
+  void resetSymmetricQP(VectorXd s)
+  {
+    symmetricQP = s;
+    completeConstruction();
+  }
+  void reset(Vector4d p,VectorXd s)
+  {
+    stationaryP = p;
+    symmetricQP = s;
+    completeConstruction();
+  }
+  void mcmc(Alignment&,Tree&,int,double,mt19937_64&);
 };
   
 #endif

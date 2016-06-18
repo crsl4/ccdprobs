@@ -1,0 +1,35 @@
+Felis_catus___domestic_cat: A=414 C=366 G=278 T=487
+Acinonyx_jubatus___cheetah: A=422 C=354 G=266 T=503
+Neofelis_nebulosa___clouded_leopard: A=398 C=368 G=294 T=485
+Uncia_uncia___snow_leopard: A=402 C=354 G=294 T=495
+Panthera_pardus___leopard: A=412 C=359 G=285 T=489
+Panthera_tigris___tiger: A=402 C=369 G=295 T=479
+Canis_lupus_familiaris___domestic_dog: A=414 C=355 G=276 T=500
+Canis_lupus___gray_wolf: A=418 C=354 G=273 T=500
+Canis_latrans___coyote: A=416 C=351 G=275 T=503
+Cuon_alpinus___dhole: A=415 C=362 G=278 T=490
+Vulpes_vulpes___red_fox: A=415 C=378 G=275 T=477
+Nyctereutes_procyonoides___raccoon_dog: A=424 C=381 G=276 T=464
+
+stationary acceptance: 0.42851
+symmetric acceptance: 0.434484
+0.256794 0.212648  0.24511 0.285448
+0.0783941  0.319783 0.0837611 0.0611569  0.410384 0.0465211
+
+-0.938374   0.15264  0.622644   0.16309
+ 0.184328  -1.29306  0.143798  0.964936
+ 0.652326  0.124754 -0.871979 0.0948986
+ 0.146719  0.718842 0.0814879 -0.947049
+
+stationary acceptance: 0.392534
+symmetric acceptance: 0.40626
+0.243536 0.223244 0.215567 0.317653
+0.0509112  0.302351 0.0688913 0.0149327  0.550813 0.0121016
+
+-0.866716  0.104525  0.620751   0.14144
+ 0.114026  -1.38112 0.0334446   1.23365
+ 0.701293 0.0346358 -0.763998 0.0280692
+ 0.108438  0.867004 0.0190484 -0.994491
+
+Generating 1000 random trees:
+ESS = 83.26, or 8.33 percent.

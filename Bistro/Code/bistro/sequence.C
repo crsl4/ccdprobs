@@ -7,6 +7,7 @@
 #include <random>
 
 #include "sequence.h"
+#include "model.h"
 
 using namespace std;
 
@@ -177,3 +178,6 @@ void Alignment::getTaxaNumbersAndNames(vector<int>& taxaNumbers,vector<string>& 
   }
 }
 
+void Alignment::calculateGTRDistances(QMatrix model,MatrixXd& jcDistanceMatrix,MatrixXd& gtrDistanceMatrix)
+{
+}

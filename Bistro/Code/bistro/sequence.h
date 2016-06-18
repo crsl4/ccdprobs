@@ -11,6 +11,8 @@
 #include "Eigen/Core"
 #include "Eigen/Eigenvalues"
 
+class QMatrix;
+
 using namespace std;
 using namespace Eigen;
 
@@ -49,6 +51,7 @@ public:
   void summarize(ostream&);
   void calculateJCDistancesUsingWeights(vector<int>&,MatrixXd&);
   void calculateJCDistances(MatrixXd&);
+  void calculateGTRDistances(QMatrix,MatrixXd&,MatrixXd&);
   void setBootstrapWeights(vector<int>&,mt19937_64&);
   void getTaxaNumbersAndNames(vector<int>&,vector<string>&);
 };

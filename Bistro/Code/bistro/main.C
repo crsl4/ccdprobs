@@ -47,7 +47,9 @@ int main(int argc, char* argv[])
 
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
-  Tree jctree(jcDistanceMatrix);
+  MatrixXd jcDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
+  jcDistanceMatrixCopy = jcDistanceMatrix;
+  Tree jctree(jcDistanceMatrixCopy);
   jctree.reroot(1);
   jctree.sortCanonical();
   cerr << " done." << endl;
@@ -67,29 +69,41 @@ int main(int argc, char* argv[])
 
   // Run MCMC on tree to estimate Q matrix parameters
   //   initial Q matrix
+  
   vector<double> p_init(4,0.25);
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;
   s_init[4] = 0.3;
 
   QMatrix q_init(p_init,s_init);
-  cout << q_init.getQ() << endl;
 
-//  q_init.mcmc(rng);
+  // burnin
+  q_init.mcmc(alignment,jctree,100,alignment.getNumSites(),rng);
 
-  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
+  // mcmc to get final Q
+  q_init.mcmc(alignment,jctree,1000,alignment.getNumSites(),rng);
+
+//  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
+  QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
 
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
+  cerr << "Finding initial GTR pairwise distances ...";
+  MatrixXd gtrDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
+  alignment.calculateGTRDistances(model,jcDistanceMatrix,gtrDistanceMatrix);
+  cerr << " done." << endl;
 
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
   MatrixXd bootDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   vector<int> weights(alignment.getNumSites());
+  cerr << '|';
   for ( int b=0; b<parameters.getNumBootstrap(); ++b )
   {
     if ( (b+1) % (parameters.getNumBootstrap() / 100) == 0 )
       cerr << '*';
+    if ( (b+1) % (parameters.getNumBootstrap() / 10) == 0 )
+      cerr << '|';
     alignment.setBootstrapWeights(weights,rng);
     alignment.calculateJCDistancesUsingWeights(weights,bootDistanceMatrix);
     Tree bootTree(bootDistanceMatrix);
@@ -97,7 +111,7 @@ int main(int argc, char* argv[])
     bootTree.sortCanonical();
     topologyToCountMap[ bootTree.makeTopologyNumbers() ]++;
   }
-  cerr << '*' << " ... done." << endl;
+  cerr << endl << "done." << endl;
 
   cerr << endl << "Topology counts:" << endl;
   for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
@@ -120,13 +134,15 @@ int main(int argc, char* argv[])
 
   if ( parameters.getNumBootstrap() > 0 )
   {
-    cerr << "Generating " << numRandom << " random trees:" << endl;
+    cerr << "Generating " << numRandom << " random trees:" << endl << '|';
     for ( int k=0; k<numRandom; ++k )
     {
-      cerr << k << endl;
+      if ( (k+1) % (numRandom / 100) == 0 )
+	cerr << '*';
+      if ( (k+1) % (numRandom / 10) == 0 )
+	cerr << '|';
       double logTopologyProbability=0;
       string treeString = ccd.randomTree(rng,logTopologyProbability);
-      cerr << "LogTopologyProbability = " << logTopologyProbability << endl;
       Tree tree(treeString);
       tree.relabel(alignment);
       tree.unroot();
@@ -134,30 +150,23 @@ int main(int argc, char* argv[])
       jcDistanceMatrixCopy = jcDistanceMatrix;
       tree.setNJDistances(jcDistanceMatrixCopy,rng);
       tree.sortCanonical();
-      cerr << tree.makeTreeNumbers() << endl;
       tree.randomize(rng);
-      cerr << tree.makeTreeNumbers() << endl;
       double logProposalDensity = 0;
       for ( int i=0; i<parameters.getNumMLE(); ++i )
       {
 	tree.randomEdges(alignment,model,rng,logProposalDensity,true);
-	cerr << tree.makeTreeNumbers() << endl;
       }
       tree.randomEdges(alignment,model,rng,logProposalDensity,false);
-      cerr << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
-      cerr << "Loglik for tree: " << logLik << endl;
-      cerr << "LogDensity for tree: " <<  logProposalDensity << endl;
-      cerr << "LogPrior for tree: " << logBranchLengthPriorDensity << endl;
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
-      cerr << "LogWeight for tree: " << logWeight << endl;
       tree.sortCanonical();
       f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
       logwt[k] = logWeight;
       if ( k==0 || logWeight > maxLogWeight )
 	maxLogWeight = logWeight;
     }
+    cerr << endl << "done." << endl;
     vector<double> wt(numRandom,0);
     double sum=0;
     for ( int k=0; k<numRandom; ++k )
