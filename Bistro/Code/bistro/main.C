@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
   cerr << "Reading alignment from FASTA file ...";
   Alignment alignment(parameters.getSequenceFileName());
   cerr << " done." << endl;
-  cerr << endl << "Alignment summary:" << endl;
+  cout << endl << "Alignment summary:" << endl;
   alignment.summarize(cout);
   cout << endl;
 
@@ -45,7 +45,8 @@ int main(int argc, char* argv[])
   alignment.calculateJCDistances(jcDistanceMatrix);
   cerr << " done." << endl;
 
-  cerr << endl << jcDistanceMatrix << endl << endl;
+  cout << "Jukes-Cantor Distance Matrix:" << endl;
+  cout << endl << jcDistanceMatrix << endl << endl;
   
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
@@ -67,8 +68,9 @@ int main(int argc, char* argv[])
   }
   mt19937_64 rng(parameters.getSeed());
   cerr << " done." << endl;
-  cerr << "Seed = " << parameters.getSeed() << endl;
+  cout << "Seed = " << parameters.getSeed() << endl;
 
+  cerr << "Running MCMC to estimate Q matrix ...";
   // Run MCMC on tree to estimate Q matrix parameters
   //   initial Q matrix
   
@@ -83,18 +85,21 @@ int main(int argc, char* argv[])
   q_init.mcmc(alignment,jctree,1000,alignment.getNumSites(),rng);
 
   // mcmc to get final Q
-  q_init.mcmc(alignment,jctree,1000,alignment.getNumSites(),rng);
+  q_init.mcmc(alignment,jctree,10000,alignment.getNumSites(),rng);
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
 
+  cerr << " done." << endl;
+  
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";
   MatrixXd gtrDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   alignment.calculateGTRDistances(model,jcDistanceMatrix,gtrDistanceMatrix);
   cerr << " done." << endl;
 
-  cerr << endl << gtrDistanceMatrix << endl << endl;
+  cout << "GTR Distance Matrix:" << endl;
+  cout << endl << gtrDistanceMatrix << endl << endl;
   
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
@@ -118,10 +123,10 @@ int main(int argc, char* argv[])
   }
   cerr << endl << "done." << endl;
 
-  cerr << endl << "Topology counts:" << endl;
+  cout << endl << "Topology counts:" << endl;
   for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
-    cerr << (*m).first << " " << setw(5) << (*m).second << endl;
-  cerr << endl;
+    cout << (*m).first << " " << setw(5) << (*m).second << endl;
+  cout << endl;
 
   vector<int> taxaNumbers;
   vector<string> taxaNames;
@@ -151,17 +156,19 @@ int main(int argc, char* argv[])
       Tree tree(treeString);
       tree.relabel(alignment);
       tree.unroot();
-      MatrixXd jcDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
-      jcDistanceMatrixCopy = jcDistanceMatrix;
-      tree.setNJDistances(jcDistanceMatrixCopy,rng);
-      tree.sortCanonical();
+      MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
+      gtrDistanceMatrixCopy = gtrDistanceMatrix;
+      tree.setNJDistances(gtrDistanceMatrixCopy,rng);
       tree.randomize(rng);
+      cout << tree.makeTreeNumbers() << endl;
       double logProposalDensity = 0;
       for ( int i=0; i<parameters.getNumMLE(); ++i )
       {
 	tree.randomEdges(alignment,model,rng,logProposalDensity,true);
+	cout << tree.makeTreeNumbers() << endl;
       }
       tree.randomEdges(alignment,model,rng,logProposalDensity,false);
+      cout << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
@@ -187,6 +194,8 @@ int main(int argc, char* argv[])
       essInverse += wt[k]*wt[k];
     }
     cout << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
+	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
+    cerr << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
 	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
   }
   return 0;
