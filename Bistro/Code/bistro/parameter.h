@@ -19,6 +19,7 @@ private:
   int numBootstrap;
   int numRandom;
   int numMLE;
+  string outFileRoot;
 public:
   Parameter()
   {
@@ -29,6 +30,7 @@ public:
     numBootstrap = 0;
     numRandom = 0;
     numMLE = 0;
+    outFileRoot = (string)("run1");
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -40,14 +42,16 @@ public:
   void setSymmetricQP(vector<double> qp) { symmetricQP = qp; }
   unsigned int getSeed() const { return seed; }
   void setSeed(unsigned int x) { seed = x; }
-  int getNumBootstrap() { return numBootstrap; }
+  int getNumBootstrap() const { return numBootstrap; }
   void setNumBootstrap(int n) { numBootstrap = n; }
-  int getNumRandom() { return numRandom; }
+  int getNumRandom() const { return numRandom; }
   void setNumRandom(int n) { numRandom = n; }
-  int getNumMLE() { return numMLE; }
+  int getNumMLE() const { return numMLE; }
   void setNumMLE(int n) { numMLE = n; }
-
+  string getOutFileRoot() const { return outFileRoot; }
+  void setOutFileRoot(string name) { outFileRoot = name; }
   void processCommandLine(int,char* []);
+  
 };
 
 #endif

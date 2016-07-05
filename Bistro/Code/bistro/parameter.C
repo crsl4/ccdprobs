@@ -15,13 +15,15 @@ void usage(ostream& f)
   f << "Usage: bistro [options]" << endl;
   f << "Options:" << endl;
   f << "    -f sequence-file-name          |  the FASTA format file name with the sequence data" << endl;
-  f << "    -p stationary-distribution     |  four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
-  f << "    -q symmetric-q-parameters      |  six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -b num-bootstrap               |  nonnegative integer number of bootstrap trees" << endl;
   f << "    -r num-random                  |  nonnegative integer number of random trees" << endl;
   f << "    -m num-mle                     |  nonnegative integer number of MLE passes before generating random gamma lengths" << endl;
+  f << "    -o file-root                   |  name of root for all output files" << endl;
   f << "    -s seed                        |  positive integer random seed (machine chosen if not provided)" << endl;
   f << "    -h || --help                   |  print this help message" << endl;
+  f << "    -p stationary-distribution     |  [ not used ] four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
+  f << "    -q symmetric-q-parameters      |  [ not used ] six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
+  f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
   exit(1);
 }
 
@@ -84,6 +86,20 @@ void Parameter::processCommandLine(int argc,char* argv[])
       else
       {
         cerr << "Error: flag `-t' not followed by a topology string" << endl;
+        usage(cerr);
+      }
+    }
+    else if ( strcmp(argv[k],"-o") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> outFileRoot;
+      }
+      else
+      {
+        cerr << "Error: flag `-o' not followed by a string" << endl;
         usage(cerr);
       }
     }

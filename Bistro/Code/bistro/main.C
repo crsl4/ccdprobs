@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
   CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
 
-  ofstream f("out.txt");
+  ofstream f(parameters.getOutFileRoot().c_str());
 
   f << "tree logl logTop logProp logPrior logWt" << endl;
 
@@ -165,6 +165,7 @@ int main(int argc, char* argv[])
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
+      tree.reroot(1);
       tree.sortCanonical();
       f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
       logwt[k] = logWeight;
