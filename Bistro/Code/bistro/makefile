@@ -6,9 +6,10 @@ OBJS = parameter.o sequence.o ccdprobs.o tree.o model.o
 TARGET = all
 
 #CC = g++-5
+#CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated
+
 CC = g++
-CFLAGS = -O3 -I. -std=c++11 #-Wno-deprecated
-#CFLAGS = -I. -g
+CFLAGS = -O3 -I. -std=c++11
 
 .SUFFIXES: .C .o
 
