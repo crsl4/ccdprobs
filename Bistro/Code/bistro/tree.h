@@ -3,6 +3,7 @@
 
 #define MIN_EDGE_LENGTH 0.00001
 #define MAX_EDGE_LENGTH 10
+#define TOL 1.0e-6
 
 #include <iostream>
 #include <iomanip>
@@ -191,6 +192,11 @@ public:
   void unroot();
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&,bool);
   double logPriorExp(double);
+  void mleLength3D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
+  void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d& ,bool);
+  double vectorProduct(vector<Vector4d>);
+  double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
+  void mleError(bool&);
 };
 
 #endif
