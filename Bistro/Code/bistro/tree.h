@@ -179,7 +179,7 @@ public:
   void setNodeLevels();
   void depthFirstNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
-  void generateBranchLengths(Alignment&,QMatrix&,double);
+  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&);
   void reroot(int);
   void setMinNumber() { root->setMinNumber(NULL); }
   void sortCanonical()

@@ -21,6 +21,7 @@ void usage(ostream& f)
   f << "    -o file-root                   |  name of root for all output files" << endl;
   f << "    -s seed                        |  positive integer random seed (machine chosen if not provided)" << endl;
   f << "    -h || --help                   |  print this help message" << endl;
+  f << "    --independent                  |  generates branch lengths independently" << endl;
   f << "    -p stationary-distribution     |  [ not used ] four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
   f << "    -q symmetric-q-parameters      |  [ not used ] six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
@@ -218,6 +219,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
         cerr << "Error: flag `-q' not followed by comma-separated no-space list of six (unweighted) values" << endl;
         usage(cerr);
       }
+    }
+    else if ( strcmp(argv[k],"--independent") == 0 )
+    {
+      independent = true;
     }
     else // does not match a flag
     {

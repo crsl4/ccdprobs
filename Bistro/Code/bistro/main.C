@@ -160,6 +160,7 @@ int main(int argc, char* argv[])
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
       tree.setNJDistances(gtrDistanceMatrixCopy,rng);
       tree.randomize(rng);
+      tree.print(cout);
       cout << tree.makeTreeNumbers() << endl;
       double logProposalDensity = 0;
       for ( int i=0; i<parameters.getNumMLE(); ++i )
@@ -167,7 +168,17 @@ int main(int argc, char* argv[])
 	tree.randomEdges(alignment,model,rng,logProposalDensity,true);
 	cout << tree.makeTreeNumbers() << endl;
       }
-      tree.randomEdges(alignment,model,rng,logProposalDensity,false);
+      if( parameters.getIndependent() )
+	{
+	  cout << "Branch lengths sampled independently" << endl;
+	  tree.randomEdges(alignment,model,rng,logProposalDensity,false);
+	}
+      else
+	{
+	  cout << "Branch lengths sampled jointly in 2D" << endl;
+	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity);
+	  tree.randomEdges(alignment,model,rng,logProposalDensity,false);
+	}
       cout << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);

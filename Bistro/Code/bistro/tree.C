@@ -1049,106 +1049,106 @@ pair<int,int> getPair(int x,int y)
   return pair<int,int> (x,y);
 }
 
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix,double initialLength)
-{
-  map<pair<int,int>,double> distanceMap;
-  list<Node*> nodeList;
-  depthFirstNodeList(nodeList);
-  setActiveChildrenAndNodeParents();
-//   cout << "Node List:";
-//   for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-//     cout << " " << (*p)->getNumber();
-//   cout << endl;
+// void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix,double initialLength)
+// {
+//   map<pair<int,int>,double> distanceMap;
+//   list<Node*> nodeList;
+//   depthFirstNodeList(nodeList);
+//   setActiveChildrenAndNodeParents();
+// //   cout << "Node List:";
+// //   for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+// //     cout << " " << (*p)->getNumber();
+// //   cout << endl;
 
-  list<Node*>::iterator p=nodeList.begin();
-  while ( true )
-  {
-    Node* x;
-    Node* y;
-    Node* z;
-    Node* par;
-    if ( (*p)->getNodeParent() == root )
-    {
-      if ( root->getActiveChildrenSize() != 3)
-      {
-        cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
-        cerr << root->getActiveChild(0)->getNumber() << endl;
-        cerr << (*p)->getNumber() << endl;
-        exit(1);
-      }
-      par = root;
-      x = *p++;
-      y = *p++;
-      z = *p;
-    }
-    else
-    {
-      x = *p++;
-      y = *p++;
-      par = x->getNodeParent();
-      z = par->closeRelative();
-    }
-    // do calculations
-    x->calculateEdges(qmatrix);
-    y->calculateEdges(qmatrix);
-    z->calculateEdges(qmatrix);
-    for ( int k=0; k<alignment.getNumSites(); ++k )
-    {
-      x->calculate(k,alignment,x->getEdgeParent(),false);
-      y->calculate(k,alignment,y->getEdgeParent(),false);
-      z->calculate(k,alignment,z->getEdgeParent(),false);
-    }
+//   list<Node*>::iterator p=nodeList.begin();
+//   while ( true )
+//   {
+//     Node* x;
+//     Node* y;
+//     Node* z;
+//     Node* par;
+//     if ( (*p)->getNodeParent() == root )
+//     {
+//       if ( root->getActiveChildrenSize() != 3)
+//       {
+//         cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
+//         cerr << root->getActiveChild(0)->getNumber() << endl;
+//         cerr << (*p)->getNumber() << endl;
+//         exit(1);
+//       }
+//       par = root;
+//       x = *p++;
+//       y = *p++;
+//       z = *p;
+//     }
+//     else
+//     {
+//       x = *p++;
+//       y = *p++;
+//       par = x->getNodeParent();
+//       z = par->closeRelative();
+//     }
+//     // do calculations
+//     x->calculateEdges(qmatrix);
+//     y->calculateEdges(qmatrix);
+//     z->calculateEdges(qmatrix);
+//     for ( int k=0; k<alignment.getNumSites(); ++k )
+//     {
+//       x->calculate(k,alignment,x->getEdgeParent(),false);
+//       y->calculate(k,alignment,y->getEdgeParent(),false);
+//       z->calculate(k,alignment,z->getEdgeParent(),false);
+//     }
 
-    map<pair<int,int>,double>::iterator m;
-    double dxy, dxz, dyz;
-    m = distanceMap.find( getPair(x->getNumber(),y->getNumber()) );
-    if ( m == distanceMap.end() )
-      dxy = mleDistance(alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),qmatrix,initialLength);
-    else
-      dxy = m->second;
-    m = distanceMap.find( getPair(x->getNumber(),z->getNumber()) );
-    if ( m == distanceMap.end() )
-      dxz = mleDistance(alignment,x,x->getEdgeParent(),z,z->getEdgeParent(),qmatrix,initialLength);
-    else
-      dxz = m->second;
-    m = distanceMap.find( getPair(y->getNumber(),z->getNumber()) );
-    if ( m == distanceMap.end() )
-      dyz = mleDistance(alignment,y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,initialLength);
-    else
-      dyz = m->second;
-    double lengthX = (dxy + dxz - dyz)*0.5;
-    if ( lengthX < 0 )
-    {
-      cerr << "Warning: fix negative edge length." << endl;
-      lengthX = 0;
-    }
-    double lengthY = (dxy + dyz - dxz)*0.5;
-    if ( lengthY < 0 )
-    {
-      cerr << "Warning: fix negative edge length." << endl;
-      lengthY = 0;
-    }
-    x->getEdgeParent()->setLength( lengthX );
-    y->getEdgeParent()->setLength( lengthY );
-    double lengthZ = (dxz + dyz - dxy)*0.5;
-    if ( lengthZ < 0 )
-    {
-      cerr << "Warning: fix negative edge length." << endl;
-      lengthZ = 0;
-    }
-    if ( par==root )
-    {
-      z->getEdgeParent()->setLength( lengthZ );
-      break;
-    }
-    distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lengthZ;
-    par->deactivateChild(1);
-    par->deactivateChild(0);
-  }
+//     map<pair<int,int>,double>::iterator m;
+//     double dxy, dxz, dyz;
+//     m = distanceMap.find( getPair(x->getNumber(),y->getNumber()) );
+//     if ( m == distanceMap.end() )
+//       dxy = mleDistance(alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),qmatrix,initialLength);
+//     else
+//       dxy = m->second;
+//     m = distanceMap.find( getPair(x->getNumber(),z->getNumber()) );
+//     if ( m == distanceMap.end() )
+//       dxz = mleDistance(alignment,x,x->getEdgeParent(),z,z->getEdgeParent(),qmatrix,initialLength);
+//     else
+//       dxz = m->second;
+//     m = distanceMap.find( getPair(y->getNumber(),z->getNumber()) );
+//     if ( m == distanceMap.end() )
+//       dyz = mleDistance(alignment,y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,initialLength);
+//     else
+//       dyz = m->second;
+//     double lengthX = (dxy + dxz - dyz)*0.5;
+//     if ( lengthX < 0 )
+//     {
+//       cerr << "Warning: fix negative edge length." << endl;
+//       lengthX = 0;
+//     }
+//     double lengthY = (dxy + dyz - dxz)*0.5;
+//     if ( lengthY < 0 )
+//     {
+//       cerr << "Warning: fix negative edge length." << endl;
+//       lengthY = 0;
+//     }
+//     x->getEdgeParent()->setLength( lengthX );
+//     y->getEdgeParent()->setLength( lengthY );
+//     double lengthZ = (dxz + dyz - dxy)*0.5;
+//     if ( lengthZ < 0 )
+//     {
+//       cerr << "Warning: fix negative edge length." << endl;
+//       lengthZ = 0;
+//     }
+//     if ( par==root )
+//     {
+//       z->getEdgeParent()->setLength( lengthZ );
+//       break;
+//     }
+//     distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lengthZ;
+//     par->deactivateChild(1);
+//     par->deactivateChild(0);
+//   }
 
-  for ( map<pair<int,int>,double>::iterator m=distanceMap.begin(); m!= distanceMap.end(); ++m )
-    cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
-}
+//   for ( map<pair<int,int>,double>::iterator m=distanceMap.begin(); m!= distanceMap.end(); ++m )
+//     cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
+// }
 
 void njCalculateAdjustedMatrix(MatrixXd& dist,list<pair<int,Node*> >& active,MatrixXd& adj,VectorXd& sums)
 {
@@ -1486,3 +1486,56 @@ double Tree::logPriorExp(double mean)
   return edges.size()*log(lambda) - lambda*sum;
 }
 
+
+// based on generateBranchLengths in BranchLengths/Code/test/tree.C
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity)
+{
+  list<Node*> nodeList;
+  depthFirstNodeList(nodeList);
+  setActiveChildrenAndNodeParents();
+  cout << "Node List:";
+  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+    cout << " " << (*p)->getNumber();
+  cout << endl;
+  
+  list<Node*>::iterator p=nodeList.begin();
+  while ( true )
+  {
+    Node* x;
+    Node* y;
+    Node* z;
+    Node* par; //clau: parent of x,y
+    if ( (*p)->getNodeParent() == root ) //clau: if p parent is root
+    {
+      if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
+      {
+        cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
+        cerr << root->getActiveChild(0)->getNumber() << endl;
+        cerr << (*p)->getNumber() << endl;
+	throw 20;
+      }
+      par = root;
+      x = *p++;
+      y = *p++;
+      z = *p;
+    }
+    else //clau: p parent not root
+    {
+      x = *p++; //it means take *p and move right
+      y = *p++;
+      par = x->getNodeParent();
+      z = par->closeRelative();
+    }
+    if ( par==root )
+    {
+      cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
+      // need 3D sampling
+      break;
+    }
+    else
+      {
+	cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
+	// need 2D sampling: need to call randomLength2D
+      }
+  }
+}
