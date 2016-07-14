@@ -180,7 +180,7 @@ public:
   void setNodeLevels();
   void depthFirstNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
-  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&);
+  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&, bool);
   void reroot(int);
   void setMinNumber() { root->setMinNumber(NULL); }
   void sortCanonical()
@@ -192,7 +192,7 @@ public:
   void unroot();
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&,bool);
   double logPriorExp(double);
-  void mleLength3D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
+  Vector3d mleLength3D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
   void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d& ,bool);
   double vectorProduct(vector<Vector4d>);
   double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);

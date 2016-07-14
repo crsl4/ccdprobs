@@ -2,7 +2,7 @@
 # To compile, type "make" or make "all"
 # To remove files, type "make clean"
 #
-OBJS = parameter.o sequence.o ccdprobs.o tree.o model.o
+OBJS = parameter.o sequence.o ccdprobs.o tree.o model.o random.o
 TARGET = all
 
 #CC = g++-5
@@ -15,7 +15,7 @@ CFLAGS = -O3 -I. -std=c++11
 
 all: bistro
 
-bistro: main.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h $(OBJS)
+bistro: main.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
 	$(CC) $(CFLAGS) -o bistro main.C $(OBJS)
 
 .C.o:

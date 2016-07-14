@@ -14,6 +14,7 @@
 #include "Eigen/Eigenvalues"
 
 #include "tree.h"
+#include "random.h"
 
 using namespace std;
 using namespace Eigen;
@@ -1393,8 +1394,13 @@ double Tree::logPriorExp(double mean)
 
 
 // based on generateBranchLengths in BranchLengths/Code/test/tree.C
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity)
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool onlyMLE)
 {
+  // clear probability maps from all nodes for fresh calculation
+  clearProbMaps();
+  // compute transition matrices for all edges using provisional edge lengths
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    (*e)->calculate(qmatrix);
   list<Node*> nodeList;
   depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents();
@@ -1448,9 +1454,24 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	  y->calculate(k,alignment,y->getEdgeParent(),true);
 	  z->calculate(k,alignment,z->getEdgeParent(),true);
 	}
-      // need 3D sampling
       bool converge;
-      mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge);
+      Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge);
+      if(!onlyMLE)
+	{
+	  double prop_logl;
+	  Vector3d prop_gradient;
+	  Matrix3d prop_hessian;
+	  partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	  Vector3d mu = t;
+	  Matrix3d cov = (-1) * prop_hessian.inverse();
+	  t = multivariateGamma3D(mu,cov,rng, logdensity);
+	}
+      x->getEdgeParent()->setLength( t[0] );
+      y->getEdgeParent()->setLength( t[1] );
+      z->getEdgeParent()->setLength( t[2] );
+      x->getEdgeParent()->calculate(qmatrix);
+      y->getEdgeParent()->calculate(qmatrix);
+      z->getEdgeParent()->calculate(qmatrix);
       break;
     }
     else
@@ -1465,15 +1486,37 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	    z->calculate(k,alignment,par->getEdgeParent(),true); //edge parent of par to go in opposite direction
 	  }
 
-	// need 2D sampling: need to call randomLength2D
 	bool converge;
-	mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
+	Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
+	if(!onlyMLE)
+	  {
+	    double prop_logl;
+	    Vector3d prop_gradient;
+	    Matrix3d prop_hessian;
+	    partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	    Vector2d mu;
+	    mu[0] = t[0];
+	    mu[1] = t[1];
+	    Matrix3d cov3d = (-1) * prop_hessian.inverse();
+	    Matrix2d cov;
+	    cov(0,0) = cov3d(0,0);
+	    cov(1,0) = cov3d(1,0);
+	    cov(0,1) = cov3d(0,1);
+	    cov(1,1) = cov3d(1,1);
+	    Vector2d newt = multivariateGamma2D(mu,cov,rng, logdensity);
+	    t[0] = newt[0];
+	    t[1] = newt[1];
+	  }
+	x->getEdgeParent()->setLength( t[0] );
+	y->getEdgeParent()->setLength( t[1] );
+	x->getEdgeParent()->calculate(qmatrix);
+	y->getEdgeParent()->calculate(qmatrix);
       }
   }
 }
 
 
-void Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
+Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
 {
   cout << "Entering mleLength3D";
   cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
@@ -1571,7 +1614,7 @@ void Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,
   cout << "Finally converged to" << endl;
   cout << "Gradient " << endl << prop_gradient.transpose() << endl;
   cout << "prop: " << prop.transpose() << endl;
-  //return prop;
+  return prop;
 }
 
 

@@ -16,6 +16,7 @@
 #include "tree.h"
 #include "model.h"
 #include "ccdprobs.h"
+#include "random.h"
 
 #include "Eigen/Core"
 #include "Eigen/Eigenvalues"
@@ -176,8 +177,8 @@ int main(int argc, char* argv[])
       else
 	{
 	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity);
-	  tree.randomEdges(alignment,model,rng,logProposalDensity,false);
+	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
+	  //tree.randomEdges(alignment,model,rng,logProposalDensity,false); //need to remove this
 	}
       cout << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
