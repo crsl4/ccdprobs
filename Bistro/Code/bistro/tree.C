@@ -1558,7 +1558,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
       {
 	while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
 	  {
-	    cerr << "found negative with big curr, will shrink delta" << endl;
+	    cout << "found negative with big curr, will shrink delta" << endl;
 	    if(prop[0] < 0)
 	      delta[0] = 0.5* delta[0];
 	    if(prop[1] < 0)
@@ -1571,19 +1571,19 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
     //    cerr << "Delta " << delta.transpose() << endl;
     if(prop[0] < 0 && curr[0] < TOL)
       {
-	cerr << "found negative for 1st element with curr small, will set to zero" << endl;
+	cout << "found negative for 1st element with curr small, will set to zero" << endl;
     	prop[0] = MIN_EDGE_LENGTH;
 	keepZero1 = true;
       }
     if(prop[1] < 0 && curr[1] < TOL)
       {
-	cerr << "found negative for 2nd element with curr small, will set to zero" << endl;
+	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
     	prop[1] = MIN_EDGE_LENGTH;
 	keepZero2 = true;
       }
     if(prop[2] < 0 && curr[2] < TOL)
       {
-	cerr << "found negative for 3rd element with curr small, will set to zero" << endl;
+	cout << "found negative for 3rd element with curr small, will set to zero" << endl;
     	prop[2] = MIN_EDGE_LENGTH;
 	keepZero3 = true;
       }
@@ -1596,7 +1596,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
       {
 	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
 	  {
-	    cerr << "found bigger step" << endl;
+	    cout << "found bigger step" << endl;
 	    if(keepZero1)
 		delta[0] = 0;
 	    if(keepZero2)
