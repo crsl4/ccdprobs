@@ -7,3 +7,4 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 -m 4 -o run12.txt > run12.log
 ## after random bl
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 -m 4 -o run13.txt > run13.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 -m 4 -o run14.txt > run14.log

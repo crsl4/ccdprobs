@@ -57,7 +57,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   if( num < MIN_EDGE_LENGTH + TOL)
     {
-      cerr << "mu2 + L21*z1 in multivariateGamma3D is zero" << endl;
+      cout << "mu2 + L21*z1 in multivariateGamma3D is zero" << endl;
       alpha2 = 1.0;
       lambda2 = 1.0 / (MIN_EDGE_LENGTH);
     }
@@ -83,7 +83,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   if( num < MIN_EDGE_LENGTH + TOL)
     {
-      cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is zero" << endl;
+      cout << "mu3+L31*z1+L32*z2 in multivariateGamma3D is zero" << endl;
       alpha3 = 1.0;
       lambda3 = 1.0 / (MIN_EDGE_LENGTH);
     }
