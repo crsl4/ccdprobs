@@ -1,0 +1,3 @@
+muscle -in passer.fasta -out passer-aligned.fasta
+brew install muscle
+
