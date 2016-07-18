@@ -2,3 +2,4 @@ time ../../Code/bistro/bistro -p 0.309,0.288,0.134,0.269 -q 0.1847391,0.1289626,
 
 ## after joint sampling
 time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 100 -m 4 -o run1.txt > run1.log 
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 10 -m 4 -o run2.txt > run2.log 
