@@ -139,7 +139,7 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
   //   }
   if( num < MIN_EDGE_LENGTH + TOL)
     {
-      cerr << "mu2 + L21*z1 in multivariateGamma2D is zero or negative (will use exponential): " << num << endl;
+      cout << "mu2 + L21*z1 in multivariateGamma2D is zero or negative (will use exponential): " << num << endl;
       alpha2 = 1.0;
       lambda2 = 1.0 / (MIN_EDGE_LENGTH);
     }

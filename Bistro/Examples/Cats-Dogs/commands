@@ -9,3 +9,6 @@ and its topology
 -p 0.267,0.235,0.181,0.317 -q 0.0108929,0.3428420,0.0398413,0.0106884,0.5949126,0.0008228
 
 ../../Code/bistro/bistro -p 0.267,0.235,0.181,0.317 -q 0.0108929,0.3428420,0.0398413,0.0106884,0.5949126,0.0008228 -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2
+
+## after joint branch lengths sampling
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 100 -m 4 -o run5.txt > run5.log

@@ -1,0 +1,2 @@
+## after joint branch lengths sampling
+time ../../Code/bistro/bistro -f ../../Data/1mammals.fasta -b 10000 -r 100 -m 4 -o run1.txt > run1.log
