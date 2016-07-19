@@ -1454,8 +1454,10 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	  y->calculate(k,alignment,y->getEdgeParent(),true);
 	  z->calculate(k,alignment,z->getEdgeParent(),true);
 	}
-      bool converge;
-      Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge);
+      bool converge = true;
+      Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge); //we might want to get rid of joint MLE, and t=curr lengths(x,y,z)
+      if(!converge)
+	cout << "Newton-Raphson did not converge" << endl;
       if(!onlyMLE)
 	{
 	  double prop_logl;
@@ -1487,25 +1489,17 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	  }
 
 	bool converge;
-	Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
+	Vector2d t = mleLength2D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
 	if(!onlyMLE)
 	  {
 	    double prop_logl;
-	    Vector3d prop_gradient;
-	    Matrix3d prop_hessian;
-	    partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian,true);
-	    Vector2d mu;
-	    mu[0] = t[0];
-	    mu[1] = t[1];
-	    Matrix3d cov3d = (-1) * prop_hessian.inverse();
-	    Matrix2d cov;
-	    cov(0,0) = cov3d(0,0);
-	    cov(1,0) = cov3d(1,0);
-	    cov(0,1) = cov3d(0,1);
-	    cov(1,1) = cov3d(1,1);
-	    Vector2d newt = multivariateGamma2D(mu,cov,rng, logdensity);
-	    t[0] = newt[0];
-	    t[1] = newt[1];
+	    Vector2d prop_gradient;
+	    Matrix2d prop_hessian;
+	    double lz = par->getEdgeParent()->getLength(); //kept fixed throughout
+	    partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	    Vector2d mu = t;
+	    Matrix2d cov = (-1) * prop_hessian.inverse();
+	    t = multivariateGamma2D(mu,cov,rng, logdensity);
 	  }
 	x->getEdgeParent()->setLength( t[0] );
 	y->getEdgeParent()->setLength( t[1] );
@@ -1513,6 +1507,96 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	y->getEdgeParent()->calculate(qmatrix);
       }
   }
+}
+
+// modified to do 2D MLE instead of 3D
+Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
+{
+  cout << "Entering mleLength2D";
+  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+  int iter=0;
+  Vector2d curr(ex->getLength(),ey->getLength());
+  double lz = ez->getLength(); //kept fixed throughout
+  cout << "Initial bl curr: " << curr.transpose() << endl;
+  double curr_logl;
+  Vector2d curr_gradient;
+  Matrix2d curr_hessian;
+  partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+  Vector2d prop = curr;
+  double prop_logl = curr_logl;
+  Vector2d prop_gradient = curr_gradient;
+  Matrix2d prop_hessian = curr_hessian;
+  Vector2d delta = curr - prop;
+  bool keepZero1 = false; //whether to keep that entry at 0
+  bool keepZero2 = false;
+
+  // find starting point: we want a good prop
+  do
+  {
+    curr = prop;
+    partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+    cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
+    cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+    cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+    if ( ++iter > 100 )
+      mleError(converge);
+    delta = curr_hessian.inverse() * curr_gradient;
+    if(keepZero1)
+      delta[0] = 0;
+    if(keepZero2)
+      delta[1] = 0;
+    prop = curr - delta;
+    if(curr[0] > TOL && curr[1] > TOL)
+      {
+	while ( prop[0] < 0 || prop[1] < 0)
+	  {
+	    cout << "found negative with big curr, will shrink delta" << endl;
+	    if(prop[0] < 0)
+	      delta[0] = 0.5* delta[0];
+	    if(prop[1] < 0)
+	      delta[1] = 0.5* delta[1];
+	    prop = curr - delta;
+	  }
+      }
+    //    cerr << "Delta " << delta.transpose() << endl;
+    if(prop[0] < 0 && curr[0] < TOL)
+      {
+	cout << "found negative for 1st element with curr small, will set to zero" << endl;
+    	prop[0] = MIN_EDGE_LENGTH;
+	keepZero1 = true;
+      }
+    if(prop[1] < 0 && curr[1] < TOL)
+      {
+	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
+    	prop[1] = MIN_EDGE_LENGTH;
+	keepZero2 = true;
+      }
+    cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
+
+    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+    if ( ++iter > 100 )
+      mleError(converge);
+    if(!keepZero1 && !keepZero2)
+      {
+	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
+	  {
+	    cout << "found bigger step" << endl;
+	    if(keepZero1)
+		delta[0] = 0;
+	    if(keepZero2)
+		delta[1] = 0;
+	    delta = 0.5 *delta;
+	    prop = curr - delta;
+	    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	    if ( ++iter > 100 )
+	      mleError(converge);
+	  }
+      }
+  } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
+  cout << "Finally converged to" << endl;
+  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+  cout << "prop: " << prop.transpose() << endl;
+  return prop;
 }
 
 
@@ -1617,6 +1701,69 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   return prop;
 }
 
+// modified to make t a Vector2d (instead of Vector3d) to keep the length to node z fixed
+// gradient and hessian are 2d as well
+void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector2d& gradient,Matrix2d& hessian,bool recurse)
+{
+  Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
+  Matrix4d QP1 = qmatrix.getQP(t[0]);
+  Matrix4d QQP1 = qmatrix.getQQP(t[0]);
+  Matrix4d P2 = qmatrix.getTransitionMatrix(t[1]);
+  Matrix4d QP2 = qmatrix.getQP(t[1]);
+  Matrix4d QQP2 = qmatrix.getQQP(t[1]);
+  Matrix4d P3 = qmatrix.getTransitionMatrix(lz);
+  Matrix4d QP3 = qmatrix.getQP(lz);
+  Matrix4d QQP3 = qmatrix.getQQP(lz);
+  Vector4d vq = qmatrix.getStationaryP();
+  Vector4d ones(1,1,1,1);
+
+  int numSites = alignment.getNumSites();
+
+  logl = 0;
+  double dll1 = 0;
+  double dll2 = 0;
+  double d2ll_11 = 0;
+  double d2ll_12 = 0;
+  double d2ll_22 = 0;
+
+  for ( int k=0; k<numSites; ++k )
+  {
+    // clau: I think we don't need this here again, we did this already
+    nx->calculate(k,alignment,ex,recurse); // set pattern and put probability in map if not already there
+    ny->calculate(k,alignment,ey,recurse);
+    nz->calculate(k,alignment,ez,recurse);
+    pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
+    pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
+    pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
+
+    Vector4d S1 = P1 * px.second.asDiagonal() * ones;
+    Vector4d S2 = P2 * py.second.asDiagonal() * ones;
+    Vector4d S3 = P3 * pz.second.asDiagonal() * ones;
+    Vector4d S1pr = QP1 * px.second.asDiagonal() * ones;
+    Vector4d S2pr = QP2 * py.second.asDiagonal() * ones;
+    Vector4d S1doublepr = QQP1 * px.second.asDiagonal() * ones;
+    Vector4d S2doublepr = QQP2 * py.second.asDiagonal() * ones;
+
+    //fixt: make a function of this
+    // question: how to make a function to return many things?
+    double fk = vectorProduct4D(vq,S1,S2,S3);
+    double fkpr1 = vectorProduct4D(vq,S1pr,S2,S3);
+    double fkpr2 = vectorProduct4D(vq,S1,S2pr,S3);
+    double fkdoublepr11 = vectorProduct4D(vq,S1doublepr,S2,S3);
+    double fkdoublepr22 = vectorProduct4D(vq,S1,S2doublepr,S3);
+    double fkdoublepr12 = vectorProduct4D(vq,S1pr,S2pr,S3);
+
+    logl += px.first + py.first + pz.first + log( fk );
+    dll1 += fkpr1/fk;
+    dll2 += fkpr2/fk;
+    d2ll_11 += (fk*fkdoublepr11 - fkpr1*fkpr1)/(fk*fk);
+    d2ll_12 += (fk*fkdoublepr12 - fkpr1*fkpr2)/(fk*fk);
+    d2ll_22 += (fk*fkdoublepr22 - fkpr2*fkpr2)/(fk*fk);
+  }
+  gradient << dll1, dll2;
+  hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22; //row-wise
+}
+
 
 void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector3d& gradient,Matrix3d& hessian,bool recurse)
 {
@@ -1687,7 +1834,7 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
     d2ll_13 += (fk*fkdoublepr13 - fkpr1*fkpr3)/(fk*fk);
     d2ll_22 += (fk*fkdoublepr22 - fkpr2*fkpr2)/(fk*fk);
     d2ll_23 += (fk*fkdoublepr23 - fkpr2*fkpr3)/(fk*fk);
-    d2ll_33 += (fk*fkdoublepr33 - fkpr3*fkpr3)/(fk*fk);
+    d2ll_33 += (fk*fkdoublepr33 - fkpr3*fkpr3)/(fk*fk); 
   }
   gradient << dll1, dll2, dll3;
   hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33; //row-wise

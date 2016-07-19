@@ -148,9 +148,9 @@ int main(int argc, char* argv[])
     cerr << "Generating " << numRandom << " random trees:" << endl << '|';
     for ( int k=0; k<numRandom; ++k )
     {
-      if ( (k+1) % (numRandom / 100) == 0 )
+      if ( numRandom > 99 && (k+1) % (numRandom / 100) == 0 )
 	cerr << '*';
-      if ( (k+1) % (numRandom / 10) == 0 )
+      if ( numRandom > 9 && (k+1) % (numRandom / 10) == 0 )
 	cerr << '|';
       double logTopologyProbability=0;
       string treeString = ccd.randomTree(rng,logTopologyProbability);

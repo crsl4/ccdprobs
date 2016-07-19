@@ -192,6 +192,8 @@ public:
   void unroot();
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&,bool);
   double logPriorExp(double);
+  Vector2d mleLength2D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
+  void partialPathCalculations2D(Vector2d ,double,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector2d& ,Matrix2d& ,bool);
   Vector3d mleLength3D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
   void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d& ,bool);
   double vectorProduct(vector<Vector4d>);

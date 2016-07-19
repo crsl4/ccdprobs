@@ -24,14 +24,14 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   Matrix3d L( vc.llt().matrixL() );
   double alpha1;
   double lambda1;
-  if(mu[0] < 0)
-    {
-      cerr << "Error with mu1<0 in multivariateGamma3D" << endl;
-      throw 20;
-    }
+  // if(mu[0] < 0)
+  //   {
+  //     cerr << "Error with mu1<0 in multivariateGamma3D" << endl;
+  //     throw 20;
+  //   }
   if( mu[0] < MIN_EDGE_LENGTH + TOL)
     {
-      cout << "Case mu1==0 in multivariateGamma3D" << endl;
+      cout << "Case mu1==0 (or negative )in multivariateGamma3D (will use exponential): " << mu[0] << endl;
       alpha1 = 1.0;
       lambda1 = 1.0 / (MIN_EDGE_LENGTH);
     }
@@ -50,14 +50,14 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   double num = mu[1] + L(1,0)*z1;
   double alpha2;
   double lambda2;
-  if( num < 0)
-    {
-      cerr << "mu2 + L21*z1 in multivariateGamma3D is negative, mu2,L21,z1: " << mu[1] << ","<< L(1,0) << "," << z1 << "," << num << endl;
-      throw 20;
-    }
+  // if( num < 0)
+  //   {
+  //     cerr << "mu2 + L21*z1 in multivariateGamma3D is negative, mu2,L21,z1: " << mu[1] << ","<< L(1,0) << "," << z1 << "," << num << endl;
+  //     throw 20;
+  //   }
   if( num < MIN_EDGE_LENGTH + TOL)
     {
-      cout << "mu2 + L21*z1 in multivariateGamma3D is zero" << endl;
+      cout << "mu2 + L21*z1 in multivariateGamma3D is zero or negative (will use exponential): " << num << endl;
       alpha2 = 1.0;
       lambda2 = 1.0 / (MIN_EDGE_LENGTH);
     }
@@ -76,14 +76,14 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   num = mu[2] + L(2,0)*z1 + L(2,1)*z2;
   double alpha3;
   double lambda3;
-  if( num < 0)
-    {
-      cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is negative" << endl;
-      throw 20;
-    }
+  // if( num < 0)
+  //   {
+  //     cerr << "mu3+L31*z1+L32*z2 in multivariateGamma3D is negative" << endl;
+  //     throw 20;
+  //   }
   if( num < MIN_EDGE_LENGTH + TOL)
     {
-      cout << "mu3+L31*z1+L32*z2 in multivariateGamma3D is zero" << endl;
+      cout << "mu3+L31*z1+L32*z2 in multivariateGamma3D is zero or negative (will use exponential): " << num << endl;
       alpha3 = 1.0;
       lambda3 = 1.0 / (MIN_EDGE_LENGTH);
     }
@@ -106,14 +106,14 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
   Matrix2d L( vc.llt().matrixL() );
   double alpha1;
   double lambda1;
-  if(mu[0] < 0)
-    {
-      cerr << "Error with mu1<0 in multivariateGamma2D" << endl;
-      throw 20;
-    }
+  // if(mu[0] < 0)
+  //   {
+  //     cerr << "Error with mu1<0 in multivariateGamma2D" << endl;
+  //     throw 20;
+  //   }
   if( mu[0] < MIN_EDGE_LENGTH + TOL)
     {
-      cout << "Case mu1==0 in multivariateGamma2D" << endl;
+      cout << "Case mu1==0 (or negative) in multivariateGamma2D (will use exponential): " << mu[0] << endl;
       alpha1 = 1.0;
       lambda1 = 1.0 / (MIN_EDGE_LENGTH);
     }
@@ -132,14 +132,14 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
   double num = mu[1] + L(1,0)*z1;
   double alpha2;
   double lambda2;
-  if( num < 0)
-    {
-      cerr << "mu2 + L21*z1 in multivariateGamma2D is negative" << endl;
-      throw 20;
-    }
+  // if( num < 0)
+  //   {
+  //     cerr << "mu2 + L21*z1 in multivariateGamma2D is negative" << endl;
+  //     throw 20;
+  //   }
   if( num < MIN_EDGE_LENGTH + TOL)
     {
-      cerr << "mu2 + L21*z1 in multivariateGamma2D is zero" << endl;
+      cerr << "mu2 + L21*z1 in multivariateGamma2D is zero or negative (will use exponential): " << num << endl;
       alpha2 = 1.0;
       lambda2 = 1.0 / (MIN_EDGE_LENGTH);
     }
