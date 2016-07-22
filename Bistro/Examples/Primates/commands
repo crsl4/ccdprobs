@@ -3,3 +3,6 @@ perl ../../scripts/nexus2phylip.pl -nexus primates.nex
 ## then use keyboard macro to convert to fasta (change from primates.phy to primates.fasta)
 
 time ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 10000 -r 100 -m 4 -o run1.txt > run1.log
+
+## compare to mrbayes
+time ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 10000 -r 1000 -m 2 -o run2.txt > run2.log

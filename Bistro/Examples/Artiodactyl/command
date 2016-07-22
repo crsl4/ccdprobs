@@ -10,3 +10,6 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 -m 4 -o run14.txt > run14.log
 ## after 2d joint (instead of 3d):
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 -m 4 -o run15.txt > run15.log
+
+## compare to mrbayes:
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 5000 -m 2 -o run16.txt > run16.log
