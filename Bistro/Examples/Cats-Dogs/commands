@@ -12,3 +12,6 @@ and its topology
 
 ## after joint branch lengths sampling
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 100 -m 4 -o run5.txt > run5.log
+
+## compare to mrbayes
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 5000 -m 2 -o run6.txt > run6.log
