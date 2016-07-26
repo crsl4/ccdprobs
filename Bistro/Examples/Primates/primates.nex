@@ -1,0 +1,10 @@
+begin mrbayes;
+      set autoclose=yes nowarn=yes;
+      exec ../../Data/primates.nex;
+      lset nst=6;
+      outgroup 2;
+
+      mcmc ngen=1100000 printfreq=10000 samplefreq=50;
+      sumt burnin=100000;		
+      sump burnin=100000;
+end;
