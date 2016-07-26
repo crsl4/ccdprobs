@@ -1728,7 +1728,7 @@ void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
 
   for ( int k=0; k<numSites; ++k )
   {
-    // clau: I think we don't need this here again, we did this already
+    // clau: I think we don't need this here again, we did this already outside, and lik on subtrees x,y,z is fixed
     nx->calculate(k,alignment,ex,recurse); // set pattern and put probability in map if not already there
     ny->calculate(k,alignment,ey,recurse);
     nz->calculate(k,alignment,ez,recurse);
@@ -1834,7 +1834,7 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
     d2ll_13 += (fk*fkdoublepr13 - fkpr1*fkpr3)/(fk*fk);
     d2ll_22 += (fk*fkdoublepr22 - fkpr2*fkpr2)/(fk*fk);
     d2ll_23 += (fk*fkdoublepr23 - fkpr2*fkpr3)/(fk*fk);
-    d2ll_33 += (fk*fkdoublepr33 - fkpr3*fkpr3)/(fk*fk); 
+    d2ll_33 += (fk*fkdoublepr33 - fkpr3*fkpr3)/(fk*fk);
   }
   gradient << dll1, dll2, dll3;
   hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33; //row-wise

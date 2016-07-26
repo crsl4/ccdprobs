@@ -1,11 +1,14 @@
-time ../../Code/bistro/bistro -p 0.309,0.288,0.134,0.269 -q 0.1847391,0.1289626,0.0373299,0.0079465,0.6403711,0.0006508 -f ../../Data/whales.fasta -b 10000 -r 1000 -m 4 >& out4 & 
+time ../../Code/bistro/bistro -p 0.309,0.288,0.134,0.269 -q 0.1847391,0.1289626,0.0373299,0.0079465,0.6403711,0.0006508 -f ../../Data/whales.fasta -b 10000 -r 1000 -m 4 >& out4 &
 
 ## after joint sampling
-time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 100 -m 4 -o run1.txt > run1.log 
-time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 10 -m 4 -o run2.txt > run2.log 
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 100 -m 4 -o run1.txt > run1.log
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 10 -m 4 -o run2.txt > run2.log
 
 ## after 2d sampling instead of 3d
-time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 100 -m 4 -o run3.txt > run3.log 
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 100 -m 4 -o run3.txt > run3.log
 
 ## compare to mrbayes
-time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 5000 -m 2 -o run4.txt > run4.log 
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 5000 -m 2 -o run4.txt > run4.log
+
+## changed fasta (whales-nospaces.fasta) to nexus with http://www.hiv.lanl.gov/content/sequence/FORMAT_CONVERSION/form.html : whales.nex, then modified to remove ' and to mimic primates.nex
+~/software/MrBayes/mb whales.nex (16min)
