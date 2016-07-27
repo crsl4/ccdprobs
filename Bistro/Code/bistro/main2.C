@@ -40,6 +40,13 @@ int main(int argc, char* argv[])
   alignment.summarize(cout);
   cout << endl;
 
+  Tree tree(parameters.getTopology());
+  tree.relabel(alignment);
+  tree.reroot(1);
+  tree.sortCanonical();
+  cout << tree.makeTopologyNumbers() << endl;
+  return 0;
+
   // Find Jukes-Cantor pairwise distances
   cerr << "Finding initial Jukes-Cantor pairwise distances ...";
   MatrixXd jcDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -58,7 +65,7 @@ int main(int argc, char* argv[])
   jctree.sortCanonical();
   cerr << " done." << endl;
   cerr << endl << "Tree topology:" << endl;
-  cout << jctree.makeTopologyNumbers() << endl << endl;
+  cerr << jctree.makeTopologyNumbers() << endl << endl;
 
   // Initialize random number generator
   cerr << "Initializing random number generator ...";
