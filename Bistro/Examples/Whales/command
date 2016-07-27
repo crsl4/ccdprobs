@@ -9,6 +9,8 @@ time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 100 -m 4 -o
 
 ## compare to mrbayes
 time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 5000 -m 2 -o run4.txt > run4.log
+## had to delete run4.log because it was too big, and was added/committed by mistake
+
 
 ## changed fasta (whales-nospaces.fasta) to nexus with http://www.hiv.lanl.gov/content/sequence/FORMAT_CONVERSION/form.html : whales.nex, then modified to remove ' and to mimic primates.nex
 ~/software/MrBayes/mb whales.nex (16min)
