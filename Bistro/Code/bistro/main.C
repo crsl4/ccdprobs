@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
   cout << endl;
 
   // Find Jukes-Cantor pairwise distances
+  cerr << alignment.getNumTaxa() << endl;
   cerr << "Finding initial Jukes-Cantor pairwise distances ...";
   MatrixXd jcDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   alignment.calculateJCDistances(jcDistanceMatrix);
@@ -57,8 +58,10 @@ int main(int argc, char* argv[])
   jctree.reroot(1); //warning: if 1 changed, need to change resolveRoot if called after
   jctree.sortCanonical();
   cerr << " done." << endl;
-  cerr << endl << "Tree topology:" << endl;
+  cout << endl << "Tree topology:" << endl;
   cout << jctree.makeTopologyNumbers() << endl << endl;
+  cerr << endl << "Tree topology:" << endl;
+  cerr << jctree.makeTopologyNumbers() << endl << endl;
 
   // Initialize random number generator
   cerr << "Initializing random number generator ...";
@@ -139,7 +142,7 @@ int main(int argc, char* argv[])
 
   ofstream f(parameters.getOutFileRoot().c_str());
 
-  f << "tree logl logTop logProp logPrior logWt" << endl;
+  f << "tree logl logTop logProp logPrior logWt parsimonyScore" << endl;
 
   int numRandom = parameters.getNumRandom();
 
@@ -189,7 +192,8 @@ int main(int argc, char* argv[])
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
       tree.reroot(1); //warning: if 1 changes, need to change resolveRoot if called after
       tree.sortCanonical();
-      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+      int score = tree.parsimonyScore(alignment);
+      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << " " << score << endl;
       logwt[k] = logWeight;
       if ( k==0 || logWeight > maxLogWeight )
 	maxLogWeight = logWeight;

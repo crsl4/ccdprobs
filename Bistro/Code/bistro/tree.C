@@ -1907,3 +1907,112 @@ void Tree::resolveRoot()
 }
 
 
+// recurse tree for given site and add to the parsimony score
+// bases is an integer representative of a set of DNA bases, A=1, C=2, G=4, T=8, the set is the sum of these
+// use | for union and & for intersection
+void Node::parsimonyScore(Alignment& alignment,Edge* parent,int site,int& score,int& bases)
+{
+  if ( leaf )
+  {
+    char b = alignment.getBase(number,site);
+    Vector4d cond = translate(tolower(b));
+    bases = 0;
+    int foo = 1;
+    for ( int i=0; i<4; ++i )
+    {
+      if ( cond(i) > 0 ) // actually, should be a double equal to one
+	bases += foo;
+      foo *= 2;
+    }
+    score = 0;
+    return;
+  }
+  // now code for internal nodes
+  // assume fully resolved tree
+  // case where node is not the root
+  if ( parent != NULL )
+  {
+    Edge* left = NULL;
+    Edge* right = NULL;
+    for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    {
+      if ( *e != parent )
+      {
+	if ( left == NULL )
+	{
+	  left = *e;
+	}
+	else
+	{
+	  if ( right == NULL )
+	  {
+	    right = *e;
+	  }
+	  else
+	  {
+	    cerr << "Error: found another nonparent edge but left and right already set." << endl;
+	  }
+	}
+      }
+    }	
+
+    int leftScore = 0,rightScore=0,leftBases=0,rightBases=0;
+    getNeighbor(left)->parsimonyScore(alignment,left,site,leftScore,leftBases);
+    getNeighbor(right)->parsimonyScore(alignment,right,site,rightScore,rightBases);
+    int intersection = leftBases & rightBases;
+    score = leftScore + rightScore;
+    if ( intersection == 0 )
+    {
+      bases = leftBases | rightBases;
+      ++score;
+    }
+    else
+    {
+      bases = intersection;
+    }
+    return;
+  }
+  // now case where node is root of the tree and has three children
+  if ( getNumEdges() != 3 )
+  {
+    cerr << "Error: was expecting root of the tree with three children.";
+    exit(1);
+  }
+  int score0=0,score1=0,score2=0,bases0=0,bases1=0,bases2=0;
+  getNeighbor(edges[0])->parsimonyScore(alignment,edges[0],site,score0,bases0);
+  getNeighbor(edges[1])->parsimonyScore(alignment,edges[1],site,score1,bases1);
+  getNeighbor(edges[2])->parsimonyScore(alignment,edges[2],site,score2,bases2);
+  score = score0 + score1 + score2;
+  int intersection = bases0 & bases1;
+  if ( intersection == 0 )
+  {
+    ++score;
+    bases1 = bases0 | bases1;
+  }
+  else
+  {
+    bases1 = intersection;
+  }
+  intersection = bases1 & bases2;
+  if ( intersection == 0 )
+  {
+    ++score;
+  }
+  bases = 0;
+}
+
+// return parsimony score of the tree
+// tree must be rooted
+int Tree::parsimonyScore(Alignment& alignment)
+{
+  int score = 0;
+  for ( int site=0; site<alignment.getNumSites(); ++site )
+  {
+    int siteScore = 0;
+    int bases = 0;
+    root->parsimonyScore(alignment,NULL,site,siteScore,bases);
+    score += siteScore;
+  }
+  return score;
+}
+
