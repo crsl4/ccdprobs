@@ -132,6 +132,7 @@ public:
   int setMinNumber(Edge*);
   void sortCanonical(Edge*);
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&,bool);
+  void parsimonyScore(Alignment&,Edge*,int,int&,int&);
 };
 
 class Tree
@@ -199,6 +200,7 @@ public:
   double vectorProduct(vector<Vector4d>);
   double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
   void mleError(bool&);
+  int parsimonyScore(Alignment&);
 };
 
 #endif
