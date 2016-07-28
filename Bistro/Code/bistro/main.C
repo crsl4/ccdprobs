@@ -48,13 +48,13 @@ int main(int argc, char* argv[])
 
   cout << "Jukes-Cantor Distance Matrix:" << endl;
   cout << endl << jcDistanceMatrix << endl << endl;
-  
+
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
   MatrixXd jcDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
   jcDistanceMatrixCopy = jcDistanceMatrix;
   Tree jctree(jcDistanceMatrixCopy);
-  jctree.reroot(1);
+  jctree.reroot(1); //warning: if 1 changed, need to change resolveRoot if called after
   jctree.sortCanonical();
   cerr << " done." << endl;
   cerr << endl << "Tree topology:" << endl;
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
   cerr << "Running MCMC to estimate Q matrix ...";
   // Run MCMC on tree to estimate Q matrix parameters
   //   initial Q matrix
-  
+
   vector<double> p_init(4,0.25);
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
 
   cerr << " done." << endl;
-  
+
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";
   MatrixXd gtrDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 
   cout << "GTR Distance Matrix:" << endl;
   cout << endl << gtrDistanceMatrix << endl << endl;
-  
+
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
@@ -118,7 +118,10 @@ int main(int argc, char* argv[])
     alignment.calculateGTRDistancesUsingWeights(weights,model,gtrDistanceMatrix,bootDistanceMatrix);
 //    alignment.calculateJCDistancesUsingWeights(weights,bootDistanceMatrix);
     Tree bootTree(bootDistanceMatrix);
-    bootTree.reroot(1);
+    //    if(b == 1)
+    //cout << "Bootstrap NJ tree: " << endl << bootTree.makeTopologyNumbers() << endl;
+    bootTree.reroot(1); //warning: if 1 changes, need to change resolveRoot if called after
+    bootTree.resolveRoot(); //not sure this should be here: canonical still works?
     bootTree.sortCanonical();
     topologyToCountMap[ bootTree.makeTopologyNumbers() ]++;
   }
@@ -184,7 +187,7 @@ int main(int argc, char* argv[])
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
-      tree.reroot(1);
+      tree.reroot(1); //warning: if 1 changes, need to change resolveRoot if called after
       tree.sortCanonical();
       f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
       logwt[k] = logWeight;

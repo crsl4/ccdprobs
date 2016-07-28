@@ -45,6 +45,10 @@ int main(int argc, char* argv[])
   tree.reroot(1);
   tree.sortCanonical();
   cout << tree.makeTopologyNumbers() << endl;
+  tree.resolveRoot();
+  cout << tree.makeTopologyNumbers() << endl;
+  tree.sortCanonical();
+  cout << tree.makeTopologyNumbers() << endl;
   return 0;
 
   // Find Jukes-Cantor pairwise distances
@@ -55,7 +59,7 @@ int main(int argc, char* argv[])
 
   cout << "Jukes-Cantor Distance Matrix:" << endl;
   cout << endl << jcDistanceMatrix << endl << endl;
-  
+
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
   MatrixXd jcDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -81,7 +85,7 @@ int main(int argc, char* argv[])
   cerr << "Running MCMC to estimate Q matrix ...";
   // Run MCMC on tree to estimate Q matrix parameters
   //   initial Q matrix
-  
+
   vector<double> p_init(4,0.25);
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;
@@ -99,7 +103,7 @@ int main(int argc, char* argv[])
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
 
   cerr << " done." << endl;
-  
+
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";
   MatrixXd gtrDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -108,7 +112,7 @@ int main(int argc, char* argv[])
 
   cout << "GTR Distance Matrix:" << endl;
   cout << endl << gtrDistanceMatrix << endl << endl;
-  
+
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;

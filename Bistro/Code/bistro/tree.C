@@ -1865,3 +1865,45 @@ double Tree::vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
   v.push_back(v4);
   return vectorProduct(v);
 }
+
+// resolves the root so that it has 2 children
+// needs to be called after reroot(1)
+// will assume the outgroup will be 1
+void Tree::resolveRoot()
+{
+  if ( root == NULL ) // no node is set to be the root
+    return;
+  if ( root->getNumEdges() < 2 ) // root is a leaf!
+    return;
+  if ( root->getNumEdges() == 2 ) // already rooted
+    {
+      return;
+    }
+  if( root -> getNumEdges() > 3 ) // cannot handle more than three children
+    exit(1);
+  // root has 3 children
+  int i;
+  for ( i=0; i<3; ++i )
+    {
+      Edge* ex = root->getEdge(i);
+      Node* x = root->getNeighbor(ex);
+      if( x->getNumber() == 1 ) //want to find node number 1
+	break;
+    }
+  Edge* e1 = root -> getEdge(i) ;
+  Node* n1 = root->getNeighbor(e1);
+  root -> deleteEdge(e1);
+  Node* newnode = new Node(); //number -1
+  newnode -> setLeaf(false);
+  Edge* newedge = new Edge(); //no number
+  newedge -> setNodes(root,newnode);
+  e1 -> setNodes(newnode,n1);
+  newnode -> addEdge(newedge);
+  newnode -> addEdge(e1);
+  root -> addEdge(newedge);
+  edges.push_back(newedge);
+  nodes.push_back(newnode);
+  root = newnode;
+}
+
+

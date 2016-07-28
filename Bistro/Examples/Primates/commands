@@ -9,3 +9,6 @@ time ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 10000 -r 5000 -m 2
 
 ## to run mrbayes
 ~/software/MrBayes/mb ../../Data/primates.nex
+
+## after resolveRoot
+time ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 10000 -r 100 -m 2 -o run3.txt > run3.log

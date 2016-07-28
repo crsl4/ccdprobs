@@ -14,3 +14,8 @@ time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 5000 -m 2 -
 
 ## changed fasta (whales-nospaces.fasta) to nexus with http://www.hiv.lanl.gov/content/sequence/FORMAT_CONVERSION/form.html : whales.nex, then modified to remove ' and to mimic primates.nex
 ~/software/MrBayes/mb whales.nex (16min)
+
+
+
+## to debug resolveRoot
+./bistro -t "(1,2,((((((3,13),((((8,9),11),12),10)),(6,7)),(4,5)),14),(15,(((((16,17),((18,19),(20,21))),31),(23,((24,(25,26)),(27,(28,(29,30)))))),22))));" -f ../../Data/whales.fasta

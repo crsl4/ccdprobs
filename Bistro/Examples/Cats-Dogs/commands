@@ -19,3 +19,6 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 5000 -m 
 ## mrbayes: created nexus file with http://www.hiv.lanl.gov/content/sequence/FORMAT_CONVERSION/form.html
 ## cats-dogs.nex and then removed ' : cats-dogs-2.nex
 ~/software/MrBayes/mb cats-dogs-2.nex (7min)
+
+## after resolveRoot
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 100 -m 2 -o run7.txt > run7.log
