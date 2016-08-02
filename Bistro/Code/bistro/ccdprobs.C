@@ -304,9 +304,9 @@ string Clade::randomTree(multimap<Clade,pair<Clade,int> >& mm,
 			 mt19937_64& rng,
 			 double& logTopologyProbability)
 {
-  if ( count()==1 ) {
+  if ( count()==1 ) { // one leaf
     stringstream ss;
-    dynamic_bitset<unsigned char>::size_type first = clade.find_first();
+    dynamic_bitset<unsigned char>::size_type first = clade.find_first(); //find first 1
     ss << size() - first;
     return ss.str();
   }
@@ -317,9 +317,9 @@ string Clade::randomTree(multimap<Clade,pair<Clade,int> >& mm,
     int index = 0;
     int total = 0;
     for ( multimap<Clade,pair<Clade,int> >::iterator p=ret.first; p!= ret.second; ++p, ++index ) {
-      int counter = (p->second).second;
+      int counter = (p->second).second; //p->second: pair clade,int
       probs.push_back((double)counter);
-      indices.push_back( (p->second).first.get() );
+      indices.push_back( (p->second).first.get() ); //get(): get dynamic bit set
       total += counter;
     }  
     for (int i = 0; i < probs.size(); ++i) {

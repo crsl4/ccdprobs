@@ -44,15 +44,15 @@ using namespace boost;
 // ************************************************************
 class Clade {
 private:
-  dynamic_bitset<unsigned char> clade;
+  dynamic_bitset<unsigned char> clade; // one bit per taxa 0/1
 public:
   Clade() {}
   Clade(int n) { clade.resize(n); }
   ~Clade() { clade.clear(); }
   Clade(dynamic_bitset<unsigned char> x) { clade=x; }
   dynamic_bitset<unsigned char> get() const { return clade; }
-  int count() const { return clade.count(); }
-  int size() const { return clade.size(); }
+  int count() const { return clade.count(); } // number of 1s
+  int size() const { return clade.size(); } // number of bits
   void clear() { clade.clear(); }
   void set(dynamic_bitset<unsigned char> x) { clade=x; }
   void resize(int n) { clade.resize(n); }
@@ -207,7 +207,7 @@ private:
   vector<string> taxaNames;
   Clade all;
 public:
-  multimap<Clade,pair<Clade,int> > mm;
+  multimap<Clade,pair<Clade,int> > mm; //one clade (key) has many pairs clade,int (values): ways to split
   map<Clade,Alias<dynamic_bitset<unsigned char> >* > am;
   // add a map from pair<Clade,Clade> to double to store the log of the probability of selecting the second clade from the first
   map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double> cladeLogProbMap;
