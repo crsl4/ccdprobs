@@ -351,7 +351,7 @@ string Clade::randomTree(multimap<Clade,pair<Clade,T> >& mm,
 template<typename T>
 string CCDProbs<T>::randomTree(mt19937_64& rng,double& logTopologyProbability)
 {
-  return all.randomTree(mm,am,cladeLogProbMap,rng,logTopologyProbability) + ';';
+  return all.randomTree<T>(mm,am,cladeLogProbMap,rng,logTopologyProbability) + ';';
 }
 
 /*
