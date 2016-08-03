@@ -221,6 +221,8 @@ void RootedTree::printClades(ostream& f)
   }
 }    
 
+// to add n to count of clade
+//template<class T> and change int for T
 void RootedTree::count(int n,map<Clade,int>& cladeCount,map<CladePair,int>& pairCount)
 {
   for ( vector<RootedNode*>::iterator p = nodes.begin(); p != nodes.end(); p++ ) {
@@ -237,6 +239,7 @@ void RootedTree::count(int n,map<Clade,int>& cladeCount,map<CladePair,int>& pair
   }
 }
 
+// template<class T>, change int for T and put CCDProbs<T>
 CCDProbs::CCDProbs(map<string,int>& topologyToCountMap,vector<int>& taxaNumbers,vector<string>& taxaNames)
 {
   sampleSize = 0;
@@ -298,6 +301,7 @@ void CCDProbs::writePairCount(ostream& f)
   }
 }
 
+// template<class T> with T instead of int
 string Clade::randomTree(multimap<Clade,pair<Clade,int> >& mm,
 			 map<Clade,Alias<dynamic_bitset<unsigned char> >* >& am,
 			 map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>& cladeLogProbMap,
