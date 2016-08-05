@@ -188,7 +188,6 @@ int main(int argc, char* argv[])
 	{
 	  cout << "Branch lengths sampled jointly in 2D" << endl;
 	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
-	  //tree.randomEdges(alignment,model,rng,logProposalDensity,false); //need to remove this
 	}
       cout << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);

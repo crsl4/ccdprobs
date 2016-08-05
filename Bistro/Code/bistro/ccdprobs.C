@@ -222,7 +222,7 @@ void RootedTree::printClades(ostream& f)
 }    
 
 // to add n to count of clade
-template<typename T> //and change int for T
+template<class T> //and change int for T
 void RootedTree::count(T n,map<Clade,T>& cladeCount,map<CladePair,T>& pairCount)
 {
   for ( vector<RootedNode*>::iterator p = nodes.begin(); p != nodes.end(); p++ ) {
@@ -239,12 +239,12 @@ void RootedTree::count(T n,map<Clade,T>& cladeCount,map<CladePair,T>& pairCount)
   }
 }
 
-template<typename T> //change int for T and put CCDProbs<T>
+template<class T> //change int for T and put CCDProbs<T>
 CCDProbs<T>::CCDProbs(map<string,T>& topologyToCountMap,vector<int>& taxaNumbers,vector<string>& taxaNames)
 {
   sampleSize = 0;
   numTaxa = taxaNames.size();
-  for ( typename map<string,T>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
+  for ( class map<string,T>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
   {
     RootedTree rt(m->first,numTaxa);
     rt.count<T>(m->second,cladeCount,pairCount);
@@ -262,7 +262,7 @@ CCDProbs<T>::CCDProbs(map<string,T>& topologyToCountMap,vector<int>& taxaNumbers
     all.add(k);
 }
 
-template<typename T>
+template<class T>
 void CCDProbs<T>::writeTranslateTable(ostream& f)
 {
   f << "translate" << endl;
@@ -275,7 +275,7 @@ void CCDProbs<T>::writeTranslateTable(ostream& f)
   }
 }
 
-template<typename T>
+template<class T>
 void CCDProbs<T>::writeCladeCount(ostream& f)
 {
   writeTranslateTable(f);
@@ -288,7 +288,7 @@ void CCDProbs<T>::writeCladeCount(ostream& f)
   }
 }
 
-template<typename T>
+template<class T>
 void CCDProbs<T>::writePairCount(ostream& f)
 {
   writeTranslateTable(f);
@@ -304,7 +304,7 @@ void CCDProbs<T>::writePairCount(ostream& f)
   }
 }
 
-template<typename T> //with T instead of int
+template<class T> //with T instead of int
 string Clade::randomTree(multimap<Clade,pair<Clade,T> >& mm,
 			 map<Clade,Alias<dynamic_bitset<unsigned char> >* >& am,
 			 map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>& cladeLogProbMap,
@@ -318,12 +318,12 @@ string Clade::randomTree(multimap<Clade,pair<Clade,T> >& mm,
     return ss.str();
   }
   if ( am.find(*this) == am.end() ) { // need to initialize alias for this clade
-    pair< typename multimap<Clade,pair<Clade,T> >::iterator,typename multimap<Clade,pair<Clade,T> >::iterator> ret = mm.equal_range(*this);
+    pair< class multimap<Clade,pair<Clade,T> >::iterator,class multimap<Clade,pair<Clade,T> >::iterator> ret = mm.equal_range(*this);
     vector<double> probs;
     vector<dynamic_bitset<unsigned char> > indices;
     int index = 0;
     T total = 0;
-    for ( typename multimap<Clade,pair<Clade,T> >::iterator p=ret.first; p!= ret.second; ++p, ++index ) {
+    for ( class multimap<Clade,pair<Clade,T> >::iterator p=ret.first; p!= ret.second; ++p, ++index ) {
       T counter = (p->second).second; //p->second: pair clade,int
       probs.push_back((double)counter);
       indices.push_back( (p->second).first.get() ); //get(): get dynamic bit set
@@ -348,7 +348,7 @@ string Clade::randomTree(multimap<Clade,pair<Clade,T> >& mm,
   return out;
 }
 
-template<typename T>
+template<class T>
 string CCDProbs<T>::randomTree(mt19937_64& rng,double& logTopologyProbability)
 {
   return all.randomTree<T>(mm,am,cladeLogProbMap,rng,logTopologyProbability) + ';';

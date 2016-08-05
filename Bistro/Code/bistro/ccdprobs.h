@@ -47,6 +47,7 @@ using namespace boost;
 // for Clade, only randomTree uses it, still need to define Clade<T>?
 // it seems that a member template is enough: http://www.cplusplus.com/forum/general/46654/
 // http://en.cppreference.com/w/cpp/language/member_template
+// http://www.tutorialspoint.com/cplusplus/cpp_templates.htm
 class Clade {
 private:
   dynamic_bitset<unsigned char> clade; // one bit per taxa 0/1
@@ -70,7 +71,7 @@ public:
   friend bool operator> (const Clade&,const Clade&);
   friend bool operator== (const Clade&,const Clade&);
   friend Clade operator- (const Clade&,const Clade&);
-  template<typename T>
+  template<class T>
   string randomTree(multimap<Clade,pair<Clade,T> >&, // T instead of int
 		    map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,
 		    map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>&,
@@ -199,12 +200,12 @@ public:
   Clade getClade(int i) { return clades[i]; }
   void print(ostream&);
   void printClades(ostream&);
-  template<typename T> //with T instead of all ints
+  template<class T> //with T instead of all ints
   void count(T,map<Clade,T>&,map<CladePair,T>&);
   double estimateProbability(int, map<Clade,int>&, map<CladePair,int>&); //not implemented
 };
 
-template <typename T>
+template <class T>
 class CCDProbs
 {
 private:
