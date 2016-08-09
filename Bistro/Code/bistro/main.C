@@ -143,6 +143,10 @@ int main(int argc, char* argv[])
   vector<int> taxaNumbers;
   vector<string> taxaNames;
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
+
+  // here do parsimony score (keep the option to do without parsimony)
+  //   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
+  //   CCDProbs<double> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
 
   ofstream f(parameters.getOutFileRoot().c_str());

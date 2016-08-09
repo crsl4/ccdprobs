@@ -42,17 +42,22 @@ using namespace boost;
 // The data in a Clade is a dynamic bitset of size numTaxa
 // where clade[i-1] = 1 if taxon i is in the clade.
 // ************************************************************
+
+// question: do we need to put T in all classes?
+// for Clade, only randomTree uses it, still need to define Clade<T>?
+// it seems that a member template is enough: http://www.cplusplus.com/forum/general/46654/
+// http://en.cppreference.com/w/cpp/language/member_template
 class Clade {
 private:
-  dynamic_bitset<unsigned char> clade;
+  dynamic_bitset<unsigned char> clade; // one bit per taxa 0/1
 public:
   Clade() {}
   Clade(int n) { clade.resize(n); }
   ~Clade() { clade.clear(); }
   Clade(dynamic_bitset<unsigned char> x) { clade=x; }
   dynamic_bitset<unsigned char> get() const { return clade; }
-  int count() const { return clade.count(); }
-  int size() const { return clade.size(); }
+  int count() const { return clade.count(); } // number of 1s
+  int size() const { return clade.size(); } // number of bits
   void clear() { clade.clear(); }
   void set(dynamic_bitset<unsigned char> x) { clade=x; }
   void resize(int n) { clade.resize(n); }
@@ -65,7 +70,8 @@ public:
   friend bool operator> (const Clade&,const Clade&);
   friend bool operator== (const Clade&,const Clade&);
   friend Clade operator- (const Clade&,const Clade&);
-  string randomTree(multimap<Clade,pair<Clade,int> >&,
+  // template<class T>
+  string randomTree(multimap<Clade,pair<Clade,int> >&, // T instead of int
 		    map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,
 		    map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>&,
 		    mt19937_64&,
@@ -78,18 +84,18 @@ class CCDTree {
 private:
   string top;
   int numTaxa;
-  vector<Clade> clades;
+  vector<Clade> clades; 
 public:
   CCDTree(string,int);
   ~CCDTree() { 
-    for ( vector<Clade>::iterator p=clades.begin(); p != clades.end(); p++ )
+    for ( vector<Clade>::iterator p=clades.begin(); p != clades.end(); p++ ) 
       (*p).clear();
     clades.clear();
   }
   void print(ostream& f) { f << top; }
   void printClades(ostream& f)
   {
-    vector<Clade>::iterator p = clades.begin();
+    vector<Clade>::iterator p = clades.begin(); 
     (*p).print(f);
     ++p;
     for (; p != clades.end(); ++p)
@@ -99,7 +105,7 @@ public:
   string getTop() { return top; }
   int getNumTaxa() { return numTaxa; }
   int getNumClades() { return clades.size(); }
-  Clade getClade(int i) { return clades[i]; }
+  Clade getClade(int i) { return clades[i]; } 
 };
 
 // ************************************************************
@@ -169,6 +175,7 @@ public:
   void add(Clade c) { clade.add(c); }
   void copyClade(Clade c) { clade = c; }
   void setNumTaxa(int n) { clade.resize(n); }
+  //template<class T> with T instead of int: not implemented function
   string randomTree(multimap<Clade,pair<Clade,int> >&,map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,mt19937_64&,double&);
 };
 
@@ -192,27 +199,29 @@ public:
   Clade getClade(int i) { return clades[i]; }
   void print(ostream&);
   void printClades(ostream&);
+  //template<class T> with T instead of all ints
   void count(int,map<Clade,int>&,map<CladePair,int>&);
   double estimateProbability(int, map<Clade,int>&, map<CladePair,int>&);
 };
 
+// template <class T>
 class CCDProbs
 {
 private:
   int sampleSize;
   int numTaxa;
-  map<Clade,int> cladeCount;
-  map<CladePair,int> pairCount;
+  map<Clade,int> cladeCount; //T instead of int
+  map<CladePair,int> pairCount; //T instead of int
   vector<int> taxaNumbers;
   vector<string> taxaNames;
   Clade all;
-public:
-  multimap<Clade,pair<Clade,int> > mm;
+public: //T instead of int in mm
+  multimap<Clade,pair<Clade,int> > mm; //one clade (key) has many pairs clade,int (values): ways to split
   map<Clade,Alias<dynamic_bitset<unsigned char> >* > am;
   // add a map from pair<Clade,Clade> to double to store the log of the probability of selecting the second clade from the first
   map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double> cladeLogProbMap;
 public:
-  CCDProbs(map<string,int>&,vector<int>&,vector<string>&);
+  CCDProbs(map<string,int>&,vector<int>&,vector<string>&); //T instead of 1st int in map
   void writeTranslateTable(ostream&);
   void writeCladeCount(ostream&);
   void writePairCount(ostream&);

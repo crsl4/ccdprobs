@@ -221,6 +221,8 @@ void RootedTree::printClades(ostream& f)
   }
 }    
 
+// to add n to count of clade
+//template<class T> and change int for T
 void RootedTree::count(int n,map<Clade,int>& cladeCount,map<CladePair,int>& pairCount)
 {
   for ( vector<RootedNode*>::iterator p = nodes.begin(); p != nodes.end(); p++ ) {
@@ -237,6 +239,7 @@ void RootedTree::count(int n,map<Clade,int>& cladeCount,map<CladePair,int>& pair
   }
 }
 
+// template<class T>, change int for T and put CCDProbs<T>
 CCDProbs::CCDProbs(map<string,int>& topologyToCountMap,vector<int>& taxaNumbers,vector<string>& taxaNames)
 {
   sampleSize = 0;
@@ -298,15 +301,16 @@ void CCDProbs::writePairCount(ostream& f)
   }
 }
 
+// template<class T> with T instead of int
 string Clade::randomTree(multimap<Clade,pair<Clade,int> >& mm,
 			 map<Clade,Alias<dynamic_bitset<unsigned char> >* >& am,
 			 map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>& cladeLogProbMap,
 			 mt19937_64& rng,
 			 double& logTopologyProbability)
 {
-  if ( count()==1 ) {
+  if ( count()==1 ) { // one leaf
     stringstream ss;
-    dynamic_bitset<unsigned char>::size_type first = clade.find_first();
+    dynamic_bitset<unsigned char>::size_type first = clade.find_first(); //find first 1
     ss << size() - first;
     return ss.str();
   }
@@ -317,9 +321,9 @@ string Clade::randomTree(multimap<Clade,pair<Clade,int> >& mm,
     int index = 0;
     int total = 0;
     for ( multimap<Clade,pair<Clade,int> >::iterator p=ret.first; p!= ret.second; ++p, ++index ) {
-      int counter = (p->second).second;
+      int counter = (p->second).second; //p->second: pair clade,int
       probs.push_back((double)counter);
-      indices.push_back( (p->second).first.get() );
+      indices.push_back( (p->second).first.get() ); //get(): get dynamic bit set
       total += counter;
     }  
     for (int i = 0; i < probs.size(); ++i) {
