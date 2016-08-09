@@ -108,6 +108,8 @@ int main(int argc, char* argv[])
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
+  map<string,int> topologyToParsimonyScoreMap;
+  int minimumParsimonyScore = -1;
   MatrixXd bootDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   vector<int> weights(alignment.getNumSites());
   cerr << '|';
@@ -126,6 +128,9 @@ int main(int argc, char* argv[])
     bootTree.reroot(1); //warning: if 1 changes, need to change resolveRoot if called after
     bootTree.resolveRoot(); //not sure this should be here: canonical still works?
     bootTree.sortCanonical();
+
+        int score = bootTree.parsimonyScore(alignment);
+
     topologyToCountMap[ bootTree.makeTopologyNumbers() ]++;
   }
   cerr << endl << "done." << endl;
