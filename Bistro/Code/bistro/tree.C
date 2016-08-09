@@ -1883,23 +1883,23 @@ void Tree::resolveRoot()
     exit(1);
   // root has 3 children
   int i;
+  Edge* ex;
+  Node* x;
   for ( i=0; i<3; ++i )
     {
-      Edge* ex = root->getEdge(i);
-      Node* x = root->getNeighbor(ex);
+      ex = root->getEdge(i);
+      x = root->getNeighbor(ex);
       if( x->getNumber() == 1 ) //want to find node number 1
 	break;
     }
-  Edge* e1 = root -> getEdge(i) ;
-  Node* n1 = root->getNeighbor(e1);
-  root -> deleteEdge(e1);
+  root -> deleteEdge(ex);
   Node* newnode = new Node(); //number -1
   newnode -> setLeaf(false);
   Edge* newedge = new Edge(); //no number
   newedge -> setNodes(root,newnode);
-  e1 -> setNodes(newnode,n1);
+  ex -> setNodes(newnode,x);
   newnode -> addEdge(newedge);
-  newnode -> addEdge(e1);
+  newnode -> addEdge(ex);
   root -> addEdge(newedge);
   edges.push_back(newedge);
   nodes.push_back(newnode);
@@ -1973,32 +1973,52 @@ void Node::parsimonyScore(Alignment& alignment,Edge* parent,int site,int& score,
     return;
   }
   // now case where node is root of the tree and has three children
-  if ( getNumEdges() != 3 )
-  {
-    cerr << "Error: was expecting root of the tree with three children.";
-    exit(1);
-  }
-  int score0=0,score1=0,score2=0,bases0=0,bases1=0,bases2=0;
+  //// changed code 8 aug 2016 so it works for root with 2 or more children
+  // if ( getNumEdges() != 3 )
+  // {
+  //   cerr << "Error: was expecting root of the tree with three children.";
+  //   exit(1);
+  // }
+  int score0=0,bases0=0;
   getNeighbor(edges[0])->parsimonyScore(alignment,edges[0],site,score0,bases0);
-  getNeighbor(edges[1])->parsimonyScore(alignment,edges[1],site,score1,bases1);
-  getNeighbor(edges[2])->parsimonyScore(alignment,edges[2],site,score2,bases2);
-  score = score0 + score1 + score2;
-  int intersection = bases0 & bases1;
-  if ( intersection == 0 )
+  score += score0;
+  for ( int k=1; k<getNumEdges(); ++k )
   {
-    ++score;
-    bases1 = bases0 | bases1;
+    int score1=0,bases1=0;
+    getNeighbor(edges[k])->parsimonyScore(alignment,edges[k],site,score1,bases1);
+    score += score1;
+    int intersection = bases0 & bases1;
+    if ( intersection == 0 )
+    {
+      ++ score;
+      bases0 = bases0 | bases1;
+    }
+    else
+    {
+      bases0 = intersection;
+    }
   }
-  else
-  {
-    bases1 = intersection;
-  }
-  intersection = bases1 & bases2;
-  if ( intersection == 0 )
-  {
-    ++score;
-  }
-  bases = 0;
+//  int score0=0,score1=0,score2=0,bases0=0,bases1=0,bases2=0;
+//  getNeighbor(edges[0])->parsimonyScore(alignment,edges[0],site,score0,bases0);
+//  getNeighbor(edges[1])->parsimonyScore(alignment,edges[1],site,score1,bases1);
+//  getNeighbor(edges[2])->parsimonyScore(alignment,edges[2],site,score2,bases2);
+//  score = score0 + score1 + score2;
+//  int intersection = bases0 & bases1;
+  // if ( intersection == 0 )
+  // {
+  //   ++score;
+  //   bases1 = bases0 | bases1;
+  // }
+  // else
+  // {
+  //   bases1 = intersection;
+  // }
+  // intersection = bases1 & bases2;
+  // if ( intersection == 0 )
+  // {
+  //   ++score;
+  // }
+  // bases = 0;
 }
 
 // return parsimony score of the tree

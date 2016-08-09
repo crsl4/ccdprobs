@@ -71,7 +71,7 @@ public:
   friend bool operator> (const Clade&,const Clade&);
   friend bool operator== (const Clade&,const Clade&);
   friend Clade operator- (const Clade&,const Clade&);
-  template<class T>
+  template<typename T>
   string randomTree(multimap<Clade,pair<Clade,T> >&, // T instead of int
 		    map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,
 		    map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>&,
@@ -176,7 +176,7 @@ public:
   void add(Clade c) { clade.add(c); }
   void copyClade(Clade c) { clade = c; }
   void setNumTaxa(int n) { clade.resize(n); }
-  //template<class T> with T instead of int: not implemented function
+  //template<typename T> with T instead of int: not implemented function
   string randomTree(multimap<Clade,pair<Clade,int> >&,map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,mt19937_64&,double&);
 };
 
@@ -200,12 +200,12 @@ public:
   Clade getClade(int i) { return clades[i]; }
   void print(ostream&);
   void printClades(ostream&);
-  template<class T> //with T instead of all ints
+  template<typename T> //with T instead of all ints
   void count(T,map<Clade,T>&,map<CladePair,T>&);
   double estimateProbability(int, map<Clade,int>&, map<CladePair,int>&); //not implemented
 };
 
-template <class T>
+template <typename T>
 class CCDProbs
 {
 private:
@@ -230,5 +230,137 @@ public:
 //  Tree rtop(mt19937_64&);
 };
 
+// to add n to count of clade
+template<typename T> //and change int for T
+void RootedTree::count(T n,map<Clade,T>& cladeCount,map<CladePair,T>& pairCount)
+{
+  for ( vector<RootedNode*>::iterator p = nodes.begin(); p != nodes.end(); p++ ) {
+    if ( (*p)->getLeaf() )
+      continue;
+    Clade z = (*p)->getClade();
+    cladeCount[z] += n;
+    Clade x = (*p)->getLeft()->getClade();
+    Clade y = (*p)->getRight()->getClade();
+    if ( x > y )
+      x = y;
+    CladePair c(z,x);
+    pairCount[c] += n;
+  }
+}
+
+template<typename T> //change int for T and put CCDProbs<T>
+CCDProbs<T>::CCDProbs(map<string,T>& topologyToCountMap,vector<int>& taxaNumbers,vector<string>& taxaNames)
+{
+  sampleSize = 0;
+  numTaxa = taxaNames.size();
+  for ( typename map<string,T>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
+  {
+    RootedTree rt(m->first,numTaxa);
+    rt.count<T>(m->second,cladeCount,pairCount);
+    sampleSize += m->second;
+  }
+
+  for ( map<CladePair,int>::iterator p=pairCount.begin(); p!=pairCount.end(); ++p ) {
+    Clade parent=(p->first).getClade1();
+    Clade child=(p->first).getClade2();
+    mm.insert( pair<Clade,pair<Clade,int> >(parent,make_pair(child, p->second)) );
+  }
+
+  all.resize(taxaNames.size());
+  for ( int k=1; k<=numTaxa; ++k )
+    all.add(k);
+}
+
+template<typename T>
+void CCDProbs<T>::writeTranslateTable(ostream& f)
+{
+  f << "translate" << endl;
+  for ( int i=0; i < taxaNumbers.size(); ++i ) {
+    f << setw(8) << taxaNumbers[i] << " " << taxaNames[i];
+    if ( i < taxaNumbers.size()-1 )
+      f << "," << endl;
+    else
+      f << ";" << endl;
+  }
+}
+
+template<typename T>
+void CCDProbs<T>::writeCladeCount(ostream& f)
+{
+  writeTranslateTable(f);
+  f.setf(ios::fixed,ios::floatfield);
+  for ( typename map<Clade,T>::iterator p=cladeCount.begin(); p != cladeCount.end(); p++ ) {
+    f << setw(10) << setprecision(8) << p->second / (double) sampleSize << " ";
+    f << setw(10) << p->second << " ";
+    p->first.print(f);
+    f << endl;
+  }
+}
+
+template<typename T>
+void CCDProbs<T>::writePairCount(ostream& f)
+{
+  writeTranslateTable(f);
+  f.setf(ios::fixed,ios::floatfield);
+  for ( typename map<CladePair,T>::iterator p=pairCount.begin(); p != pairCount.end(); p++ ) {
+    f << setw(10) << setprecision(8) << p->second / (double) sampleSize << " ";
+    f << setw(10) << p->second << " ";
+    f << "[ ";
+    (p->first).getClade1().print(f);
+    f << " , ";
+    (p->first).getClade2().print(f);
+    f << " ]" << endl;
+  }
+}
+
+template<typename T> //with T instead of int
+string Clade::randomTree(multimap<Clade,pair<Clade,T> >& mm,
+			 map<Clade,Alias<dynamic_bitset<unsigned char> >* >& am,
+			 map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>& cladeLogProbMap,
+			 mt19937_64& rng,
+			 double& logTopologyProbability)
+{
+  if ( count()==1 ) { // one leaf
+    stringstream ss;
+    dynamic_bitset<unsigned char>::size_type first = clade.find_first(); //find first 1
+    ss << size() - first;
+    return ss.str();
+  }
+  if ( am.find(*this) == am.end() ) { // need to initialize alias for this clade
+    pair< typename multimap<Clade,pair<Clade,T> >::iterator,typename multimap<Clade,pair<Clade,T> >::iterator> ret = mm.equal_range(*this);
+    vector<double> probs;
+    vector<dynamic_bitset<unsigned char> > indices;
+    int index = 0;
+    T total = 0;
+    for ( typename multimap<Clade,pair<Clade,T> >::iterator p=ret.first; p!= ret.second; ++p, ++index ) {
+      T counter = (p->second).second; //p->second: pair clade,int
+      probs.push_back((double)counter);
+      indices.push_back( (p->second).first.get() ); //get(): get dynamic bit set
+      total += counter;
+    }  
+    for (int i = 0; i < probs.size(); ++i) {
+      probs[i] = probs[i]/(double)total;
+      cladeLogProbMap[ pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >(get(),indices[i]) ] = log(probs[i]);
+    }
+    am[*this] = new Alias<dynamic_bitset<unsigned char> >(probs,indices);
+  }
+  Clade c1( (am[*this])->pick(rng) );
+  Clade c2(clade - c1.get());
+  string s1 = c1.randomTree<T>(mm,am,cladeLogProbMap,rng,logTopologyProbability);
+  string s2 = c2.randomTree<T>(mm,am,cladeLogProbMap,rng,logTopologyProbability);
+  string out;
+  if ( c1 > c2 )
+    out = '(' + s1 + ',' + s2 + ')';
+  else
+    out = '(' + s2 + ',' + s1 + ')';
+  logTopologyProbability += cladeLogProbMap[ pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >(get(),c1.get()) ];
+  return out;
+}
+
+template<typename T>
+string CCDProbs<T>::randomTree(mt19937_64& rng,double& logTopologyProbability)
+{
+  return all.randomTree<T>(mm,am,cladeLogProbMap,rng,logTopologyProbability) + ';';
+}
 
 #endif

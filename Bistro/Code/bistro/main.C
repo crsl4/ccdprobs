@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     bootTree.resolveRoot(); //not sure this should be here: canonical still works?
     bootTree.sortCanonical();
 
-        int score = bootTree.parsimonyScore(alignment);
+    int score = bootTree.parsimonyScore(alignment);
 
     topologyToCountMap[ bootTree.makeTopologyNumbers() ]++;
   }
@@ -146,6 +146,14 @@ int main(int argc, char* argv[])
 
   // here do parsimony score (keep the option to do without parsimony)
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
+  // write map out to temp files to check
+  ofstream smap("temp.smap");
+  ccd.writeCladeCount(smap);
+  smap.close();
+  ofstream tmap("temp.tmap");
+  ccd.writePairCount(tmap);
+  tmap.close();
+  
   //   CCDProbs<double> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   //CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
 
