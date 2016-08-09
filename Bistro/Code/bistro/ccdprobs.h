@@ -47,6 +47,7 @@ using namespace boost;
 // for Clade, only randomTree uses it, still need to define Clade<T>?
 // it seems that a member template is enough: http://www.cplusplus.com/forum/general/46654/
 // http://en.cppreference.com/w/cpp/language/member_template
+// http://www.tutorialspoint.com/cplusplus/cpp_templates.htm
 class Clade {
 private:
   dynamic_bitset<unsigned char> clade; // one bit per taxa 0/1
@@ -70,8 +71,8 @@ public:
   friend bool operator> (const Clade&,const Clade&);
   friend bool operator== (const Clade&,const Clade&);
   friend Clade operator- (const Clade&,const Clade&);
-  // template<class T>
-  string randomTree(multimap<Clade,pair<Clade,int> >&, // T instead of int
+  template<class T>
+  string randomTree(multimap<Clade,pair<Clade,T> >&, // T instead of int
 		    map<Clade,Alias<dynamic_bitset<unsigned char> >* >&,
 		    map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>&,
 		    mt19937_64&,
@@ -199,29 +200,29 @@ public:
   Clade getClade(int i) { return clades[i]; }
   void print(ostream&);
   void printClades(ostream&);
-  //template<class T> with T instead of all ints
-  void count(int,map<Clade,int>&,map<CladePair,int>&);
-  double estimateProbability(int, map<Clade,int>&, map<CladePair,int>&);
+  template<class T> //with T instead of all ints
+  void count(T,map<Clade,T>&,map<CladePair,T>&);
+  double estimateProbability(int, map<Clade,int>&, map<CladePair,int>&); //not implemented
 };
 
-// template <class T>
+template <class T>
 class CCDProbs
 {
 private:
   int sampleSize;
   int numTaxa;
-  map<Clade,int> cladeCount; //T instead of int
-  map<CladePair,int> pairCount; //T instead of int
+  map<Clade,T> cladeCount; //T instead of int
+  map<CladePair,T> pairCount; //T instead of int
   vector<int> taxaNumbers;
   vector<string> taxaNames;
   Clade all;
 public: //T instead of int in mm
-  multimap<Clade,pair<Clade,int> > mm; //one clade (key) has many pairs clade,int (values): ways to split
+  multimap<Clade,pair<Clade,T> > mm; //one clade (key) has many pairs clade,int (values): ways to split
   map<Clade,Alias<dynamic_bitset<unsigned char> >* > am;
   // add a map from pair<Clade,Clade> to double to store the log of the probability of selecting the second clade from the first
   map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double> cladeLogProbMap;
 public:
-  CCDProbs(map<string,int>&,vector<int>&,vector<string>&); //T instead of 1st int in map
+  CCDProbs(map<string,T>&,vector<int>&,vector<string>&); //T instead of 1st int in map
   void writeTranslateTable(ostream&);
   void writeCladeCount(ostream&);
   void writePairCount(ostream&);

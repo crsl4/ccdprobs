@@ -145,9 +145,9 @@ int main(int argc, char* argv[])
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
 
   // here do parsimony score (keep the option to do without parsimony)
-  //   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
+  CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   //   CCDProbs<double> ccd(topologyToCountMap,taxaNumbers,taxaNames);
-  CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
+  //CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
 
   ofstream f(parameters.getOutFileRoot().c_str());
 
@@ -193,7 +193,6 @@ int main(int argc, char* argv[])
 	{
 	  cout << "Branch lengths sampled jointly in 2D" << endl;
 	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
-	  //tree.randomEdges(alignment,model,rng,logProposalDensity,false); //need to remove this
 	}
       cout << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
