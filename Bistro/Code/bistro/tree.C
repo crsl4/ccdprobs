@@ -1892,6 +1892,11 @@ void Tree::resolveRoot()
       if( x->getNumber() == 1 ) //want to find node number 1
 	break;
     }
+  if(x->getNumber() != 1) //not found
+    {
+      cerr << "not found node number 1 for resolve root" << endl;
+      exit(1);
+    }
   root -> deleteEdge(ex);
   Node* newnode = new Node(); //number -1
   newnode -> setLeaf(false);

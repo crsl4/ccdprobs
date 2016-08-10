@@ -260,10 +260,10 @@ CCDProbs<T>::CCDProbs(map<string,T>& topologyToCountMap,vector<int>& taxaNumbers
     sampleSize += m->second;
   }
 
-  for ( map<CladePair,int>::iterator p=pairCount.begin(); p!=pairCount.end(); ++p ) {
+  for ( typename map<CladePair,T>::iterator p=pairCount.begin(); p!=pairCount.end(); ++p ) {
     Clade parent=(p->first).getClade1();
     Clade child=(p->first).getClade2();
-    mm.insert( pair<Clade,pair<Clade,int> >(parent,make_pair(child, p->second)) );
+    mm.insert( pair<Clade,pair<Clade,T> >(parent,make_pair(child, p->second)) );
   }
 
   all.resize(taxaNames.size());
