@@ -62,7 +62,8 @@ public:
   void clear() { clade.clear(); }
   void set(dynamic_bitset<unsigned char> x) { clade=x; }
   void resize(int n) { clade.resize(n); }
-  void add(int x) { clade[size() - x] = 1; } // taxa #x stored at size-x (1 is at size-1, numTaxa is at 0).
+  void add(int x) { clade[x-1] = 1; }
+  //void add(int x) { clade[size() - x] = 1; } // taxa #x stored at size-x (1 is at size-1, numTaxa is at 0).
 //  void add(int x) { clade[x-1] = 1; }
   void add(Clade c) { clade |= c.get(); }
 //  void subtract(int x) { clade[x-1] = 0; }
@@ -329,7 +330,8 @@ string Clade::randomTree(multimap<Clade,pair<Clade,T> >& mm,
   if ( count()==1 ) { // one leaf
     stringstream ss;
     dynamic_bitset<unsigned char>::size_type first = clade.find_first(); //find first 1
-    ss << size() - first;
+    ss << first + 1;
+    //ss << size() - first;
     return ss.str();
   }
   if ( am.find(*this) == am.end() ) { // need to initialize alias for this clade
