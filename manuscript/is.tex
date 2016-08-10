@@ -1,0 +1,373 @@
+\documentclass[conference]{IEEEtran}
+
+%========================================================================= PACKAGES
+\usepackage{amsmath,amssymb}
+\usepackage[mathscr]{euscript} %To be able to use script letters with \mathscr{}
+\usepackage{amsthm} %To be able to write Definitions, Theorems, etc.
+\usepackage{tikz} %To draw graphs.
+\usepackage{graphicx} % To scale equations
+\newcommand*{\Scale}[2][4]{\scalebox{#1}{\ensuremath{#2}}} % To scale equations
+\usepackage{framed} % To be able to frame theorems and stuff
+%\usepackage{float} %To be able to place figures exactly where I want with [H]
+\usepackage{multirow}
+\usepackage{color}
+\usepackage{subfigure}
+\usepackage{longtable}
+\usepackage{MnSymbol}
+\usepackage{xcolor}  \definecolor{shadecolor}{rgb}{.95,.95,.95}  %To
+                                %put a shaded region
+\usepackage[round]{natbib} % references with citep, citet
+%\usepackage[numbers,square, comma, sort&compress]{natbib}	 %Make the references [1-8], rather than [1]-[8], as with \usepackage{cite}
+%\renewcommand*{\bibfont}{\footnotesize} %Size of the references; only needed with natbib
+%\usepackage{makeidx} %To create an index
+%\makeindex
+\usepackage[hidelinks]{hyperref} %To be able to use links inside the document; [hidelinks removes the ugly red boxes]
+
+
+
+%==================================================== ALGORITHM SETUP
+\usepackage[ruled,vlined]{algorithm2e}
+
+%========================================================================= THEOREMS, LEMMAS, DEFINITIONS, ETC.
+\newtheorem{myDefinition}{Definition}
+\newtheorem{myTheorem}{Theorem}
+\newtheorem{myLemma}{Lemma}
+\newtheorem{myCorollary}{Corollary}
+\newtheorem{myProposition}{Proposition}
+\newtheorem{myExample}{Example}
+\newtheorem{myRemark}{Remark}
+\newtheorem{myConjecture}{Conjecture}
+\newtheorem{myQuestion}{Question}
+\newtheorem{myProblem}{Problem}
+
+\newcommand{\help}[1]{\textcolor{blue}{#1}}
+\newcommand{\falta}[1]{\textcolor{red}{#1}}
+
+%========================================================================= STUFF TO DRAW GRAPHS
+\tikzstyle{every edge}=  [draw]
+\tikzstyle{vertex} = [draw,circle,minimum size=1pt]
+\tikzstyle{label} = [minimum size=.1pt,font=\scriptsize]
+\tikzstyle{title} = [minimum size=.25cm,font=\small]
+
+%========================================================================= SYMBOLS
+\newcommand{\var}[1]{\mathsf{#1}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\wt}[1]{\widetilde{#1}}
+
+%Miscelaneous
+\def \R{\mathbb{R}}
+\def \P{\mathsf{P}}
+\def \T{\mathsf{T}}
+\def \c{\mathsf{c}}
+\def \spn{{\rm span}}
+\def \rnk{{\rm rank}}
+
+%Scalars
+\def \r{{\hyperref[rDef]{r}}}
+
+%text
+\def \as{{\hyperref[asDef]{{\rm a.s.}}}}
+%Assumptions
+\def \Cone{{\hyperref[ConeDef]{{\rm {\bf C1}}}}}
+%Theorems
+\def \mainThm{{\hyperref[mainThm]{Theorem \ref{mainThm}}}}
+%Sections
+\def \modelSec{{\hyperref[modelSec]{Section \ref{modelSec}}}}
+%Figures
+\def \distributionFig{{\hyperref[distributionFig]{Figure \ref{distributionFig}}}}
+%Algorithms
+\def \validationAlg{{\hyperref[validationAlg]{Algorithm \ref{validationAlg}}}}
+
+\bibliographystyle{mbe} %needs mbe.bst
+
+% correct bad hyphenation here
+%\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+\title{BISTRO: Bayesian Importance Sampling...}
+\author{BL,CSL}
+\maketitle
+
+
+\section{Importance Sampling Background}
+\label{background}
+% Explain here what is importance sampling in general terms, explain
+% normalized case and unnormalized case
+
+Let $X \sim f(x)$, and suppose that we want to calculate the
+expectation of a function $h(X)$ under $f(x)$:
+\begin{align*}
+E_f(h(X)) &= \int h(x) f(x) dx := \mu
+\end{align*}
+If the integral does not have a closed solution, we can estimate $\mu$
+with the mean from a random sample $X_1,X_2,...,X_n \sim f(x)$:
+\begin{align*}
+\hat{\mu} &= \frac{1}{n} \sum_{i=1}^n h(X_i)
+\end{align*}
+
+\textbf{Problem:} It can be hard (or impossible) to get random samples
+from $f(x)$.
+
+
+\textbf{Solution:} Sample from an easier density $g(x)$ such that inference of $h(X)$ under $f(x)$ can be approached as
+inference of $h(X)w(X)$ under $g(x)$ for a weight function
+$w(x)=f(x)/g(x)$ defined when both $f(x)$ and $g(x)$ are \textit{normalized} densities (we will discuss the
+    \textit{unnormalized} case in next subsection). That is,
+\begin{align*}
+E_f(h(X)) &= \int h(x) f(x) dx \\
+&= \int h(x) \frac{f(x)}{g(x)} g(x) dx \\
+&= \int h(x) w(x) g(x) dx \\
+&= E_g(h(X)w(X))
+\end{align*}
+
+\begin{algorithm}
+\caption{Importance Sampling}
+\textbf{Goal:} Estimate $\mu = E_f(h(X))$, and $\sigma^2 = Var_f(h(X))$.
+\begin{enumerate}
+\item{Sample independently $Y_1,Y_2,...,Y_m \sim g(x)$}
+\item{Define the weight function: $w(x) = f(x)/g(x)$}
+\item{Mean estimate: $\hat{\mu} = \frac{1}{m} \sum_{i=1}^m
+    h(y_i)w(y_i)$}
+\item{Variance estimate: $\hat{\sigma}^2 = \frac{1}{m} \sum_{i=1}^m
+    (h(y_i)w(y_i) - \hat{\mu})^2$}
+\end{enumerate}
+\end{algorithm}
+
+
+\subsubsection*{Standard error}
+Since $Y_1,Y_2,...,Y_m \sim g(x)$ is an independent sample, we can
+compute the variance of the estimator as
+\begin{align*}
+Var_g(\hat{\mu}) &= \frac{1}{m} Var_g(h(X)w(X)) = \frac{\sigma^2}{m}
+\end{align*}
+
+\subsection*{Unnormalized case}
+The usual approach of importance sampling assumes that you have the
+normalized version of both $f(x)$ and $g(x)$. In many real-life
+applictions, this is not true.
+
+Let $X \sim f(x) = c_1 f_0(x)$, and we again want to estimate
+$E_f(h(X))$. We sample independently $Y_1,Y_2,...,Y_m \sim g(x) = c_2
+g_0(x)$.
+Unlike in the previous setting, we compute the weights with the
+\textit{unnormalized} densities: $w_0(y_i) = f_0(y_i) / g_0(y_i)$.
+
+% \begin{myProposition}
+% Let $Z$ be a random variable such that
+% \begin{align*}
+% P(Z=y_j) &= \frac{w_0(y_j)}{\sum_{i=1}^m w_0(y_i)}.
+% \end{align*}
+% Then, $Z \xrightarrow{d} X$, as $m \rightarrow \infty$ \citep{Ross1997}. 
+% \end{myProposition}
+
+This unnormalized case is different from the normalized importance
+sampling case. Here we do inference of $h(X)$ directly, but
+with a weighted sample $Y_1,Y_2,...,Y_m$ with weights
+$\tilde{w}_0(y_1),\tilde{w}_0(y_2),...,\tilde{w}_0(y_m)$ with
+$\tilde{w}_0(y_j) = \frac{w_0(y_j)}{\sum_{i=1}^m w_0(y_i)}.$ On the
+contrary, in the normalized importance sampling case, we do inference
+of $h(X)w(X)$ with a random sample from $g(x)$.
+
+\begin{algorithm}
+\caption{Unnormalized Importance Sampling}
+\textbf{Goal:} Estimate $\mu = E_f(h(X))$, and $\sigma^2 = Var_f(h(X))$.
+\begin{enumerate}
+\item{Sample independently $Y_1,Y_2,...,Y_m \sim g(x)$}
+\item{Define the weight function: $w_0(y_j) = f_0(y_j)/g_0(y_j)$, and
+    the normalized weight as $\tilde{w}_0(y_j) =
+    \frac{w_0(y_j)}{\sum_{i=1}^m w_0(y_i)}.$}
+\item{Mean estimate: $\hat{\mu} = \sum_{i=1}^m
+    h(y_i)\tilde{w}_0(y_i)$}
+\item{Variance estimate: $\hat{\sigma}^2 = \sum_{i=1}^m
+    (h(y_i) - \hat{\mu})^2 \tilde{w}_0(y_i)$}
+\end{enumerate}
+\end{algorithm}
+
+The estimate $\hat{\mu}$ is sometimes called
+\textit{self-normalized importance sampling estimate}.
+
+\subsubsection*{Standard error}
+Since the sample $Y_1,Y_2,...,Y_m$ with weights
+$\tilde{w}_0(y_1),\tilde{w}_0(y_2),...,\tilde{w}_0(y_m)$ is no longer
+an independent sample (because weights add up to 1). The variance
+estimate is then \citep{Owen2013}
+\begin{align*}
+\widehat{Var}(\hat{\mu}) &= \sum_{i=1}^m \tilde{w}_0(y_i)^2(h(y_i)-\hat{\mu})^2.
+\end{align*}
+
+\subsection*{Diagnostics}
+Importance sampling diagnostics are not clear-cut rules. One common
+approach to detect if importance sampling performed well is to compute
+the effective sample size:
+\begin{align*}
+n_e &= \frac{\left( \sum_{i=1}^n w(y_i) \right)^2}{\sum_{i=1}^nw(y_i)^2}.
+\end{align*}
+
+If the effective sample size is too small, then one or few weights
+could be too large compared to the others, and importance sampling did
+not work as expected.
+
+\section{Importance Sampling for phylogenetics}
+% Explain here how it applies to phylogenetics. explain that we are in
+% the unnormalized case
+Phylogenetics studies the evolutionary relationships between species,
+typically visualized in a tree or phylogeny. DNA sequences are used as
+input data to estimate the phylogenetic tree that links several
+species. This estimation can be performed through a variety of methods
+such as maximum parsimony \falta{(reference)}, maximum likelihood
+\falta{(reference)} or bayesian inference \falta{(reference)}.
+
+In the Bayesian framework, we want to obtain the posterior
+distribution of trees, branch lengths and other model
+parameters. However, this posterior distribution does not have an
+explicit form. Furthermore, it is impossible to obtain samples
+directly from this distribution, so MCMC methods are widely used
+\falta{(references)} to generate a Markov chain with the posterior
+distribution as stationary distribution.
+
+The posterior sample generated by MCMC can then be used to do
+inference on parameters of interest, such as identifying trees or
+splits with higher posterior probabilities, or computing posterior
+means and credibility intervals of numerical model parameters.
+
+The downside of MCMC methods is that its performance rapidly
+deteriorates as the parameter space increases due to slow or poor
+mixing. In phylogenetic analyses, the tree space increases
+dramatically with the number of species. Then, MCMC methods need a
+very big chain in order to navigate the huge tree space, which in
+turns could result in a decreased effective sample size (we need a
+chain with millions of generations to generate few independent
+observations).
+
+With these limitations in mind, we propose an importance sampling
+method to generate independent samples from the posterior distribution
+in the phylogenetic setting. This new sampling scheme is more
+efficient as proven by a bigger effective sample size.
+
+\section{Methods}
+Let $\theta = (T, \lambda, \mathbf{Q}(\pi,r))$ be the parameters of interest
+in the phylogenetic setting, where $T$ represents a tree topology,
+$\lambda$ represents the vector of branch lengths and $\mathbf{Q}(\pi,r)$
+represents the rate matrix for the GTR model \falta{(reference)} as a
+function of the base frequency vector $\pi = (\pi_A, \pi_C, \pi_G,
+\pi_T)$ and the transition rate parameters $r = (r_{AC}, r_{AG},
+r_{AT}, r_{CG}, r_{CT}, r_{GT})$. \falta{(add model parametrization here)}
+Let $X$ denote the DNA sequences as input data.
+
+We want to generate independent samples from the posterior
+distribution $p(\theta|X)$ (the $f(x)$ density in section
+\ref{background}). Thus, we need to find a density $g(\theta|X)$ such
+that we can generate samples from $g$ instead of $p$. 
+
+The success of importance sampling relies on choosing a $g$ that is
+close enough to the density of interest, and that it has heavier
+tails. Since the posterior distribution depends on the choice of the
+prior, we will focus in finding a $g$ that resembles the likelihood
+$L(X|\theta)$, in an attempt to use the same density $g$ regardless of
+the chosen prior.
+
+The importance sampling density $g(\theta|X)$ has multiple parts which
+will be explained in the next subsections:
+\begin{align*}
+g(\theta|X) &= f_1(\mathbf{Q})f_2(T|\mathbf{Q})f_3(\lambda|T,\mathbf{Q})
+\end{align*}
+
+\subsection*{Density for $\mathbf{Q}$}
+First, we generate a rate matrix $\mathbf{Q}$ by ... \falta{(do we do this?)}.
+
+\subsection*{Density for $T$ given $\mathbf{Q}$}
+After drawing a rate matrix $\mathbf{Q}$ from $f_1(\mathbf{Q})$, we
+compute the distance matrix between sequences, and then a
+Neighbor-Joining (NJ) tree \falta{(reference)}. We then bootstrap the
+sites to get a bootstrap sample of NJ trees. We then use this sample
+of NJ trees to compute the clade distributions \citep{Larget2013}, and
+use these clade probabilities to draw a random topology.
+\falta{(need to double check this, add more details)}.
+
+\subsection*{Density for $\lambda$ given $T,\mathbf{Q}$}
+After drawing a random topology $T$, we initialize all the branch
+lengths with the NJ distances (and $0.00001$ as minimun length in case
+of negative distance), and then estimate the MLE distance for each
+branch at a time using the likelihood function
+\begin{align*}
+L(t) &= \prod_k \sum_x \sum_y \pi_x P_{xy}(t)P(A_k|x)P(B_k|y)
+\end{align*}
+where the product is over sites, the two sum are over the state of the
+internal nodes $x$ and $y$, $P_{xy}(t)$ is the transition probability
+from $x$ to $y$ in time length $t$ given by the GTR model, and
+$P(A_k|x), P(B_k|y)$ are the probability of the subtrees given the
+state of the internal nodes. \falta{(add figure)}
+
+When estimating the MLE for a given branch length, we keep all the
+other branch lengths in the subtrees constant at their current
+values. Since the NJ branch lengths are very different from the MLE
+branch lenghts, we need to do several MLE passes to get accurate
+branch length estimates.
+
+After all branch lengths are set at their MLE, we order the nodes in
+postorder, and traverse the tree from leaves to root. For a given
+cherry, we jointly sample the two branch lengths leading to leaves
+with a Gamma distribution centered at the joint MLE and with variance
+given by the observed $2 \times 2$ information matrix from the
+likelihood:
+\begin{align*}
+L(t_1,t_2) &= \prod_k \sum_y \pi_y \sum_{x_1} \sum_{x_2}
+P_{yx_1}(t_1)P_{yx_2}(t_2) * \\
+&P(A^{(1)}_k|x_1)P(A^{(2)}_k|x_2)P(B_k|y).
+\end{align*}
+The observed information matrix is negative the inverse of the Hessian
+matrix evaluated at the MLE.
+\falta{(add figure)}
+
+\begin{algorithm}
+\caption{Joint Gamma sampling}
+\textbf{Goal:} Generate a joint Gamma random vector with mean $\mu=(\mu_1, \mu_2)$
+and covariance matrix $\Sigma$
+\begin{enumerate}
+\item{Obtain the Cholesky decomposition $\Sigma=LL^T$, with $L$ a
+    lower triangular matrix}
+\item{Generate $T_1 \sim Gamma(\alpha_1, \lambda_1)$ with 
+\begin{align*}
+\alpha_1 &= \frac{\mu_1^2}{L_{11}^2} & \lambda_1 &= \frac{\mu_1}{L_{11}^2}
+\end{align*}}
+\item{Compute $z_1 = \frac{T_1-\mu_1}{L_{11}}$}
+\vspace{0.25cm}
+\item{Generate $T_2|T_1 \sim Gamma(\alpha_2, \lambda_2)$ with
+\begin{align*}
+\alpha_2 &= \frac{(\mu_2+L_{21}z_1)^2}{L_{22}^2} & \lambda_2 &= \frac{(\mu_2+L_{21}z_1)}{L_{22}^2}
+\end{align*}}
+\end{enumerate}
+\end{algorithm}
+
+% We realized that it was important to account for correlation between
+% sister branches and also, that we had to use all the data when
+% computing the likelihood (not just from the nodes down).
+
+\subsection*{Computation of the weights}
+We computed the likelihood of the data given the drawn $\theta = (\mathbf{Q}, T,
+\lambda)$ and evaluated the importance sampling density $g(\theta|X)$
+to obtain the weight:
+\begin{align*}
+w(\theta) &= \frac{L(\theta|X)}{g(\theta|X)}.
+\end{align*}
+
+Finally, we repeated the process to obtain an independent sample
+$\theta_1, \theta_2,...,\theta_n \sim g(\theta|X)$ with the
+unnormalized weights $w(\theta_1), w(\theta_2),...,w(\theta_n)$. Note
+that since the likelihood used is not a normalized density, we are in
+the case of self-normalizing importance sampling estimates, and thus,
+we need to normalize the weights:
+\begin{align*}
+\tilde{w}(\theta_j) &= \frac{w(\theta_j)}{\sum_{i=1}^n w(\theta_i)}.
+\end{align*}
+
+
+todo:
+- describe h functions of interest: indicator of tree
+- go back and fill details missing, plots, formulas
+
+
+
+\bibliography{/Users/Clauberry/Documents/phylo/bibtex/bistro.bib}
+
+\end{document}
