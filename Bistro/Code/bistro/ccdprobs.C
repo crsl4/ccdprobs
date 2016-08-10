@@ -167,10 +167,14 @@ RootedTree::RootedTree(string x,int n)
       }
       w.push_back( node );
       s >> c;
+      Clade clad = node->getClade();
+      cout << "Clade for read internal node: ";
+      clad.print(cout);
+      cout << endl;
     }
     else if ( c==')' ) { // complete a subtree
       nodes.push_back(w.back());
-      nodes.back()->copyClade(nodes.back()->getLeft()->getClade());
+      nodes.back()->copyClade(nodes.back()->getLeft()->getClade()); //using clades already in RootedNode
       nodes.back()->add(nodes.back()->getRight()->getClade());
       w.pop_back();
       clades.push_back(nodes.back()->getClade());
@@ -179,10 +183,18 @@ RootedTree::RootedTree(string x,int n)
     else if ( isdigit(c) ) { // add leaf node
       int tax;
       s >> tax;
-      RootedNode* node = new RootedNode(w.back());
+      RootedNode* node = new RootedNode(w.back()); //why this?
       node->setLeaf(true);
       node->setNumTaxa(numTaxa);
-      node->add(tax);
+      Clade clad = node->getClade();
+      cout << "Clade for read leaf node: " << tax << " ";
+      clad.print(cout);
+      cout << endl;
+      node->add(tax); //this is the problem!
+      clad = node->getClade();
+      cout << "Clade for read leaf node: " << tax << " ";
+      clad.print(cout);
+      cout << endl;
       w.back()->addChild(node);
       nodes.push_back(node);
     }
@@ -195,6 +207,8 @@ RootedTree::RootedTree(string x,int n)
       break;
     }
   }
+  printClades(cout);
+  cout << endl;
 }
 
 void RootedTree::print(ostream& f)
