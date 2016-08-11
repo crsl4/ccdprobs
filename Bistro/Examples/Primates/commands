@@ -12,3 +12,6 @@ time ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 10000 -r 5000 -m 2
 
 ## after resolveRoot
 time ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 10000 -r 100 -m 2 -o run3.txt > run3.log
+
+## after fixing add problem
+time ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 10000 -r 1000 -m 2 -o run4.txt > run4.log

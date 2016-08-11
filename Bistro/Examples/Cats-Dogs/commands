@@ -22,3 +22,6 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 5000 -m 
 
 ## after resolveRoot
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 100 -m 2 -o run7.txt > run7.log
+
+## after solving the add problem
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o run8.txt > run8.log
