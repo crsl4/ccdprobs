@@ -16,3 +16,12 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 5000
 
 ## to test after adding resolveRoot
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 -m 2 -o run17.txt > run17.log
+
+## to debug ccdprobs
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o ccd.txt > ccd.log
+## after changed add
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 -m 2 -o ccd3.txt > ccd3.log
+
+
+## to compare with ccdprobs:
+../../Code/ccdprobs-1.0.5/src/ccdprobs -i hoo -o hoo2
