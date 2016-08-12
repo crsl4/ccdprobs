@@ -224,6 +224,20 @@ void Parameter::processCommandLine(int argc,char* argv[])
     {
       independent = true;
     }
+    else if ( strcmp(argv[k],"--parsimony-scale") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> parsimonyScale;
+      }
+      else
+      {
+        cerr << "Error: flag `--parsimony-scale' not followed by a postive value" << endl;
+        usage(cerr);
+      }
+    }
     else // does not match a flag
     {
       cerr << "Option `" << argv[k] << "' does not match a valid program flag." << endl;

@@ -1,0 +1,24 @@
+#NEXUS
+[ID: 7689171351]
+begin taxa;
+	dimensions ntax=6;
+	taxlabels
+		Camel
+		Dolphin
+		Pig
+		Cow
+		Sheep
+		Giraffe
+		;
+end;
+begin trees;
+	translate
+		1	Camel,
+		2	Dolphin,
+		3	Pig,
+		4	Cow,
+		5	Sheep,
+		6	Giraffe
+		;
+   tree con_50_majrule = [&U] (1[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:1.432891e-01[&length_mean=1.43634197e-01,length_median=1.43289100e-01,length_95%HPD={1.17531100e-01,1.71626200e-01}],2[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:1.188272e-01[&length_mean=1.19199461e-01,length_median=1.18827200e-01,length_95%HPD={9.52695000e-02,1.44649600e-01}],(3[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:1.057724e-01[&length_mean=1.06174182e-01,length_median=1.05772400e-01,length_95%HPD={8.31954400e-02,1.30156500e-01}],(4[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:8.783581e-02[&length_mean=8.81799968e-02,length_median=8.78358100e-02,length_95%HPD={6.81479600e-02,1.09927900e-01}],(5[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:8.543646e-02[&length_mean=8.58929003e-02,length_median=8.54364600e-02,length_95%HPD={6.54893000e-02,1.06195800e-01}],6[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:7.522978e-02[&length_mean=7.55747533e-02,length_median=7.52297800e-02,length_95%HPD={5.77873400e-02,9.50505900e-02}])[&prob=6.14508212e-01,prob_stddev=4.54235009e-03,prob_range={6.11296285e-01,6.17720138e-01},prob(percent)="61",prob+-sd="61+-0"]:1.849846e-02[&length_mean=1.88075171e-02,length_median=1.84984600e-02,length_95%HPD={6.70505800e-03,3.06370500e-02}])[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:5.008512e-02[&length_mean=5.05756583e-02,length_median=5.00851200e-02,length_95%HPD={3.37749600e-02,6.91882700e-02}])[&prob=9.63456760e-01,prob_stddev=1.45698022e-03,prob_range={9.62426520e-01,9.64487001e-01},prob(percent)="96",prob+-sd="96+-0"]:2.696851e-02[&length_mean=2.73605510e-02,length_median=2.69685100e-02,length_95%HPD={1.33614100e-02,4.22994200e-02}]);
+end;

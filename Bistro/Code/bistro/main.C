@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
   cerr << " done." << endl;
   cout << "Seed = " << parameters.getSeed() << endl;
 
-  cerr << "Running MCMC to estimate Q matrix ...";
+  cerr << "Running MCMC to estimate Q matrix ..." << endl;
   // Run MCMC on tree to estimate Q matrix parameters
   //   initial Q matrix
 
@@ -86,15 +86,19 @@ int main(int argc, char* argv[])
   QMatrix q_init(p_init,s_init);
 
   // burnin
+  cerr << "burn-in:" << endl;
   q_init.mcmc(alignment,jctree,1000,alignment.getNumSites(),rng);
+  cerr << endl << " done." << endl;
 
   // mcmc to get final Q
+  cerr << "sampling:" << endl;
   q_init.mcmc(alignment,jctree,10000,alignment.getNumSites(),rng);
+  cerr << endl << " done." << endl;
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
 
-  cerr << " done." << endl;
+  cerr << endl << " done." << endl;
 
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";
@@ -121,24 +125,44 @@ int main(int argc, char* argv[])
       cerr << '|';
     alignment.setBootstrapWeights(weights,rng);
     alignment.calculateGTRDistancesUsingWeights(weights,model,gtrDistanceMatrix,bootDistanceMatrix);
-//    alignment.calculateJCDistancesUsingWeights(weights,bootDistanceMatrix);
     Tree bootTree(bootDistanceMatrix);
-    //    if(b == 1)
-    //cout << "Bootstrap NJ tree: " << endl << bootTree.makeTopologyNumbers() << endl;
     bootTree.reroot(1); //warning: if 1 changes, need to change resolveRoot if called after
     bootTree.resolveRoot(); //not sure this should be here: canonical still works?
     bootTree.sortCanonical();
 
-    int score = bootTree.parsimonyScore(alignment);
-
-    topologyToCountMap[ bootTree.makeTopologyNumbers() ]++;
+    string top = bootTree.makeTopologyNumbers();
+    // add score to map if it is not already there
+    // update minimum parsimony score if new minimum found
+    if ( topologyToParsimonyScoreMap.find(top) == topologyToParsimonyScoreMap.end() )
+    {
+      int score = bootTree.parsimonyScore(alignment);
+      topologyToParsimonyScoreMap[ top ] = score;
+      if ( score < minimumParsimonyScore || b==0 )
+	minimumParsimonyScore = score;
+    }
+    topologyToCountMap[ top ]++;
   }
   cerr << endl << "done." << endl;
 
-  cout << endl << "Topology counts:" << endl;
+  map<string,double> topologyToWeightMap; // not normalized; normalization taken care of during alias creation
   for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
-    cout << (*m).first << " " << setw(5) << (*m).second << endl;
-  cout << endl;
+  {
+    topologyToWeightMap[ (*m).first ] =
+      (*m).second * exp( parameters.getParsimonyScale() *
+			 (minimumParsimonyScore - topologyToParsimonyScoreMap[ (*m).first ]) );
+  }
+
+  cout << endl << "Topology counts:" << endl;
+  {
+    map<string,double>::iterator wm=topologyToWeightMap.begin();
+    for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
+    {
+      cout << (*cm).first << " " << setw(5) << (*cm).second << " " << setw(10) << setprecision(4) << fixed << (*wm).second;
+      cout << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ] << endl;
+      ++wm;
+    }
+    cout << endl;
+  }
 
   vector<int> taxaNumbers;
   vector<string> taxaNames;
@@ -146,6 +170,7 @@ int main(int argc, char* argv[])
 
   // here do parsimony score (keep the option to do without parsimony)
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
+  CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
   // write map out to temp files to check
   ofstream smap("temp.smap");
   ccd.writeCladeCount(smap);
@@ -153,13 +178,19 @@ int main(int argc, char* argv[])
   ofstream tmap("temp.tmap");
   ccd.writePairCount(tmap);
   tmap.close();
+  smap.open("pars.smap");
+  ccdParsimony.writeCladeCount(smap);
+  smap.close();
+  tmap.open("pars.tmap");
+  ccdParsimony.writePairCount(tmap);
+  tmap.close();
   
   //   CCDProbs<double> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   //CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
 
   ofstream f(parameters.getOutFileRoot().c_str());
 
-  f << "tree logl logTop logProp logPrior logWt parsimonyScore" << endl;
+  f << "tree logl logTop logProp logPrior logWt" << endl;
 
   int numRandom = parameters.getNumRandom();
 
@@ -176,7 +207,8 @@ int main(int argc, char* argv[])
       if ( numRandom > 9 && (k+1) % (numRandom / 10) == 0 )
 	cerr << '|';
       double logTopologyProbability=0;
-      string treeString = ccd.randomTree(rng,logTopologyProbability);
+//      string treeString = ccd.randomTree(rng,logTopologyProbability);
+      string treeString = ccdParsimony.randomTree(rng,logTopologyProbability);
       Tree tree(treeString);
       tree.relabel(alignment);
       tree.unroot();
@@ -208,8 +240,9 @@ int main(int argc, char* argv[])
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
       tree.reroot(1); //warning: if 1 changes, need to change resolveRoot if called after
       tree.sortCanonical();
-      int score = tree.parsimonyScore(alignment);
-      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << " " << score << endl;
+//      int score = tree.parsimonyScore(alignment);
+//      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << " " << score << endl;
+      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
       logwt[k] = logWeight;
       if ( k==0 || logWeight > maxLogWeight )
 	maxLogWeight = logWeight;

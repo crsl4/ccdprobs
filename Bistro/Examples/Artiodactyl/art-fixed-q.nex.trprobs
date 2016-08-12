@@ -1,0 +1,23 @@
+#NEXUS
+[ID: 7087805436]
+[This file contains the trees that were found during the MCMC
+search, sorted by posterior probability. "p" indicates the
+posterior probability of the tree whereas "P" indicates the
+cumulative posterior probability.]
+
+begin trees;
+   translate
+    1 Camel,
+    2 Dolphin,
+    3 Pig,
+    4 Cow,
+    5 Sheep,
+    6 Giraffe;
+   tree tree_1 [p = 0.580, P = 0.580] = [&W 0.579541] (2,(((6,5),4),3),1);
+   tree tree_2 [p = 0.385, P = 0.964] = [&W 0.384583] (2,((5,(6,4)),3),1);
+   tree tree_3 [p = 0.023, P = 0.987] = [&W 0.022756] (((6,5),4),(2,3),1);
+   tree tree_4 [p = 0.012, P = 0.998] = [&W 0.011514] ((((6,5),4),2),3,1);
+   tree tree_5 [p = 0.001, P = 0.999] = [&W 0.001030] (2,((6,(5,4)),3),1);
+   tree tree_6 [p = 0.001, P = 1.000] = [&W 0.000545] (((5,(6,4)),2),3,1);
+   tree tree_7 [p = 0.000, P = 1.000] = [&W 0.000030] ((5,(6,4)),(2,3),1);
+end;

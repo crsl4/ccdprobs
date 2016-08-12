@@ -210,7 +210,7 @@ template <typename T>
 class CCDProbs
 {
 private:
-  int sampleSize;
+  T sampleSize;
   int numTaxa;
   map<Clade,T> cladeCount; //T instead of int
   map<CladePair,T> pairCount; //T instead of int
@@ -331,6 +331,7 @@ string Clade::randomTree(multimap<Clade,pair<Clade,T> >& mm,
     stringstream ss;
     dynamic_bitset<unsigned char>::size_type first = clade.find_first(); //find first 1
     ss << first + 1;
+    // back when subsets were stored right to left;
     //ss << size() - first;
     return ss.str();
   }

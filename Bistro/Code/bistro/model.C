@@ -146,8 +146,13 @@ void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double sca
   avgP << 0,0,0,0;
   VectorXd avgS(6);
   avgS << 0,0,0,0,0,0;
+  cerr << '|';
   for ( int i=0; i<numGenerations; ++i )
   {
+    if ( (i+1) % (numGenerations / 100) == 0 )
+      cerr << '*';
+    if ( (i+1) % (numGenerations / 10) == 0 )
+      cerr << '|';
     Vector4d x = getStationaryP();
     double logProposalRatio = 0;
     Vector4d y = dirichletProposal(x,scale,logProposalRatio,rng);
