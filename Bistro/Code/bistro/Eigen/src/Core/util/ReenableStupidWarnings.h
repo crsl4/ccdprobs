@@ -8,6 +8,9 @@
     #pragma warning pop
   #elif defined __clang__
     #pragma clang diagnostic pop
+//added lines below for gcc6 warnings: https://bitbucket.org/eigen/eigen/commits/0b5d0bcb72f7
+  #elif defined __GNUC__ && __GNUC__>=6
+    #pragma GCC diagnostic pop
   #endif
 #endif
 

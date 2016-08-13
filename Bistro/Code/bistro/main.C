@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   MatrixXd jcDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
   jcDistanceMatrixCopy = jcDistanceMatrix;
   Tree jctree(jcDistanceMatrixCopy);
-  jctree.reroot(1); //warning: if 1 changed, need to change resolveRoot if called after
+  jctree.reroot(1); //warning: if 1 changed, need to change makeBinary if called after
   jctree.sortCanonical();
   cerr << " done." << endl;
   cout << endl << "Tree topology:" << endl;
@@ -126,8 +126,8 @@ int main(int argc, char* argv[])
     alignment.setBootstrapWeights(weights,rng);
     alignment.calculateGTRDistancesUsingWeights(weights,model,gtrDistanceMatrix,bootDistanceMatrix);
     Tree bootTree(bootDistanceMatrix);
-    bootTree.reroot(1); //warning: if 1 changes, need to change resolveRoot if called after
-    bootTree.resolveRoot(); //not sure this should be here: canonical still works?
+    bootTree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
+    bootTree.makeBinary(); 
     bootTree.sortCanonical();
 
     string top = bootTree.makeTopologyNumbers();
@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
-      tree.reroot(1); //warning: if 1 changes, need to change resolveRoot if called after
+      tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
       tree.sortCanonical();
 //      int score = tree.parsimonyScore(alignment);
 //      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << " " << score << endl;

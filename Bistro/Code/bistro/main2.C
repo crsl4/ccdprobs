@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
   tree.reroot(1);
   tree.sortCanonical();
   cout << tree.makeTopologyNumbers() << endl;
-  tree.resolveRoot();
+  tree.makeBinary();
   cout << tree.makeTopologyNumbers() << endl;
   tree.sortCanonical();
   cout << tree.makeTopologyNumbers() << endl;

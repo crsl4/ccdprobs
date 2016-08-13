@@ -1869,7 +1869,7 @@ double Tree::vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
 // resolves the root so that it has 2 children
 // needs to be called after reroot(1)
 // will assume the outgroup will be 1
-void Tree::resolveRoot()
+void Tree::makeBinary()
 {
   if ( root == NULL ) // no node is set to be the root
     return;

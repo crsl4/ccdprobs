@@ -200,7 +200,7 @@ public:
   double vectorProduct(vector<Vector4d>);
   double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
   void mleError(bool&);
-  void resolveRoot();
+  void makeBinary();
   int parsimonyScore(Alignment&);
 };
 

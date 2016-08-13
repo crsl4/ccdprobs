@@ -35,3 +35,6 @@ ess = 1/sum(w^2)
 essp = ess/nrep
 
 write.table(data.frame(ntax,rep,time,seed,mi,m,ma,nbig,nrep,ess,essp), file="weights.txt", append=TRUE, row.names=FALSE, col.names=FALSE, sep=",")
+
+
+sapply(split(wt,tree),sum)
