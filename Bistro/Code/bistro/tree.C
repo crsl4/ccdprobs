@@ -1517,7 +1517,7 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   int iter=0;
   Vector2d curr(ex->getLength(),ey->getLength());
   double lz = ez->getLength(); //kept fixed throughout
-  cout << "Initial bl curr: " << curr.transpose() << endl;
+  //  cout << "Initial bl curr: " << curr.transpose() << endl;
   double curr_logl;
   Vector2d curr_gradient;
   Matrix2d curr_hessian;
@@ -1535,9 +1535,9 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   {
     curr = prop;
     partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
-    cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
-    cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
-    cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+    // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
+    // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+    // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
     if ( ++iter > 100 )
       mleError(converge);
     delta = curr_hessian.inverse() * curr_gradient;
@@ -1606,7 +1606,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
   int iter=0;
   Vector3d curr(ex->getLength(),ey->getLength(),ez->getLength());
-  cout << "Initial bl curr: " << curr.transpose() << endl;
+  //  cout << "Initial bl curr: " << curr.transpose() << endl;
   double curr_logl;
   Vector3d curr_gradient;
   Matrix3d curr_hessian;
@@ -1625,9 +1625,9 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   {
     curr = prop;
     partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
-    cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
-    cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
-    cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+    // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
+    // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+    // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
     if ( ++iter > 100 )
       mleError(converge);
     delta = curr_hessian.inverse() * curr_gradient;

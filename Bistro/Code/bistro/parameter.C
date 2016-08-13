@@ -25,6 +25,7 @@ void usage(ostream& f)
   f << "    -p stationary-distribution     |  [ not used ] four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
   f << "    -q symmetric-q-parameters      |  [ not used ] six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
+  f << "    --parsimony-scale scale        |  scale to compute the weights from counts, positive number" << endl;
   exit(1);
 }
 

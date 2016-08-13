@@ -167,10 +167,10 @@ RootedTree::RootedTree(string x,int n)
       }
       w.push_back( node );
       s >> c;
-      Clade clad = node->getClade();
-      cout << "Clade for read internal node: ";
-      clad.print(cout);
-      cout << endl;
+      // Clade clad = node->getClade();
+      // cout << "Clade for read internal node: ";
+      // clad.print(cout);
+      // cout << endl;
     }
     else if ( c==')' ) { // complete a subtree
       nodes.push_back(w.back());
@@ -186,15 +186,15 @@ RootedTree::RootedTree(string x,int n)
       RootedNode* node = new RootedNode(w.back()); //why this?
       node->setLeaf(true);
       node->setNumTaxa(numTaxa);
-      Clade clad = node->getClade();
-      cout << "Clade for read leaf node: " << tax << " ";
-      clad.print(cout);
-      cout << endl;
+      // Clade clad = node->getClade();
+      // cout << "Clade for read leaf node: " << tax << " ";
+      // clad.print(cout);
+      // cout << endl;
       node->add(tax); //this is the problem!
-      clad = node->getClade();
-      cout << "Clade for read leaf node: " << tax << " ";
-      clad.print(cout);
-      cout << endl;
+      // clad = node->getClade();
+      // cout << "Clade for read leaf node: " << tax << " ";
+      // clad.print(cout);
+      // cout << endl;
       w.back()->addChild(node);
       nodes.push_back(node);
     }
@@ -207,8 +207,8 @@ RootedTree::RootedTree(string x,int n)
       break;
     }
   }
-  printClades(cout);
-  cout << endl;
+  // printClades(cout);
+  // cout << endl;
 }
 
 void RootedTree::print(ostream& f)

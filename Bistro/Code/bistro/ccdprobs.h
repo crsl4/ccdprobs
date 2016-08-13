@@ -235,13 +235,13 @@ public:
 template<typename T> //and change int for T
 void RootedTree::count(T n,map<Clade,T>& cladeCount,map<CladePair,T>& pairCount)
 {
-  print(cout); // print tree info
+  //print(cout); // print tree info
   for ( vector<RootedNode*>::iterator p = nodes.begin(); p != nodes.end(); p++ ) {
     if ( (*p)->getLeaf() )
       continue;
     Clade z = (*p)->getClade();
-    z.print(cout);
-    cout << "added count " << n << endl;
+    //z.print(cout);
+    //cout << "added count " << n << endl;
     cladeCount[z] += n;
     Clade x = (*p)->getLeft()->getClade();
     Clade y = (*p)->getRight()->getClade();
@@ -260,9 +260,9 @@ CCDProbs<T>::CCDProbs(map<string,T>& topologyToCountMap,vector<int>& taxaNumbers
   for ( typename map<string,T>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
   {
     RootedTree rt(m->first,numTaxa);
-    cout << "Rooted tree top and binarytop" << endl;
-    cout << rt.getTop() << endl;
-    cout << rt.getBinaryTop() << endl;
+    /* cout << "Rooted tree top and binarytop" << endl; */
+    /* cout << rt.getTop() << endl; */
+    /* cout << rt.getBinaryTop() << endl; */
     rt.count<T>(m->second,cladeCount,pairCount);
     sampleSize += m->second;
   }
