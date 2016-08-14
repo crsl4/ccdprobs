@@ -21,3 +21,10 @@ time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 5000 -m 2 -
 ## after solving add problem
 time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 1000 -m 2 -o run5.txt > run5.log
 
+## compare to mrbayes:
+* no parsimony
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 5000 -m 2 -o run5k.txt > run5k.log
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 1000 -m 2 -o run1k.txt > run1k.log
+* parsimony
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 5000 -m 2 -o run5k-p.txt > run5k-p.log
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 1000 -m 2 -o run1k-p.txt > run1k-p.log

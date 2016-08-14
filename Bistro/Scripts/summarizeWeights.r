@@ -12,7 +12,12 @@ summarizeWeights = function(file){
 
     means=sort(with(dat, round(sapply( split( w,tree ),sum ),4) ), decreasing=TRUE)
     print("Posterior probabilities")
-    print(means)
+    if(length(means)>10){
+        print(means[1:10])
+        print(paste0("Only showing 10 trees out of ",length(means)))
+    }else{
+        print(means)
+    }
     ses = rep(NA, length(means))
     for(i in 1:length(means)){
         se = with(dat, sqrt(sum(w^2*((tree==names(means)[i])-means[i])^2)))
@@ -20,5 +25,11 @@ summarizeWeights = function(file){
     }
     ses = round(ses,4)
     print("Standard errors")
-    print(setNames(ses, names(means)))
+    sesnam = setNames(ses, names(means))
+    if(length(sesnam)>10){
+        print(sesnam[1:10])
+        print(paste0("Only showing 10 trees out of ",length(sesnam)))
+    }else{
+        print(sesnam)
+    }
 }

@@ -1,3 +1,6 @@
+## to compare with ccdprobs:
+../../Code/ccdprobs-1.0.5/src/ccdprobs -i hoo -o hoo2
+
 ../../Code/bistro/bistro -p 0.309,0.288,0.134,0.269 -q 0.1847391,0.1289626,0.0373299,0.0079465,0.6403711,0.0006508 -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1
 
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 4 -o run9.txt > run9.log
@@ -23,5 +26,10 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 -m 2 -o ccd3.txt > ccd3.log
 
 
-## to compare with ccdprobs:
-../../Code/ccdprobs-1.0.5/src/ccdprobs -i hoo -o hoo2
+## compare to mrbayes:
+* no parsimony
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 5000 -m 2 -o run5k.txt > run5k.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o run1k.txt > run1k.log
+* parsimony
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 5000 -m 2 -o run5k-p.txt > run5k-p.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o run1k-p.txt > run1k-p.log

@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     alignment.calculateGTRDistancesUsingWeights(weights,model,gtrDistanceMatrix,bootDistanceMatrix);
     Tree bootTree(bootDistanceMatrix);
     bootTree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
-    bootTree.makeBinary(); 
+    bootTree.makeBinary();
     bootTree.sortCanonical();
 
     string top = bootTree.makeTopologyNumbers();
@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
   tmap.open("pars.tmap");
   ccdParsimony.writePairCount(tmap);
   tmap.close();
-  
+
   //   CCDProbs<double> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   //CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
 
@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
       if ( numRandom > 9 && (k+1) % (numRandom / 10) == 0 )
 	cerr << '|';
       double logTopologyProbability=0;
-//      string treeString = ccd.randomTree(rng,logTopologyProbability);
+      //string treeString = ccd.randomTree(rng,logTopologyProbability);
       string treeString = ccdParsimony.randomTree(rng,logTopologyProbability);
       Tree tree(treeString);
       tree.relabel(alignment);
