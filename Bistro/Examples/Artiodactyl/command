@@ -33,3 +33,6 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 * parsimony
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 5000 -m 2 -o run5k-p.txt > run5k-p.log
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o run1k-p.txt > run1k-p.log
+
+## with new output files and split weights summary
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100 -m 2 -o pars1k > pars1k.log
