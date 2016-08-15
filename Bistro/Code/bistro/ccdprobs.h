@@ -38,7 +38,7 @@ using namespace boost;
 
 // ************************************************************
 // Clade and Tree stuff from tree string
-// 
+//
 // The data in a Clade is a dynamic bitset of size numTaxa
 // where clade[i-1] = 1 if taxon i is in the clade.
 // ************************************************************
@@ -86,33 +86,33 @@ class CCDTree {
 private:
   string top;
   int numTaxa;
-  vector<Clade> clades; 
+  vector<Clade> clades;
 public:
   CCDTree(string,int);
-  ~CCDTree() { 
-    for ( vector<Clade>::iterator p=clades.begin(); p != clades.end(); p++ ) 
+  ~CCDTree() {
+    for ( vector<Clade>::iterator p=clades.begin(); p != clades.end(); p++ )
       (*p).clear();
     clades.clear();
   }
   void print(ostream& f) { f << top; }
   void printClades(ostream& f)
   {
-    vector<Clade>::iterator p = clades.begin(); 
+    vector<Clade>::iterator p = clades.begin();
     (*p).print(f);
     ++p;
     for (; p != clades.end(); ++p)
       (*p).print(f);
     f << endl;
-  }    
+  }
   string getTop() { return top; }
   int getNumTaxa() { return numTaxa; }
   int getNumClades() { return clades.size(); }
-  Clade getClade(int i) { return clades[i]; } 
+  Clade getClade(int i) { return clades[i]; }
 };
 
 // ************************************************************
 // CladePair stuff
-// 
+//
 // A clade pair will be two clades where the second clade is a strict subset of the first clade
 // and the second clade will precede the clade which is the set difference between the first and second clades.
 // ************************************************************
@@ -346,7 +346,7 @@ string Clade::randomTree(multimap<Clade,pair<Clade,T> >& mm,
       probs.push_back((double)counter);
       indices.push_back( (p->second).first.get() ); //get(): get dynamic bit set
       total += counter;
-    }  
+    }
     for (int i = 0; i < probs.size(); ++i) {
       probs[i] = probs[i]/(double)total;
       cladeLogProbMap[ pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >(get(),indices[i]) ] = log(probs[i]);

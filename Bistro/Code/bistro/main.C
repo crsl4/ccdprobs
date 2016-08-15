@@ -152,16 +152,20 @@ int main(int argc, char* argv[])
 			 (minimumParsimonyScore - topologyToParsimonyScoreMap[ (*m).first ]) );
   }
 
-  cout << endl << "Topology counts:" << endl;
+
+  cout << endl << "Topology counts to file" << endl;
   {
+    string topologyCountsFile = parameters.getOutFileRoot() + ".topCounts";
+    ofstream topCounts(topologyCountsFile.c_str());
     map<string,double>::iterator wm=topologyToWeightMap.begin();
     for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
     {
-      cout << (*cm).first << " " << setw(5) << (*cm).second << " " << setw(10) << setprecision(4) << fixed << (*wm).second;
-      cout << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ] << endl;
+      topCounts << (*cm).first << " " << setw(5) << (*cm).second << " " << setw(10) << setprecision(4) << fixed << (*wm).second;
+      topCounts << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ] << endl;
       ++wm;
     }
-    cout << endl;
+    topCounts << endl;
+    topCounts.close();
   }
 
   vector<int> taxaNumbers;
@@ -203,6 +207,7 @@ int main(int argc, char* argv[])
 
   if ( parameters.getNumBootstrap() > 0 )
   {
+    multimap<string,double> topologyToLogweightMMap; //multimap to keep logwt for each topology
     cerr << "Generating " << numRandom << " random trees:" << endl << '|';
     for ( int k=0; k<numRandom; ++k )
     {
@@ -211,8 +216,8 @@ int main(int argc, char* argv[])
       if ( numRandom > 9 && (k+1) % (numRandom / 10) == 0 )
 	cerr << '|';
       double logTopologyProbability=0;
-      string treeString = ccd.randomTree(rng,logTopologyProbability);
-      //string treeString = ccdParsimony.randomTree(rng,logTopologyProbability);
+      //string treeString = ccd.randomTree(rng,logTopologyProbability);
+      string treeString = ccdParsimony.randomTree(rng,logTopologyProbability);
       Tree tree(treeString);
       tree.relabel(alignment);
       tree.unroot();
@@ -244,13 +249,17 @@ int main(int argc, char* argv[])
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
       tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
       tree.sortCanonical();
+      string top = tree.makeTopologyNumbers();
 //      int score = tree.parsimonyScore(alignment);
-//      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << " " << score << endl;
-      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+//      f << top << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << " " << score << endl;
+      f << top << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
       logwt[k] = logWeight;
       if ( k==0 || logWeight > maxLogWeight )
 	maxLogWeight = logWeight;
+      //add to the multimap for the topology the logweight
+      topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
     }
+
     cerr << endl << "done." << endl;
     vector<double> wt(numRandom,0);
     double sum=0;
@@ -269,6 +278,37 @@ int main(int argc, char* argv[])
 	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
     cerr << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
 	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
+
+    // substract max from multimap
+    for ( multimap<string,double >::iterator p=topologyToLogweightMMap.begin(); p!= topologyToLogweightMMap.end(); ++p) {
+      p->second -= maxLogWeight; // need to test this
+    }
+
+    // map from topology to unnormalized weight
+    map<string,double> topologyToUnnormalizedWeightMap;
+    for ( multimap<string,double >::iterator p=topologyToLogweightMMap.begin(); p!= topologyToLogweightMMap.end(); ++p) {
+      pair< multimap<string,double >::iterator,multimap<string,double >::iterator> ret = topologyToLogweightMMap.equal_range(p->first);
+      double sumWt = 0;
+      for ( multimap<string,double >::iterator q=ret.first; q!= ret.second; ++q) {
+	sumWt += exp(q->second);
+      }
+      cout << "topology: " << (p->first) << " and sum of weights " << sumWt << endl;
+      topologyToUnnormalizedWeightMap[ p->first ] = sumWt;
+    }
+
+    CCDProbs<double> splits(topologyToUnnormalizedWeightMap,taxaNumbers,taxaNames);
+    string splitsWeightsFile = parameters.getOutFileRoot() + ".splits";
+    ofstream splitsWt(splitsWeightsFile.c_str());
+    splits.writeCladeCount(splitsWt);
+    splitsWt.close();
+
+    string topologyPPFile = parameters.getOutFileRoot() + ".topPP";
+    ofstream topPP(topologyPPFile.c_str());
+    for ( map<string,double >::iterator p=topologyToUnnormalizedWeightMap.begin(); p!= topologyToUnnormalizedWeightMap.end(); ++p) {
+      topPP << (p->first) << fixed << setprecision(4) << (p->second)/sum << endl;
+    }
+
   }
+
   return 0;
 }
