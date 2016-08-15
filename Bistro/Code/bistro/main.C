@@ -207,8 +207,8 @@ int main(int argc, char* argv[])
       if ( numRandom > 9 && (k+1) % (numRandom / 10) == 0 )
 	cerr << '|';
       double logTopologyProbability=0;
-      //string treeString = ccd.randomTree(rng,logTopologyProbability);
-      string treeString = ccdParsimony.randomTree(rng,logTopologyProbability);
+      string treeString = ccd.randomTree(rng,logTopologyProbability);
+      //string treeString = ccdParsimony.randomTree(rng,logTopologyProbability);
       Tree tree(treeString);
       tree.relabel(alignment);
       tree.unroot();

@@ -143,83 +143,83 @@ int main(int argc, char* argv[])
   vector<int> taxaNumbers;
   vector<string> taxaNames;
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
-  CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
+  // CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
 
-  ofstream f(parameters.getOutFileRoot().c_str());
+  // ofstream f(parameters.getOutFileRoot().c_str());
 
-  f << "tree logl logTop logProp logPrior logWt" << endl;
+  // f << "tree logl logTop logProp logPrior logWt" << endl;
 
-  int numRandom = parameters.getNumRandom();
+  // int numRandom = parameters.getNumRandom();
 
-  vector<double> logwt(numRandom,0);
-  double maxLogWeight;
+  // vector<double> logwt(numRandom,0);
+  // double maxLogWeight;
 
-  if ( parameters.getNumBootstrap() > 0 )
-  {
-    cerr << "Generating " << numRandom << " random trees:" << endl << '|';
-    for ( int k=0; k<numRandom; ++k )
-    {
-      if ( numRandom > 99 && (k+1) % (numRandom / 100) == 0 )
-	cerr << '*';
-      if ( numRandom > 9 && (k+1) % (numRandom / 10) == 0 )
-	cerr << '|';
-      double logTopologyProbability=0;
-      string treeString = ccd.randomTree(rng,logTopologyProbability);
-      Tree tree(treeString);
-      tree.relabel(alignment);
-      tree.unroot();
-      MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
-      gtrDistanceMatrixCopy = gtrDistanceMatrix;
-      tree.setNJDistances(gtrDistanceMatrixCopy,rng);
-      tree.randomize(rng);
-      tree.print(cout);
-      cout << tree.makeTreeNumbers() << endl;
-      double logProposalDensity = 0;
-      for ( int i=0; i<parameters.getNumMLE(); ++i )
-      {
-	tree.randomEdges(alignment,model,rng,logProposalDensity,true);
-	cout << tree.makeTreeNumbers() << endl;
-      }
-      if( parameters.getIndependent() )
-	{
-	  cout << "Branch lengths sampled independently" << endl;
-	  tree.randomEdges(alignment,model,rng,logProposalDensity,false);
-	}
-      else
-	{
-	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
-	  //tree.randomEdges(alignment,model,rng,logProposalDensity,false); //need to remove this
-	}
-      cout << tree.makeTreeNumbers() << endl;
-      double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
-      double logLik = tree.calculate(alignment, model);
-      double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
-      tree.reroot(1);
-      tree.sortCanonical();
-      f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
-      logwt[k] = logWeight;
-      if ( k==0 || logWeight > maxLogWeight )
-	maxLogWeight = logWeight;
-    }
-    cerr << endl << "done." << endl;
-    vector<double> wt(numRandom,0);
-    double sum=0;
-    for ( int k=0; k<numRandom; ++k )
-    {
-      wt[k] = exp(logwt[k] - maxLogWeight);
-      sum += wt[k];
-    }
-    double essInverse=0;
-    for ( int k=0; k<numRandom; ++k )
-    {
-      wt[k] /= sum;
-      essInverse += wt[k]*wt[k];
-    }
-    cout << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
-	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
-    cerr << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
-	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
-  }
+  // if ( parameters.getNumBootstrap() > 0 )
+  // {
+  //   cerr << "Generating " << numRandom << " random trees:" << endl << '|';
+  //   for ( int k=0; k<numRandom; ++k )
+  //   {
+  //     if ( numRandom > 99 && (k+1) % (numRandom / 100) == 0 )
+  // 	cerr << '*';
+  //     if ( numRandom > 9 && (k+1) % (numRandom / 10) == 0 )
+  // 	cerr << '|';
+  //     double logTopologyProbability=0;
+  //     string treeString = ccd.randomTree(rng,logTopologyProbability);
+  //     Tree tree(treeString);
+  //     tree.relabel(alignment);
+  //     tree.unroot();
+  //     MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
+  //     gtrDistanceMatrixCopy = gtrDistanceMatrix;
+  //     tree.setNJDistances(gtrDistanceMatrixCopy,rng);
+  //     tree.randomize(rng);
+  //     tree.print(cout);
+  //     cout << tree.makeTreeNumbers() << endl;
+  //     double logProposalDensity = 0;
+  //     for ( int i=0; i<parameters.getNumMLE(); ++i )
+  //     {
+  // 	tree.randomEdges(alignment,model,rng,logProposalDensity,true);
+  // 	cout << tree.makeTreeNumbers() << endl;
+  //     }
+  //     if( parameters.getIndependent() )
+  // 	{
+  // 	  cout << "Branch lengths sampled independently" << endl;
+  // 	  tree.randomEdges(alignment,model,rng,logProposalDensity,false);
+  // 	}
+  //     else
+  // 	{
+  // 	  cout << "Branch lengths sampled jointly in 2D" << endl;
+  // 	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
+  // 	  //tree.randomEdges(alignment,model,rng,logProposalDensity,false); //need to remove this
+  // 	}
+  //     cout << tree.makeTreeNumbers() << endl;
+  //     double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
+  //     double logLik = tree.calculate(alignment, model);
+  //     double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
+  //     tree.reroot(1);
+  //     tree.sortCanonical();
+  //     f << tree.makeTopologyNumbers() << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+  //     logwt[k] = logWeight;
+  //     if ( k==0 || logWeight > maxLogWeight )
+  // 	maxLogWeight = logWeight;
+  //   }
+  //   cerr << endl << "done." << endl;
+  //   vector<double> wt(numRandom,0);
+  //   double sum=0;
+  //   for ( int k=0; k<numRandom; ++k )
+  //   {
+  //     wt[k] = exp(logwt[k] - maxLogWeight);
+  //     sum += wt[k];
+  //   }
+  //   double essInverse=0;
+  //   for ( int k=0; k<numRandom; ++k )
+  //   {
+  //     wt[k] /= sum;
+  //     essInverse += wt[k]*wt[k];
+  //   }
+  //   cout << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
+  // 	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
+  //   cerr << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
+  // 	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
+  // }
   return 0;
 }
