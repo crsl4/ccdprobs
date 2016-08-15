@@ -16,7 +16,7 @@ rates = function(file){
     r <- as.numeric(strsplit(lin[i+2],"\\s+")[[1]])
     p <- p[!is.na(p)]
     r <- r[!is.na(r)]
-    den <- c(p[1]*p[2],p[1]*p[3],p[1]*p[4],p[2]*p[3], p[2]*p[3],p[3]*p[4])
+    den <- c(p[1]*p[2],p[1]*p[3],p[1]*p[4],p[2]*p[3], p[2]*p[4],p[3]*p[4])
     r <- r/den
     r <- r/r[6]
     print(paste0("prset statefreqpr=fixed(",p[1],",",p[2],",",p[3],",",p[4],");"))
