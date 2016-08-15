@@ -172,16 +172,20 @@ int main(int argc, char* argv[])
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
   // write map out to temp files to check
-  ofstream smap("temp.smap");
+  string originalSmapFile = parameters.getOutFileRoot() + "-nopars.smap";
+  string originalTmapFile = parameters.getOutFileRoot() + "-nopars.tmap";
+  string parsimonySmapFile = parameters.getOutFileRoot() + "-pars.smap";
+  string parsimonyTmapFile = parameters.getOutFileRoot() + "-pars.tmap";
+  ofstream smap(originalSmapFile.c_str());
   ccd.writeCladeCount(smap);
   smap.close();
-  ofstream tmap("temp.tmap");
+  ofstream tmap(originalTmapFile.c_str());
   ccd.writePairCount(tmap);
   tmap.close();
-  smap.open("pars.smap");
+  smap.open(parsimonySmapFile);
   ccdParsimony.writeCladeCount(smap);
   smap.close();
-  tmap.open("pars.tmap");
+  tmap.open(parsimonyTmapFile);
   ccdParsimony.writePairCount(tmap);
   tmap.close();
 
