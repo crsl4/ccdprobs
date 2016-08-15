@@ -253,8 +253,10 @@ void RootedTree::count(T n,map<Clade,T>& cladeCount,map<CladePair,T>& pairCount)
 }
 
 template<typename T> //change int for T and put CCDProbs<T>
-CCDProbs<T>::CCDProbs(map<string,T>& topologyToCountMap,vector<int>& taxaNumbers,vector<string>& taxaNames)
+CCDProbs<T>::CCDProbs(map<string,T>& topologyToCountMap,vector<int>& tNumbers,vector<string>& tNames)
 {
+  taxaNumbers = tNumbers;
+  taxaNames = tNames;
   sampleSize = 0;
   numTaxa = taxaNames.size();
   for ( typename map<string,T>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
