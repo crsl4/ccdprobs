@@ -131,8 +131,8 @@ end;
 begin mrbayes;
       set autoclose=yes nowarn=yes;
       lset nst=6;
-      prset statefreqpr=fixed(0.283648,0.259055,0.155743,0.301554);
-      prset revmatpr=fixed(10.6133849811454,11.9865451425035,3.47335322142167,2.14852796351979,38.4894669329814,1);
+      prset statefreqpr=fixed(0.287404,0.25981,0.152123,0.300663);
+      prset revmatpr=fixed(18.9119163191331,21.3532112947297,5.93312767201482,3.13717291008267,35.8986145518895,1);
       outgroup 1;
 
       mcmc ngen=1100000 printfreq=10000 samplefreq=50;

@@ -193,10 +193,9 @@ int main(int argc, char* argv[])
   ccdParsimony.writePairCount(tmap);
   tmap.close();
 
-  //   CCDProbs<double> ccd(topologyToCountMap,taxaNumbers,taxaNames);
-  //CCDProbs ccd(topologyToCountMap,taxaNumbers,taxaNames);
-
   ofstream f(parameters.getOutFileRoot().c_str());
+  string treeBLFile = parameters.getOutFileRoot() + ".treeBL";
+  ofstream treebl(treeBLFile.c_str());
 
   f << "tree logl logTop logProp logPrior logWt" << endl;
 
@@ -248,6 +247,7 @@ int main(int argc, char* argv[])
 	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
 	}
       cout << tree.makeTreeNumbers() << endl;
+      treebl << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
       double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
@@ -263,6 +263,7 @@ int main(int argc, char* argv[])
       //add to the multimap for the topology the logweight
       topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
     }
+    treebl.close();
 
     cerr << endl << "done." << endl;
     vector<double> wt(numRandom,0);
@@ -296,7 +297,7 @@ int main(int argc, char* argv[])
       for ( multimap<string,double >::iterator q=ret.first; q!= ret.second; ++q) {
 	sumWt += exp(q->second);
       }
-      cout << "topology: " << (p->first) << " and sum of weights " << sumWt << endl;
+      //cout << "topology: " << (p->first) << " and sum of weights " << sumWt << endl;
       topologyToUnnormalizedWeightMap[ p->first ] = sumWt;
     }
 

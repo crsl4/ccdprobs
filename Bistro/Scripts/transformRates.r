@@ -7,10 +7,14 @@
 
 rates = function(file){
     lin <- readLines(file)
+    found = FALSE
     i = 0
     for(i in 1:length(lin)){
         if(grepl("symmetric acceptance", lin[i]))
-            break
+            if(!found)
+                found = TRUE
+            else
+                break
     }
     p <- as.numeric(strsplit(lin[i+1],"\\s+")[[1]])
     r <- as.numeric(strsplit(lin[i+2],"\\s+")[[1]])
