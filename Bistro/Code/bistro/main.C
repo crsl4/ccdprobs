@@ -193,7 +193,8 @@ int main(int argc, char* argv[])
   ccdParsimony.writePairCount(tmap);
   tmap.close();
 
-  ofstream f(parameters.getOutFileRoot().c_str());
+  string outFile = parameters.getOutFileRoot() + ".out";
+  ofstream f(outFile.c_str());
   string treeBLFile = parameters.getOutFileRoot() + ".treeBL";
   ofstream treebl(treeBLFile.c_str());
 
@@ -250,7 +251,7 @@ int main(int argc, char* argv[])
       treebl << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
-      double logWeight = logTopologyProbability + logBranchLengthPriorDensity + logLik - logProposalDensity;
+      double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity - logTopologyProbability;
       tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
       tree.sortCanonical();
       string top = tree.makeTopologyNumbers();
