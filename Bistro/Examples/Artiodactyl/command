@@ -39,3 +39,5 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o nopars1k --no-parsimony -s 4011643352 > nopars1k.log
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o pars1k-indep -s 4011643352 --independent > pars1k-indep.log
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o nopars1k-indep -s 4011643352 --independent --no-parsimony > nopars1k-indep.log
+
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10000 -m 2 -o pars10k > pars10k.log
