@@ -310,8 +310,12 @@ int main(int argc, char* argv[])
 
     string topologyPPFile = parameters.getOutFileRoot() + ".topPP";
     ofstream topPP(topologyPPFile.c_str());
+    double prob;
+    double se;
     for ( map<string,double >::iterator p=topologyToUnnormalizedWeightMap.begin(); p!= topologyToUnnormalizedWeightMap.end(); ++p) {
-      topPP << (p->first) << fixed << setprecision(4) << (p->second)/sum << endl;
+      prob = (p->second)/sum;
+      se = sqrt(prob * (1-prob) * essInverse);
+      topPP << (p->first) << fixed << setprecision(4) << prob << " " << se << endl;
     }
 
   }
