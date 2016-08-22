@@ -3,25 +3,25 @@
 
 using namespace std;
 
-// creating a thread using a Function pointer
-// void thread_function()
-// {
-//   //cout << "entering thread function" << endl;
-//   for ( int i=0; i < 10; i++)
-//     cout << "thread function executing" << endl;
-// }
+//creating a thread using a Function pointer
+void thread_function()
+{
+  //cout << "entering thread function" << endl;
+  for ( int i=0; i < 10; i++)
+    cout << "thread function executing" << endl;
+}
 
-// int main()
-// {
-//   //cout << "entering main" << endl;
-//   thread threadObj(thread_function);
-//   //cout << "in main, after calling thread function" << endl;
-//   for( int i=0; i < 10; i++)
-//     cout << "Display from main thread" << endl;
-//   threadObj.join();
-//   cout << "exit from main function" << endl;
-//   return 0;
-// }
+int main()
+{
+  //cout << "entering main" << endl;
+  thread threadObj(thread_function);
+  //cout << "in main, after calling thread function" << endl;
+  for( int i=0; i < 10; i++)
+    cout << "Display from main thread" << endl;
+  threadObj.join();
+  cout << "exit from main function" << endl;
+  return 0;
+}
 
 // creating a thread using function objects
 // class DisplayThread
@@ -89,23 +89,23 @@ using namespace std;
 
 
 // passing arguments to a thread
-void threadCallback(int x, string str)
-{
-  cout << "entering thread callback" << endl;
-  cout << "Passed number = " << x << endl;
-  cout << "Passed string = " << str << endl;
-}
+// void threadCallback(int x, string str)
+// {
+//   cout << "entering thread callback" << endl;
+//   cout << "Passed number = " << x << endl;
+//   cout << "Passed string = " << str << endl;
+// }
 
-int main()
-{
-  //may return 0 when not able to detect
-  unsigned concurrentThreadsSupported = std::thread::hardware_concurrency();
-  cout << "hardware concurrency: " << concurrentThreadsSupported << endl;
-  int x = 10;
-  string str = "claudia";
-  cout << "main before calling thread" << endl;
-  thread threadObj(threadCallback,x,str);
-  cout << "main after calling thread" << endl;
-  threadObj.join();
-  return 0;
-}
+// int main()
+// {
+//   //may return 0 when not able to detect
+//   unsigned concurrentThreadsSupported = std::thread::hardware_concurrency();
+//   cout << "hardware concurrency: " << concurrentThreadsSupported << endl;
+//   int x = 10;
+//   string str = "claudia";
+//   cout << "main before calling thread" << endl;
+//   thread threadObj(threadCallback,x,str);
+//   cout << "main after calling thread" << endl;
+//   threadObj.join();
+//   return 0;
+//}
