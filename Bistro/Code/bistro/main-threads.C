@@ -27,7 +27,7 @@ using namespace Eigen;
 
 // arguments made reference to avoid copying in each thread
 template<typename T>
-void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
+void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T>& ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 { 
    cerr << "Random trees from " << indStart << " to " << indEnd << endl;
    string outFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".out";
@@ -293,15 +293,15 @@ int main(int argc, char* argv[])
     for ( int i=0; i<(cores-1); ++i )
       {
 	if ( parameters.getUseParsimony() )
-	  threads.push_back(thread(randomTrees,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	  threads.push_back(thread(randomTrees<double>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
 	else
-	  threads.push_back(thread(randomTrees,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	  threads.push_back(thread(randomTrees<int>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       }
     // last core:
     if ( parameters.getUseParsimony() )
-      threads.push_back(thread(randomTrees,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ccdParsimony, ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
+      threads.push_back(thread(randomTrees<double>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
     else
-      threads.push_back(thread(randomTrees,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ccd, ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
+      threads.push_back(thread(randomTrees<int>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccd), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
 
     for ( int i=0; i<cores; ++i )
       threads.at(i).join();
