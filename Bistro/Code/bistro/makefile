@@ -18,8 +18,8 @@ CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-de
 
 all: bistro
 
-bistro: main.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
-	$(CC) $(CFLAGS) -o bistro main.C $(OBJS)
+bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
+	$(CC) $(CFLAGS) -o bistro main-threads.C $(OBJS)
 
 .C.o:
 	$(CC) $(CFLAGS) -o $@ -c $<

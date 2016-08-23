@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <random>
+#include <thread>
 
 #include "parameter.h"
 #include "sequence.h"
@@ -24,22 +25,23 @@
 using namespace std;
 using namespace Eigen;
 
+// arguments made reference to avoid copying in each thread
 template<typename T>
-multimap<string,double> randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64 rng, Alignment alignment, MatrixXd gtrDistanceMatrix, QMatrix model, Parameter parameters)
-{
-  string outFile = parameters.getOutFileRoot() + ".out";
-  ofstream f(outFile.c_str());
-  string treeBLFile = parameters.getOutFileRoot() + ".treeBL";
-  ofstream treebl(treeBLFile.c_str());
-  f << "tree logl logTop logProp logPrior logWt" << endl;
+void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
+{ 
+   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
+   string outFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".out";
+   ofstream f(outFile.c_str());
+   string treeBLFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".treeBL";
+   ofstream treebl(treeBLFile.c_str());
+   f << "tree logl logTop logProp logPrior logWt" << endl;
 
-  multimap<string,double> topologyToLogweightMMap; //multimap to keep logwt for each topology
-  for ( int k=indStart; k<indEnd; ++k )
-    {
-      if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
-	cerr << '*';
-      if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
-	cerr << '|';
+   for ( int k=indStart; k<indEnd; ++k )
+     {
+      // if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
+      // 	cerr << '*';
+      // if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
+      // 	cerr << '|';
       double logTopologyProbability=0;
       string treeString;
       treeString = ccd.randomTree(rng,logTopologyProbability);
@@ -85,7 +87,6 @@ multimap<string,double> randomTrees(int indStart, int indEnd, vector<double>& lo
       topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
     }
   treebl.close();
-  return topologyToLogweightMMap;
 }
 
 
@@ -258,19 +259,70 @@ int main(int argc, char* argv[])
   ccdParsimony.writePairCount(tmap);
   tmap.close();
 
-  int numRandom = parameters.getNumRandom();
-  vector<double> logwt(numRandom,0);
-  double maxLogWeight;
-
   if ( parameters.getNumBootstrap() > 0 )
   {
-    cerr << "Generating " << numRandom << " random trees:" << endl << '|';
-    multimap<string,double> topologyToLogweightMMap;
+    int numRandom = parameters.getNumRandom();
+ 
+    unsigned int cores = thread::hardware_concurrency();
+    cerr << "Generating " << numRandom << " random trees in " << cores << " cores:" << endl;
+    int k = numRandom / cores;
+
+    // generating the seeds for each core
+    random_device rd;
+    unsigned int initial_seed = rd();
+    cerr << "Seed = " << initial_seed << endl;
+    minstd_rand seed_rng(initial_seed);
+    uniform_int_distribution<> rint(0,4294967295);
+    vector<unsigned int> seeds(cores);
+    vector<mt19937_64*> vrng;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
+      {
+    	*p = rint(seed_rng);
+    	vrng.push_back( new mt19937_64(*p) );
+      }
+    cerr << "Seeds per core: " << endl;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
+      cerr << setw(15) << *p << endl;
+
+    vector<thread> threads;
+    vector< multimap<string,double> > topologymm(cores); //vector of multimaps
+    vector<double> logwt(numRandom,0);
+    vector<double> maxLogW(cores); //vector of maxlogweight
+
+    return 0;
+    for ( int i=0; i<(cores-1); ++i )
+      {
+	if ( parameters.getUseParsimony() )
+	  threads.push_back(thread(randomTrees,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	else
+	  threads.push_back(thread(randomTrees,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+      }
+    // last core:
     if ( parameters.getUseParsimony() )
-      topologyToLogweightMMap = randomTrees(0,numRandom, logwt, maxLogWeight, ccdParsimony, rng, alignment, gtrDistanceMatrix, model, parameters);
+      threads.push_back(thread(randomTrees,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ccdParsimony, ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
     else
-      topologyToLogweightMMap = randomTrees(0,numRandom, logwt, maxLogWeight, ccd, rng, alignment, gtrDistanceMatrix, model, parameters);
+      threads.push_back(thread(randomTrees,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ccd, ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
+
+    for ( int i=0; i<cores; ++i )
+      threads.at(i).join();
     cerr << endl << "done." << endl;
+
+    double maxLogWeight = maxLogW[0];
+    for(int i=1; i<cores; ++i)
+      {
+	if(maxLogW[i] > maxLogWeight)
+	  maxLogWeight = maxLogW[i];
+      }
+
+    multimap<string,double> topologyToLogweightMMap;
+    for ( vector< multimap<string,double>>::iterator p=topologymm.begin(); p!=topologymm.end(); ++p) //for every multimap in topologymm
+      {
+	for ( multimap<string,double >::iterator q=(*p).begin(); q!= (*p).end(); ++q) // traverse this multimap (*p)
+	  {
+	    topologyToLogweightMMap.insert( pair<string,double>(q->first,q->second) ) ;
+	  }
+      }
+
     vector<double> wt(numRandom,0);
     double sum=0;
     for ( int k=0; k<numRandom; ++k )

@@ -10,14 +10,14 @@ void thread_function(mt19937_64& rng,int id,int n,vector<int>& v)
 {
   cout << "Beginning thread " << id << ", also known as " << this_thread::get_id() << endl;
   for ( int i=0; i<n; ++i )
-  {
-    uniform_int_distribution<> rint(0,99);
-    v[n*id + i] = rint(rng);
-  }
+    {
+      uniform_int_distribution<> rint(0,99);
+      v[n*id + i] = rint(rng);
+    }
   cout << "Ending thread " << id << endl;
-}
-
-int main()
+ }
+      
+  int main()
 {
   unsigned int cores = thread::hardware_concurrency();
   cout << cores << " cores." << endl;
