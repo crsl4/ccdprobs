@@ -28,3 +28,7 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 
 
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o pars10k > pars10k.log
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o pars1k > pars1k.log
+
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o pars1k-scale --parsimony-scale 0.2 > pars1k-scale.log
+
+

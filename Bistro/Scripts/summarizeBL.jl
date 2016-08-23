@@ -62,6 +62,7 @@ dot(bl21,wt21)
 
 ##################### cats ###############################################################
 trees = readMultiTopology("../Examples/cats-dogs/pars10k.treeBL");
+trees = readMultiTopology("../Examples/cats-dogs/pars1k-scale.treeBL");
 length(trees)
 
 taxa = tipLabels(trees[1])
@@ -80,6 +81,7 @@ split22 = [true,true,true,true,true,false,false,true,true,true,true,true]
 ## WEIGHTS
 using DataFrames
 dat = readtable("../Examples/cats-dogs/pars10k.out", header=true, separator=' ')
+dat = readtable("../Examples/cats-dogs/pars1k-scale.out", header=true, separator=' ')
 logwt = convert(Array,dat[:logWt])
 logwt = logwt - maximum(logwt)
 wt = exp(logwt)
