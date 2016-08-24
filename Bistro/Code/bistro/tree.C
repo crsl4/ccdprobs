@@ -1404,10 +1404,10 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   list<Node*> nodeList;
   depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents();
-  cout << "Node List:";
-  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-    cout << " " << (*p)->getNumber();
-  cout << endl;
+//  cout << "Node List:";
+//  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+//    cout << " " << (*p)->getNumber();
+//  cout << endl;
 
   list<Node*>::iterator p=nodeList.begin();
   while ( true )
@@ -1445,7 +1445,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
     if ( par==root )
     {
-      cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
+//      cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
 
       // compute probabilities at subtrees x,y,z
       for ( int k=0; k<alignment.getNumSites(); ++k )
@@ -1478,7 +1478,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
     else
       {
-	cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
+//	cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
 
 	// compute probabilities at subtrees x,y,z
 	for ( int k=0; k<alignment.getNumSites(); ++k )
@@ -1512,8 +1512,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 // modified to do 2D MLE instead of 3D
 Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
 {
-  cout << "Entering mleLength2D";
-  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+//  cout << "Entering mleLength2D";
+//  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
   int iter=0;
   Vector2d curr(ex->getLength(),ey->getLength());
   double lz = ez->getLength(); //kept fixed throughout
@@ -1550,7 +1550,7 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
       {
 	while ( prop[0] < 0 || prop[1] < 0)
 	  {
-	    cout << "found negative with big curr, will shrink delta" << endl;
+//	    cout << "found negative with big curr, will shrink delta" << endl;
 	    if(prop[0] < 0)
 	      delta[0] = 0.5* delta[0];
 	    if(prop[1] < 0)
@@ -1561,17 +1561,17 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
     //    cerr << "Delta " << delta.transpose() << endl;
     if(prop[0] < 0 && curr[0] < TOL)
       {
-	cout << "found negative for 1st element with curr small, will set to zero" << endl;
+//	cout << "found negative for 1st element with curr small, will set to zero" << endl;
     	prop[0] = MIN_EDGE_LENGTH;
 	keepZero1 = true;
       }
     if(prop[1] < 0 && curr[1] < TOL)
       {
-	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
+//	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
     	prop[1] = MIN_EDGE_LENGTH;
 	keepZero2 = true;
       }
-    cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
+//    cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
 
     partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
     if ( ++iter > 100 )
@@ -1580,7 +1580,7 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
       {
 	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
 	  {
-	    cout << "found bigger step" << endl;
+//	    cout << "found bigger step" << endl;
 	    if(keepZero1)
 		delta[0] = 0;
 	    if(keepZero2)
@@ -1593,17 +1593,17 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
 	  }
       }
   } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
-  cout << "Finally converged to" << endl;
-  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
-  cout << "prop: " << prop.transpose() << endl;
+//  cout << "Finally converged to" << endl;
+//  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+//  cout << "prop: " << prop.transpose() << endl;
   return prop;
 }
 
 
 Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
 {
-  cout << "Entering mleLength3D";
-  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+//  cout << "Entering mleLength3D";
+//  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
   int iter=0;
   Vector3d curr(ex->getLength(),ey->getLength(),ez->getLength());
   //  cout << "Initial bl curr: " << curr.transpose() << endl;
@@ -1642,7 +1642,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
       {
 	while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
 	  {
-	    cout << "found negative with big curr, will shrink delta" << endl;
+//	    cout << "found negative with big curr, will shrink delta" << endl;
 	    if(prop[0] < 0)
 	      delta[0] = 0.5* delta[0];
 	    if(prop[1] < 0)
@@ -1655,23 +1655,23 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
     //    cerr << "Delta " << delta.transpose() << endl;
     if(prop[0] < 0 && curr[0] < TOL)
       {
-	cout << "found negative for 1st element with curr small, will set to zero" << endl;
+//	cout << "found negative for 1st element with curr small, will set to zero" << endl;
     	prop[0] = MIN_EDGE_LENGTH;
 	keepZero1 = true;
       }
     if(prop[1] < 0 && curr[1] < TOL)
       {
-	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
+//	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
     	prop[1] = MIN_EDGE_LENGTH;
 	keepZero2 = true;
       }
     if(prop[2] < 0 && curr[2] < TOL)
       {
-	cout << "found negative for 3rd element with curr small, will set to zero" << endl;
+//	cout << "found negative for 3rd element with curr small, will set to zero" << endl;
     	prop[2] = MIN_EDGE_LENGTH;
 	keepZero3 = true;
       }
-    cout << "prop befofe partialPathCalculations3D: " << prop.transpose() << endl;
+//    cout << "prop befofe partialPathCalculations3D: " << prop.transpose() << endl;
 
     partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
     if ( ++iter > 100 )
@@ -1680,7 +1680,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
       {
 	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
 	  {
-	    cout << "found bigger step" << endl;
+//	    cout << "found bigger step" << endl;
 	    if(keepZero1)
 		delta[0] = 0;
 	    if(keepZero2)
@@ -1695,9 +1695,9 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
 	  }
       }
   } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
-  cout << "Finally converged to" << endl;
-  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
-  cout << "prop: " << prop.transpose() << endl;
+//  cout << "Finally converged to" << endl;
+//  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+//  cout << "prop: " << prop.transpose() << endl;
   return prop;
 }
 

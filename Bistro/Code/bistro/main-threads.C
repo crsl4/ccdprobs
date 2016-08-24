@@ -29,7 +29,7 @@ using namespace Eigen;
 template<typename T>
 void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T>& ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 { 
-   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
+//   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
    string outFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".out";
    ofstream f(outFile.c_str());
    string treeBLFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".treeBL";
@@ -38,7 +38,7 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
 
    for ( int k=indStart; k<indEnd; ++k )
      {
-       cerr << "," << k << ",";
+//       cerr << "," << k << ",";
       // if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
       // 	cerr << '*';
       // if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
@@ -54,25 +54,25 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
       tree.setNJDistances(gtrDistanceMatrixCopy,rng);
       tree.randomize(rng);
-      tree.print(cout);
-      cout << tree.makeTreeNumbers() << endl;
+//      tree.print(cout);
+//      cout << tree.makeTreeNumbers() << endl;
       double logProposalDensity = 0;
       for ( int i=0; i<parameters.getNumMLE(); ++i )
 	{
 	  tree.randomEdges(alignment,model,rng,logProposalDensity,true);
-	  cout << tree.makeTreeNumbers() << endl;
+//	  cout << tree.makeTreeNumbers() << endl;
 	}
       if( parameters.getIndependent() )
 	{
-	  cout << "Branch lengths sampled independently" << endl;
+//	  cout << "Branch lengths sampled independently" << endl;
 	  tree.randomEdges(alignment,model,rng,logProposalDensity,false);
 	}
       else
 	{
-	  cout << "Branch lengths sampled jointly in 2D" << endl;
+//	  cout << "Branch lengths sampled jointly in 2D" << endl;
 	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
 	}
-      cout << tree.makeTreeNumbers() << endl;
+//      cout << tree.makeTreeNumbers() << endl;
       treebl << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       double logLik = tree.calculate(alignment, model);
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
   cout << endl;
 
   // Find Jukes-Cantor pairwise distances
-  cerr << alignment.getNumTaxa() << endl;
+//  cerr << alignment.getNumTaxa() << endl;
   cerr << "Finding initial Jukes-Cantor pairwise distances ...";
   MatrixXd jcDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   alignment.calculateJCDistances(jcDistanceMatrix);
@@ -292,13 +292,15 @@ int main(int argc, char* argv[])
     vector<double> maxLogW(cores); //vector of maxlogweight
 
     for ( int i=0; i<(cores-1); ++i )
-      {
-	if ( parameters.getUseParsimony() )
-	  threads.push_back(thread(randomTrees<double>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
-	else
-	  threads.push_back(thread(randomTrees<int>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
-      }
+    {
+      cerr << "Thread " << i << " beginning random trees from " << i*k << " to " << (i+1)*k-1 << endl; 
+      if ( parameters.getUseParsimony() )
+	threads.push_back(thread(randomTrees<double>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+      else
+	threads.push_back(thread(randomTrees<int>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+    }
     // last core:
+    cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << cores*k-1 << endl; 
     if ( parameters.getUseParsimony() )
       threads.push_back(thread(randomTrees<double>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
     else
