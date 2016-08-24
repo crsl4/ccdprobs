@@ -38,6 +38,7 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
 
    for ( int k=indStart; k<indEnd; ++k )
      {
+       cerr << "," << k << ",";
       // if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
       // 	cerr << '*';
       // if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
@@ -81,7 +82,7 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
       string top = tree.makeTopologyNumbers();
       f << top << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
       logwt[k] = logWeight;
-      if ( k==0 || logWeight > maxLogWeight )
+      if ( k==indStart || logWeight > maxLogWeight )
 	maxLogWeight = logWeight;
       //add to the multimap for the topology the logweight
       topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
@@ -289,7 +290,6 @@ int main(int argc, char* argv[])
     vector<double> logwt(numRandom,0);
     vector<double> maxLogW(cores); //vector of maxlogweight
 
-    return 0;
     for ( int i=0; i<(cores-1); ++i )
       {
 	if ( parameters.getUseParsimony() )
@@ -307,12 +307,14 @@ int main(int argc, char* argv[])
       threads.at(i).join();
     cerr << endl << "done." << endl;
 
+    cerr << "maxLogW: " << maxLogW[0] << ", " << maxLogW[1] << ", " << maxLogW[2] << ", " << maxLogW[3] << endl;
     double maxLogWeight = maxLogW[0];
     for(int i=1; i<cores; ++i)
       {
 	if(maxLogW[i] > maxLogWeight)
 	  maxLogWeight = maxLogW[i];
       }
+    cerr << "maxLogWeight: " << maxLogWeight << endl;
 
     multimap<string,double> topologyToLogweightMMap;
     for ( vector< multimap<string,double>>::iterator p=topologymm.begin(); p!=topologymm.end(); ++p) //for every multimap in topologymm
@@ -327,7 +329,9 @@ int main(int argc, char* argv[])
     double sum=0;
     for ( int k=0; k<numRandom; ++k )
     {
+      //      cerr << "logwt[k]: " << logwt[k] << "for k= " << k << endl;
       wt[k] = exp(logwt[k] - maxLogWeight);
+      //cerr << "wt[k]: " << wt[k] << endl;
       sum += wt[k];
     }
     double essInverse=0;
