@@ -266,6 +266,7 @@ int main(int argc, char* argv[])
     unsigned int cores = thread::hardware_concurrency();
     cerr << "Generating " << numRandom << " random trees in " << cores << " cores:" << endl;
     int k = numRandom / cores;
+    cerr << "k = " << k << endl;
 
     // generating the seeds for each core
     random_device rd;
