@@ -29,7 +29,7 @@ using namespace Eigen;
 template<typename T>
 void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T>& ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 { 
-//   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
+  //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
    string outFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".out";
    ofstream f(outFile.c_str());
    string treeBLFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".treeBL";
@@ -38,11 +38,13 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
 
    for ( int k=indStart; k<indEnd; ++k )
      {
-//       cerr << "," << k << ",";
-      // if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
-      // 	cerr << '*';
-      // if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
-      // 	cerr << '|';
+       if(indStart == 0)
+	 {
+	   if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
+	     cerr << '*';
+	   if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
+	     cerr << '|';
+	 }
       double logTopologyProbability=0;
       string treeString;
       treeString = ccd.randomTree(rng,logTopologyProbability);
@@ -263,8 +265,13 @@ int main(int argc, char* argv[])
   if ( parameters.getNumBootstrap() > 0 )
   {
     int numRandom = parameters.getNumRandom();
- 
-    unsigned int cores = thread::hardware_concurrency();
+
+    unsigned int cores; 
+    if( parameters.getNumCores() == 0 )
+      cores = thread::hardware_concurrency();
+    else
+      cores = parameters.getNumCores();
+    // i want to check that cores not > than hardware_concurrency?
     cerr << "Generating " << numRandom << " random trees in " << cores << " cores:" << endl;
     int k = numRandom / cores;
     cerr << "k = " << k << endl;
@@ -300,7 +307,7 @@ int main(int argc, char* argv[])
 	threads.push_back(thread(randomTrees<int>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
     // last core:
-    cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << cores*k-1 << endl; 
+    cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl; 
     if ( parameters.getUseParsimony() )
       threads.push_back(thread(randomTrees<double>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
     else
@@ -310,7 +317,6 @@ int main(int argc, char* argv[])
       threads.at(i).join();
     cerr << endl << "done." << endl;
 
-    cerr << "maxLogW: " << maxLogW[0] << ", " << maxLogW[1] << ", " << maxLogW[2] << ", " << maxLogW[3] << endl;
     double maxLogWeight = maxLogW[0];
     for(int i=1; i<cores; ++i)
       {
