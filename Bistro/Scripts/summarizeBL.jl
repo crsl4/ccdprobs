@@ -3,6 +3,46 @@
 
 using PhyloNetworks
 
+##################### whales ###############################################################
+## trying to understand how much we propose the clade 8-10
+
+trees = readMultiTopology("run5k-p.txt.treeBL");
+length(trees)
+
+taxa = tipLabels(trees[1])
+split = falses(length(taxa))
+split[16] = true
+split[17] = true
+split[19] = true
+
+using DataFrames
+dat = readtable("run5k-p.txt.out", header=true, separator=' ')
+logwt = convert(Array,dat[:logWt])
+logwt = logwt - maximum(logwt)
+wt = exp(logwt)
+wt = wt / sum(wt)
+sum(wt)
+
+
+wtsplit = Float64[]
+blsplit = Float64[]
+
+
+i = 1
+for(t in trees)
+    for(e in t.edge)
+        if(hardwiredCluster(e,taxa) == split)
+            push!(blsplit,e.length)
+            push!(wtsplit, wt[i])
+        end
+    end
+    i += 1
+end
+
+length(wtsplit)
+
+mean(blsplit)
+
 ##################### primates ###############################################################
 trees = readMultiTopology("../Examples/Primates/pars10k.treeBL");
 length(trees)
