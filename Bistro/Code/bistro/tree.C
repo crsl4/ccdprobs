@@ -892,13 +892,15 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 // do all conditional calculations for both subtrees
 // find MLE of edge length conditional on rest of tree
 // generate gamma distributed random length
-void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity, bool onlyMLE)
+void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity, Node* childNode,bool onlyMLE)
 {
   // clear prob maps recursively through entire tree
   // there is a smarter way to do this for only part of the tree, depending on order of edges
   // worry about increased efficiency later
-  nodes[0]->clearProbMaps(this);
-  nodes[1]->clearProbMaps(this);
+  Node* parentNode = getOtherNode(childNode);
+  parentNode->clearProbMaps(this);
+//  nodes[0]->clearProbMaps(this);
+//  nodes[1]->clearProbMaps(this);
 
   bool converge;
   // set length to MLE distance
@@ -945,7 +947,7 @@ void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edg
   //  get random length for parent edge
   if ( parent != NULL ) // call edge command on parent
   {
-    parent->randomLength(alignment,qmatrix,rng,logProposalDensity,onlyMLE);
+    parent->randomLength(alignment,qmatrix,rng,logProposalDensity,this,onlyMLE);
   }
 }
 

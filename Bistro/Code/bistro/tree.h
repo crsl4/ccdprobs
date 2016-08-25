@@ -74,6 +74,7 @@ private:
   vector<Node*> activeChildren;
   Node* nodeParent;
   Edge* edgeParent;
+  Edge* mapParent; // pointer to parent edge used when creating patternToProbMap
   int minNumber; // smallest number in subtree rooted at node
 public:
   map<string,pair<double,Vector4d> > patternToProbMap;
