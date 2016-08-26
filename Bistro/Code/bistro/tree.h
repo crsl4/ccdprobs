@@ -58,7 +58,7 @@ public:
   void mleError(bool&);
   void calculate(double,Alignment&,QMatrix&,double&,double&,double&);
   double mleLength(Alignment&,QMatrix&,bool&);
-  void randomLength(Alignment&,QMatrix&,mt19937_64&,double&,bool);
+  void randomLength(Alignment&,QMatrix&,mt19937_64&,double&,Node*,bool);
 };
 
 class Node
