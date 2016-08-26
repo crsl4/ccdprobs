@@ -14,6 +14,7 @@
 #include "Eigen/Eigenvalues"
 
 #include "tree.h"
+#include "random.h"
 
 using namespace std;
 using namespace Eigen;
@@ -639,17 +640,23 @@ double Tree::pathLogLikelihoodSecondDerivative(double t,Alignment& alignment,Nod
   return ddlogl;
 }
 
-void mleError(Node* na,Node* nb,double curr,double prop,double curr_dlogl,double prop_dlogl)
-{
-  cerr << "Error: too many iterations in mleDistance." << endl;
-  cerr << "Nodes " << na->getNumber() << " and " << nb->getNumber() << endl;
-  cerr << "Derivative = " << curr_dlogl << " and " << prop_dlogl << endl;
-  exit(1);
-}
+// void mleError(Node* na,Node* nb,double curr,double prop,double curr_dlogl,double prop_dlogl)
+// {
+//   cerr << "Error: too many iterations in mleDistance." << endl;
+//   cerr << "Nodes " << na->getNumber() << " and " << nb->getNumber() << endl;
+//   cerr << "Derivative = " << curr_dlogl << " and " << prop_dlogl << endl;
+//   exit(1);
+// }
 
 void Edge::mleError(bool& converge)
 {
-  cerr << "Warning: too many iterations in Edge::mleLength()." << endl;
+  cerr << "Warning: too many iterations in Edge::mleLength()" << endl;
+  converge = false;
+}
+
+void Tree::mleError(bool& converge)
+{
+  cerr << "Warning: too many iterations in Tree::mleLength3D()" << endl;
   converge = false;
 }
 
@@ -657,76 +664,76 @@ void Edge::mleError(bool& converge)
 // Conditon on data in subtrees through other edges.
 // Assumes that edge lengths in these subtrees exist
 // and that the patternToProbMaps are accurate if edges ea and eb head toward the root.
-double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double initialLength)
-{
-  bool recurse=true;
-  int iter=0;
-//  double curr = 0.05;
-  double curr = initialLength;
-  // get a decent starting point
-  double curr_logl,curr_dlogl,curr_ddlogl;
-  partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
-  double prop = curr;
-  double prop_logl = curr_logl;
-  double prop_dlogl = curr_dlogl;
-  double prop_ddlogl = curr_ddlogl;
-  if ( curr_dlogl > 0 )
-  {
-    do
-    {
-      curr = prop;
-      curr_logl = prop_logl;
-      curr_dlogl = prop_dlogl;
-      curr_ddlogl = prop_ddlogl;
-      prop = 2*curr;
-      partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      if ( ++iter > 100 )
-        mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    } while ( prop_dlogl > 0);
-  }
-  else
-  {
-    do
-    {
-      curr = prop;
-      curr_logl = prop_logl;
-      curr_dlogl = prop_dlogl;
-      curr_ddlogl = prop_ddlogl;
-      prop = 0.5*curr;
-      partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      if ( ++iter > 100 )
-        mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    } while ( prop_dlogl < 0 );
-  }
-  // switch to protected Newton-Raphson
-  prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
-  do
-  {
-    curr = prop;
-    partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
-    if ( ++iter > 100 )
-      mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    double delta = -curr_dlogl / curr_ddlogl;
-    prop = curr + delta;
-    while ( prop < 0 )
-    {
-      delta = 0.5*delta;
-      prop = curr + delta;
-    }
-    partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-    if ( ++iter > 100 )
-      mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
-    {
-      delta = 0.5*delta;
-      prop = curr + delta;
-      partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
-      if ( ++iter > 100 )
-        mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
-    }
-  } while ( fabs(curr - prop) > 1.0e-8);
-  return prop;
-}
+// double Tree::mleDistance(Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double initialLength)
+// {
+//   bool recurse=true;
+//   int iter=0;
+// //  double curr = 0.05;
+//   double curr = initialLength;
+//   // get a decent starting point
+//   double curr_logl,curr_dlogl,curr_ddlogl;
+//   partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,true);
+//   double prop = curr;
+//   double prop_logl = curr_logl;
+//   double prop_dlogl = curr_dlogl;
+//   double prop_ddlogl = curr_ddlogl;
+//   if ( curr_dlogl > 0 )
+//   {
+//     do
+//     {
+//       curr = prop;
+//       curr_logl = prop_logl;
+//       curr_dlogl = prop_dlogl;
+//       curr_ddlogl = prop_ddlogl;
+//       prop = 2*curr;
+//       partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+//       if ( ++iter > 100 )
+//         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     } while ( prop_dlogl > 0);
+//   }
+//   else
+//   {
+//     do
+//     {
+//       curr = prop;
+//       curr_logl = prop_logl;
+//       curr_dlogl = prop_dlogl;
+//       curr_ddlogl = prop_ddlogl;
+//       prop = 0.5*curr;
+//       partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+//       if ( ++iter > 100 )
+//         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     } while ( prop_dlogl < 0 );
+//   }
+//   // switch to protected Newton-Raphson
+//   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
+//   do
+//   {
+//     curr = prop;
+//     partialPathCalculations(curr,alignment,na,ea,nb,eb,qmatrix,curr_logl,curr_dlogl,curr_ddlogl,recurse);
+//     if ( ++iter > 100 )
+//       mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     double delta = -curr_dlogl / curr_ddlogl;
+//     prop = curr + delta;
+//     while ( prop < 0 )
+//     {
+//       delta = 0.5*delta;
+//       prop = curr + delta;
+//     }
+//     partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+//     if ( ++iter > 100 )
+//       mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
+//     {
+//       delta = 0.5*delta;
+//       prop = curr + delta;
+//       partialPathCalculations(prop,alignment,na,ea,nb,eb,qmatrix,prop_logl,prop_dlogl,prop_ddlogl,recurse);
+//       if ( ++iter > 100 )
+//         mleError(na,nb,curr,prop,curr_dlogl,prop_dlogl);
+//     }
+//   } while ( fabs(curr - prop) > 1.0e-8);
+//   return prop;
+// }
 
 void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl)
 {
@@ -885,17 +892,19 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 // do all conditional calculations for both subtrees
 // find MLE of edge length conditional on rest of tree
 // generate gamma distributed random length
-void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity, bool onlyMLE)
+void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity, Node* childNode,bool onlyMLE)
 {
   // clear prob maps recursively through entire tree
   // there is a smarter way to do this for only part of the tree, depending on order of edges
   // worry about increased efficiency later
-  nodes[0]->clearProbMaps(this);
-  nodes[1]->clearProbMaps(this);
+  Node* parentNode = getOtherNode(childNode);
+  parentNode->clearProbMaps(this);
+//  nodes[0]->clearProbMaps(this);
+//  nodes[1]->clearProbMaps(this);
 
   bool converge;
   // set length to MLE distance
-  length = mleLength(alignment,qmatrix,converge);
+  length = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
   if ( !onlyMLE )
   {
     if ( length < MIN_EDGE_LENGTH + 1.0e-08 ) // generate from exponential
@@ -938,7 +947,7 @@ void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edg
   //  get random length for parent edge
   if ( parent != NULL ) // call edge command on parent
   {
-    parent->randomLength(alignment,qmatrix,rng,logProposalDensity,onlyMLE);
+    parent->randomLength(alignment,qmatrix,rng,logProposalDensity,this,onlyMLE);
   }
 }
 
@@ -1047,107 +1056,6 @@ pair<int,int> getPair(int x,int y)
     temp=x; x=y; y=temp;
   }
   return pair<int,int> (x,y);
-}
-
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix,double initialLength)
-{
-  map<pair<int,int>,double> distanceMap;
-  list<Node*> nodeList;
-  depthFirstNodeList(nodeList);
-  setActiveChildrenAndNodeParents();
-//   cout << "Node List:";
-//   for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-//     cout << " " << (*p)->getNumber();
-//   cout << endl;
-
-  list<Node*>::iterator p=nodeList.begin();
-  while ( true )
-  {
-    Node* x;
-    Node* y;
-    Node* z;
-    Node* par;
-    if ( (*p)->getNodeParent() == root )
-    {
-      if ( root->getActiveChildrenSize() != 3)
-      {
-        cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
-        cerr << root->getActiveChild(0)->getNumber() << endl;
-        cerr << (*p)->getNumber() << endl;
-        exit(1);
-      }
-      par = root;
-      x = *p++;
-      y = *p++;
-      z = *p;
-    }
-    else
-    {
-      x = *p++;
-      y = *p++;
-      par = x->getNodeParent();
-      z = par->closeRelative();
-    }
-    // do calculations
-    x->calculateEdges(qmatrix);
-    y->calculateEdges(qmatrix);
-    z->calculateEdges(qmatrix);
-    for ( int k=0; k<alignment.getNumSites(); ++k )
-    {
-      x->calculate(k,alignment,x->getEdgeParent(),false);
-      y->calculate(k,alignment,y->getEdgeParent(),false);
-      z->calculate(k,alignment,z->getEdgeParent(),false);
-    }
-
-    map<pair<int,int>,double>::iterator m;
-    double dxy, dxz, dyz;
-    m = distanceMap.find( getPair(x->getNumber(),y->getNumber()) );
-    if ( m == distanceMap.end() )
-      dxy = mleDistance(alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),qmatrix,initialLength);
-    else
-      dxy = m->second;
-    m = distanceMap.find( getPair(x->getNumber(),z->getNumber()) );
-    if ( m == distanceMap.end() )
-      dxz = mleDistance(alignment,x,x->getEdgeParent(),z,z->getEdgeParent(),qmatrix,initialLength);
-    else
-      dxz = m->second;
-    m = distanceMap.find( getPair(y->getNumber(),z->getNumber()) );
-    if ( m == distanceMap.end() )
-      dyz = mleDistance(alignment,y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,initialLength);
-    else
-      dyz = m->second;
-    double lengthX = (dxy + dxz - dyz)*0.5;
-    if ( lengthX < 0 )
-    {
-      cerr << "Warning: fix negative edge length." << endl;
-      lengthX = 0;
-    }
-    double lengthY = (dxy + dyz - dxz)*0.5;
-    if ( lengthY < 0 )
-    {
-      cerr << "Warning: fix negative edge length." << endl;
-      lengthY = 0;
-    }
-    x->getEdgeParent()->setLength( lengthX );
-    y->getEdgeParent()->setLength( lengthY );
-    double lengthZ = (dxz + dyz - dxy)*0.5;
-    if ( lengthZ < 0 )
-    {
-      cerr << "Warning: fix negative edge length." << endl;
-      lengthZ = 0;
-    }
-    if ( par==root )
-    {
-      z->getEdgeParent()->setLength( lengthZ );
-      break;
-    }
-    distanceMap[ getPair(z->getNumber(),par->getNumber()) ] = lengthZ;
-    par->deactivateChild(1);
-    par->deactivateChild(0);
-  }
-
-  for ( map<pair<int,int>,double>::iterator m=distanceMap.begin(); m!= distanceMap.end(); ++m )
-    cout << (*m).first.first << " " << (*m).first.second << " --> " << (*m).second << endl;
 }
 
 void njCalculateAdjustedMatrix(MatrixXd& dist,list<pair<int,Node*> >& active,MatrixXd& adj,VectorXd& sums)
@@ -1484,5 +1392,654 @@ double Tree::logPriorExp(double mean)
     sum += (*e)->getLength();
   }
   return edges.size()*log(lambda) - lambda*sum;
+}
+
+
+// based on generateBranchLengths in BranchLengths/Code/test/tree.C
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool onlyMLE)
+{
+  // clear probability maps from all nodes for fresh calculation
+  clearProbMaps();
+  // compute transition matrices for all edges using provisional edge lengths
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    (*e)->calculate(qmatrix);
+  list<Node*> nodeList;
+  depthFirstNodeList(nodeList);
+  setActiveChildrenAndNodeParents();
+//  cout << "Node List:";
+//  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+//    cout << " " << (*p)->getNumber();
+//  cout << endl;
+
+  list<Node*>::iterator p=nodeList.begin();
+  while ( true )
+  {
+    Node* x;
+    Node* y;
+    Node* z;
+    Node* par; //clau: parent of x,y
+    if ( (*p)->getNodeParent() == root ) //clau: if p parent is root
+    {
+      if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
+      {
+        cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
+        cerr << root->getActiveChild(0)->getNumber() << endl;
+        cerr << (*p)->getNumber() << endl;
+	throw 20;
+      }
+      par = root;
+      x = *p++;
+      y = *p++;
+      z = *p;
+    }
+    else //clau: p parent not root
+    {
+      x = *p++; //it means take *p and move right
+      y = *p++;
+      par = x->getNodeParent();
+      z = par->getNodeParent();
+    }
+
+    // clear prob maps recursively through entire tree
+    // there is a smarter way to do this for only part of the tree, depending on order of edges
+    // worry about increased efficiency later
+    clearProbMaps();
+
+    if ( par==root )
+    {
+//      cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
+
+      // compute probabilities at subtrees x,y,z
+      for ( int k=0; k<alignment.getNumSites(); ++k )
+	{
+	  x->calculate(k,alignment,x->getEdgeParent(),true);
+	  y->calculate(k,alignment,y->getEdgeParent(),true);
+	  z->calculate(k,alignment,z->getEdgeParent(),true);
+	}
+      bool converge = true;
+      Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge); //we might want to get rid of joint MLE, and t=curr lengths(x,y,z)
+      if(!converge)
+	cout << "Newton-Raphson did not converge" << endl;
+      if(!onlyMLE)
+	{
+	  double prop_logl;
+	  Vector3d prop_gradient;
+	  Matrix3d prop_hessian;
+	  partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	  Vector3d mu = t;
+	  Matrix3d cov = (-1) * prop_hessian.inverse();
+	  t = multivariateGamma3D(mu,cov,rng, logdensity);
+	}
+      x->getEdgeParent()->setLength( t[0] );
+      y->getEdgeParent()->setLength( t[1] );
+      z->getEdgeParent()->setLength( t[2] );
+      x->getEdgeParent()->calculate(qmatrix);
+      y->getEdgeParent()->calculate(qmatrix);
+      z->getEdgeParent()->calculate(qmatrix);
+      break;
+    }
+    else
+      {
+//	cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
+
+	// compute probabilities at subtrees x,y,z
+	for ( int k=0; k<alignment.getNumSites(); ++k )
+	  {
+	    x->calculate(k,alignment,x->getEdgeParent(),true);
+	    y->calculate(k,alignment,y->getEdgeParent(),true);
+	    z->calculate(k,alignment,par->getEdgeParent(),true); //edge parent of par to go in opposite direction
+	  }
+
+	bool converge;
+	Vector2d t = mleLength2D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
+	if(!onlyMLE)
+	  {
+	    double prop_logl;
+	    Vector2d prop_gradient;
+	    Matrix2d prop_hessian;
+	    double lz = par->getEdgeParent()->getLength(); //kept fixed throughout
+	    partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	    Vector2d mu = t;
+	    Matrix2d cov = (-1) * prop_hessian.inverse();
+	    t = multivariateGamma2D(mu,cov,rng, logdensity);
+	  }
+	x->getEdgeParent()->setLength( t[0] );
+	y->getEdgeParent()->setLength( t[1] );
+	x->getEdgeParent()->calculate(qmatrix);
+	y->getEdgeParent()->calculate(qmatrix);
+      }
+  }
+}
+
+// modified to do 2D MLE instead of 3D
+Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
+{
+//  cout << "Entering mleLength2D";
+//  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+  int iter=0;
+  Vector2d curr(ex->getLength(),ey->getLength());
+  double lz = ez->getLength(); //kept fixed throughout
+  //  cout << "Initial bl curr: " << curr.transpose() << endl;
+  double curr_logl;
+  Vector2d curr_gradient;
+  Matrix2d curr_hessian;
+  partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+  Vector2d prop = curr;
+  double prop_logl = curr_logl;
+  Vector2d prop_gradient = curr_gradient;
+  Matrix2d prop_hessian = curr_hessian;
+  Vector2d delta = curr - prop;
+  bool keepZero1 = false; //whether to keep that entry at 0
+  bool keepZero2 = false;
+
+  // find starting point: we want a good prop
+  do
+  {
+    curr = prop;
+    partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+    // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
+    // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+    // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+    if ( ++iter > 100 )
+      mleError(converge);
+    delta = curr_hessian.inverse() * curr_gradient;
+    if(keepZero1)
+      delta[0] = 0;
+    if(keepZero2)
+      delta[1] = 0;
+    prop = curr - delta;
+    if(curr[0] > TOL && curr[1] > TOL)
+      {
+	while ( prop[0] < 0 || prop[1] < 0)
+	  {
+//	    cout << "found negative with big curr, will shrink delta" << endl;
+	    if(prop[0] < 0)
+	      delta[0] = 0.5* delta[0];
+	    if(prop[1] < 0)
+	      delta[1] = 0.5* delta[1];
+	    prop = curr - delta;
+	  }
+      }
+    //    cerr << "Delta " << delta.transpose() << endl;
+    if(prop[0] < 0 && curr[0] < TOL)
+      {
+//	cout << "found negative for 1st element with curr small, will set to zero" << endl;
+    	prop[0] = MIN_EDGE_LENGTH;
+	keepZero1 = true;
+      }
+    if(prop[1] < 0 && curr[1] < TOL)
+      {
+//	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
+    	prop[1] = MIN_EDGE_LENGTH;
+	keepZero2 = true;
+      }
+//    cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
+
+    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+    if ( ++iter > 100 )
+      mleError(converge);
+    if(!keepZero1 && !keepZero2)
+      {
+	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
+	  {
+//	    cout << "found bigger step" << endl;
+	    if(keepZero1)
+		delta[0] = 0;
+	    if(keepZero2)
+		delta[1] = 0;
+	    delta = 0.5 *delta;
+	    prop = curr - delta;
+	    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	    if ( ++iter > 100 )
+	      mleError(converge);
+	  }
+      }
+  } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
+//  cout << "Finally converged to" << endl;
+//  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+//  cout << "prop: " << prop.transpose() << endl;
+  return prop;
+}
+
+
+Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
+{
+//  cout << "Entering mleLength3D";
+//  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+  int iter=0;
+  Vector3d curr(ex->getLength(),ey->getLength(),ez->getLength());
+  //  cout << "Initial bl curr: " << curr.transpose() << endl;
+  double curr_logl;
+  Vector3d curr_gradient;
+  Matrix3d curr_hessian;
+  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+  Vector3d prop = curr;
+  double prop_logl = curr_logl;
+  Vector3d prop_gradient = curr_gradient;
+  Matrix3d prop_hessian = curr_hessian;
+  Vector3d delta = curr - prop;
+  bool keepZero1 = false; //whether to keep that entry at 0
+  bool keepZero2 = false;
+  bool keepZero3 = false;
+
+  // find starting point: we want a good prop
+  do
+  {
+    curr = prop;
+    partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+    // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
+    // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+    // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+    if ( ++iter > 100 )
+      mleError(converge);
+    delta = curr_hessian.inverse() * curr_gradient;
+    if(keepZero1)
+      delta[0] = 0;
+    if(keepZero2)
+      delta[1] = 0;
+    if(keepZero3)
+      delta[2] = 0;
+    prop = curr - delta;
+    if(curr[0] > TOL && curr[1] > TOL && curr[2] > TOL)
+      {
+	while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
+	  {
+//	    cout << "found negative with big curr, will shrink delta" << endl;
+	    if(prop[0] < 0)
+	      delta[0] = 0.5* delta[0];
+	    if(prop[1] < 0)
+	      delta[1] = 0.5* delta[1];
+	    if(prop[2] < 0)
+	      delta[2] = 0.5* delta[2];
+	    prop = curr - delta;
+	  }
+      }
+    //    cerr << "Delta " << delta.transpose() << endl;
+    if(prop[0] < 0 && curr[0] < TOL)
+      {
+//	cout << "found negative for 1st element with curr small, will set to zero" << endl;
+    	prop[0] = MIN_EDGE_LENGTH;
+	keepZero1 = true;
+      }
+    if(prop[1] < 0 && curr[1] < TOL)
+      {
+//	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
+    	prop[1] = MIN_EDGE_LENGTH;
+	keepZero2 = true;
+      }
+    if(prop[2] < 0 && curr[2] < TOL)
+      {
+//	cout << "found negative for 3rd element with curr small, will set to zero" << endl;
+    	prop[2] = MIN_EDGE_LENGTH;
+	keepZero3 = true;
+      }
+//    cout << "prop befofe partialPathCalculations3D: " << prop.transpose() << endl;
+
+    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+    if ( ++iter > 100 )
+      mleError(converge);
+    if(!keepZero1 && !keepZero2 && !keepZero3)
+      {
+	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
+	  {
+//	    cout << "found bigger step" << endl;
+	    if(keepZero1)
+		delta[0] = 0;
+	    if(keepZero2)
+		delta[1] = 0;
+	    if(keepZero3)
+		delta[2] = 0;
+	    delta = 0.5 *delta;
+	    prop = curr - delta;
+	    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	    if ( ++iter > 100 )
+	      mleError(converge);
+	  }
+      }
+  } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
+//  cout << "Finally converged to" << endl;
+//  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+//  cout << "prop: " << prop.transpose() << endl;
+  return prop;
+}
+
+// modified to make t a Vector2d (instead of Vector3d) to keep the length to node z fixed
+// gradient and hessian are 2d as well
+void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector2d& gradient,Matrix2d& hessian,bool recurse)
+{
+  Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
+  Matrix4d QP1 = qmatrix.getQP(t[0]);
+  Matrix4d QQP1 = qmatrix.getQQP(t[0]);
+  Matrix4d P2 = qmatrix.getTransitionMatrix(t[1]);
+  Matrix4d QP2 = qmatrix.getQP(t[1]);
+  Matrix4d QQP2 = qmatrix.getQQP(t[1]);
+  Matrix4d P3 = qmatrix.getTransitionMatrix(lz);
+  Matrix4d QP3 = qmatrix.getQP(lz);
+  Matrix4d QQP3 = qmatrix.getQQP(lz);
+  Vector4d vq = qmatrix.getStationaryP();
+  Vector4d ones(1,1,1,1);
+
+  int numSites = alignment.getNumSites();
+
+  logl = 0;
+  double dll1 = 0;
+  double dll2 = 0;
+  double d2ll_11 = 0;
+  double d2ll_12 = 0;
+  double d2ll_22 = 0;
+
+  for ( int k=0; k<numSites; ++k )
+  {
+    // clau: I think we don't need this here again, we did this already outside, and lik on subtrees x,y,z is fixed
+    nx->calculate(k,alignment,ex,recurse); // set pattern and put probability in map if not already there
+    ny->calculate(k,alignment,ey,recurse);
+    nz->calculate(k,alignment,ez,recurse);
+    pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
+    pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
+    pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
+
+    Vector4d S1 = P1 * px.second.asDiagonal() * ones;
+    Vector4d S2 = P2 * py.second.asDiagonal() * ones;
+    Vector4d S3 = P3 * pz.second.asDiagonal() * ones;
+    Vector4d S1pr = QP1 * px.second.asDiagonal() * ones;
+    Vector4d S2pr = QP2 * py.second.asDiagonal() * ones;
+    Vector4d S1doublepr = QQP1 * px.second.asDiagonal() * ones;
+    Vector4d S2doublepr = QQP2 * py.second.asDiagonal() * ones;
+
+    //fixt: make a function of this
+    // question: how to make a function to return many things?
+    double fk = vectorProduct4D(vq,S1,S2,S3);
+    double fkpr1 = vectorProduct4D(vq,S1pr,S2,S3);
+    double fkpr2 = vectorProduct4D(vq,S1,S2pr,S3);
+    double fkdoublepr11 = vectorProduct4D(vq,S1doublepr,S2,S3);
+    double fkdoublepr22 = vectorProduct4D(vq,S1,S2doublepr,S3);
+    double fkdoublepr12 = vectorProduct4D(vq,S1pr,S2pr,S3);
+
+    logl += px.first + py.first + pz.first + log( fk );
+    dll1 += fkpr1/fk;
+    dll2 += fkpr2/fk;
+    d2ll_11 += (fk*fkdoublepr11 - fkpr1*fkpr1)/(fk*fk);
+    d2ll_12 += (fk*fkdoublepr12 - fkpr1*fkpr2)/(fk*fk);
+    d2ll_22 += (fk*fkdoublepr22 - fkpr2*fkpr2)/(fk*fk);
+  }
+  gradient << dll1, dll2;
+  hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22; //row-wise
+}
+
+
+void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector3d& gradient,Matrix3d& hessian,bool recurse)
+{
+  Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
+  Matrix4d QP1 = qmatrix.getQP(t[0]);
+  Matrix4d QQP1 = qmatrix.getQQP(t[0]);
+  Matrix4d P2 = qmatrix.getTransitionMatrix(t[1]);
+  Matrix4d QP2 = qmatrix.getQP(t[1]);
+  Matrix4d QQP2 = qmatrix.getQQP(t[1]);
+  Matrix4d P3 = qmatrix.getTransitionMatrix(t[2]);
+  Matrix4d QP3 = qmatrix.getQP(t[2]);
+  Matrix4d QQP3 = qmatrix.getQQP(t[2]);
+  Vector4d vq = qmatrix.getStationaryP();
+  Vector4d ones(1,1,1,1);
+
+  int numSites = alignment.getNumSites();
+
+  logl = 0;
+  double dll1 = 0;
+  double dll2 = 0;
+  double dll3 = 0;
+  double d2ll_11 = 0;
+  double d2ll_12 = 0;
+  double d2ll_13 = 0;
+  double d2ll_22 = 0;
+  double d2ll_23 = 0;
+  double d2ll_33 = 0;
+
+  for ( int k=0; k<numSites; ++k )
+  {
+    // clau: I think we don't need this here again, we did this already
+    nx->calculate(k,alignment,ex,recurse); // set pattern and put probability in map if not already there
+    ny->calculate(k,alignment,ey,recurse);
+    nz->calculate(k,alignment,ez,recurse);
+    pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
+    pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
+    pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
+
+    Vector4d S1 = P1 * px.second.asDiagonal() * ones;
+    Vector4d S2 = P2 * py.second.asDiagonal() * ones;
+    Vector4d S3 = P3 * pz.second.asDiagonal() * ones;
+    Vector4d S1pr = QP1 * px.second.asDiagonal() * ones;
+    Vector4d S2pr = QP2 * py.second.asDiagonal() * ones;
+    Vector4d S3pr = QP3 * pz.second.asDiagonal() * ones;
+    Vector4d S1doublepr = QQP1 * px.second.asDiagonal() * ones;
+    Vector4d S2doublepr = QQP2 * py.second.asDiagonal() * ones;
+    Vector4d S3doublepr = QQP3 * pz.second.asDiagonal() * ones;
+
+    //fixt: make a function of this
+    // question: how to make a function to return many things?
+    double fk = vectorProduct4D(vq,S1,S2,S3);
+    double fkpr1 = vectorProduct4D(vq,S1pr,S2,S3);
+    double fkpr2 = vectorProduct4D(vq,S1,S2pr,S3);
+    double fkpr3 = vectorProduct4D(vq,S1,S2,S3pr);
+    double fkdoublepr11 = vectorProduct4D(vq,S1doublepr,S2,S3);
+    double fkdoublepr22 = vectorProduct4D(vq,S1,S2doublepr,S3);
+    double fkdoublepr33 = vectorProduct4D(vq,S1,S2,S3doublepr);
+    double fkdoublepr12 = vectorProduct4D(vq,S1pr,S2pr,S3);
+    double fkdoublepr13 = vectorProduct4D(vq,S1pr,S2,S3pr);
+    double fkdoublepr23 = vectorProduct4D(vq,S1,S2pr,S3pr);
+
+    logl += px.first + py.first + pz.first + log( fk );
+    dll1 += fkpr1/fk;
+    dll2 += fkpr2/fk;
+    dll3 += fkpr3/fk;
+    d2ll_11 += (fk*fkdoublepr11 - fkpr1*fkpr1)/(fk*fk);
+    d2ll_12 += (fk*fkdoublepr12 - fkpr1*fkpr2)/(fk*fk);
+    d2ll_13 += (fk*fkdoublepr13 - fkpr1*fkpr3)/(fk*fk);
+    d2ll_22 += (fk*fkdoublepr22 - fkpr2*fkpr2)/(fk*fk);
+    d2ll_23 += (fk*fkdoublepr23 - fkpr2*fkpr3)/(fk*fk);
+    d2ll_33 += (fk*fkdoublepr33 - fkpr3*fkpr3)/(fk*fk);
+  }
+  gradient << dll1, dll2, dll3;
+  hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33; //row-wise
+}
+
+
+double Tree::vectorProduct(vector<Vector4d> v)
+{
+  double sum = 0;
+  for ( int i=0; i<4; ++i )
+  {
+    double product = 1;
+    for(  vector<Vector4d>::iterator m = v.begin(); m!=v.end(); m++)
+    {
+      product *= (*m)(i);
+    }
+    sum += product;
+  }
+  return sum;
+}
+
+double Tree::vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
+{
+  vector<Vector4d> v;
+  v.push_back(v1);
+  v.push_back(v2);
+  v.push_back(v3);
+  v.push_back(v4);
+  return vectorProduct(v);
+}
+
+// resolves the root so that it has 2 children
+// needs to be called after reroot(1)
+// will assume the outgroup will be 1
+void Tree::makeBinary()
+{
+  if ( root == NULL ) // no node is set to be the root
+    return;
+  if ( root->getNumEdges() < 2 ) // root is a leaf!
+    return;
+  if ( root->getNumEdges() == 2 ) // already rooted
+    {
+      return;
+    }
+  if( root -> getNumEdges() > 3 ) // cannot handle more than three children
+    exit(1);
+  // root has 3 children
+  int i;
+  Edge* ex;
+  Node* x;
+  for ( i=0; i<3; ++i )
+    {
+      ex = root->getEdge(i);
+      x = root->getNeighbor(ex);
+      if( x->getNumber() == 1 ) //want to find node number 1
+	break;
+    }
+  if(x->getNumber() != 1) //not found
+    {
+      cerr << "not found node number 1 for resolve root" << endl;
+      exit(1);
+    }
+  root -> deleteEdge(ex);
+  Node* newnode = new Node(); //number -1
+  newnode -> setLeaf(false);
+  Edge* newedge = new Edge(); //no number
+  newedge -> setNodes(root,newnode);
+  ex -> setNodes(newnode,x);
+  newnode -> addEdge(newedge);
+  newnode -> addEdge(ex);
+  root -> addEdge(newedge);
+  edges.push_back(newedge);
+  nodes.push_back(newnode);
+  root = newnode;
+}
+
+
+// recurse tree for given site and add to the parsimony score
+// bases is an integer representative of a set of DNA bases, A=1, C=2, G=4, T=8, the set is the sum of these
+// use | for union and & for intersection
+void Node::parsimonyScore(Alignment& alignment,Edge* parent,int site,int& score,int& bases)
+{
+  if ( leaf )
+  {
+    char b = alignment.getBase(number,site);
+    Vector4d cond = translate(tolower(b));
+    bases = 0;
+    int foo = 1;
+    for ( int i=0; i<4; ++i )
+    {
+      if ( cond(i) > 0 ) // actually, should be a double equal to one
+	bases += foo;
+      foo *= 2;
+    }
+    score = 0;
+    return;
+  }
+  // now code for internal nodes
+  // assume fully resolved tree
+  // case where node is not the root
+  if ( parent != NULL )
+  {
+    Edge* left = NULL;
+    Edge* right = NULL;
+    for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    {
+      if ( *e != parent )
+      {
+	if ( left == NULL )
+	{
+	  left = *e;
+	}
+	else
+	{
+	  if ( right == NULL )
+	  {
+	    right = *e;
+	  }
+	  else
+	  {
+	    cerr << "Error: found another nonparent edge but left and right already set." << endl;
+	  }
+	}
+      }
+    }	
+
+    int leftScore = 0,rightScore=0,leftBases=0,rightBases=0;
+    getNeighbor(left)->parsimonyScore(alignment,left,site,leftScore,leftBases);
+    getNeighbor(right)->parsimonyScore(alignment,right,site,rightScore,rightBases);
+    int intersection = leftBases & rightBases;
+    score = leftScore + rightScore;
+    if ( intersection == 0 )
+    {
+      bases = leftBases | rightBases;
+      ++score;
+    }
+    else
+    {
+      bases = intersection;
+    }
+    return;
+  }
+  // now case where node is root of the tree and has three children
+  //// changed code 8 aug 2016 so it works for root with 2 or more children
+  // if ( getNumEdges() != 3 )
+  // {
+  //   cerr << "Error: was expecting root of the tree with three children.";
+  //   exit(1);
+  // }
+  int score0=0,bases0=0;
+  getNeighbor(edges[0])->parsimonyScore(alignment,edges[0],site,score0,bases0);
+  score += score0;
+  for ( int k=1; k<getNumEdges(); ++k )
+  {
+    int score1=0,bases1=0;
+    getNeighbor(edges[k])->parsimonyScore(alignment,edges[k],site,score1,bases1);
+    score += score1;
+    int intersection = bases0 & bases1;
+    if ( intersection == 0 )
+    {
+      ++ score;
+      bases0 = bases0 | bases1;
+    }
+    else
+    {
+      bases0 = intersection;
+    }
+  }
+//  int score0=0,score1=0,score2=0,bases0=0,bases1=0,bases2=0;
+//  getNeighbor(edges[0])->parsimonyScore(alignment,edges[0],site,score0,bases0);
+//  getNeighbor(edges[1])->parsimonyScore(alignment,edges[1],site,score1,bases1);
+//  getNeighbor(edges[2])->parsimonyScore(alignment,edges[2],site,score2,bases2);
+//  score = score0 + score1 + score2;
+//  int intersection = bases0 & bases1;
+  // if ( intersection == 0 )
+  // {
+  //   ++score;
+  //   bases1 = bases0 | bases1;
+  // }
+  // else
+  // {
+  //   bases1 = intersection;
+  // }
+  // intersection = bases1 & bases2;
+  // if ( intersection == 0 )
+  // {
+  //   ++score;
+  // }
+  // bases = 0;
+}
+
+// return parsimony score of the tree
+// tree must be rooted
+int Tree::parsimonyScore(Alignment& alignment)
+{
+  int score = 0;
+  for ( int site=0; site<alignment.getNumSites(); ++site )
+  {
+    int siteScore = 0;
+    int bases = 0;
+    root->parsimonyScore(alignment,NULL,site,siteScore,bases);
+    score += siteScore;
+  }
+  return score;
 }
 

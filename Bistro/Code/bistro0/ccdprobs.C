@@ -167,10 +167,14 @@ RootedTree::RootedTree(string x,int n)
       }
       w.push_back( node );
       s >> c;
+      // Clade clad = node->getClade();
+      // cout << "Clade for read internal node: ";
+      // clad.print(cout);
+      // cout << endl;
     }
     else if ( c==')' ) { // complete a subtree
       nodes.push_back(w.back());
-      nodes.back()->copyClade(nodes.back()->getLeft()->getClade());
+      nodes.back()->copyClade(nodes.back()->getLeft()->getClade()); //using clades already in RootedNode
       nodes.back()->add(nodes.back()->getRight()->getClade());
       w.pop_back();
       clades.push_back(nodes.back()->getClade());
@@ -179,10 +183,18 @@ RootedTree::RootedTree(string x,int n)
     else if ( isdigit(c) ) { // add leaf node
       int tax;
       s >> tax;
-      RootedNode* node = new RootedNode(w.back());
+      RootedNode* node = new RootedNode(w.back()); //why this?
       node->setLeaf(true);
       node->setNumTaxa(numTaxa);
-      node->add(tax);
+      // Clade clad = node->getClade();
+      // cout << "Clade for read leaf node: " << tax << " ";
+      // clad.print(cout);
+      // cout << endl;
+      node->add(tax); //this is the problem!
+      // clad = node->getClade();
+      // cout << "Clade for read leaf node: " << tax << " ";
+      // clad.print(cout);
+      // cout << endl;
       w.back()->addChild(node);
       nodes.push_back(node);
     }
@@ -195,6 +207,8 @@ RootedTree::RootedTree(string x,int n)
       break;
     }
   }
+  // printClades(cout);
+  // cout << endl;
 }
 
 void RootedTree::print(ostream& f)
@@ -220,131 +234,6 @@ void RootedTree::printClades(ostream& f)
     f << " ";
   }
 }    
-
-void RootedTree::count(int n,map<Clade,int>& cladeCount,map<CladePair,int>& pairCount)
-{
-  for ( vector<RootedNode*>::iterator p = nodes.begin(); p != nodes.end(); p++ ) {
-    if ( (*p)->getLeaf() )
-      continue;
-    Clade z = (*p)->getClade();
-    cladeCount[z] += n;
-    Clade x = (*p)->getLeft()->getClade();
-    Clade y = (*p)->getRight()->getClade();
-    if ( x > y )
-      x = y;
-    CladePair c(z,x);
-    pairCount[c] += n;
-  }
-}
-
-CCDProbs::CCDProbs(map<string,int>& topologyToCountMap,vector<int>& taxaNumbers,vector<string>& taxaNames)
-{
-  sampleSize = 0;
-  numTaxa = taxaNames.size();
-  for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
-  {
-    RootedTree rt(m->first,numTaxa);
-    rt.count(m->second,cladeCount,pairCount);
-    sampleSize += m->second;
-  }
-
-  for ( map<CladePair,int>::iterator p=pairCount.begin(); p!=pairCount.end(); ++p ) {
-    Clade parent=(p->first).getClade1();
-    Clade child=(p->first).getClade2();
-    mm.insert( pair<Clade,pair<Clade,int> >(parent,make_pair(child, p->second)) );
-  }
-
-  all.resize(taxaNames.size());
-  for ( int k=1; k<=numTaxa; ++k )
-    all.add(k);
-}
-
-void CCDProbs::writeTranslateTable(ostream& f)
-{
-  f << "translate" << endl;
-  for ( int i=0; i < taxaNumbers.size(); ++i ) {
-    f << setw(8) << taxaNumbers[i] << " " << taxaNames[i];
-    if ( i < taxaNumbers.size()-1 )
-      f << "," << endl;
-    else
-      f << ";" << endl;
-  }
-}
-
-void CCDProbs::writeCladeCount(ostream& f)
-{
-  writeTranslateTable(f);
-  f.setf(ios::fixed,ios::floatfield);
-  for ( map<Clade,int>::iterator p=cladeCount.begin(); p != cladeCount.end(); p++ ) {
-    f << setw(10) << setprecision(8) << p->second / (double) sampleSize << " ";
-    f << setw(10) << p->second << " ";
-    p->first.print(f);
-    f << endl;
-  }
-}
-
-void CCDProbs::writePairCount(ostream& f)
-{
-  writeTranslateTable(f);
-  f.setf(ios::fixed,ios::floatfield);
-  for ( map<CladePair,int>::iterator p=pairCount.begin(); p != pairCount.end(); p++ ) {
-    f << setw(10) << setprecision(8) << p->second / (double) sampleSize << " ";
-    f << setw(10) << p->second << " ";
-    f << "[ ";
-    (p->first).getClade1().print(f);
-    f << " , ";
-    (p->first).getClade2().print(f);
-    f << " ]" << endl;
-  }
-}
-
-string Clade::randomTree(multimap<Clade,pair<Clade,int> >& mm,
-			 map<Clade,Alias<dynamic_bitset<unsigned char> >* >& am,
-			 map<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >,double>& cladeLogProbMap,
-			 mt19937_64& rng,
-			 double& logTopologyProbability)
-{
-  if ( count()==1 ) {
-    stringstream ss;
-    dynamic_bitset<unsigned char>::size_type first = clade.find_first();
-    ss << size() - first;
-    return ss.str();
-  }
-  if ( am.find(*this) == am.end() ) { // need to initialize alias for this clade
-    pair<multimap<Clade,pair<Clade,int> >::iterator,multimap<Clade,pair<Clade,int> >::iterator> ret = mm.equal_range(*this);
-    vector<double> probs;
-    vector<dynamic_bitset<unsigned char> > indices;
-    int index = 0;
-    int total = 0;
-    for ( multimap<Clade,pair<Clade,int> >::iterator p=ret.first; p!= ret.second; ++p, ++index ) {
-      int counter = (p->second).second;
-      probs.push_back((double)counter);
-      indices.push_back( (p->second).first.get() );
-      total += counter;
-    }  
-    for (int i = 0; i < probs.size(); ++i) {
-      probs[i] = probs[i]/(double)total;
-      cladeLogProbMap[ pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >(get(),indices[i]) ] = log(probs[i]);
-    }
-    am[*this] = new Alias<dynamic_bitset<unsigned char> >(probs,indices);
-  }
-  Clade c1( (am[*this])->pick(rng) );
-  Clade c2(clade - c1.get());
-  string s1 = c1.randomTree(mm,am,cladeLogProbMap,rng,logTopologyProbability);
-  string s2 = c2.randomTree(mm,am,cladeLogProbMap,rng,logTopologyProbability);
-  string out;
-  if ( c1 > c2 )
-    out = '(' + s1 + ',' + s2 + ')';
-  else
-    out = '(' + s2 + ',' + s1 + ')';
-  logTopologyProbability += cladeLogProbMap[ pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >(get(),c1.get()) ];
-  return out;
-}
-
-string CCDProbs::randomTree(mt19937_64& rng,double& logTopologyProbability)
-{
-  return all.randomTree(mm,am,cladeLogProbMap,rng,logTopologyProbability) + ';';
-}
 
 /*
 Tree CCDProbs::rtop(mt19937_64& rng)

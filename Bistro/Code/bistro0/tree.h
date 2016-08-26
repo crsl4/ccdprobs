@@ -3,6 +3,7 @@
 
 #define MIN_EDGE_LENGTH 0.00001
 #define MAX_EDGE_LENGTH 10
+#define TOL 1.0e-6
 
 #include <iostream>
 #include <iomanip>
@@ -73,6 +74,7 @@ private:
   vector<Node*> activeChildren;
   Node* nodeParent;
   Edge* edgeParent;
+  Edge* mapParent; // pointer to parent edge used when creating patternToProbMap
   int minNumber; // smallest number in subtree rooted at node
 public:
   map<string,pair<double,Vector4d> > patternToProbMap;
@@ -131,6 +133,7 @@ public:
   int setMinNumber(Edge*);
   void sortCanonical(Edge*);
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&,bool);
+  void parsimonyScore(Alignment&,Edge*,int,int&,int&);
 };
 
 class Tree
@@ -179,7 +182,7 @@ public:
   void setNodeLevels();
   void depthFirstNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
-  void generateBranchLengths(Alignment&,QMatrix&,double);
+  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&, bool);
   void reroot(int);
   void setMinNumber() { root->setMinNumber(NULL); }
   void sortCanonical()
@@ -191,6 +194,15 @@ public:
   void unroot();
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&,bool);
   double logPriorExp(double);
+  Vector2d mleLength2D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
+  void partialPathCalculations2D(Vector2d ,double,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector2d& ,Matrix2d& ,bool);
+  Vector3d mleLength3D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
+  void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d& ,bool);
+  double vectorProduct(vector<Vector4d>);
+  double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
+  void mleError(bool&);
+  void makeBinary();
+  int parsimonyScore(Alignment&);
 };
 
 #endif

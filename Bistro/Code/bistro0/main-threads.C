@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <random>
+#include <thread>
 
 #include "parameter.h"
 #include "sequence.h"
@@ -23,6 +24,74 @@
 
 using namespace std;
 using namespace Eigen;
+
+// arguments made reference to avoid copying in each thread
+template<typename T>
+void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T>& ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
+{ 
+  //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
+   string outFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".out";
+   ofstream f(outFile.c_str());
+   string treeBLFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".treeBL";
+   ofstream treebl(treeBLFile.c_str());
+   f << "tree logl logTop logProp logPrior logWt" << endl;
+
+   for ( int k=indStart; k<indEnd; ++k )
+     {
+       if(indStart == 0)
+	 {
+	   if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
+	     cerr << '*';
+	   if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
+	     cerr << '|';
+	 }
+      double logTopologyProbability=0;
+      string treeString;
+      treeString = ccd.randomTree(rng,logTopologyProbability);
+      
+      Tree tree(treeString);
+      tree.relabel(alignment);
+      tree.unroot();
+      MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
+      gtrDistanceMatrixCopy = gtrDistanceMatrix;
+      tree.setNJDistances(gtrDistanceMatrixCopy,rng);
+      tree.randomize(rng);
+//      tree.print(cout);
+//      cout << tree.makeTreeNumbers() << endl;
+      double logProposalDensity = 0;
+      for ( int i=0; i<parameters.getNumMLE(); ++i )
+	{
+	  tree.randomEdges(alignment,model,rng,logProposalDensity,true);
+//	  cout << tree.makeTreeNumbers() << endl;
+	}
+      if( parameters.getIndependent() )
+	{
+//	  cout << "Branch lengths sampled independently" << endl;
+	  tree.randomEdges(alignment,model,rng,logProposalDensity,false);
+	}
+      else
+	{
+//	  cout << "Branch lengths sampled jointly in 2D" << endl;
+	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
+	}
+//      cout << tree.makeTreeNumbers() << endl;
+      treebl << tree.makeTreeNumbers() << endl;
+      double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
+      double logLik = tree.calculate(alignment, model);
+      double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity - logTopologyProbability;
+      tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
+      tree.sortCanonical();
+      string top = tree.makeTopologyNumbers();
+      f << top << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+      logwt[k] = logWeight;
+      if ( k==indStart || logWeight > maxLogWeight )
+	maxLogWeight = logWeight;
+      //add to the multimap for the topology the logweight
+      topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
+    }
+  treebl.close();
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -41,7 +110,7 @@ int main(int argc, char* argv[])
   cout << endl;
 
   // Find Jukes-Cantor pairwise distances
-  cerr << alignment.getNumTaxa() << endl;
+//  cerr << alignment.getNumTaxa() << endl;
   cerr << "Finding initial Jukes-Cantor pairwise distances ...";
   MatrixXd jcDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   alignment.calculateJCDistances(jcDistanceMatrix);
@@ -193,85 +262,85 @@ int main(int argc, char* argv[])
   ccdParsimony.writePairCount(tmap);
   tmap.close();
 
-  string outFile = parameters.getOutFileRoot() + ".out";
-  ofstream f(outFile.c_str());
-  string treeBLFile = parameters.getOutFileRoot() + ".treeBL";
-  ofstream treebl(treeBLFile.c_str());
-
-  f << "tree logl logTop logProp logPrior logWt" << endl;
-
-  int numRandom = parameters.getNumRandom();
-
-  vector<double> logwt(numRandom,0);
-  double maxLogWeight;
-
   if ( parameters.getNumBootstrap() > 0 )
   {
-    multimap<string,double> topologyToLogweightMMap; //multimap to keep logwt for each topology
-    cerr << "Generating " << numRandom << " random trees:" << endl << '|';
-    for ( int k=0; k<numRandom; ++k )
-    {
-      if ( numRandom > 99 && (k+1) % (numRandom / 100) == 0 )
-	cerr << '*';
-      if ( numRandom > 9 && (k+1) % (numRandom / 10) == 0 )
-	cerr << '|';
-      double logTopologyProbability=0;
-      string treeString;
-      if ( parameters.getUseParsimony() )
-	treeString = ccdParsimony.randomTree(rng,logTopologyProbability);
-      else
-	treeString = ccd.randomTree(rng,logTopologyProbability);
+    int numRandom = parameters.getNumRandom();
 
-      Tree tree(treeString);
-      tree.relabel(alignment);
-      tree.unroot();
-      MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
-      gtrDistanceMatrixCopy = gtrDistanceMatrix;
-      tree.setNJDistances(gtrDistanceMatrixCopy,rng);
-      tree.randomize(rng);
-      tree.print(cout);
-      cout << tree.makeTreeNumbers() << endl;
-      double logProposalDensity = 0;
-      for ( int i=0; i<parameters.getNumMLE(); ++i )
+    unsigned int cores; 
+    if( parameters.getNumCores() == 0 )
+      cores = thread::hardware_concurrency();
+    else
+      cores = parameters.getNumCores();
+    // i want to check that cores not > than hardware_concurrency?
+    cerr << "Generating " << numRandom << " random trees in " << cores << " cores:" << endl;
+    int k = numRandom / cores;
+    cerr << "k = " << k << endl;
+
+    // generating the seeds for each core
+    random_device rd;
+    unsigned int initial_seed = rd();
+    cerr << "Seed = " << initial_seed << endl;
+    minstd_rand seed_rng(initial_seed);
+    uniform_int_distribution<> rint(0,4294967295);
+    vector<unsigned int> seeds(cores);
+    vector<mt19937_64*> vrng;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
       {
-	tree.randomEdges(alignment,model,rng,logProposalDensity,true);
-	cout << tree.makeTreeNumbers() << endl;
+    	*p = rint(seed_rng);
+    	vrng.push_back( new mt19937_64(*p) );
       }
-      if( parameters.getIndependent() )
-	{
-	  cout << "Branch lengths sampled independently" << endl;
-	  tree.randomEdges(alignment,model,rng,logProposalDensity,false);
-	}
-      else
-	{
-	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
-	}
-      cout << tree.makeTreeNumbers() << endl;
-      treebl << tree.makeTreeNumbers() << endl;
-      double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
-      double logLik = tree.calculate(alignment, model);
-      double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity - logTopologyProbability;
-      tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
-      tree.sortCanonical();
-      string top = tree.makeTopologyNumbers();
-//      int score = tree.parsimonyScore(alignment);
-//      f << top << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << " " << score << endl;
-      f << top << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
-      logwt[k] = logWeight;
-      if ( k==0 || logWeight > maxLogWeight )
-	maxLogWeight = logWeight;
-      //add to the multimap for the topology the logweight
-      topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
-    }
-    treebl.close();
+    cerr << "Seeds per core: " << endl;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
+      cerr << setw(15) << *p << endl;
 
+    vector<thread> threads;
+    vector< multimap<string,double> > topologymm(cores); //vector of multimaps
+    vector<double> logwt(numRandom,0);
+    vector<double> maxLogW(cores); //vector of maxlogweight
+
+    for ( int i=0; i<(cores-1); ++i )
+    {
+      cerr << "Thread " << i << " beginning random trees from " << i*k << " to " << (i+1)*k-1 << endl; 
+      if ( parameters.getUseParsimony() )
+	threads.push_back(thread(randomTrees<double>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+      else
+	threads.push_back(thread(randomTrees<int>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+    }
+    // last core:
+    cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl; 
+    if ( parameters.getUseParsimony() )
+      threads.push_back(thread(randomTrees<double>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
+    else
+      threads.push_back(thread(randomTrees<int>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccd), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
+
+    for ( int i=0; i<cores; ++i )
+      threads.at(i).join();
     cerr << endl << "done." << endl;
+
+    double maxLogWeight = maxLogW[0];
+    for(int i=1; i<cores; ++i)
+      {
+	if(maxLogW[i] > maxLogWeight)
+	  maxLogWeight = maxLogW[i];
+      }
+    cerr << "maxLogWeight: " << maxLogWeight << endl;
+
+    multimap<string,double> topologyToLogweightMMap;
+    for ( vector< multimap<string,double>>::iterator p=topologymm.begin(); p!=topologymm.end(); ++p) //for every multimap in topologymm
+      {
+	for ( multimap<string,double >::iterator q=(*p).begin(); q!= (*p).end(); ++q) // traverse this multimap (*p)
+	  {
+	    topologyToLogweightMMap.insert( pair<string,double>(q->first,q->second) ) ;
+	  }
+      }
+
     vector<double> wt(numRandom,0);
     double sum=0;
     for ( int k=0; k<numRandom; ++k )
     {
+      //      cerr << "logwt[k]: " << logwt[k] << "for k= " << k << endl;
       wt[k] = exp(logwt[k] - maxLogWeight);
+      //cerr << "wt[k]: " << wt[k] << endl;
       sum += wt[k];
     }
     double essInverse=0;

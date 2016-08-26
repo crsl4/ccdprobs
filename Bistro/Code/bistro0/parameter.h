@@ -20,6 +20,10 @@ private:
   int numRandom;
   int numMLE;
   string outFileRoot;
+  bool independent;
+  bool useParsimony;
+  double parsimonyScale;
+  unsigned int numCores;
 public:
   Parameter()
   {
@@ -31,6 +35,10 @@ public:
     numRandom = 0;
     numMLE = 0;
     outFileRoot = (string)("run1");
+    independent = false;
+    useParsimony = true;
+    parsimonyScale = 0.5;
+    numCores = 0;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -48,10 +56,17 @@ public:
   void setNumRandom(int n) { numRandom = n; }
   int getNumMLE() const { return numMLE; }
   void setNumMLE(int n) { numMLE = n; }
+  int getIndependent() const { return independent; }
+  void setIndependent(bool b) { independent = b; }
   string getOutFileRoot() const { return outFileRoot; }
   void setOutFileRoot(string name) { outFileRoot = name; }
+  bool getUseParsimony() const { return useParsimony; }
+  void setUseParsimony(bool b) { useParsimony = b; }
+  double getParsimonyScale() const { return parsimonyScale; }
+  void setParsimonyScale(double x) { parsimonyScale = x; }
   void processCommandLine(int,char* []);
-  
+  void setNumCores(unsigned int b) { numCores = b; }
+  unsigned int getNumCores() const { return numCores; }
 };
 
 #endif

@@ -21,9 +21,13 @@ void usage(ostream& f)
   f << "    -o file-root                   |  name of root for all output files" << endl;
   f << "    -s seed                        |  positive integer random seed (machine chosen if not provided)" << endl;
   f << "    -h || --help                   |  print this help message" << endl;
+  f << "    --independent                  |  generates branch lengths independently" << endl;
   f << "    -p stationary-distribution     |  [ not used ] four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
   f << "    -q symmetric-q-parameters      |  [ not used ] six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
+  f << "    --no-parsimony                 |  do *not* reweight bootstrap sample with weight proportional to exp(-parsimony score)" << endl;
+  f << "    --parsimony-scale scale        |  scale to compute the weights from counts, positive number" << endl;
+  f << "    --cores num                    |  number of cores for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;
   exit(1);
 }
 
@@ -216,6 +220,42 @@ void Parameter::processCommandLine(int argc,char* argv[])
       else
       {
         cerr << "Error: flag `-q' not followed by comma-separated no-space list of six (unweighted) values" << endl;
+        usage(cerr);
+      }
+    }
+    else if ( strcmp(argv[k],"--independent") == 0 )
+    {
+      independent = true;
+    }
+    else if ( strcmp(argv[k],"--no-parsimony") == 0 )
+    {
+      useParsimony = false;
+    }
+    else if ( strcmp(argv[k],"--parsimony-scale") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> parsimonyScale;
+      }
+      else
+      {
+        cerr << "Error: flag `--parsimony-scale' not followed by a postive value" << endl;
+        usage(cerr);
+      }
+    }
+    else if ( strcmp(argv[k],"--cores") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> numCores;
+      }
+      else
+      {
+        cerr << "Error: flag `--cores' not followed by a postive value" << endl;
         usage(cerr);
       }
     }
