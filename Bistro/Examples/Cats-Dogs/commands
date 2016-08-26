@@ -32,3 +32,5 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o pars1k-scale --parsimony-scale 0.2 > pars1k-scale.log
 
 
+## tests with new likelihood
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o threads2 --parsimony-scale 0.2 -s 1073593356 > threads2.log

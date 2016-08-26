@@ -116,7 +116,9 @@ public:
   string getPattern() const { return pattern; }
   int getLevel() const { return level; }
   void setLevel(Edge*);
-  void calculate(int,const Alignment&,Edge*,bool);
+  void setPattern(int,const Alignment& ,Edge* );
+  void calculateAfterPattern(int,const Alignment& ,Edge*);
+  void calculate(int,const Alignment&,Edge*);//,bool);
   pair<double,Vector4d> getProb();
   void randomize(mt19937_64&,Edge*);
   void clearProbMaps(Edge*);
@@ -174,10 +176,10 @@ public:
   double calculate(const Alignment&,QMatrix&);
   void randomize(mt19937_64&);
   void clearProbMaps();
-  void partialPathCalculations(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double&,double&,double&,bool);
-  double pathLogLikelihood(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool);
-  double pathLogLikelihoodDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool);
-  double pathLogLikelihoodSecondDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool);
+  /* void partialPathCalculations(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double&,double&,double&,bool); */
+  /* double pathLogLikelihood(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool); */
+  /* double pathLogLikelihoodDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool); */
+  /* double pathLogLikelihoodSecondDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool); */
   double mleDistance(Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double);
   void setNodeLevels();
   void depthFirstNodeList(list<Node*>&);
@@ -195,9 +197,9 @@ public:
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&,bool);
   double logPriorExp(double);
   Vector2d mleLength2D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
-  void partialPathCalculations2D(Vector2d ,double,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector2d& ,Matrix2d& ,bool);
+  void partialPathCalculations2D(Vector2d ,double,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector2d& ,Matrix2d&);// ,bool);
   Vector3d mleLength3D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
-  void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d& ,bool);
+  void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d&);// ,bool);
   double vectorProduct(vector<Vector4d>);
   double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
   void mleError(bool&);

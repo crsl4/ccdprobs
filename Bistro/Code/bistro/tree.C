@@ -461,19 +461,43 @@ void Node::calculateEdges(QMatrix& qmatrix)
   }
 }
 
-void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recurse)
+
+void Node::setPattern(int site,const Alignment& alignment,Edge* parent)
 {
   pattern.clear();
-  map<string,pair<double,Vector4d> >::iterator m;
   if ( leaf )
   {
     char base = alignment.getBase(number,site);
     base = tolower(base);
     pattern = base;
+    return;
+  }
+  // internal node
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  {
+    if ( (*e) != parent )
+    {
+      getNeighbor(*e)->setPattern(site,alignment,*e);
+      pattern += getNeighbor(*e)->getPattern();
+    }
+  }
+}
+
+
+void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* parent)
+{
+  map<string,pair<double,Vector4d> >::iterator m;
+
+  // here we want to call a function to set all patterns, put pattern.clear() inside this new function
+  if ( leaf )
+  {
+    char base = alignment.getBase(number,site);
+    base = tolower(base);
+    // pattern = base;
     m = patternToProbMap.find(pattern);
     if ( m == patternToProbMap.end() ) // first time this pattern calculated
     {
-      patternToProbMap[ pattern ] = pair<double,Vector4d> (0,translate(base));
+      patternToProbMap[ pattern ] = pair<double,Vector4d> (0,translate( base ));
 //      cerr << "  " << pattern << " --> " << 0 << "," << translate(base).transpose() << endl;
     }
     return;
@@ -483,9 +507,9 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
   {
     if ( (*e) != parent )
     {
-      if ( recurse )
-        getNeighbor(*e)->calculate(site,alignment,*e,recurse);
-      pattern += getNeighbor(*e)->getPattern();
+      //need to check if the map of the children was gotten with *e as mapParent, if so, no need to recalculate, but we do need to reset the pattern of children
+      getNeighbor(*e)->calculateAfterPattern(site,alignment,*e);//,recurse);
+      //pattern += getNeighbor(*e)->getPattern();
     }
   }
   m = patternToProbMap.find(pattern);
@@ -513,6 +537,14 @@ void Node::calculate(int site,const Alignment& alignment,Edge* parent,bool recur
   }
 }
 
+
+// assumes patternToProbMap is current
+void Node::calculate(int site,const Alignment& alignment,Edge* parent)//,bool recurse)
+{
+  setPattern(site,alignment,parent); // this will clear the pattern of this node, and call setPattern on all the children
+  calculateAfterPattern(site,alignment,parent);
+}
+
 // must have accurate patternToProbMaps prior to calling
 // call clearProbMaps() on either whole tree or nodes for which
 // this may have changed due to rerooting or branch length changes
@@ -530,7 +562,7 @@ double Tree::calculate(const Alignment& alignment,QMatrix& qmatrix)
   // loop over sites and calculate log-likelihood while traversing the tree
   for ( int k=0; k < alignment.getNumSites(); ++k )
   {
-    root->calculate(k,alignment,NULL,true);
+    root->calculate(k,alignment,NULL);//,true);
     pair<double,Vector4d> condProbPair = root->getProb();
     logLikelihood(k) = condProbPair.first + log( qmatrix.getStationaryP().dot(condProbPair.second) );
 //    cout << logLikelihood(k) << endl;
@@ -542,7 +574,7 @@ void Node::clearProbMaps(Edge* parent)
 {
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
   {
-    if ( (*e) != parent )
+    if ( (*e) != parent ) // check here, only clear map if *e is different from the one used to create the map
       getNeighbor(*e)->clearProbMaps(*e);
   }
   patternToProbMap.clear();
@@ -588,57 +620,57 @@ void Tree::randomize(mt19937_64& rng)
   setNodeLevels();
 }
 
-void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl,bool recurse)
-{
-  Matrix4d P = qmatrix.getTransitionMatrix(t);
-  Matrix4d QP = qmatrix.getQP(t);
-  Matrix4d QQP = qmatrix.getQQP(t);
-  int numSites = alignment.getNumSites();
+// void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl,bool recurse)
+// {
+//   Matrix4d P = qmatrix.getTransitionMatrix(t);
+//   Matrix4d QP = qmatrix.getQP(t);
+//   Matrix4d QQP = qmatrix.getQQP(t);
+//   int numSites = alignment.getNumSites();
 
-  logl = 0;
-  dlogl = 0;
-  ddlogl = 0;
-  for ( int k=0; k<numSites; ++k )
-  {
-    na->calculate(k,alignment,ea,recurse); // set pattern and put probability in map if not already there
-    nb->calculate(k,alignment,eb,recurse);
-    pair<double,Vector4d> pa = na->patternToProbMap[na->getPattern()];
-    pair<double,Vector4d> pb = nb->patternToProbMap[nb->getPattern()];
-    Vector4d va = pa.second;
-    Vector4d vq = qmatrix.getStationaryP();
-    for ( int i=0; i<4; ++i )
-      va(i) *= vq(i);
-    Vector4d vb = pb.second;
-    double f0 = (va.asDiagonal() * P * vb.asDiagonal()).sum();
-    double f1 = (va.asDiagonal() * QP * vb.asDiagonal()).sum();
-    double f2 = (va.asDiagonal() * QQP * vb.asDiagonal()).sum();
-    logl += pa.first + pb.first + log( f0 );
-    dlogl += f1/f0;
-    ddlogl += (f0*f2 - f1*f1)/(f0*f0);
-  }
-}
+//   logl = 0;
+//   dlogl = 0;
+//   ddlogl = 0;
+//   for ( int k=0; k<numSites; ++k )
+//   {
+//     na->calculate(k,alignment,ea,recurse); // set pattern and put probability in map if not already there
+//     nb->calculate(k,alignment,eb,recurse);
+//     pair<double,Vector4d> pa = na->patternToProbMap[na->getPattern()];
+//     pair<double,Vector4d> pb = nb->patternToProbMap[nb->getPattern()];
+//     Vector4d va = pa.second;
+//     Vector4d vq = qmatrix.getStationaryP();
+//     for ( int i=0; i<4; ++i )
+//       va(i) *= vq(i);
+//     Vector4d vb = pb.second;
+//     double f0 = (va.asDiagonal() * P * vb.asDiagonal()).sum();
+//     double f1 = (va.asDiagonal() * QP * vb.asDiagonal()).sum();
+//     double f2 = (va.asDiagonal() * QQP * vb.asDiagonal()).sum();
+//     logl += pa.first + pb.first + log( f0 );
+//     dlogl += f1/f0;
+//     ddlogl += (f0*f2 - f1*f1)/(f0*f0);
+//   }
+// }
 
-double Tree::pathLogLikelihood(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,bool recurse)
-{
-  double logl,dlogl,ddlogl;
-  partialPathCalculations(t,alignment,na,ea,nb,eb,qmatrix,logl,dlogl,ddlogl,recurse);
-  return logl;
-}
+// double Tree::pathLogLikelihood(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,bool recurse)
+// {
+//   double logl,dlogl,ddlogl;
+//   partialPathCalculations(t,alignment,na,ea,nb,eb,qmatrix,logl,dlogl,ddlogl,recurse);
+//   return logl;
+// }
 
-double Tree::pathLogLikelihoodDerivative(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,bool recurse)
-{
-  double logl,dlogl,ddlogl;
-  partialPathCalculations(t,alignment,na,ea,nb,eb,qmatrix,logl,dlogl,ddlogl,recurse);
-  return dlogl;
+// double Tree::pathLogLikelihoodDerivative(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,bool recurse)
+// {
+//   double logl,dlogl,ddlogl;
+//   partialPathCalculations(t,alignment,na,ea,nb,eb,qmatrix,logl,dlogl,ddlogl,recurse);
+//   return dlogl;
 
-}
+// }
 
-double Tree::pathLogLikelihoodSecondDerivative(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix, bool recurse)
-{
-  double logl,dlogl,ddlogl;
-  partialPathCalculations(t,alignment,na,ea,nb,eb,qmatrix,logl,dlogl,ddlogl,recurse);
-  return ddlogl;
-}
+// double Tree::pathLogLikelihoodSecondDerivative(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix, bool recurse)
+// {
+//   double logl,dlogl,ddlogl;
+//   partialPathCalculations(t,alignment,na,ea,nb,eb,qmatrix,logl,dlogl,ddlogl,recurse);
+//   return ddlogl;
+// }
 
 // void mleError(Node* na,Node* nb,double curr,double prop,double curr_dlogl,double prop_dlogl)
 // {
@@ -753,8 +785,8 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   for ( int k=0; k<numSites; ++k )
   {
 //    cerr << "k=" << k << endl;
-    nodes[0]->calculate(k,alignment,this,true); // sets pattern for this site
-    nodes[1]->calculate(k,alignment,this,true);
+    nodes[0]->calculate(k,alignment,this);//,true); // sets pattern for this site
+    nodes[1]->calculate(k,alignment,this);//,true);
 //    cerr << nodes[0]->getPattern() << endl;
 //    cerr << nodes[1]->getPattern() << endl;
     pair<double,Vector4d> pa = nodes[0]->patternToProbMap[nodes[0]->getPattern()];
@@ -898,9 +930,9 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
   // there is a smarter way to do this for only part of the tree, depending on order of edges
   // worry about increased efficiency later
   Node* parentNode = getOtherNode(childNode);
-  parentNode->clearProbMaps(this);
-//  nodes[0]->clearProbMaps(this);
-//  nodes[1]->clearProbMaps(this);
+  //parentNode->clearProbMaps(this);
+  nodes[0]->clearProbMaps(this);
+  nodes[1]->clearProbMaps(this);
 
   bool converge;
   // set length to MLE distance
@@ -1452,9 +1484,9 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       // compute probabilities at subtrees x,y,z
       for ( int k=0; k<alignment.getNumSites(); ++k )
 	{
-	  x->calculate(k,alignment,x->getEdgeParent(),true);
-	  y->calculate(k,alignment,y->getEdgeParent(),true);
-	  z->calculate(k,alignment,z->getEdgeParent(),true);
+	  x->calculate(k,alignment,x->getEdgeParent());//,true);
+	  y->calculate(k,alignment,y->getEdgeParent());//,true);
+	  z->calculate(k,alignment,z->getEdgeParent());//,true);
 	}
       bool converge = true;
       Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge); //we might want to get rid of joint MLE, and t=curr lengths(x,y,z)
@@ -1465,7 +1497,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	  double prop_logl;
 	  Vector3d prop_gradient;
 	  Matrix3d prop_hessian;
-	  partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	  partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
 	  Vector3d mu = t;
 	  Matrix3d cov = (-1) * prop_hessian.inverse();
 	  t = multivariateGamma3D(mu,cov,rng, logdensity);
@@ -1485,9 +1517,9 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	// compute probabilities at subtrees x,y,z
 	for ( int k=0; k<alignment.getNumSites(); ++k )
 	  {
-	    x->calculate(k,alignment,x->getEdgeParent(),true);
-	    y->calculate(k,alignment,y->getEdgeParent(),true);
-	    z->calculate(k,alignment,par->getEdgeParent(),true); //edge parent of par to go in opposite direction
+	    x->calculate(k,alignment,x->getEdgeParent());//,true);
+	    y->calculate(k,alignment,y->getEdgeParent());//,true);
+	    z->calculate(k,alignment,par->getEdgeParent());//,true); //edge parent of par to go in opposite direction
 	  }
 
 	bool converge;
@@ -1498,7 +1530,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	    Vector2d prop_gradient;
 	    Matrix2d prop_hessian;
 	    double lz = par->getEdgeParent()->getLength(); //kept fixed throughout
-	    partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	    partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
 	    Vector2d mu = t;
 	    Matrix2d cov = (-1) * prop_hessian.inverse();
 	    t = multivariateGamma2D(mu,cov,rng, logdensity);
@@ -1523,7 +1555,7 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   double curr_logl;
   Vector2d curr_gradient;
   Matrix2d curr_hessian;
-  partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+  partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
   Vector2d prop = curr;
   double prop_logl = curr_logl;
   Vector2d prop_gradient = curr_gradient;
@@ -1536,7 +1568,7 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   do
   {
     curr = prop;
-    partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+    partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
     // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
     // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
     // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
@@ -1575,7 +1607,7 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
       }
 //    cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
 
-    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
     if ( ++iter > 100 )
       mleError(converge);
     if(!keepZero1 && !keepZero2)
@@ -1589,7 +1621,7 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
 		delta[1] = 0;
 	    delta = 0.5 *delta;
 	    prop = curr - delta;
-	    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
 	    if ( ++iter > 100 )
 	      mleError(converge);
 	  }
@@ -1612,7 +1644,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   double curr_logl;
   Vector3d curr_gradient;
   Matrix3d curr_hessian;
-  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
   Vector3d prop = curr;
   double prop_logl = curr_logl;
   Vector3d prop_gradient = curr_gradient;
@@ -1626,7 +1658,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   do
   {
     curr = prop;
-    partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian,true);
+    partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
     // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
     // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
     // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
@@ -1675,7 +1707,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
       }
 //    cout << "prop befofe partialPathCalculations3D: " << prop.transpose() << endl;
 
-    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
     if ( ++iter > 100 )
       mleError(converge);
     if(!keepZero1 && !keepZero2 && !keepZero3)
@@ -1691,7 +1723,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
 		delta[2] = 0;
 	    delta = 0.5 *delta;
 	    prop = curr - delta;
-	    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian,true);
+	    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
 	    if ( ++iter > 100 )
 	      mleError(converge);
 	  }
@@ -1705,7 +1737,7 @@ Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
 
 // modified to make t a Vector2d (instead of Vector3d) to keep the length to node z fixed
 // gradient and hessian are 2d as well
-void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector2d& gradient,Matrix2d& hessian,bool recurse)
+void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector2d& gradient,Matrix2d& hessian)//,bool recurse)
 {
   Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
   Matrix4d QP1 = qmatrix.getQP(t[0]);
@@ -1731,9 +1763,9 @@ void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
   for ( int k=0; k<numSites; ++k )
   {
     // clau: I think we don't need this here again, we did this already outside, and lik on subtrees x,y,z is fixed
-    nx->calculate(k,alignment,ex,recurse); // set pattern and put probability in map if not already there
-    ny->calculate(k,alignment,ey,recurse);
-    nz->calculate(k,alignment,ez,recurse);
+    nx->calculate(k,alignment,ex);//,recurse); // set pattern and put probability in map if not already there
+    ny->calculate(k,alignment,ey);//,recurse);
+    nz->calculate(k,alignment,ez);//,recurse);
     pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
     pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
     pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
@@ -1767,7 +1799,7 @@ void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
 }
 
 
-void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector3d& gradient,Matrix3d& hessian,bool recurse)
+void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector3d& gradient,Matrix3d& hessian)//,bool recurse)
 {
   Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
   Matrix4d QP1 = qmatrix.getQP(t[0]);
@@ -1797,9 +1829,9 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
   for ( int k=0; k<numSites; ++k )
   {
     // clau: I think we don't need this here again, we did this already
-    nx->calculate(k,alignment,ex,recurse); // set pattern and put probability in map if not already there
-    ny->calculate(k,alignment,ey,recurse);
-    nz->calculate(k,alignment,ez,recurse);
+    nx->calculate(k,alignment,ex);//,recurse); // set pattern and put probability in map if not already there
+    ny->calculate(k,alignment,ey);//,recurse);
+    nz->calculate(k,alignment,ez);//,recurse);
     pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
     pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
     pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
