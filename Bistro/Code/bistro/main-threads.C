@@ -56,9 +56,12 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
       tree.setNJDistances(gtrDistanceMatrixCopy,rng);
       tree.randomize(rng);
-//      tree.print(cout);
-//      cout << tree.makeTreeNumbers() << endl;
+      // cout << k << "th tree" << endl;
+      // tree.print(cout);
+      // cout << tree.makeTreeNumbers() << endl;
       double logProposalDensity = 0;
+      tree.setMapParentNull();
+
       for ( int i=0; i<parameters.getNumMLE(); ++i )
 	{
 	  tree.randomEdges(alignment,model,rng,logProposalDensity,true);
@@ -277,8 +280,8 @@ int main(int argc, char* argv[])
     cerr << "k = " << k << endl;
 
     // generating the seeds for each core
-    random_device rd;
-    unsigned int initial_seed = rd();
+    uniform_int_distribution<> rint_orig(0,4294967295);
+    unsigned int initial_seed = rint_orig(rng);
     cerr << "Seed = " << initial_seed << endl;
     minstd_rand seed_rng(initial_seed);
     uniform_int_distribution<> rint(0,4294967295);

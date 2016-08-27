@@ -74,7 +74,7 @@ private:
   vector<Node*> activeChildren;
   Node* nodeParent;
   Edge* edgeParent;
-  Edge* mapParent; // pointer to parent edge used when creating patternToProbMap
+  Edge* mapParent; // pointer to parent edge used when creating patternToProbMap, Clau: I think we need this separate from parent
   int minNumber; // smallest number in subtree rooted at node
 public:
   map<string,pair<double,Vector4d> > patternToProbMap;
@@ -128,6 +128,7 @@ public:
   int getActiveChildrenSize() const { return activeChildren.size(); }
   void deactivateChild(int i) { activeChildren.erase(activeChildren.begin() + i); }
   void setActiveChildrenAndNodeParents(Edge*);
+  void setMapParent(Edge*);
   Node* closeRelative();
   Edge* getEdgeParent() const { return edgeParent; }
   void calculateEdges(QMatrix&);
@@ -136,6 +137,7 @@ public:
   void sortCanonical(Edge*);
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&,bool);
   void parsimonyScore(Alignment&,Edge*,int,int&,int&);
+  void setMapParentNull();
 };
 
 class Tree
@@ -205,6 +207,7 @@ public:
   void mleError(bool&);
   void makeBinary();
   int parsimonyScore(Alignment&);
+  void setMapParentNull();
 };
 
 #endif

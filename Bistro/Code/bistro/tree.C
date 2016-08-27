@@ -505,9 +505,8 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
   // internal node
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
   {
-    if ( (*e) != parent )
+    if ( (*e) != parent && (*e) != mapParent ) //only calculate for children if *e is not mapParent
     {
-      //need to check if the map of the children was gotten with *e as mapParent, if so, no need to recalculate, but we do need to reset the pattern of children
       getNeighbor(*e)->calculateAfterPattern(site,alignment,*e);//,recurse);
       //pattern += getNeighbor(*e)->getPattern();
     }
@@ -574,7 +573,7 @@ void Node::clearProbMaps(Edge* parent)
 {
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
   {
-    if ( (*e) != parent ) // check here, only clear map if *e is different from the one used to create the map
+    if ( (*e) != parent  && (*e) != mapParent) // check here, only clear map if *e is different from the one used to create the map
       getNeighbor(*e)->clearProbMaps(*e);
   }
   patternToProbMap.clear();
@@ -1031,6 +1030,11 @@ void Tree::depthFirstNodeList(list<Node*>& nodeList)
   root->depthFirstNodeList(nodeList,NULL);
 }
 
+void Node::setMapParent(Edge* edge)
+{
+  mapParent = edge;
+}
+
 void Node::setActiveChildrenAndNodeParents(Edge* parent)
 {
   if ( parent != NULL )
@@ -1436,12 +1440,12 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     (*e)->calculate(qmatrix);
   list<Node*> nodeList;
-  depthFirstNodeList(nodeList);
-  setActiveChildrenAndNodeParents();
-//  cout << "Node List:";
-//  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-//    cout << " " << (*p)->getNumber();
-//  cout << endl;
+  depthFirstNodeList(nodeList); //need to change this to postorder traversal
+  setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
+ cout << "Node List:";
+ for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+   cout << " " << (*p)->getNumber();
+ cout << endl;
 
   list<Node*>::iterator p=nodeList.begin();
   while ( true )
@@ -2075,3 +2079,14 @@ int Tree::parsimonyScore(Alignment& alignment)
   return score;
 }
 
+
+void Tree::setMapParentNull()
+{
+  for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
+    (*n)->setMapParentNull();
+}
+
+void Node::setMapParentNull()
+{
+  mapParent = NULL;
+}
