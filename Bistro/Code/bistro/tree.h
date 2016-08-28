@@ -58,7 +58,7 @@ public:
   void mleError(bool&);
   void calculate(double,Alignment&,QMatrix&,double&,double&,double&);
   double mleLength(Alignment&,QMatrix&,bool&);
-  void randomLength(Alignment&,QMatrix&,mt19937_64&,double&,Node*,bool);
+  void randomLength(Alignment&,QMatrix&,mt19937_64&,double&,bool);
 };
 
 class Node
@@ -122,6 +122,7 @@ public:
   pair<double,Vector4d> getProb();
   void randomize(mt19937_64&,Edge*);
   void clearProbMaps(Edge*);
+  void clearProbMapsSmart(Edge*);
   void depthFirstNodeList(list<Node*>&,Edge*);
   Node* getNodeParent() const { return nodeParent; }
   Node* getActiveChild(int i) const { return activeChildren[i]; }
@@ -129,6 +130,7 @@ public:
   void deactivateChild(int i) { activeChildren.erase(activeChildren.begin() + i); }
   void setActiveChildrenAndNodeParents(Edge*);
   void setMapParent(Edge*);
+  Edge* getMapParent() { return mapParent; }
   Node* closeRelative();
   Edge* getEdgeParent() const { return edgeParent; }
   void calculateEdges(QMatrix&);
@@ -137,7 +139,7 @@ public:
   void sortCanonical(Edge*);
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&,bool);
   void parsimonyScore(Alignment&,Edge*,int,int&,int&);
-  void setMapParentNull();
+  void clearMapParent();
 };
 
 class Tree
@@ -178,6 +180,7 @@ public:
   double calculate(const Alignment&,QMatrix&);
   void randomize(mt19937_64&);
   void clearProbMaps();
+  void clearProbMapsSmart();
   /* void partialPathCalculations(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double&,double&,double&,bool); */
   /* double pathLogLikelihood(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool); */
   /* double pathLogLikelihoodDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool); */
@@ -207,7 +210,7 @@ public:
   void mleError(bool&);
   void makeBinary();
   int parsimonyScore(Alignment&);
-  void setMapParentNull();
+  void clearMapParent();
 };
 
 #endif

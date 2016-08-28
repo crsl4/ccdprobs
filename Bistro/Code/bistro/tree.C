@@ -487,13 +487,13 @@ void Node::setPattern(int site,const Alignment& alignment,Edge* parent)
 void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* parent)
 {
   map<string,pair<double,Vector4d> >::iterator m;
+  // if( site == 0)
+  //   cout << "Calculate after pattern for node: " << number << endl;
 
-  // here we want to call a function to set all patterns, put pattern.clear() inside this new function
   if ( leaf )
   {
     char base = alignment.getBase(number,site);
     base = tolower(base);
-    // pattern = base;
     m = patternToProbMap.find(pattern);
     if ( m == patternToProbMap.end() ) // first time this pattern calculated
     {
@@ -505,10 +505,11 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
   // internal node
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
   {
-    if ( (*e) != parent && (*e) != mapParent ) //only calculate for children if *e is not mapParent
+    if ( (*e) != parent )
     {
-      getNeighbor(*e)->calculateAfterPattern(site,alignment,*e);//,recurse);
-      //pattern += getNeighbor(*e)->getPattern();
+      Node* neighbor = getNeighbor(*e);
+      if( (*e) != neighbor->getMapParent() ) //only calculate for children if *e is not mapParent
+	neighbor->calculateAfterPattern(site,alignment,*e);//,recurse);
     }
   }
   m = patternToProbMap.find(pattern);
@@ -569,19 +570,48 @@ double Tree::calculate(const Alignment& alignment,QMatrix& qmatrix)
   return logLikelihood.sum();
 }
 
+// same function as always, traverse all the tree and does not worry about mapParent Edge
 void Node::clearProbMaps(Edge* parent)
 {
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
-  {
-    if ( (*e) != parent  && (*e) != mapParent) // check here, only clear map if *e is different from the one used to create the map
-      getNeighbor(*e)->clearProbMaps(*e);
-  }
+    {
+      if ( (*e) != parent )
+	getNeighbor(*e)->clearProbMaps(*e);
+    }
+  cout << "clearing prob maps and mapParent for node: " << number << endl;
   patternToProbMap.clear();
+  mapParent = NULL;
 }
 
+// same function as always, traverse all the tree and does not worry about mapParent Edge
 void Tree::clearProbMaps()
 {
   root->clearProbMaps(NULL);
+}
+
+// checks if mapParent is the same used to create the map, if so, it does not clear the map
+void Node::clearProbMapsSmart(Edge* parent)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    {
+      if ( (*e) != parent )
+	{
+	  Node* neighbor = getNeighbor(*e);
+	  if( (*e) != neighbor->getMapParent() ) //only keep going for children if *e is not mapParent
+	    neighbor->clearProbMapsSmart(*e);
+	}
+    }
+  if( mapParent != parent)
+    {
+      cout << "clearing prob maps and mapParent for node: " << number << endl;
+      patternToProbMap.clear();
+      mapParent = NULL;
+    }
+}
+
+void Tree::clearProbMapsSmart()
+{
+  root->clearProbMapsSmart(NULL);
 }
 
 // put edges in random order
@@ -773,7 +803,7 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   Matrix4d QQP = qmatrix.getQQP( t );
   int numSites = alignment.getNumSites();
 
-//  cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl;
+  //  cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl;
 //  cerr << "P =" << endl << P << endl << endl;
 //  cerr << "QP =" << endl << QP << endl << endl;
 //  cerr << "QQP =" << endl << QQP << endl << endl;
@@ -805,6 +835,8 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
     dlogl += f1/f0;
     ddlogl += (f0*f2 - f1*f1)/(f0*f0);
   }
+  nodes[0] -> setMapParent(this); //here we are resetting and traversing every time, maybe we could avoid this
+  nodes[1] -> setMapParent(this);
 }
 
 double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
@@ -923,19 +955,15 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 // do all conditional calculations for both subtrees
 // find MLE of edge length conditional on rest of tree
 // generate gamma distributed random length
-void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity, Node* childNode,bool onlyMLE)
+void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity, bool onlyMLE)
 {
-  // clear prob maps recursively through entire tree
-  // there is a smarter way to do this for only part of the tree, depending on order of edges
-  // worry about increased efficiency later
-  Node* parentNode = getOtherNode(childNode);
-  //parentNode->clearProbMaps(this);
-  nodes[0]->clearProbMaps(this);
-  nodes[1]->clearProbMaps(this);
+  nodes[0]->clearProbMapsSmart(this);
+  nodes[1]->clearProbMapsSmart(this);
 
   bool converge;
   // set length to MLE distance
   length = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
+  //cout << "Setting length from mleLength to edge: " << number << endl;
   if ( !onlyMLE )
   {
     if ( length < MIN_EDGE_LENGTH + 1.0e-08 ) // generate from exponential
@@ -978,13 +1006,13 @@ void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edg
   //  get random length for parent edge
   if ( parent != NULL ) // call edge command on parent
   {
-    parent->randomLength(alignment,qmatrix,rng,logProposalDensity,this,onlyMLE);
+    parent->randomLength(alignment,qmatrix,rng,logProposalDensity,onlyMLE);
   }
 }
 
 void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity,bool onlyMLE)
 {
-  // clear probability maps from all nodes for fresh calculation
+  // clear probability maps from all nodes for fresh calculation, and clear mapParent for every node
   clearProbMaps();
   // compute transition matrices for all edges using provisional edge lengths
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
@@ -1032,6 +1060,16 @@ void Tree::depthFirstNodeList(list<Node*>& nodeList)
 
 void Node::setMapParent(Edge* edge)
 {
+  if( leaf )
+    {
+      mapParent = edge;
+      return;
+    }
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  {
+    if ( *e != edge )
+      getNeighbor(*e)->setMapParent(*e);
+  }
   mapParent = edge;
 }
 
@@ -1997,7 +2035,7 @@ void Node::parsimonyScore(Alignment& alignment,Edge* parent,int site,int& score,
 	  }
 	}
       }
-    }	
+    }
 
     int leftScore = 0,rightScore=0,leftBases=0,rightBases=0;
     getNeighbor(left)->parsimonyScore(alignment,left,site,leftScore,leftBases);
@@ -2080,13 +2118,13 @@ int Tree::parsimonyScore(Alignment& alignment)
 }
 
 
-void Tree::setMapParentNull()
+void Tree::clearMapParent()
 {
   for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
-    (*n)->setMapParentNull();
+    (*n)->clearMapParent();
 }
 
-void Node::setMapParentNull()
+void Node::clearMapParent()
 {
   mapParent = NULL;
 }

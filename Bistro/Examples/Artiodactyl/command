@@ -45,3 +45,7 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 
 ## test new threads:
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o threads2 -s 2566231036 > threads2.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o threads3 -s 2566231036 > threads3.log
+
+## to check printed order in cout with independent to only call randomEdges
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1 --cores 1 --independent > core1.log
