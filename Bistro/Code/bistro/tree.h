@@ -124,6 +124,7 @@ public:
   void clearProbMaps(Edge*);
   void clearProbMapsSmart(Edge*);
   void depthFirstNodeList(list<Node*>&,Edge*);
+  void postorderNodeList(list<Node*>&,Edge*);
   Node* getNodeParent() const { return nodeParent; }
   Node* getActiveChild(int i) const { return activeChildren[i]; }
   int getActiveChildrenSize() const { return activeChildren.size(); }
@@ -188,6 +189,7 @@ public:
   double mleDistance(Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double);
   void setNodeLevels();
   void depthFirstNodeList(list<Node*>&);
+  void postorderNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
   void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&, bool);
   void reroot(int);

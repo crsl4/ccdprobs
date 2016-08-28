@@ -578,7 +578,7 @@ void Node::clearProbMaps(Edge* parent)
       if ( (*e) != parent )
 	getNeighbor(*e)->clearProbMaps(*e);
     }
-  cout << "clearing prob maps and mapParent for node: " << number << endl;
+  //cout << "clearing prob maps and mapParent for node: " << number << endl;
   patternToProbMap.clear();
   mapParent = NULL;
 }
@@ -603,7 +603,7 @@ void Node::clearProbMapsSmart(Edge* parent)
     }
   if( mapParent != parent)
     {
-      cout << "clearing prob maps and mapParent for node: " << number << endl;
+      //cout << "clearing prob maps and mapParent for node: " << number << endl;
       patternToProbMap.clear();
       mapParent = NULL;
     }
@@ -954,7 +954,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 // clear prob maps of both nodes
 // do all conditional calculations for both subtrees
 // find MLE of edge length conditional on rest of tree
-// generate gamma distributed random length
+// gamma distributed random length
 void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity, bool onlyMLE)
 {
   nodes[0]->clearProbMapsSmart(this);
@@ -1056,6 +1056,21 @@ void Node::depthFirstNodeList(list<Node*>& nodeList,Edge* parent)
 void Tree::depthFirstNodeList(list<Node*>& nodeList)
 {
   root->depthFirstNodeList(nodeList,NULL);
+}
+
+void Node::postorderNodeList(list<Node*>& nodeList,Edge* parent)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  {
+    if ( *e != parent )
+      getNeighbor(*e)->postorderNodeList(nodeList,*e);
+  }
+  nodeList.push_back(this);
+}
+
+void Tree::postorderNodeList(list<Node*>& nodeList)
+{
+  root->postorderNodeList(nodeList,NULL);
 }
 
 void Node::setMapParent(Edge* edge)
@@ -1478,12 +1493,13 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     (*e)->calculate(qmatrix);
   list<Node*> nodeList;
-  depthFirstNodeList(nodeList); //need to change this to postorder traversal
+  //postorderNodeList(nodeList);
+  depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
- cout << "Node List:";
- for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-   cout << " " << (*p)->getNumber();
- cout << endl;
+  cout << "Node List:";
+  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+    cout << " " << (*p)->getNumber();
+  cout << endl;
 
   list<Node*>::iterator p=nodeList.begin();
   while ( true )
@@ -1492,21 +1508,31 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     Node* y;
     Node* z;
     Node* par; //clau: parent of x,y
+    //    if( (*p) == root )
     if ( (*p)->getNodeParent() == root ) //clau: if p parent is root
-    {
-      if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
       {
-        cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
-        cerr << root->getActiveChild(0)->getNumber() << endl;
-        cerr << (*p)->getNumber() << endl;
-	throw 20;
+	if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
+	  {
+	    cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
+	    cerr << root->getActiveChild(0)->getNumber() << endl;
+	    cerr << (*p)->getNumber() << endl;
+	    throw 20;
+	  }
+	par = root;
+	x = *p++;
+	y = *p++;
+	z = *p;
+	// par = root;
+	// x = par->getEdge(0)->getOtherNode(par);
+	// y = par->getEdge(1)->getOtherNode(par);
+	// z = par->getEdge(2)->getOtherNode(par);
       }
-      par = root;
-      x = *p++;
-      y = *p++;
-      z = *p;
-    }
-    else //clau: p parent not root
+    // else if ( (*p)->getNodeParent() == root ) //clau: if p parent is root
+    //   {
+    // 	x = *p++;
+    // 	continue;
+    //   }
+    else //clau: p parent not root, and p not root
     {
       x = *p++; //it means take *p and move right
       y = *p++;
@@ -1517,19 +1543,22 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     // clear prob maps recursively through entire tree
     // there is a smarter way to do this for only part of the tree, depending on order of edges
     // worry about increased efficiency later
-    clearProbMaps();
+    clearProbMaps(); //get rid of this with new approach
 
     if ( par==root )
     {
-//      cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
+      cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
 
+      //when doing the root, no need to clearProbMaps of x,y,z because they would be accurate now
+
+      // this is computed inside mleLength3D, get rid of this
       // compute probabilities at subtrees x,y,z
       for ( int k=0; k<alignment.getNumSites(); ++k )
-	{
-	  x->calculate(k,alignment,x->getEdgeParent());//,true);
-	  y->calculate(k,alignment,y->getEdgeParent());//,true);
-	  z->calculate(k,alignment,z->getEdgeParent());//,true);
-	}
+      	{
+      	  x->calculate(k,alignment,x->getEdgeParent());//,true);
+      	  y->calculate(k,alignment,y->getEdgeParent());//,true);
+      	  z->calculate(k,alignment,z->getEdgeParent());//,true);
+      	}
       bool converge = true;
       Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge); //we might want to get rid of joint MLE, and t=curr lengths(x,y,z)
       if(!converge)
@@ -1552,10 +1581,14 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       z->getEdgeParent()->calculate(qmatrix);
       break;
     }
-    else
+    else //par not root
       {
-//	cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
+	cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
+	x-> clearProbMapsSmart(x->getEdgeParent());
+	y-> clearProbMapsSmart(y->getEdgeParent());
+	z-> clearProbMapsSmart(par->getEdgeParent()); //edge parent of par to go in opposite direction
 
+	// this is done inside mleLength2D, get rid of this now
 	// compute probabilities at subtrees x,y,z
 	for ( int k=0; k<alignment.getNumSites(); ++k )
 	  {
@@ -1588,8 +1621,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 // modified to do 2D MLE instead of 3D
 Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
 {
-//  cout << "Entering mleLength2D";
-//  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+  cout << "Entering mleLength2D";
+  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
   int iter=0;
   Vector2d curr(ex->getLength(),ey->getLength());
   double lz = ez->getLength(); //kept fixed throughout
@@ -1804,7 +1837,6 @@ void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
 
   for ( int k=0; k<numSites; ++k )
   {
-    // clau: I think we don't need this here again, we did this already outside, and lik on subtrees x,y,z is fixed
     nx->calculate(k,alignment,ex);//,recurse); // set pattern and put probability in map if not already there
     ny->calculate(k,alignment,ey);//,recurse);
     nz->calculate(k,alignment,ez);//,recurse);
@@ -1838,6 +1870,10 @@ void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
   }
   gradient << dll1, dll2;
   hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22; //row-wise
+
+  // nx -> setMapParent(ex); //here we are resetting and traversing every time, maybe we could avoid this
+  // ny -> setMapParent(ey);
+  // nz -> setMapParent(ez);
 }
 
 
@@ -1870,7 +1906,6 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
 
   for ( int k=0; k<numSites; ++k )
   {
-    // clau: I think we don't need this here again, we did this already
     nx->calculate(k,alignment,ex);//,recurse); // set pattern and put probability in map if not already there
     ny->calculate(k,alignment,ey);//,recurse);
     nz->calculate(k,alignment,ez);//,recurse);
@@ -1914,6 +1949,10 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
   }
   gradient << dll1, dll2, dll3;
   hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33; //row-wise
+
+  // nx -> setMapParent(ex); //here we are resetting and traversing every time, maybe we could avoid this
+  // ny -> setMapParent(ey);
+  // nz -> setMapParent(ez);
 }
 
 
