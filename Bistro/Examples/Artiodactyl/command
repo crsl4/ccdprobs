@@ -51,3 +51,7 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1 --cores 1 --independent > core1.log
 ## to check with generate branch lengths if nodes are computed in correct order
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1gbl --cores 1  > core1gbl.log
+
+
+
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1_2 --cores 1 --independent -s 2561016956 > core1_2.log

@@ -61,7 +61,7 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
       cout << tree.makeTreeNumbers() << endl;
       double logProposalDensity = 0;
       list<Node*> nodeList;
-      tree.postorderNodeList(nodeList);
+      tree.postorderCherryNodeList(nodeList);
       cout << "Postorder Node List:";
       for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
 	cout << " " << (*p)->getNumber();

@@ -1058,19 +1058,29 @@ void Tree::depthFirstNodeList(list<Node*>& nodeList)
   root->depthFirstNodeList(nodeList,NULL);
 }
 
-void Node::postorderNodeList(list<Node*>& nodeList,Edge* parent)
+// will put in nodeList a traversal of left cherries, right cherries and then current node, 
+// if it is a prunedLeaf
+void Node::postorderCherryNodeList(list<Node*>& nodeList,Edge* parent)
 {
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
-  {
     if ( *e != parent )
-      getNeighbor(*e)->postorderNodeList(nodeList,*e);
-  }
-  nodeList.push_back(this);
+      getNeighbor(*e)->postorderCherryNodeList(nodeList,*e);
+  if( isPrunedLeaf(parent) || parent == NULL )
+    {
+      for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+	  if ( *e != parent )
+	    {
+	      Node* neighbor = getNeighbor(*e);
+	      if( neighbor->getLeaf() )
+		nodeList.push_back(neighbor);
+	    }
+      nodeList.push_back(this);
+    }
 }
 
-void Tree::postorderNodeList(list<Node*>& nodeList)
+void Tree::postorderCherryNodeList(list<Node*>& nodeList)
 {
-  root->postorderNodeList(nodeList,NULL);
+  root->postorderCherryNodeList(nodeList,NULL);
 }
 
 void Node::setMapParent(Edge* edge)
@@ -1508,8 +1518,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     Node* y;
     Node* z;
     Node* par; //clau: parent of x,y
-    //    if( (*p) == root )
-    if ( (*p)->getNodeParent() == root ) //clau: if p parent is root
+    if( (*p) == root )
+    //if ( (*p)->getNodeParent() == root ) 
       {
 	if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
 	  {
@@ -1518,20 +1528,20 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	    cerr << (*p)->getNumber() << endl;
 	    throw 20;
 	  }
-	par = root;
-	x = *p++;
-	y = *p++;
-	z = *p;
 	// par = root;
-	// x = par->getEdge(0)->getOtherNode(par);
-	// y = par->getEdge(1)->getOtherNode(par);
-	// z = par->getEdge(2)->getOtherNode(par);
+	// x = *p++;
+	// y = *p++;
+	// z = *p;
+	par = root;
+	x = par->getEdge(0)->getOtherNode(par);
+	y = par->getEdge(1)->getOtherNode(par);
+	z = par->getEdge(2)->getOtherNode(par);
       }
-    // else if ( (*p)->getNodeParent() == root ) //clau: if p parent is root
-    //   {
-    // 	x = *p++;
-    // 	continue;
-    //   }
+    else if ( (*p)->getNodeParent() == root ) //clau: if p parent is root, just skip
+      {
+    	x = *p++;
+    	continue;
+      }
     else //clau: p parent not root, and p not root
     {
       x = *p++; //it means take *p and move right
@@ -1543,7 +1553,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     // clear prob maps recursively through entire tree
     // there is a smarter way to do this for only part of the tree, depending on order of edges
     // worry about increased efficiency later
-    clearProbMaps(); //get rid of this with new approach
+    clearProbMaps(); //fixit: I think we should be able to get rid of this, but does not work
 
     if ( par==root )
     {
@@ -1553,12 +1563,12 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
       // this is computed inside mleLength3D, get rid of this
       // compute probabilities at subtrees x,y,z
-      for ( int k=0; k<alignment.getNumSites(); ++k )
-      	{
-      	  x->calculate(k,alignment,x->getEdgeParent());//,true);
-      	  y->calculate(k,alignment,y->getEdgeParent());//,true);
-      	  z->calculate(k,alignment,z->getEdgeParent());//,true);
-      	}
+      // for ( int k=0; k<alignment.getNumSites(); ++k )
+      // 	{
+      // 	  x->calculate(k,alignment,x->getEdgeParent());//,true);
+      // 	  y->calculate(k,alignment,y->getEdgeParent());//,true);
+      // 	  z->calculate(k,alignment,z->getEdgeParent());//,true);
+      // 	}
       bool converge = true;
       Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge); //we might want to get rid of joint MLE, and t=curr lengths(x,y,z)
       if(!converge)
@@ -1590,12 +1600,12 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
 	// this is done inside mleLength2D, get rid of this now
 	// compute probabilities at subtrees x,y,z
-	for ( int k=0; k<alignment.getNumSites(); ++k )
-	  {
-	    x->calculate(k,alignment,x->getEdgeParent());//,true);
-	    y->calculate(k,alignment,y->getEdgeParent());//,true);
-	    z->calculate(k,alignment,par->getEdgeParent());//,true); //edge parent of par to go in opposite direction
-	  }
+	// for ( int k=0; k<alignment.getNumSites(); ++k )
+	//   {
+	//     x->calculate(k,alignment,x->getEdgeParent());//,true);
+	//     y->calculate(k,alignment,y->getEdgeParent());//,true);
+	//     z->calculate(k,alignment,par->getEdgeParent());//,true); //edge parent of par to go in opposite direction
+	//   }
 
 	bool converge;
 	Vector2d t = mleLength2D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
@@ -1871,9 +1881,9 @@ void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
   gradient << dll1, dll2;
   hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22; //row-wise
 
-  // nx -> setMapParent(ex); //here we are resetting and traversing every time, maybe we could avoid this
-  // ny -> setMapParent(ey);
-  // nz -> setMapParent(ez);
+  nx -> setMapParent(ex); //here we are resetting and traversing every time, maybe we could avoid this
+  ny -> setMapParent(ey);
+  nz -> setMapParent(ez);
 }
 
 
@@ -1950,9 +1960,9 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
   gradient << dll1, dll2, dll3;
   hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33; //row-wise
 
-  // nx -> setMapParent(ex); //here we are resetting and traversing every time, maybe we could avoid this
-  // ny -> setMapParent(ey);
-  // nz -> setMapParent(ez);
+  nx -> setMapParent(ex); //here we are resetting and traversing every time, maybe we could avoid this
+  ny -> setMapParent(ey);
+  nz -> setMapParent(ez);
 }
 
 
@@ -2166,4 +2176,19 @@ void Tree::clearMapParent()
 void Node::clearMapParent()
 {
   mapParent = NULL;
+}
+
+
+bool Node::isPrunedLeaf(Edge* parent)
+{
+  if( leaf )
+    return false;
+  bool prunedLeaf = true;
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    if( (*e) != parent )
+      {
+	Node* neighbor = getNeighbor(*e);
+	prunedLeaf &= ( neighbor->getLeaf() || neighbor->isPrunedLeaf(*e) );
+      }
+  return prunedLeaf;
 }
