@@ -487,8 +487,8 @@ void Node::setPattern(int site,const Alignment& alignment,Edge* parent)
 void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* parent)
 {
   map<string,pair<double,Vector4d> >::iterator m;
-  // if( site == 0)
-  //   cout << "Calculate after pattern for node: " << number << endl;
+  if( site == 0)
+    cout << "Calculate after pattern for node: " << number << endl;
 
   if ( leaf )
   {
@@ -578,7 +578,7 @@ void Node::clearProbMaps(Edge* parent)
       if ( (*e) != parent )
 	getNeighbor(*e)->clearProbMaps(*e);
     }
-  //cout << "clearing prob maps and mapParent for node: " << number << endl;
+  cout << "clearing prob maps and mapParent for node: " << number << endl;
   patternToProbMap.clear();
   mapParent = NULL;
 }
@@ -603,7 +603,7 @@ void Node::clearProbMapsSmart(Edge* parent)
     }
   if( mapParent != parent)
     {
-      //cout << "clearing prob maps and mapParent for node: " << number << endl;
+      cout << "clearing prob maps and mapParent for node: " << number << endl;
       patternToProbMap.clear();
       mapParent = NULL;
     }
@@ -803,7 +803,7 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   Matrix4d QQP = qmatrix.getQQP( t );
   int numSites = alignment.getNumSites();
 
-  //  cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl;
+  cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl;
 //  cerr << "P =" << endl << P << endl << endl;
 //  cerr << "QP =" << endl << QP << endl << endl;
 //  cerr << "QQP =" << endl << QQP << endl << endl;
@@ -963,7 +963,7 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
   bool converge;
   // set length to MLE distance
   length = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
-  //cout << "Setting length from mleLength to edge: " << number << endl;
+  cout << "Setting length from mleLength to edge: " << number << endl;
   if ( !onlyMLE )
   {
     if ( length < MIN_EDGE_LENGTH + 1.0e-08 ) // generate from exponential
@@ -1503,10 +1503,10 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     (*e)->calculate(qmatrix);
   list<Node*> nodeList;
-  //postorderNodeList(nodeList);
-  depthFirstNodeList(nodeList);
+  postorderCherryNodeList(nodeList);
+  //depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
-  cout << "Node List:";
+  cout << "Postorder Node List:";
   for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
     cout << " " << (*p)->getNumber();
   cout << endl;
@@ -1553,13 +1553,14 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     // clear prob maps recursively through entire tree
     // there is a smarter way to do this for only part of the tree, depending on order of edges
     // worry about increased efficiency later
-    clearProbMaps(); //fixit: I think we should be able to get rid of this, but does not work
+    //clearProbMaps(); //fixit: I think we should be able to get rid of this, but does not work
 
     if ( par==root )
     {
       cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
-
-      //when doing the root, no need to clearProbMaps of x,y,z because they would be accurate now
+      x-> clearProbMapsSmart(x->getEdgeParent());
+      y-> clearProbMapsSmart(y->getEdgeParent());
+      z-> clearProbMapsSmart(par->getEdgeParent()); //edge parent of par to go in opposite direction
 
       // this is computed inside mleLength3D, get rid of this
       // compute probabilities at subtrees x,y,z

@@ -86,6 +86,8 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
 //      cout << tree.makeTreeNumbers() << endl;
       treebl << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
+      tree.clearProbMaps(); //added just to see if this was missing
+      cout << "calculating the final loglik now..." << endl;
       double logLik = tree.calculate(alignment, model);
       double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity - logTopologyProbability;
       tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
