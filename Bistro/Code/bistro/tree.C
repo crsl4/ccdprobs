@@ -487,8 +487,8 @@ void Node::setPattern(int site,const Alignment& alignment,Edge* parent)
 void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* parent)
 {
   map<string,pair<double,Vector4d> >::iterator m;
-  if( site == 0)
-    cout << "Calculate after pattern for node: " << number << endl;
+//  if( site == 0)
+//    cout << "Calculate after pattern for node: " << number << endl << flush;
 
   if ( leaf )
   {
@@ -578,7 +578,7 @@ void Node::clearProbMaps(Edge* parent)
       if ( (*e) != parent )
 	getNeighbor(*e)->clearProbMaps(*e);
     }
-  cout << "clearing prob maps and mapParent for node: " << number << endl;
+//  cout << "clearing prob maps and mapParent for node: " << number << endl << flush;
   patternToProbMap.clear();
   mapParent = NULL;
 }
@@ -603,7 +603,7 @@ void Node::clearProbMapsSmart(Edge* parent)
     }
   if( mapParent != parent)
     {
-      cout << "clearing prob maps and mapParent for node: " << number << endl;
+//      cout << "clearing prob maps and mapParent for node: " << number << endl << flush;
       patternToProbMap.clear();
       mapParent = NULL;
     }
@@ -803,7 +803,7 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   Matrix4d QQP = qmatrix.getQQP( t );
   int numSites = alignment.getNumSites();
 
-  cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl;
+//  cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
 //  cerr << "P =" << endl << P << endl << endl;
 //  cerr << "QP =" << endl << QP << endl << endl;
 //  cerr << "QQP =" << endl << QQP << endl << endl;
@@ -963,7 +963,7 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
   bool converge;
   // set length to MLE distance
   length = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
-  cout << "Setting length from mleLength to edge: " << number << endl;
+//  cout << "Setting length from mleLength to edge: " << number << endl << flush;
   if ( !onlyMLE )
   {
     if ( length < MIN_EDGE_LENGTH + 1.0e-08 ) // generate from exponential
@@ -1506,10 +1506,10 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   postorderCherryNodeList(nodeList);
   //depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
-  cout << "Postorder Node List:";
-  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-    cout << " " << (*p)->getNumber();
-  cout << endl;
+//  cout << "Postorder Node List:";
+//  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+//    cout << " " << (*p)->getNumber();
+//  cout << endl << flush;
 
   list<Node*>::iterator p=nodeList.begin();
   while ( true )
@@ -1557,7 +1557,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
     if ( par==root )
     {
-      cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
+//      cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
       x-> clearProbMapsSmart(x->getEdgeParent());
       y-> clearProbMapsSmart(y->getEdgeParent());
       z-> clearProbMapsSmart(par->getEdgeParent()); //edge parent of par to go in opposite direction
@@ -1594,7 +1594,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
     else //par not root
       {
-	cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
+//	cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
 	x-> clearProbMapsSmart(x->getEdgeParent());
 	y-> clearProbMapsSmart(y->getEdgeParent());
 	z-> clearProbMapsSmart(par->getEdgeParent()); //edge parent of par to go in opposite direction
@@ -1632,8 +1632,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 // modified to do 2D MLE instead of 3D
 Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
 {
-  cout << "Entering mleLength2D";
-  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+//  cout << "Entering mleLength2D";
+//  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
   int iter=0;
   Vector2d curr(ex->getLength(),ey->getLength());
   double lz = ez->getLength(); //kept fixed throughout

@@ -10,6 +10,7 @@
 #include <string>
 #include <random>
 #include <thread>
+#include <chrono>
 
 #include "parameter.h"
 #include "sequence.h"
@@ -23,16 +24,17 @@
 #include "Eigen/Eigenvalues"
 
 using namespace std;
+using namespace std::chrono;
 using namespace Eigen;
 
 // arguments made reference to avoid copying in each thread
 template<typename T>
-void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T>& ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
+void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T>& ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 {
   //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
    string outFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".out";
    ofstream f(outFile.c_str());
-   string treeBLFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".treeBL";
+   string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd) + ".treeBL";
    ofstream treebl(treeBLFile.c_str());
    f << "tree logl logTop logProp logPrior logWt" << endl;
 
@@ -56,16 +58,16 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
       tree.setNJDistances(gtrDistanceMatrixCopy,rng);
       tree.randomize(rng);
-      cout << k << "th tree" << endl;
-      tree.print(cout);
-      cout << tree.makeTreeNumbers() << endl;
+//      cout << coreID << " " << k << "th tree" << endl << flush;
+//      tree.print(cout);
+//      cout << tree.makeTreeNumbers() << endl << flush;
       double logProposalDensity = 0;
-      list<Node*> nodeList;
-      tree.postorderCherryNodeList(nodeList);
-      cout << "Postorder Node List:";
-      for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-	cout << " " << (*p)->getNumber();
-      cout << endl;
+//      list<Node*> nodeList;
+//      tree.postorderCherryNodeList(nodeList);
+//      cout << "Postorder Node List:";
+//      for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+//	cout << " " << (*p)->getNumber();
+//      cout << endl << flush;
 
 
       for ( int i=0; i<parameters.getNumMLE(); ++i )
@@ -87,7 +89,7 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
       treebl << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
       tree.clearProbMaps(); //added just to see if this was missing
-      cout << "calculating the final loglik now..." << endl;
+//      cout << "calculating the final loglik now..." << endl;
       double logLik = tree.calculate(alignment, model);
       double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity - logTopologyProbability;
       tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
@@ -106,12 +108,14 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
 
 int main(int argc, char* argv[])
 {
+  milliseconds ms0 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Read command line and process parameters
   cerr << "Processing command line ...";
   Parameter parameters;
   parameters.processCommandLine(argc,argv);
   cerr << " done." << endl;
 
+  milliseconds ms1 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Read in sequences from FASTA file
   cerr << "Reading alignment from FASTA file ...";
   Alignment alignment(parameters.getSequenceFileName());
@@ -119,6 +123,8 @@ int main(int argc, char* argv[])
   cout << endl << "Alignment summary:" << endl;
   alignment.summarize(cout);
   cout << endl;
+
+  milliseconds ms2 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   // Find Jukes-Cantor pairwise distances
 //  cerr << alignment.getNumTaxa() << endl;
@@ -129,6 +135,8 @@ int main(int argc, char* argv[])
 
   cout << "Jukes-Cantor Distance Matrix:" << endl;
   cout << endl << jcDistanceMatrix << endl << endl;
+
+  milliseconds ms3 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
@@ -143,6 +151,8 @@ int main(int argc, char* argv[])
   cerr << endl << "Tree topology:" << endl;
   cerr << jctree.makeTopologyNumbers() << endl << endl;
 
+  milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
   // Initialize random number generator
   cerr << "Initializing random number generator ...";
   if ( parameters.getSeed() == 0 )
@@ -153,6 +163,8 @@ int main(int argc, char* argv[])
   mt19937_64 rng(parameters.getSeed());
   cerr << " done." << endl;
   cout << "Seed = " << parameters.getSeed() << endl;
+
+  milliseconds ms5 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   cerr << "Running MCMC to estimate Q matrix ..." << endl;
   // Run MCMC on tree to estimate Q matrix parameters
@@ -180,6 +192,8 @@ int main(int argc, char* argv[])
 
   cerr << endl << " done." << endl;
 
+  milliseconds ms6 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";
   MatrixXd gtrDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -189,6 +203,8 @@ int main(int argc, char* argv[])
   cout << "GTR Distance Matrix:" << endl;
   cout << endl << gtrDistanceMatrix << endl << endl;
 
+  milliseconds ms7 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
@@ -224,6 +240,8 @@ int main(int argc, char* argv[])
   }
   cerr << endl << "done." << endl;
 
+  milliseconds ms8 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
   map<string,double> topologyToWeightMap; // not normalized; normalization taken care of during alias creation
   for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
   {
@@ -252,6 +270,8 @@ int main(int argc, char* argv[])
   vector<string> taxaNames;
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
 
+  milliseconds ms9 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
   // here do parsimony score (keep the option to do without parsimony)
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
@@ -273,6 +293,8 @@ int main(int argc, char* argv[])
   ccdParsimony.writePairCount(tmap);
   tmap.close();
 
+  milliseconds ms10 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
   if ( parameters.getNumBootstrap() > 0 )
   {
     int numRandom = parameters.getNumRandom();
@@ -284,8 +306,12 @@ int main(int argc, char* argv[])
       cores = parameters.getNumCores();
     // i want to check that cores not > than hardware_concurrency?
     cerr << "Generating " << numRandom << " random trees in " << cores << " cores:" << endl;
-    int k = numRandom / cores;
-    cerr << "k = " << k << endl;
+    int div = numRandom / cores;
+    int remainder = numRandom % cores;
+    vector<int> startTreeNumber(cores);
+    for ( int i=0; i<cores; ++i )
+      startTreeNumber[i] = i*div + (i < remainder ? i : remainder);
+    startTreeNumber.push_back(numRandom);
 
     // generating the seeds for each core
     uniform_int_distribution<> rint_orig(0,4294967295);
@@ -309,20 +335,20 @@ int main(int argc, char* argv[])
     vector<double> logwt(numRandom,0);
     vector<double> maxLogW(cores); //vector of maxlogweight
 
-    for ( int i=0; i<(cores-1); ++i )
+    for ( int i=0; i<cores; ++i )
     {
-      cerr << "Thread " << i << " beginning random trees from " << i*k << " to " << (i+1)*k-1 << endl;
+//      cerr << "Thread " << i << " beginning random trees from " << i*k << " to " << (i+1)*k-1 << endl;
       if ( parameters.getUseParsimony() )
-	threads.push_back(thread(randomTrees<double>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       else
-	threads.push_back(thread(randomTrees<int>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	threads.push_back(thread(randomTrees<int>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
-    // last core:
-    cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl;
-    if ( parameters.getUseParsimony() )
-      threads.push_back(thread(randomTrees<double>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
-    else
-      threads.push_back(thread(randomTrees<int>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccd), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
+    // // last core:
+    // cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl;
+    // if ( parameters.getUseParsimony() )
+    //   threads.push_back(thread(randomTrees<double>,cores-1,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
+    // else
+    //   threads.push_back(thread(randomTrees<int>,cores-1,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccd), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
 
     for ( int i=0; i<cores; ++i )
       threads.at(i).join();
@@ -400,5 +426,20 @@ int main(int argc, char* argv[])
 
   }
 
+  milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
+  cerr << "Times:" << endl;
+  cerr << ms1.count() - ms0.count() << endl;
+  cerr << ms2.count() - ms1.count() << endl;
+  cerr << ms3.count() - ms2.count() << endl;
+  cerr << ms4.count() - ms3.count() << endl;
+  cerr << ms5.count() - ms4.count() << endl;
+  cerr << ms6.count() - ms5.count() << endl;
+  cerr << ms7.count() - ms6.count() << endl;
+  cerr << ms8.count() - ms7.count() << endl;
+  cerr << ms9.count() - ms8.count() << endl;
+  cerr << ms10.count() - ms9.count() << endl;
+  cerr << ms11.count() - ms10.count() << endl;
+  
   return 0;
 }
