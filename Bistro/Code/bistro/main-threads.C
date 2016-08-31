@@ -316,7 +316,7 @@ int main(int argc, char* argv[])
     // generating the seeds for each core
     uniform_int_distribution<> rint_orig(0,4294967295);
     unsigned int initial_seed = rint_orig(rng);
-    cerr << "Seed = " << initial_seed << endl;
+    cout << "Seed = " << initial_seed << endl;
     minstd_rand seed_rng(initial_seed);
     uniform_int_distribution<> rint(0,4294967295);
     vector<unsigned int> seeds(cores);
@@ -326,9 +326,9 @@ int main(int argc, char* argv[])
     	*p = rint(seed_rng);
     	vrng.push_back( new mt19937_64(*p) );
       }
-    cerr << "Seeds per core: " << endl;
+    cout << "Seeds per core: " << endl;
     for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
-      cerr << setw(15) << *p << endl;
+      cout << setw(15) << *p << endl;
 
     vector<thread> threads;
     vector< multimap<string,double> > topologymm(cores); //vector of multimaps
@@ -428,18 +428,18 @@ int main(int argc, char* argv[])
 
   milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-  cerr << "Times: " << endl;
-  cerr << ms1.count() - ms0.count() << endl;
-  cerr << ms2.count() - ms1.count() << endl;
-  cerr << ms3.count() - ms2.count() << endl;
-  cerr << ms4.count() - ms3.count() << endl;
-  cerr << ms5.count() - ms4.count() << endl;
-  cerr << ms6.count() - ms5.count() << endl;
-  cerr << ms7.count() - ms6.count() << endl;
-  cerr << ms8.count() - ms7.count() << endl;
-  cerr << ms9.count() - ms8.count() << endl;
-  cerr << ms10.count() - ms9.count() << endl;
-  cerr << ms11.count() - ms10.count() << endl;
+  cout << "Times: " << endl;
+  cout << ms1.count() - ms0.count() << endl;
+  cout << ms2.count() - ms1.count() << endl;
+  cout << ms3.count() - ms2.count() << endl;
+  cout << ms4.count() - ms3.count() << endl;
+  cout << ms5.count() - ms4.count() << endl;
+  cout << ms6.count() - ms5.count() << endl;
+  cout << ms7.count() - ms6.count() << endl;
+  cout << ms8.count() - ms7.count() << endl;
+  cout << ms9.count() - ms8.count() << endl;
+  cout << ms10.count() - ms9.count() << endl;
+  cout << ms11.count() - ms10.count() << endl;
 
   return 0;
 }

@@ -10,6 +10,7 @@
 #include <string>
 #include <random>
 #include <thread>
+#include <chrono>
 
 #include "parameter.h"
 #include "sequence.h"
@@ -23,12 +24,13 @@
 #include "Eigen/Eigenvalues"
 
 using namespace std;
+using namespace std::chrono;
 using namespace Eigen;
 
 // arguments made reference to avoid copying in each thread
 template<typename T>
 void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T>& ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
-{ 
+{
   //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
    string outFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".out";
    ofstream f(outFile.c_str());
@@ -48,7 +50,7 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
       double logTopologyProbability=0;
       string treeString;
       treeString = ccd.randomTree(rng,logTopologyProbability);
-      
+
       Tree tree(treeString);
       tree.relabel(alignment);
       tree.unroot();
@@ -95,12 +97,14 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
 
 int main(int argc, char* argv[])
 {
+  milliseconds ms0 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Read command line and process parameters
   cerr << "Processing command line ...";
   Parameter parameters;
   parameters.processCommandLine(argc,argv);
   cerr << " done." << endl;
 
+milliseconds ms1 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Read in sequences from FASTA file
   cerr << "Reading alignment from FASTA file ...";
   Alignment alignment(parameters.getSequenceFileName());
@@ -109,6 +113,7 @@ int main(int argc, char* argv[])
   alignment.summarize(cout);
   cout << endl;
 
+  milliseconds ms2 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Find Jukes-Cantor pairwise distances
 //  cerr << alignment.getNumTaxa() << endl;
   cerr << "Finding initial Jukes-Cantor pairwise distances ...";
@@ -118,6 +123,8 @@ int main(int argc, char* argv[])
 
   cout << "Jukes-Cantor Distance Matrix:" << endl;
   cout << endl << jcDistanceMatrix << endl << endl;
+
+  milliseconds ms3 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
@@ -132,6 +139,7 @@ int main(int argc, char* argv[])
   cerr << endl << "Tree topology:" << endl;
   cerr << jctree.makeTopologyNumbers() << endl << endl;
 
+  milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Initialize random number generator
   cerr << "Initializing random number generator ...";
   if ( parameters.getSeed() == 0 )
@@ -143,6 +151,7 @@ int main(int argc, char* argv[])
   cerr << " done." << endl;
   cout << "Seed = " << parameters.getSeed() << endl;
 
+  milliseconds ms5 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   cerr << "Running MCMC to estimate Q matrix ..." << endl;
   // Run MCMC on tree to estimate Q matrix parameters
   //   initial Q matrix
@@ -169,6 +178,8 @@ int main(int argc, char* argv[])
 
   cerr << endl << " done." << endl;
 
+  milliseconds ms6 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";
   MatrixXd gtrDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -178,6 +189,7 @@ int main(int argc, char* argv[])
   cout << "GTR Distance Matrix:" << endl;
   cout << endl << gtrDistanceMatrix << endl << endl;
 
+  milliseconds ms7 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
@@ -213,6 +225,7 @@ int main(int argc, char* argv[])
   }
   cerr << endl << "done." << endl;
 
+  milliseconds ms8 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   map<string,double> topologyToWeightMap; // not normalized; normalization taken care of during alias creation
   for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
   {
@@ -241,6 +254,7 @@ int main(int argc, char* argv[])
   vector<string> taxaNames;
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
 
+  milliseconds ms9 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // here do parsimony score (keep the option to do without parsimony)
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
@@ -262,11 +276,12 @@ int main(int argc, char* argv[])
   ccdParsimony.writePairCount(tmap);
   tmap.close();
 
+  milliseconds ms10 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   if ( parameters.getNumBootstrap() > 0 )
   {
     int numRandom = parameters.getNumRandom();
 
-    unsigned int cores; 
+    unsigned int cores;
     if( parameters.getNumCores() == 0 )
       cores = thread::hardware_concurrency();
     else
@@ -300,14 +315,14 @@ int main(int argc, char* argv[])
 
     for ( int i=0; i<(cores-1); ++i )
     {
-      cerr << "Thread " << i << " beginning random trees from " << i*k << " to " << (i+1)*k-1 << endl; 
+      cerr << "Thread " << i << " beginning random trees from " << i*k << " to " << (i+1)*k-1 << endl;
       if ( parameters.getUseParsimony() )
 	threads.push_back(thread(randomTrees<double>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       else
 	threads.push_back(thread(randomTrees<int>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
     // last core:
-    cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl; 
+    cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl;
     if ( parameters.getUseParsimony() )
       threads.push_back(thread(randomTrees<double>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
     else
@@ -388,6 +403,19 @@ int main(int argc, char* argv[])
     }
 
   }
+  milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  cout << "Times: " << endl;
+  cout << ms1.count() - ms0.count() << endl;
+  cout << ms2.count() - ms1.count() << endl;
+  cout << ms3.count() - ms2.count() << endl;
+  cout << ms4.count() - ms3.count() << endl;
+  cout << ms5.count() - ms4.count() << endl;
+  cout << ms6.count() - ms5.count() << endl;
+  cout << ms7.count() - ms6.count() << endl;
+  cout << ms8.count() - ms7.count() << endl;
+  cout << ms9.count() - ms8.count() << endl;
+  cout << ms10.count() - ms9.count() << endl;
+  cout << ms11.count() - ms10.count() << endl;
 
   return 0;
 }

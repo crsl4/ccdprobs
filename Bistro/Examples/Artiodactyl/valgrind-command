@@ -1,3 +1,30 @@
 ## need to compile bistro with -g option
 
 valgrind --leak-check=full --show-leak-kinds=all ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o valgrind -s 2561016956 > valgrind.log
+
+
+How to debug a GCC segmentation fault
+https://gcc.gnu.org/bugs/segfault.html
+
+Configure GCC with --enable-checking. Compile it with -g -O0 so that you can use gdb.
+
+Compile your test case with -v -da -Q.
+
+-Q will show which function in the test case is causing it to crash.
+-v shows how cc1 was invoked (useful for invoking cc1 manually in gdb).
+-da dumps the RTL to a file after each stage.
+Next, use gdb to get a stack trace:
+
+bash$ gdb cc1
+gdb> run arguments
+(cc1 will stop at the segmentation fault)
+gdb> where
+gdb> list
+Print out the values of interesting variables, e.g., the ones in the statement which got the segmentation fault. You can use the pt and pr macros from the gdbinit.in file to display GCC data. For example, if there is a value of type tree named t, and a value of type rtx named r, you can use these commands:
+
+gdb> source .gdbinit
+gdb> print t
+gdb> pt
+gdb> print r
+gdb> pr
+gdb> pt
