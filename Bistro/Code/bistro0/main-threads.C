@@ -288,13 +288,18 @@ milliseconds ms1 = duration_cast< milliseconds >( system_clock::now().time_since
       cores = parameters.getNumCores();
     // i want to check that cores not > than hardware_concurrency?
     cerr << "Generating " << numRandom << " random trees in " << cores << " cores:" << endl;
-    int k = numRandom / cores;
-    cerr << "k = " << k << endl;
+    int div = numRandom / cores;
+    int remainder = numRandom % cores;
+    vector<int> startTreeNumber(cores);
+    for ( int i=0; i<cores; ++i )
+      startTreeNumber[i] = i*div + (i < remainder ? i : remainder);
+    startTreeNumber.push_back(numRandom);
+
 
     // generating the seeds for each core
-    random_device rd;
-    unsigned int initial_seed = rd();
-    cerr << "Seed = " << initial_seed << endl;
+    uniform_int_distribution<> rint_orig(0,4294967295);
+    unsigned int initial_seed = rint_orig(rng);
+    cout << "Seed = " << initial_seed << endl;
     minstd_rand seed_rng(initial_seed);
     uniform_int_distribution<> rint(0,4294967295);
     vector<unsigned int> seeds(cores);
@@ -306,27 +311,26 @@ milliseconds ms1 = duration_cast< milliseconds >( system_clock::now().time_since
       }
     cerr << "Seeds per core: " << endl;
     for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
-      cerr << setw(15) << *p << endl;
+      cout << setw(15) << *p << endl;
 
     vector<thread> threads;
     vector< multimap<string,double> > topologymm(cores); //vector of multimaps
     vector<double> logwt(numRandom,0);
     vector<double> maxLogW(cores); //vector of maxlogweight
 
-    for ( int i=0; i<(cores-1); ++i )
+    for ( int i=0; i<cores; ++i )
     {
-      cerr << "Thread " << i << " beginning random trees from " << i*k << " to " << (i+1)*k-1 << endl;
       if ( parameters.getUseParsimony() )
-	threads.push_back(thread(randomTrees<double>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	threads.push_back(thread(randomTrees<double>,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       else
-	threads.push_back(thread(randomTrees<int>,i*k, (i+1)*k, ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	threads.push_back(thread(randomTrees<int>,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
     // last core:
-    cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl;
-    if ( parameters.getUseParsimony() )
-      threads.push_back(thread(randomTrees<double>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
-    else
-      threads.push_back(thread(randomTrees<int>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccd), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
+    // cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl;
+    // if ( parameters.getUseParsimony() )
+    //   threads.push_back(thread(randomTrees<double>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
+    // else
+    //   threads.push_back(thread(randomTrees<int>,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccd), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
 
     for ( int i=0; i<cores; ++i )
       threads.at(i).join();
