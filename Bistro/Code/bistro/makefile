@@ -12,7 +12,7 @@ TARGET = all
 #CFLAGS = -O3 -I. -std=c++11
 
 CC = g++
-CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations
+CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations -g
 
 .SUFFIXES: .C .o
 

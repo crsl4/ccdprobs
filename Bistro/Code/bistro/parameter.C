@@ -27,7 +27,7 @@ void usage(ostream& f)
   f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
   f << "    --no-parsimony                 |  do *not* reweight bootstrap sample with weight proportional to exp(-parsimony score)" << endl;
   f << "    --parsimony-scale scale        |  scale to compute the weights from counts, positive number" << endl;
-  f << "    --cores num                    |  number of cores for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;
+  f << "    --threads num                  |  number of threads for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;
   exit(1);
 }
 
@@ -245,17 +245,17 @@ void Parameter::processCommandLine(int argc,char* argv[])
         usage(cerr);
       }
     }
-    else if ( strcmp(argv[k],"--cores") == 0 )
+    else if ( strcmp(argv[k],"--threads") == 0 )
     {
       if ( ++k < argc )
       {
         stringstream s;
         s << argv[k];
-        s >> numCores;
+        s >> numThreads;
       }
       else
       {
-        cerr << "Error: flag `--cores' not followed by a postive value" << endl;
+        cerr << "Error: flag `--threads' not followed by a postive value" << endl;
         usage(cerr);
       }
     }

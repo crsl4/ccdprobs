@@ -48,10 +48,16 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o threads3 -s 2566231036 > threads3.log
 
 ## to check printed order in cout with independent to only call randomEdges
-time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1 --cores 1 --independent > core1.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1 --threads 1 --independent > core1.log
 ## to check with generate branch lengths if nodes are computed in correct order
-time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1gbl --cores 1  > core1gbl.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1gbl --threads 1  > core1gbl.log
 
 
 
-time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1_2 --cores 1 --independent -s 2561016956 > core1_2.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -m 2 -o core1_2 --threads 1 --independent -s 2561016956 > core1_2.log
+
+
+
+## comparison between inefficient likelihood (bistro0) and efficient likelihood, and with threads2 run a while ago
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_eff -s 2566231036 > bistro_eff.log
+time ../../Code/bistro0/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_ineff -s 2566231036 > bistro_ineff.log

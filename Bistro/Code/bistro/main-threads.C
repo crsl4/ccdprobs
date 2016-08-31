@@ -32,9 +32,9 @@ template<typename T>
 void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T>& ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 {
   //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
-   string outFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".out";
+   string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
    ofstream f(outFile.c_str());
-   string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd) + ".treeBL";
+   string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBL";
    ofstream treebl(treeBLFile.c_str());
    f << "tree logl logTop logProp logPrior logWt" << endl;
 
@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
   cerr << endl << " done." << endl;
 
   milliseconds ms6 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
-  
+
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";
   MatrixXd gtrDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
   cout << endl << gtrDistanceMatrix << endl << endl;
 
   milliseconds ms7 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
-  
+
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
@@ -300,10 +300,10 @@ int main(int argc, char* argv[])
     int numRandom = parameters.getNumRandom();
 
     unsigned int cores;
-    if( parameters.getNumCores() == 0 )
+    if( parameters.getNumThreads() == 0 )
       cores = thread::hardware_concurrency();
     else
-      cores = parameters.getNumCores();
+      cores = parameters.getNumThreads();
     // i want to check that cores not > than hardware_concurrency?
     cerr << "Generating " << numRandom << " random trees in " << cores << " cores:" << endl;
     int div = numRandom / cores;
@@ -428,7 +428,7 @@ int main(int argc, char* argv[])
 
   milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-  cerr << "Times:" << endl;
+  cerr << "Times: " << endl;
   cerr << ms1.count() - ms0.count() << endl;
   cerr << ms2.count() - ms1.count() << endl;
   cerr << ms3.count() - ms2.count() << endl;
@@ -440,6 +440,6 @@ int main(int argc, char* argv[])
   cerr << ms9.count() - ms8.count() << endl;
   cerr << ms10.count() - ms9.count() << endl;
   cerr << ms11.count() - ms10.count() << endl;
-  
+
   return 0;
 }

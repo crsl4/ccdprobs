@@ -23,7 +23,7 @@ private:
   bool independent;
   bool useParsimony;
   double parsimonyScale;
-  unsigned int numCores;
+  unsigned int numThreads;
 public:
   Parameter()
   {
@@ -38,7 +38,7 @@ public:
     independent = false;
     useParsimony = true;
     parsimonyScale = 0.5;
-    numCores = 0;
+    numThreads = 0;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -65,8 +65,8 @@ public:
   double getParsimonyScale() const { return parsimonyScale; }
   void setParsimonyScale(double x) { parsimonyScale = x; }
   void processCommandLine(int,char* []);
-  void setNumCores(unsigned int b) { numCores = b; }
-  unsigned int getNumCores() const { return numCores; }
+  void setNumThreads(unsigned int b) { numThreads = b; }
+  unsigned int getNumThreads() const { return numThreads; }
 };
 
 #endif

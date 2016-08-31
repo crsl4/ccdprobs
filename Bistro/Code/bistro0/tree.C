@@ -898,9 +898,9 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
   // there is a smarter way to do this for only part of the tree, depending on order of edges
   // worry about increased efficiency later
   Node* parentNode = getOtherNode(childNode);
-  parentNode->clearProbMaps(this);
-//  nodes[0]->clearProbMaps(this);
-//  nodes[1]->clearProbMaps(this);
+  // parentNode->clearProbMaps(this);
+  nodes[0]->clearProbMaps(this);
+  nodes[1]->clearProbMaps(this);
 
   bool converge;
   // set length to MLE distance

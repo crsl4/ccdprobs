@@ -1,0 +1,3 @@
+## need to compile bistro with -g option
+
+valgrind --leak-check=full --show-leak-kinds=all ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o valgrind -s 2561016956 > valgrind.log
