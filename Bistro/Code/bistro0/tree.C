@@ -999,6 +999,30 @@ void Tree::depthFirstNodeList(list<Node*>& nodeList)
   root->depthFirstNodeList(nodeList,NULL);
 }
 
+void Node::postorderCherryNodeList(list<Node*>& nodeList,Edge* parent)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    if ( *e != parent )
+      getNeighbor(*e)->postorderCherryNodeList(nodeList,*e);
+  if( isPrunedLeaf(parent) || parent == NULL )
+    {
+      for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+	  if ( *e != parent )
+	    {
+	      Node* neighbor = getNeighbor(*e);
+	      if( neighbor->getLeaf() )
+		nodeList.push_back(neighbor);
+	    }
+      nodeList.push_back(this);
+    }
+}
+
+void Tree::postorderCherryNodeList(list<Node*>& nodeList)
+{
+  root->postorderCherryNodeList(nodeList,NULL);
+}
+
+
 void Node::setActiveChildrenAndNodeParents(Edge* parent)
 {
   if ( parent != NULL )
@@ -1284,7 +1308,8 @@ void Tree::setNJDistances(MatrixXd& dist,mt19937_64& rng)
     nodeToDistIndexMap[nodes[i]] = i;
   }
   list<Node*> nodeList; // list of all nodes in tree in depth first order
-  depthFirstNodeList(nodeList);
+  //depthFirstNodeList(nodeList);
+  postorderCherryNodeList(nodeList);
   setActiveChildrenAndNodeParents();
   list<Node*>::iterator p=nodeList.begin();
 
@@ -2043,3 +2068,16 @@ int Tree::parsimonyScore(Alignment& alignment)
   return score;
 }
 
+bool Node::isPrunedLeaf(Edge* parent)
+{
+  if( leaf )
+    return false;
+  bool prunedLeaf = true;
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    if( (*e) != parent )
+      {
+	Node* neighbor = getNeighbor(*e);
+	prunedLeaf &= ( neighbor->getLeaf() || neighbor->isPrunedLeaf(*e) );
+      }
+  return prunedLeaf;
+}

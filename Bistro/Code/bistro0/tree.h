@@ -121,6 +121,7 @@ public:
   void randomize(mt19937_64&,Edge*);
   void clearProbMaps(Edge*);
   void depthFirstNodeList(list<Node*>&,Edge*);
+  void postorderCherryNodeList(list<Node*>&,Edge*);
   Node* getNodeParent() const { return nodeParent; }
   Node* getActiveChild(int i) const { return activeChildren[i]; }
   int getActiveChildrenSize() const { return activeChildren.size(); }
@@ -134,6 +135,7 @@ public:
   void sortCanonical(Edge*);
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&,bool);
   void parsimonyScore(Alignment&,Edge*,int,int&,int&);
+  bool isPrunedLeaf(Edge*);
 };
 
 class Tree
@@ -181,6 +183,7 @@ public:
   double mleDistance(Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double);
   void setNodeLevels();
   void depthFirstNodeList(list<Node*>&);
+  void postorderCherryNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
   void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&, bool);
   void reroot(int);

@@ -1,10 +1,20 @@
 ## need to compile bistro with -g option
 
-valgrind --leak-check=full --show-leak-kinds=all ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o valgrind -s 2561016956 > valgrind.log
+valgrind --leak-check=full --show-leak-kinds=all ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o test-valgrind -s 2561016956
+## this was not helpful, will try GDB now:
+
+bash$ gdb bistro
+gdb> run -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o gdp-test -s 2561016956
+gdb> run -f ../../Data/cats-dogs.fasta -b 100 -r 10 -m 2 -o gdp-test -s 1364693788
+gdb> where
+gdb> list
+gdb> backtrace
+
 
 
 How to debug a GCC segmentation fault
 https://gcc.gnu.org/bugs/segfault.html
+https://sourceware.org/gdb/wiki/BuildingOnDarwin
 
 Configure GCC with --enable-checking. Compile it with -g -O0 so that you can use gdb.
 

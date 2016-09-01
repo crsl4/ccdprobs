@@ -32,3 +32,4 @@ time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 1000 -m 2 -
 
 ## compare time with threads (using same seed as run5k-p)
 time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 5000 -m 2 -o run5k-p-threads -s 709216427 --threads 4 > run5k-p-threads.log
+## running in darwin00 8/31 430pm

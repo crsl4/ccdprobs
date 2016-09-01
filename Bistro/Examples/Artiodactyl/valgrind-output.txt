@@ -1,0 +1,53 @@
+==1953== Process terminating with default action of signal 11 (SIGSEGV)
+==1953==  Access not within mapped region at address 0x70000425043E
+==1953==    at 0x100A5A351: _pthread_find_thread (in /usr/lib/system/libsystem_pthread.dylib)
+==1953==    by 0x100A5B835: _pthread_join_cleanup (in /usr/lib/system/libsystem_pthread.dylib)
+==1953==    by 0x100A5B7C3: pthread_join (in /usr/lib/system/libsystem_pthread.dylib)
+==1953==    by 0x100420932: std::thread::join() (in /usr/local/lib/libstdc++.6.dylib)
+==1953==    by 0x1007575AC: start (in /usr/lib/system/libdyld.dylib)
+==1953==    by 0xC: ???
+==1953==    by 0x104B68876: ???
+==1953==    by 0x104B6888F: ???
+==1953==    by 0x104B68892: ???
+==1953==    by 0x104B688B1: ???
+==1953==    by 0x104B688B4: ???
+==1953==    by 0x104B688B8: ???
+==1953==  If you believe this happened as a result of a stack
+==1953==  overflow in your program's main thread (unlikely but
+==1953==  possible), you can try to increase the size of the
+==1953==  main thread stack using the --main-stacksize= flag.
+==1953==  The main thread stack size used in this run was 8388608.
+==1953== 
+==1953== HEAP SUMMARY:
+==1953==     in use at exit: 193,952 bytes in 1,452 blocks
+==1953==   total heap usage: 17,530,976 allocs, 17,529,524 frees, 1,901,246,244 bytes allocated
+==1953== 
+
+Memcheck: mc_leakcheck.c:1044 (void lc_scan_memory(Addr, SizeT, Bool, Int, Int, Addr, SizeT)): Assertion 'bad_scanned_addr >= VG_ROUNDUP(start, sizeof(Addr))' failed.
+
+host stacktrace:
+==1953==    at 0x238040B6C: ???
+==1953==    by 0x238040F77: ???
+==1953==    by 0x238040F5A: ???
+==1953==    by 0x23800357D: ???
+==1953==    by 0x238002E3D: ???
+==1953==    by 0x238001CB1: ???
+==1953==    by 0x23800EF11: ???
+==1953==    by 0x23804C7A3: ???
+==1953==    by 0x2380C5583: ???
+
+sched status:
+  running_tid=1
+
+
+Note: see also the FAQ in the source distribution.
+It contains workarounds to several common problems.
+In particular, if Valgrind aborted or crashed after
+identifying problems in your program, there's a good chance
+that fixing those problems will prevent Valgrind aborting or
+crashing, especially if it happened in m_mallocfree.c.
+
+If that doesn't help, please report this bug to: www.valgrind.org
+
+In the bug report, send all the above text, the valgrind
+version, and what OS and version you are using.  Thanks.

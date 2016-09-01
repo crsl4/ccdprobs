@@ -11,8 +11,13 @@ TARGET = all
 #CC = g++
 #CFLAGS = -O3 -I. -std=c++11
 
+# current:
 CC = g++
-CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations #-g -O0
+CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations
+
+# to debug with gdb, takes hours!
+# CC = g++
+# CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations -g -O0 -v -da -Q
 
 .SUFFIXES: .C .o
 

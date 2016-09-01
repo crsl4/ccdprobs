@@ -61,3 +61,6 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -
 ## comparison between inefficient likelihood (bistro0) and efficient likelihood, and with threads2 run a while ago
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_eff -s 2566231036 > bistro_eff.log
 time ../../Code/bistro0/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_ineff -s 2566231036 > bistro_ineff.log
+
+## after adding postorder to bistro0
+time ../../Code/bistro0/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_ineff_ord -s 2566231036 > bistro_ineff_ord.log
