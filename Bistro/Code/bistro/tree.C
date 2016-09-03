@@ -803,24 +803,25 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   Matrix4d QQP = qmatrix.getQQP( t );
   int numSites = alignment.getNumSites();
 
-//  cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
-//  cerr << "P =" << endl << P << endl << endl;
-//  cerr << "QP =" << endl << QP << endl << endl;
-//  cerr << "QQP =" << endl << QQP << endl << endl;
+  // cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
+  // cout << "P =" << endl << P << endl << endl;
+  // cout << "QP =" << endl << QP << endl << endl;
+  // cout << "QQP =" << endl << QQP << endl << endl;
 
   logl = 0;
   dlogl = 0;
   ddlogl = 0;
   for ( int k=0; k<numSites; ++k )
   {
-//    cerr << "k=" << k << endl;
+    //    cout << "k=" << k << endl;
     nodes[0]->calculate(k,alignment,this);//,true); // sets pattern for this site
     nodes[1]->calculate(k,alignment,this);//,true);
-//    cerr << nodes[0]->getPattern() << endl;
-//    cerr << nodes[1]->getPattern() << endl;
+    // cout << "Nodes: " << nodes[0]->getNumber() << ", " << nodes[1]->getNumber() << endl;
+    // cout << nodes[0]->getPattern() << endl;
+    // cout << nodes[1]->getPattern() << endl;
     pair<double,Vector4d> pa = nodes[0]->patternToProbMap[nodes[0]->getPattern()];
     pair<double,Vector4d> pb = nodes[1]->patternToProbMap[nodes[1]->getPattern()];
-//    cerr << pa.second.transpose() << " // " << pb.second.transpose() << endl;
+    //    cout << pa.second.transpose() << " // " << pb.second.transpose() << endl;
     Vector4d va = pa.second;
     Vector4d vq = qmatrix.getStationaryP();
     for ( int i=0; i<4; ++i )
@@ -834,6 +835,7 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
     logl += pa.first + pb.first + log( f0 );
     dlogl += f1/f0;
     ddlogl += (f0*f2 - f1*f1)/(f0*f0);
+    //cout << "logl: " << logl << endl;
   }
   nodes[0] -> setMapParent(this); //here we are resetting and traversing every time, maybe we could avoid this
   nodes[1] -> setMapParent(this);
@@ -1506,10 +1508,10 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   postorderCherryNodeList(nodeList);
   //depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
-//  cout << "Postorder Node List:";
-//  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-//    cout << " " << (*p)->getNumber();
-//  cout << endl << flush;
+ // cout << "Postorder Node List:";
+ // for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+ //   cout << " " << (*p)->getNumber();
+ // cout << endl << flush;
 
   list<Node*>::iterator p=nodeList.begin();
   while ( true )
@@ -1553,11 +1555,11 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     // clear prob maps recursively through entire tree
     // there is a smarter way to do this for only part of the tree, depending on order of edges
     // worry about increased efficiency later
-    //clearProbMaps(); //fixit: I think we should be able to get rid of this, but does not work
+    //clearProbMaps(); //we don't need this with new approach
 
     if ( par==root )
     {
-//      cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
+      //      cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
       x-> clearProbMapsSmart(x->getEdgeParent());
       y-> clearProbMapsSmart(y->getEdgeParent());
       z-> clearProbMapsSmart(par->getEdgeParent()); //edge parent of par to go in opposite direction
@@ -1594,7 +1596,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
     else //par not root
       {
-//	cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
+	//cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
 	x-> clearProbMapsSmart(x->getEdgeParent());
 	y-> clearProbMapsSmart(y->getEdgeParent());
 	z-> clearProbMapsSmart(par->getEdgeParent()); //edge parent of par to go in opposite direction

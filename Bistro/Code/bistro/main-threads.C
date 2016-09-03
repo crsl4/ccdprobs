@@ -58,16 +58,16 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
       tree.setNJDistances(gtrDistanceMatrixCopy,rng);
       tree.randomize(rng);
-//      cout << coreID << " " << k << "th tree" << endl << flush;
-//      tree.print(cout);
-//      cout << tree.makeTreeNumbers() << endl << flush;
+     // cout << coreID << " " << k << "th tree" << endl << flush;
+     // tree.print(cout);
+     // cout << tree.makeTreeNumbers() << endl << flush;
       double logProposalDensity = 0;
-//      list<Node*> nodeList;
-//      tree.postorderCherryNodeList(nodeList);
-//      cout << "Postorder Node List:";
-//      for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-//	cout << " " << (*p)->getNumber();
-//      cout << endl << flush;
+     // list<Node*> nodeList;
+     // tree.postorderCherryNodeList(nodeList);
+     // cout << "Postorder Node List:";
+     // for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+     // 	cout << " " << (*p)->getNumber();
+     // cout << endl << flush;
 
 
       for ( int i=0; i<parameters.getNumMLE(); ++i )
@@ -350,8 +350,11 @@ int main(int argc, char* argv[])
     // else
     //   threads.push_back(thread(randomTrees<int>,cores-1,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccd), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
 
-    for ( int i=0; i<cores; ++i )
-      threads.at(i).join();
+    for(auto &t : threads){
+      t.join();
+    }
+    // for ( int i=0; i<cores; ++i )
+    //   threads.at(i).join();
     cerr << endl << "done." << endl;
 
     double maxLogWeight = maxLogW[0];

@@ -29,7 +29,7 @@ using namespace Eigen;
 
 // arguments made reference to avoid copying in each thread
 template<typename T>
-void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T>& ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
+void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 {
   //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
    string outFile = parameters.getOutFileRoot() + to_string(indStart) + "-" + to_string(indEnd) + ".out";
@@ -58,8 +58,9 @@ void randomTrees(int indStart, int indEnd, vector<double>& logwt, double& maxLog
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
       tree.setNJDistances(gtrDistanceMatrixCopy,rng);
       tree.randomize(rng);
-//      tree.print(cout);
-//      cout << tree.makeTreeNumbers() << endl;
+     //  cout << k << "th tree" << endl;
+     // tree.print(cout);
+     // cout << tree.makeTreeNumbers() << endl;
       double logProposalDensity = 0;
       for ( int i=0; i<parameters.getNumMLE(); ++i )
 	{
@@ -321,9 +322,9 @@ milliseconds ms1 = duration_cast< milliseconds >( system_clock::now().time_since
     for ( int i=0; i<cores; ++i )
     {
       if ( parameters.getUseParsimony() )
-	threads.push_back(thread(randomTrees<double>,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ref(ccdParsimony), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	threads.push_back(thread(randomTrees<double>,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       else
-	threads.push_back(thread(randomTrees<int>,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ref(ccd), ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	threads.push_back(thread(randomTrees<int>,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
     // last core:
     // cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl;

@@ -1,3 +1,13 @@
+## to get gdb in mac:
+install macports https://www.macports.org/install.php
+> port install gdb
+codesign gdb: https://sourceware.org/gdb/wiki/BuildingOnDarwin
+## to get valgrind
+brew install valgrind
+brew link valgrind
+
+
+
 ## need to compile bistro with -g option
 
 valgrind --leak-check=full --show-leak-kinds=all ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o test-valgrind -s 2561016956
@@ -9,6 +19,7 @@ gdb> run -f ../../Data/cats-dogs.fasta -b 100 -r 10 -m 2 -o gdp-test -s 13646937
 gdb> where
 gdb> list
 gdb> backtrace
+
 
 
 
