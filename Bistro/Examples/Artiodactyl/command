@@ -65,3 +65,5 @@ time ../../Code/bistro0/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 100
 ## after adding postorder to bistro0
 time ../../Code/bistro0/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_ineff_ord -s 2566231036 > bistro_ineff_ord.log
 
+## just to check that it works after changing the way to join threads
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_eff2 -s 2566231036 > bistro_eff2.log
