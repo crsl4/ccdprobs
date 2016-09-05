@@ -4,6 +4,7 @@
 #define MIN_EDGE_LENGTH 0.00001
 #define MAX_EDGE_LENGTH 10
 #define TOL 1.0e-6
+#define VERBOSE false
 
 #include <iostream>
 #include <iomanip>

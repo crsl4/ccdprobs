@@ -36,6 +36,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    ofstream f(outFile.c_str());
    string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBL";
    ofstream treebl(treeBLFile.c_str());
+   //   f << "tree tree0 logl logliknew logTop logProp logPrior logWt" << endl;
    f << "tree logl logTop logProp logPrior logWt" << endl;
 
    for ( int k=indStart; k<indEnd; ++k )
@@ -58,16 +59,19 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
       tree.setNJDistances(gtrDistanceMatrixCopy,rng);
       tree.randomize(rng);
-     // cout << coreID << " " << k << "th tree" << endl << flush;
-     // tree.print(cout);
-     // cout << tree.makeTreeNumbers() << endl << flush;
+      if(VERBOSE)
+	{
+	  cout << coreID << " " << k << "th tree" << endl << flush;
+	  tree.print(cout);
+	  cout << tree.makeTreeNumbers() << endl << flush;
+	  list<Node*> nodeList;
+	  tree.postorderCherryNodeList(nodeList);
+	  cout << "Postorder Node List:";
+	  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+	    cout << " " << (*p)->getNumber();
+	  cout << endl << flush;
+	}
       double logProposalDensity = 0;
-     // list<Node*> nodeList;
-     // tree.postorderCherryNodeList(nodeList);
-     // cout << "Postorder Node List:";
-     // for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-     // 	cout << " " << (*p)->getNumber();
-     // cout << endl << flush;
 
 
       for ( int i=0; i<parameters.getNumMLE(); ++i )
@@ -88,14 +92,20 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 //      cout << tree.makeTreeNumbers() << endl;
       treebl << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
-      tree.clearProbMaps(); //added just to see if this was missing
-//      cout << "calculating the final loglik now..." << endl;
+      // if(VERBOSE)
+      // 	cout << "calculating the final loglik now before clearing map" << endl;
+      // double logLik0 = tree.calculate(alignment, model);
+      // tree.clearProbMaps(); //added just to see if this was missing
+      if(VERBOSE)
+	cout << "calculating the final loglik now after clearing map" << endl;
       double logLik = tree.calculate(alignment, model);
       double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity - logTopologyProbability;
+      // string top0 = tree.makeTopologyNumbers();
       tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
       tree.sortCanonical();
       string top = tree.makeTopologyNumbers();
-      f << top << " " << logLik << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+      //      f << top << " " << top0 << " " << logLik << " " << logLik0 << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+      f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
       logwt[k] = logWeight;
       if ( k==indStart || logWeight > maxLogWeight )
 	maxLogWeight = logWeight;

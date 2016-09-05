@@ -62,8 +62,15 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10 -
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_eff -s 2566231036 > bistro_eff.log
 time ../../Code/bistro0/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_ineff -s 2566231036 > bistro_ineff.log
 
-## after adding postorder to bistro0
+## after adding postorder to bistro0: but this does not work because we need to rewrite generateBL
 time ../../Code/bistro0/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_ineff_ord -s 2566231036 > bistro_ineff_ord.log
 
-## just to check that it works after changing the way to join threads
-time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_eff2 -s 2566231036 > bistro_eff2.log
+## to study likelihood
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o lik -s 2566231036 > lik.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6-tiny.fasta -b 10000 -r 10 -m 2 -o lik-tiny -s 2566231036 --threads 1 > lik-tiny.log
+
+## after fixing error in new efficient approach:
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_eff -s 2566231036 > bistro_eff.log
+
+
+
