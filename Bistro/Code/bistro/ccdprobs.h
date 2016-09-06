@@ -193,6 +193,11 @@ private:
 public:
   RootedTree() {};
   RootedTree(string,int);
+  ~RootedTree()
+  {
+    nodes.clear();
+    clades.clear();
+  }
   RootedNode* getRoot() const { return root; }
   int getNumTaxa() const { return numTaxa; }
   string getTop() const { return top; }
