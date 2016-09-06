@@ -33,7 +33,10 @@ private:
 public:
   Alias() {}
   Alias(vector<double>&, vector<T>&);
-  virtual ~Alias() {}
+  ~Alias()
+  {
+    cells.clear();
+  }
   void initiate(vector<double>&, vector<T>&);
   T pick(mt19937_64&);
   void printTwoPointDistributions();
