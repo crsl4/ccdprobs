@@ -80,7 +80,11 @@ private:
 public:
   map<string,pair<double,Vector4d> > patternToProbMap;
   Node() { number = -1; level = 0; }
-  ~Node() { edges.clear(); }
+  ~Node()
+  {
+    edges.clear();
+    activeChildren.clear();
+  }
   Node(int n,bool l) : number(n), leaf(l) { level = 0;}
   Node(bool l) : leaf(l) { level = 0; }
   int getNumber() const { return number; }
