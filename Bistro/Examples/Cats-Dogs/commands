@@ -36,3 +36,8 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o threads2 --parsimony-scale 0.2 -s 1073593356 > threads2.log
 
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o new --parsimony-scale 0.2 -s 1073593356 > new.log
+
+
+## joint mle vs no joint
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o no-joint --parsimony-scale 0.2 -s 1741439032 > no-joint.log
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o joint --parsimony-scale 0.2 -s 1741439032 --jointMLE > joint.log

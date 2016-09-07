@@ -1045,7 +1045,7 @@ void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edg
 void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity,bool onlyMLE)
 {
   // clear probability maps from all nodes for fresh calculation, and clear mapParent for every node
-  clearProbMaps();
+  clearProbMaps(); //we need this here, otherwise it does not work
   // compute transition matrices for all edges using provisional edge lengths
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     (*e)->calculate(qmatrix);
@@ -1527,7 +1527,7 @@ double Tree::logPriorExp(double mean)
 
 
 // based on generateBranchLengths in BranchLengths/Code/test/tree.C
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool onlyMLE)
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool jointMLE)
 {
   // clear probability maps from all nodes for fresh calculation
   clearProbMaps();
@@ -1606,20 +1606,21 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       // 	  y->calculate(k,alignment,y->getEdgeParent());//,true);
       // 	  z->calculate(k,alignment,z->getEdgeParent());//,true);
       // 	}
+
       bool converge = true;
-      Vector3d t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge); //we might want to get rid of joint MLE, and t=curr lengths(x,y,z)
+      Vector3d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength(),z->getEdgeParent()->getLength());
+      if(jointMLE)
+	t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge); 
+	
       if(!converge)
 	cout << "Newton-Raphson did not converge" << endl;
-      if(!onlyMLE)
-	{
-	  double prop_logl;
-	  Vector3d prop_gradient;
-	  Matrix3d prop_hessian;
-	  partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
-	  Vector3d mu = t;
-	  Matrix3d cov = (-1) * prop_hessian.inverse();
-	  t = multivariateGamma3D(mu,cov,rng, logdensity);
-	}
+      double prop_logl;
+      Vector3d prop_gradient;
+      Matrix3d prop_hessian;
+      partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
+      Vector3d mu = t;
+      Matrix3d cov = (-1) * prop_hessian.inverse();
+      t = multivariateGamma3D(mu,cov,rng, logdensity);
       x->getEdgeParent()->setLength( t[0] );
       y->getEdgeParent()->setLength( t[1] );
       z->getEdgeParent()->setLength( t[2] );
@@ -1645,19 +1646,19 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	//     z->calculate(k,alignment,par->getEdgeParent());//,true); //edge parent of par to go in opposite direction
 	//   }
 
+	Vector2d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength());
 	bool converge;
-	Vector2d t = mleLength2D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
-	if(!onlyMLE)
-	  {
-	    double prop_logl;
-	    Vector2d prop_gradient;
-	    Matrix2d prop_hessian;
-	    double lz = par->getEdgeParent()->getLength(); //kept fixed throughout
-	    partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
-	    Vector2d mu = t;
-	    Matrix2d cov = (-1) * prop_hessian.inverse();
-	    t = multivariateGamma2D(mu,cov,rng, logdensity);
-	  }
+	if(jointMLE)
+	  t = mleLength2D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
+
+	double prop_logl;
+	Vector2d prop_gradient;
+	Matrix2d prop_hessian;
+	double lz = par->getEdgeParent()->getLength(); //kept fixed throughout
+	partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
+	Vector2d mu = t;
+	Matrix2d cov = (-1) * prop_hessian.inverse();
+	t = multivariateGamma2D(mu,cov,rng, logdensity);
 	x->getEdgeParent()->setLength( t[0] );
 	y->getEdgeParent()->setLength( t[1] );
 	x->getEdgeParent()->calculate(qmatrix);

@@ -87,7 +87,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       else
 	{
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, false);
+	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, parameters.getJointMLE());
 	}
 //      cout << tree.makeTreeNumbers() << endl;
       treebl << tree.makeTreeNumbers() << endl;
@@ -344,6 +344,7 @@ int main(int argc, char* argv[])
     vector< multimap<string,double> > topologymm(cores); //vector of multimaps
     vector<double> logwt(numRandom,0);
     vector<double> maxLogW(cores); //vector of maxlogweight
+    cerr << "jointMLE " << parameters.getJointMLE() << endl;
 
     for ( int i=0; i<cores; ++i )
     {

@@ -22,6 +22,7 @@ void usage(ostream& f)
   f << "    -s seed                        |  positive integer random seed (machine chosen if not provided)" << endl;
   f << "    -h || --help                   |  print this help message" << endl;
   f << "    --independent                  |  generates branch lengths independently" << endl;
+  f << "    --jointMLE                     |  find joint MLE for branches before generating randomly" << endl;
   f << "    -p stationary-distribution     |  [ not used ] four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
   f << "    -q symmetric-q-parameters      |  [ not used ] six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
@@ -226,6 +227,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--independent") == 0 )
     {
       independent = true;
+    }
+    else if ( strcmp(argv[k],"--jointMLE") == 0 )
+    {
+      jointMLE = true;
     }
     else if ( strcmp(argv[k],"--no-parsimony") == 0 )
     {

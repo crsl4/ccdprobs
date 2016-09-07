@@ -72,5 +72,12 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6-tiny.fasta -b 10000 -r
 ## after fixing error in new efficient approach:
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o bistro_eff -s 2566231036 > bistro_eff.log
 
+## to compare with and without 2D/3D MLE
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o joint -s 2566231036 > joint.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o joint2 -s 2566231036 > joint2.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o no-joint -s 2566231036 > no-joint.log
 
+## to test that new parameter jointMLE works
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o joint2 -s 2566231036 --jointMLE > joint2.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o no-joint2 -s 2566231036 > no-joint2.log
 

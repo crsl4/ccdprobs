@@ -21,6 +21,7 @@ private:
   int numMLE;
   string outFileRoot;
   bool independent;
+  bool jointMLE;
   bool useParsimony;
   double parsimonyScale;
   unsigned int numThreads;
@@ -36,6 +37,7 @@ public:
     numMLE = 0;
     outFileRoot = (string)("run1");
     independent = false;
+    jointMLE = false;
     useParsimony = true;
     parsimonyScale = 0.5;
     numThreads = 0;
@@ -56,8 +58,10 @@ public:
   void setNumRandom(int n) { numRandom = n; }
   int getNumMLE() const { return numMLE; }
   void setNumMLE(int n) { numMLE = n; }
-  int getIndependent() const { return independent; }
+  bool getIndependent() const { return independent; }
   void setIndependent(bool b) { independent = b; }
+  bool getJointMLE() const { return jointMLE; }
+  void setJointMLE(bool b) { jointMLE = b; }
   string getOutFileRoot() const { return outFileRoot; }
   void setOutFileRoot(string name) { outFileRoot = name; }
   bool getUseParsimony() const { return useParsimony; }
