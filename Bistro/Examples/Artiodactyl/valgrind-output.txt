@@ -1,3 +1,77 @@
+even after modifying the way to join threads, we get segmentation
+fault on computer with more cores:
+Topology counts to file
+Generating 100 random trees in 16 cores:
+Seed = 460127772
+Seeds per core: 
+     2852772822
+     4148293297
+     1524607311
+     1662058931
+     3423590890
+     3769278588
+     2437283983
+     1677395255
+     2710512810
+     3352215263
+     3170099541
+      273413764
+     2292038630
+     3306804457
+     1359237103
+     2425069213
+==8438== 
+==8438== Process terminating with default action of signal 11 (SIGSEGV)
+==8438==  Access not within mapped region at address 0x7000040AF03E
+==8438==    at 0x1007D7351: _pthread_find_thread (in /usr/lib/system/libsystem_pthread.dylib)
+==8438==    by 0x1007D8835: _pthread_join_cleanup (in /usr/lib/system/libsystem_pthread.dylib)
+==8438==    by 0x1007D87C3: pthread_join (in /usr/lib/system/libsystem_pthread.dylib)
+==8438==    by 0x1002F8E94: std::__1::thread::join() (in /usr/lib/libc++.1.dylib)
+==8438==    by 0x100007CBE: main (main-threads.C:364)
+==8438==  If you believe this happened as a result of a stack
+==8438==  overflow in your program's main thread (unlikely but
+==8438==  possible), you can try to increase the size of the
+==8438==  main thread stack using the --main-stacksize= flag.
+==8438==  The main thread stack size used in this run was 8720384.
+==8438== 
+==8438== HEAP SUMMARY:
+==8438==     in use at exit: 273,516 bytes in 2,599 blocks
+==8438==   total heap usage: 107,354,648 allocs, 107,352,049 frees, 9,810,722,761 bytes allocated
+==8438== 
+
+Memcheck: mc_leakcheck.c:1044 (void lc_scan_memory(Addr, SizeT, Bool, Int, Int, Addr, SizeT)): Assertion 'bad_scanned_addr >= VG_ROUNDUP(start, sizeof(Addr))' failed.
+
+host stacktrace:
+==8438==    at 0x23804087F: ???
+==8438==    by 0x238040C6E: ???
+==8438==    by 0x238040C51: ???
+==8438==    by 0x238003584: ???
+==8438==    by 0x238002E40: ???
+==8438==    by 0x238001CA3: ???
+==8438==    by 0x23800ECBC: ???
+==8438==    by 0x23804C268: ???
+==8438==    by 0x2380C4527: ???
+==8438==    by 0x2380C4628: ???
+
+sched status:
+  running_tid=4
+
+
+Note: see also the FAQ in the source distribution.
+It contains workarounds to several common problems.
+In particular, if Valgrind aborted or crashed after
+identifying problems in your program, there's a good chance
+that fixing those problems will prevent Valgrind aborting or
+crashing, especially if it happened in m_mallocfree.c.
+
+If that doesn't help, please report this bug to: www.valgrind.org
+
+In the bug report, send all the above text, the valgrind
+version, and what OS and version you are using.  Thanks.
+
+
+
+
 ==3869== 
 ==3869== HEAP SUMMARY:
 ==3869==     in use at exit: 135,519 bytes in 808 blocks

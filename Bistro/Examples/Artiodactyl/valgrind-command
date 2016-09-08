@@ -11,7 +11,8 @@ brew link valgrind
 ## need to compile bistro with -g option
 
 valgrind --leak-check=full --show-leak-kinds=all ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o test-valgrind -s 2561016956
-## this was not helpful, will try GDB now:
+valgrind --leak-check=full --show-leak-kinds=all ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 100 -m 2 -o test-valgrind-birge -s 2561016956
+## this was not helpful because output is hard to understand, will try GDB now:
 
 bash$ gdb bistro
 gdb> run -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o gdp-test -s 2561016956
