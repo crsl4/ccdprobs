@@ -81,3 +81,6 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o joint2 -s 2566231036 --jointMLE > joint2.log
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o no-joint2 -s 2566231036 > no-joint2.log
 
+
+## to test with many cores, segmentation fault without valgrind?
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 1000 -m 2 -o test-birge -s 2561016956 > test-birge.log
