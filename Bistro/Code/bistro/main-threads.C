@@ -314,6 +314,8 @@ int main(int argc, char* argv[])
       cores = thread::hardware_concurrency();
     else
       cores = parameters.getNumThreads();
+    if( numRandom < cores )
+      cores = numRandom; // do not create more threads than trees
     // i want to check that cores not > than hardware_concurrency?
     cerr << "Generating " << numRandom << " random trees in " << cores << " cores:" << endl;
     int div = numRandom / cores;

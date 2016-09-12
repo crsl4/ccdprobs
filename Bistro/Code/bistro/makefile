@@ -17,7 +17,7 @@ CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-de
 
 # to debug with gdb, takes hours!
 # CC = g++
-# CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations -g -O0 -v -da -Q
+# CFLAGS = -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations -g -v -da -Q
 
 .SUFFIXES: .C .o
 
