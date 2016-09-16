@@ -65,5 +65,5 @@ public:
   }
   void mcmc(Alignment&,Tree&,int,double,mt19937_64&);
 };
-  
+
 #endif

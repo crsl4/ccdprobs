@@ -27,6 +27,29 @@ using namespace std;
 using namespace std::chrono;
 using namespace Eigen;
 
+VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDensity,mt19937_64& rng)
+{
+  VectorXd alpha(x.size());
+  VectorXd y(x.size());
+  double sum = 0;
+  for ( int i=0; i<x.size(); ++i )
+  {
+    alpha(i) = scale*x(i) + 1;
+    gamma_distribution<double> rgamma(alpha(i),1.0);
+    y(i) = rgamma(rng);
+    sum += y(i);
+  }
+  for ( int i=0; i<x.size(); ++i )
+  {
+    y(i) /= sum;
+  }
+  for ( int i=0; i<x.size(); ++i )
+  {
+    logProposalDensity += ( - lgamma(alpha(i)) + scale*x(i)*log(y(i)) ) ; // include lgamma(sum(alphai))
+  }
+  return y;
+}
+
 // arguments made reference to avoid copying in each thread
 template<typename T>
 void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
@@ -34,8 +57,8 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
   //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
   // here we need to sample a Q
   double logPropDensityQ = 0;
-  vector<double> p_star = dirichletProposalDensity(q_init.getStationaryP(), alignment.getNumSites(), logPropDensityQ, rng);
-  vector<double> s_star = dirichletProposalDensity(q_init.getStationaryQP(), alignment.getNumSites(), logPropDensityQ, rng);
+  VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), alignment.getNumSites(), logPropDensityQ, rng);
+  VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), alignment.getNumSites(), logPropDensityQ, rng);
   QMatrix model(p_star,s_star);
   
   string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
