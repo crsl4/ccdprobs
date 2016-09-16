@@ -29,14 +29,20 @@ using namespace Eigen;
 
 // arguments made reference to avoid copying in each thread
 template<typename T>
-void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
+void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 {
   //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
-   string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
-   ofstream f(outFile.c_str());
-   string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBL";
-   ofstream treebl(treeBLFile.c_str());
-   //   f << "tree tree0 logl logliknew logTop logProp logPrior logWt" << endl;
+  // here we need to sample a Q
+  double logPropDensityQ = 0;
+  vector<double> p_star = dirichletProposalDensity(q_init.getStationaryP(), alignment.getNumSites(), logPropDensityQ, rng);
+  vector<double> s_star = dirichletProposalDensity(q_init.getStationaryQP(), alignment.getNumSites(), logPropDensityQ, rng);
+  QMatrix model(p_star,s_star);
+  
+  string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
+  ofstream f(outFile.c_str());
+  string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBL";
+  ofstream treebl(treeBLFile.c_str());
+  //   f << "tree tree0 logl logliknew logTop logProp logPrior logWt" << endl;
    f << "tree logl logTop logProp logPrior logWt" << endl;
 
    for ( int k=indStart; k<indEnd; ++k )
@@ -99,7 +105,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       if(VERBOSE)
 	cout << "calculating the final loglik now after clearing map" << endl;
       double logLik = tree.calculate(alignment, model);
-      double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity - logTopologyProbability;
+      double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity - logTopologyProbability - logPropDensityQ;
       // string top0 = tree.makeTopologyNumbers();
       tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
       tree.sortCanonical();
@@ -199,10 +205,10 @@ int main(int argc, char* argv[])
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
-
   cerr << endl << " done." << endl;
 
   milliseconds ms6 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
 
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";

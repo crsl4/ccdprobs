@@ -136,6 +136,29 @@ VectorXd dirichletProposal(VectorXd x,double scale,double& logProposalRatio,mt19
   return y;
 }
 
+VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDensity,mt19937_64& rng)
+{
+  VectorXd alpha(x.size());
+  VectorXd y(x.size());
+  double sum = 0;
+  for ( int i=0; i<x.size(); ++i )
+  {
+    alpha(i) = scale*x(i) + 1;
+    gamma_distribution<double> rgamma(alpha(i),1.0);
+    y(i) = rgamma(rng);
+    sum += y(i);
+  }
+  for ( int i=0; i<x.size(); ++i )
+  {
+    y(i) /= sum;
+  }
+  for ( int i=0; i<x.size(); ++i )
+  {
+    logProposalDensity += ( - lgamma(alpha(i)) + scale*x(i)*log(y(i)) ) ; // include lgamma(sum(alphai))
+  }
+  return y;
+}
+
 void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double scale,mt19937_64& rng)
 {
   tree.clearProbMaps();
