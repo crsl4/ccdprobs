@@ -32,12 +32,14 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
   VectorXd alpha(x.size());
   VectorXd y(x.size());
   double sum = 0;
+  double sumalpha = 0;
   for ( int i=0; i<x.size(); ++i )
   {
     alpha(i) = scale*x(i) + 1;
     gamma_distribution<double> rgamma(alpha(i),1.0);
     y(i) = rgamma(rng);
     sum += y(i);
+    sumalpha += alpha(i);
   }
   for ( int i=0; i<x.size(); ++i )
   {
@@ -45,8 +47,9 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
   }
   for ( int i=0; i<x.size(); ++i )
   {
-    logProposalDensity += ( - lgamma(alpha(i)) + scale*x(i)*log(y(i)) ) ; // include lgamma(sum(alphai))
+    logProposalDensity += ( - lgamma(alpha(i)) + scale*x(i)*log(y(i)) ) ;
   }
+  logProposalDensity += lgamma(sumalpha);
   return y;
 }
 
@@ -55,18 +58,13 @@ template<typename T>
 void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 {
   //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
-  // here we need to sample a Q
-  double logPropDensityQ = 0;
-  VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), alignment.getNumSites(), logPropDensityQ, rng);
-  VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), alignment.getNumSites(), logPropDensityQ, rng);
-  QMatrix model(p_star,s_star);
   
   string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
   ofstream f(outFile.c_str());
   string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBL";
   ofstream treebl(treeBLFile.c_str());
   //   f << "tree tree0 logl logliknew logTop logProp logPrior logWt" << endl;
-   f << "tree logl logTop logProp logPrior logWt" << endl;
+   f << "tree logl logTop logProp logPrior logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
 
    for ( int k=indStart; k<indEnd; ++k )
      {
@@ -77,6 +75,18 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	   if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
 	     cerr << '|';
 	 }
+       // here we need to sample a Q
+       double logPropDensityQ = 0;
+       VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), alignment.getNumSites(), logPropDensityQ, rng);
+       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), alignment.getNumSites(), logPropDensityQ, rng);
+       QMatrix model(p_star,s_star);
+
+       if( parameters.getFixedQ() )
+	 {
+	   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
+	   logPropDensityQ = 0;
+	 }
+
       double logTopologyProbability=0;
       string treeString;
       treeString = ccd.randomTree(rng,logTopologyProbability);
@@ -134,7 +144,8 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       tree.sortCanonical();
       string top = tree.makeTopologyNumbers();
       //      f << top << " " << top0 << " " << logLik << " " << logLik0 << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
-      f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+      f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << " ";
+      f << model.getStationaryP().transpose() << " " << model.getSymmetricQP().transpose() << endl;
       logwt[k] = logWeight;
       if ( k==indStart || logWeight > maxLogWeight )
 	maxLogWeight = logWeight;
@@ -376,6 +387,7 @@ int main(int argc, char* argv[])
     vector<double> logwt(numRandom,0);
     vector<double> maxLogW(cores); //vector of maxlogweight
     cerr << "jointMLE " << parameters.getJointMLE() << endl;
+    cerr << "fixedQ " << parameters.getFixedQ() << endl;
 
     for ( int i=0; i<cores; ++i )
     {

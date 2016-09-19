@@ -40,3 +40,5 @@ time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 1000 -m 2 -
 time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 1000 -m 2 -o joint -s 709216427 --jointMLE > joint.log
 
 
+## after sampling Q (compare mrbayes whales.nex)
+time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 1000 -m 2 -o randQ > randQ.log

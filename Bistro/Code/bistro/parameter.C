@@ -29,6 +29,7 @@ void usage(ostream& f)
   f << "    --no-parsimony                 |  do *not* reweight bootstrap sample with weight proportional to exp(-parsimony score)" << endl;
   f << "    --parsimony-scale scale        |  scale to compute the weights from counts, positive number" << endl;
   f << "    --threads num                  |  number of threads for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;
+  f << "    --fixedQ                       |  do not sample Q matrix, but use average of mcmc" << endl;
   exit(1);
 }
 
@@ -227,6 +228,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--independent") == 0 )
     {
       independent = true;
+    }
+    else if ( strcmp(argv[k],"--fixedQ") == 0 )
+    {
+      fixedQ = true;
     }
     else if ( strcmp(argv[k],"--jointMLE") == 0 )
     {

@@ -25,6 +25,7 @@ private:
   bool useParsimony;
   double parsimonyScale;
   unsigned int numThreads;
+  bool fixedQ;
 public:
   Parameter()
   {
@@ -41,6 +42,7 @@ public:
     useParsimony = true;
     parsimonyScale = 0.5;
     numThreads = 0;
+    fixedQ = false;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -71,6 +73,8 @@ public:
   void processCommandLine(int,char* []);
   void setNumThreads(unsigned int b) { numThreads = b; }
   unsigned int getNumThreads() const { return numThreads; }
+  bool getFixedQ() const { return fixedQ; }
+  void setFixedQ(bool b) { fixedQ = b; }
 };
 
 #endif

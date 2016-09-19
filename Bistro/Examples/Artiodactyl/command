@@ -84,3 +84,8 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 
 ## to test with many cores, segmentation fault without valgrind?
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 1000 -m 2 -o test-birge -s 2561016956 > test-birge.log
+
+
+## after sampling Q (compare to mrbayes: mb artiodactyl-6.nex)
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o randQ -s 2091436107 > randQ.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o fixedQ -s 2091436107 --fixedQ > fixedQ.log

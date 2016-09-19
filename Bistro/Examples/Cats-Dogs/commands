@@ -46,3 +46,5 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o joint-birge --parsimony-scale 0.2 -s 1741439032 --jointMLE > joint-birge.log
 
 
+## after Q sampling (to compare with mrbayes: mb cats-dogs-no-fixed-q.nex)
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o randQ --parsimony-scale 0.2  > randQ.log
