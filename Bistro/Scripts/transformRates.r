@@ -27,4 +27,18 @@ rates = function(file){
     print(paste0("prset revmatpr=fixed(",r[1],",",r[2],",",r[3],",",r[4],",",r[5],",",r[6],");"))
 }
 
+## R function to find s and p from r and p when given as a single vector
+## x = c(rac,...,rgt,pia,..,pit)
 
+getS = function(x)
+{
+    x = as.vector(x)
+    r = x[1:6]
+    p = x[7:10]
+    out = p %o% p
+    num = as.vector( out[row(out)>col(out)] )
+    s = r*num
+    s = s/sum(s)
+    return(c(s,p))
+}
+    
