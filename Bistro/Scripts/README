@@ -1,0 +1,26 @@
+After running bistro, we have output files:
+
+*** root.topPP = weighted probability for each sampled topology
+    can be readily compared to mrbayes.trprobs
+
+*** root.splits = weighted probability for each non-trivial split
+    can be readily compared to mrbayes.tstat and mrbayes.parts
+
+*** root---*.treeBL = trees with branch lengths
+    need to change the rootnames of files in "summarizeBL.jl", and run in julia with
+```julia
+include("summarizeBL.jl")
+```
+    then we can compare mrbayes.vstat and bistro.vstat
+
+*** root---*.out = table with topology, logl, logTop, logPrior, logBL, logQ, logWt, pi and s
+    need to change the rootname in "summarizeOut.r" and run in R with
+```R
+source("../../Scripts/summarizeOut.r")
+```
+    need to be in the folder with the bistro output files
+    then we can compare mrbayes.pstat and bistro.pstat
+
+*** plots: readBistro.r can provide insightful plots
+
+

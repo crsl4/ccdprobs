@@ -18,6 +18,7 @@ using namespace std;
 
 using namespace boost;
 
+
 bool operator< (const Clade& c1,const Clade& c2)
 {
   return c1.get() < c2.get();
@@ -59,6 +60,25 @@ void Clade::print(ostream& f) const {
     last = i;
   }
   f << '}';
+}
+
+// void Clade::printMB(ostream& f) const {
+//   f << clade ;
+// }
+
+void Clade::printMB(ostream& f) const {
+ dynamic_bitset<unsigned char>::size_type i = clade.find_first();
+ vector<unsigned int> v(clade.size(),0);
+ while ( i != dynamic_bitset<unsigned char>::npos ) {
+   v[i] = 1;
+   i = clade.find_next(i);
+ }
+ for(std::vector<unsigned int>::iterator it = v.begin(); it != v.end(); ++it) {
+   if(*it == 0)
+     f << ".";
+   else
+     f << "*";
+ }
 }
 
 CCDTree::CCDTree(string x,int n)

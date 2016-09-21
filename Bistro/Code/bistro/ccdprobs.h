@@ -24,6 +24,7 @@
 #include <cmath>
 #include <ctime>
 #include <random>
+#include <algorithm> 
 
 #include "alias.h"
 #include "tree.h"
@@ -68,6 +69,7 @@ public:
   void add(Clade c) { clade |= c.get(); }
 //  void subtract(int x) { clade[x-1] = 0; }
   void print(ostream&) const ;
+  void printMB(ostream&) const ;
   friend bool operator< (const Clade&,const Clade&);
   friend bool operator> (const Clade&,const Clade&);
   friend bool operator== (const Clade&,const Clade&);
@@ -231,10 +233,18 @@ public:
   CCDProbs(map<string,T>&,vector<int>&,vector<string>&); //T instead of 1st int in map
   void writeTranslateTable(ostream&);
   void writeCladeCount(ostream&);
+  void writeCladeCountOrdered(ostream&, double);
   void writePairCount(ostream&);
   string randomTree(mt19937_64&,double&);
 //  Tree rtop(mt19937_64&);
 };
+
+template<typename T>
+bool comparePairCladeT(const pair<Clade, T>  &p1, const pair<Clade, T> &p2)
+{
+    return p1.second < p2.second;
+}
+
 
 // to add n to count of clade
 template<typename T> //and change int for T
@@ -307,6 +317,28 @@ void CCDProbs<T>::writeCladeCount(ostream& f)
     f << setw(10) << setprecision(8) << p->second / (double) sampleSize << " ";
     f << setw(10) << p->second << " ";
     p->first.print(f);
+    f << endl;
+  }
+}
+
+template<typename T>
+void CCDProbs<T>::writeCladeCountOrdered(ostream& f, double essInverse)
+{
+  writeTranslateTable(f);
+  f.setf(ios::fixed,ios::floatfield);
+  vector< pair<Clade,T> > v;
+  copy(cladeCount.begin(), cladeCount.end(), back_inserter(v));
+  sort(v.begin(), v.end(), comparePairCladeT<T>);
+  double prob;
+  double se;
+  f << "prob crudeSE(ESS=" << fixed << setprecision(2) << 1.0/essInverse << ") clade" << endl; 
+  for (typename vector<pair<Clade,T>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i ) { 
+    prob = i->second / (double) sampleSize;
+    se = sqrt(prob * (1-prob) * essInverse);
+    f << setw(10) << setprecision(8) << prob << " " << se << " ";
+    i->first.print(f);
+    f << " " ;
+    i->first.printMB(f);
     f << endl;
   }
 }

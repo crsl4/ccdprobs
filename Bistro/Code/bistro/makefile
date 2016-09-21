@@ -18,13 +18,13 @@ LDLIBS = -lpthread
 
 # darwin:
 # CC = /s/gcc-5.3.0/bin/g++
-# CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations -lpthread
-
+# CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations
+# LDLIBS = -lpthread
 
 # to debug with gdb, takes hours!
 # CC = g++
 # CFLAGS = -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations -g -v -da -Q
-# LFLAGS = -lpthread
+# LDLIBS = -lpthread
 
 .SUFFIXES: .C .o
 
