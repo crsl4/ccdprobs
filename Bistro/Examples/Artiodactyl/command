@@ -88,4 +88,12 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 
 ## after sampling Q (compare to mrbayes: mb artiodactyl-6.nex)
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o randQ -s 2091436107 > randQ.log
-time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o fixedQ -s 2091436107 --fixedQ > fixedQ.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 2 -o fixedQ -s 2091436107 --fixedQ > fixedQ.log ##does not work
+
+## compare different parsimony scales (new sorted output)
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10000 -m 2 -o randQ01 --parsimony-scale 0.1 > randQ01.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10000 -m 2 -o randQ03 --parsimony-scale 0.3 > randQ03.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10000 -m 2 -o randQ05  > randQ05.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10000 -m 2 -o randQ07 --parsimony-scale 0.7 > randQ07.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10000 -m 2 -o randQ09 --parsimony-scale 0.9 > randQ09.log
+
