@@ -5,8 +5,7 @@
 ## need to be in the folder with files
 ## Claudia September 2016
 
-bistroroot = "randQ4"
-
+bistroroot = "randQ09"
 
 library(SDMTools)
 library(reldist)
@@ -128,3 +127,4 @@ samplestd[10] <- sd(bistro$pi4)
 parameter = c("r(A<->C)","r(A<->G)","r(A<->T)","r(C<->G)","r(C<->T)","r(G<->T)","pi(A)","pi(C)","pi(G)","pi(T)")
 dataOut = data.frame(parameter,means,vars,stds,lower,upper,med, samplemean, samplestd)
 write.table(dataOut, file=paste0(bistroroot,".pstat"), row.names=FALSE, sep="\t")
+print(dataOut)

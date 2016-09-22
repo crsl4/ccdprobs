@@ -5,13 +5,15 @@
 ## creates bistroroot.vstat to compare to mrbayes.vstat
 ## Claudia September 2016
 
-folder = "../Examples/Artiodactyl/"
-mbroot = "artiodactyl-6"
-bistroroot = "randQ"
-verbose = true
+#folder = "../Examples/Artiodactyl/"
+#mbroot = "artiodactyl-6"
+folder = "../Examples/cats-dogs/"
+mbroot = "cats-dogs-no-fixed-q"
+bistroroot = "randQ09"
+verbose = false
 
-using PhyloNetworks
-using DataFrames
+##using PhyloNetworks
+##using DataFrames
 
 searchdirTreeBL(path,key) = filter(x->(contains(x,key) && contains(x,".treeBL")), readdir(path))
 searchdirOut(path,key) = filter(x->(contains(x,key) && contains(x,".out")), readdir(path))
@@ -41,7 +43,7 @@ logwt = logwt - maximum(logwt);
 wt = exp(logwt);
 wt = wt / sum(wt);
 
-sum(wt) == 1.0 || error("weights do not sum up to 1")
+PhyloNetworks.approxEq(sum(wt),1.0) || error("weights do not sum up to 1")
 length(trees) == length(wt) || error("different length of trees vector and weights vector")
 
 mbfile = "$folder$mbroot.nex.parts"

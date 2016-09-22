@@ -2,3 +2,4 @@
 *.o
 *~
 Bistro/Code/bistro/debug
+*.Rhistory
