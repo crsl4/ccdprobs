@@ -27,17 +27,48 @@ using namespace std;
 using namespace std::chrono;
 using namespace Eigen;
 
+bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string, double> &p2)
+{
+    return p1.second < p2.second;
+}
+
+VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDensity,mt19937_64& rng)
+{
+  VectorXd alpha(x.size());
+  VectorXd y(x.size());
+  double sum = 0;
+  double sumalpha = 0;
+  for ( int i=0; i<x.size(); ++i )
+  {
+    alpha(i) = scale*x(i) + 1;
+    gamma_distribution<double> rgamma(alpha(i),1.0);
+    y(i) = rgamma(rng);
+    sum += y(i);
+    sumalpha += alpha(i);
+  }
+  for ( int i=0; i<x.size(); ++i )
+  {
+    y(i) /= sum;
+  }
+  for ( int i=0; i<x.size(); ++i )
+  {
+    logProposalDensity += ( - lgamma(alpha(i)) + scale*x(i)*log(y(i)) ) ;
+  }
+  logProposalDensity += lgamma(sumalpha);
+  return y;
+}
+
 // arguments made reference to avoid copying in each thread
 template<typename T>
-void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& model, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
+void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 {
   //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
-   string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
-   ofstream f(outFile.c_str());
-   string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBL";
-   ofstream treebl(treeBLFile.c_str());
-   //   f << "tree tree0 logl logliknew logTop logProp logPrior logWt" << endl;
-   f << "tree logl logTop logProp logPrior logWt" << endl;
+
+  string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
+  ofstream f(outFile.c_str());
+  string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBL";
+  ofstream treebl(treeBLFile.c_str());
+   f << "tree logl logTop logBL logPrior logQ logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
 
    for ( int k=indStart; k<indEnd; ++k )
      {
@@ -48,6 +79,18 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	   if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
 	     cerr << '|';
 	 }
+       // here we need to sample a Q
+       double logQ = 0;
+       VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), alignment.getNumSites(), logQ, rng);
+       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), alignment.getNumSites(), logQ, rng);
+       QMatrix model(p_star,s_star);
+
+       // if( parameters.getFixedQ() )
+       // 	 {
+       // 	   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
+       // 	   logQ = 0;
+       // 	 }
+
       double logTopologyProbability=0;
       string treeString;
       treeString = ccd.randomTree(rng,logTopologyProbability);
@@ -71,23 +114,23 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	    cout << " " << (*p)->getNumber();
 	  cout << endl << flush;
 	}
-      double logProposalDensity = 0;
+      double logBL = 0;
 
 
       for ( int i=0; i<parameters.getNumMLE(); ++i )
 	{
-	  tree.randomEdges(alignment,model,rng,logProposalDensity,true);
+	  tree.randomEdges(alignment,model,rng,logBL,true);
 //	  cout << tree.makeTreeNumbers() << endl;
 	}
       if( parameters.getIndependent() )
 	{
 //	  cout << "Branch lengths sampled independently" << endl;
-	  tree.randomEdges(alignment,model,rng,logProposalDensity,false);
+	  tree.randomEdges(alignment,model,rng,logBL,false);
 	}
       else
 	{
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  tree.generateBranchLengths(alignment,model,rng, logProposalDensity, parameters.getJointMLE());
+	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE());
 	}
 //      cout << tree.makeTreeNumbers() << endl;
       treebl << tree.makeTreeNumbers() << endl;
@@ -97,15 +140,15 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       // double logLik0 = tree.calculate(alignment, model);
       // tree.clearProbMaps(); //added just to see if this was missing
       if(VERBOSE)
-	cout << "calculating the final loglik now after clearing map" << endl;
+	cout << "calculating the final loglik now without clearing map" << endl;
       double logLik = tree.calculate(alignment, model);
-      double logWeight = logBranchLengthPriorDensity + logLik - logProposalDensity - logTopologyProbability;
+      double logWeight = logBranchLengthPriorDensity + logLik - logBL - logTopologyProbability - logQ;
       // string top0 = tree.makeTopologyNumbers();
       tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
       tree.sortCanonical();
       string top = tree.makeTopologyNumbers();
-      //      f << top << " " << top0 << " " << logLik << " " << logLik0 << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
-      f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logProposalDensity << " " << logBranchLengthPriorDensity << " " << logWeight << endl;
+      f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logBL << " " << logBranchLengthPriorDensity << " " << logQ << " " << logWeight << " ";
+      f << model.getStationaryP().transpose() << " " << model.getSymmetricQP().transpose() << endl;
       logwt[k] = logWeight;
       if ( k==indStart || logWeight > maxLogWeight )
 	maxLogWeight = logWeight;
@@ -199,10 +242,10 @@ int main(int argc, char* argv[])
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
-
   cerr << endl << " done." << endl;
 
   milliseconds ms6 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
 
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";
@@ -347,6 +390,7 @@ int main(int argc, char* argv[])
     vector<double> logwt(numRandom,0);
     vector<double> maxLogW(cores); //vector of maxlogweight
     cerr << "jointMLE " << parameters.getJointMLE() << endl;
+    cerr << "fixedQ " << parameters.getFixedQ() << endl;
 
     for ( int i=0; i<cores; ++i )
     {
@@ -356,12 +400,6 @@ int main(int argc, char* argv[])
       else
 	threads.push_back(thread(randomTrees<int>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
-    // // last core:
-    // cerr << "Thread " << cores-1 << " beginning random trees from " << (cores-1)*k << " to " << numRandom-1 << endl;
-    // if ( parameters.getUseParsimony() )
-    //   threads.push_back(thread(randomTrees<double>,cores-1,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccdParsimony), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
-    // else
-    //   threads.push_back(thread(randomTrees<int>,cores-1,(cores-1)*k, numRandom, ref(logwt), ref(maxLogW[cores-1]), ref(ccd), ref(*(vrng[cores-1])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[cores-1])));
 
     for(auto &t : threads){
       t.join();
@@ -427,19 +465,30 @@ int main(int argc, char* argv[])
     CCDProbs<double> splits(topologyToUnnormalizedWeightMap,taxaNumbers,taxaNames);
     string splitsWeightsFile = parameters.getOutFileRoot() + ".splits";
     ofstream splitsWt(splitsWeightsFile.c_str());
-    splits.writeCladeCount(splitsWt);
+    splits.writeCladeCountOrdered(splitsWt, essInverse);
     splitsWt.close();
 
     string topologyPPFile = parameters.getOutFileRoot() + ".topPP";
     ofstream topPP(topologyPPFile.c_str());
+
+    vector< pair<string,double> > v;
+    copy(topologyToUnnormalizedWeightMap.begin(), topologyToUnnormalizedWeightMap.end(), back_inserter(v));
+    sort(v.begin(), v.end(), comparePairStringDouble);
     double prob;
     double se;
-    for ( map<string,double >::iterator p=topologyToUnnormalizedWeightMap.begin(); p!= topologyToUnnormalizedWeightMap.end(); ++p) {
-      prob = (p->second)/sum;
+    topPP << "tree prob crudeSE(ESS=" << fixed << setprecision(2) << 1.0/essInverse << ")" << endl;
+
+    for (vector<pair<string,double>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i ) {
+      prob = i->second / sum;
       se = sqrt(prob * (1-prob) * essInverse);
-      topPP << (p->first) << fixed << setprecision(4) << prob << " " << se << endl;
+      topPP << (i->first) << fixed << setprecision(4) << prob << " " << se << endl;
     }
 
+    // for ( map<string,double >::iterator p=topologyToUnnormalizedWeightMap.begin(); p!= topologyToUnnormalizedWeightMap.end(); ++p) {
+    //   prob = (p->second)/sum;
+    //   se = sqrt(prob * (1-prob) * essInverse);
+    //   topPP << (p->first) << fixed << setprecision(4) << prob << " " << se << endl;
+    // }
   }
 
   milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );

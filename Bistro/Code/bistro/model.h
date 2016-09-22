@@ -29,8 +29,8 @@ typedef Matrix<double, 6, 1> Vector6d;
 class QMatrix
 {
 private:
-  Vector6d symmetricQP;
-  Vector4d stationaryP;
+  Vector6d symmetricQP; //AC,AG,AT,CG,CT,GT?
+  Vector4d stationaryP; //A,C,G,T?
   Vector4d lambda;
   Matrix4d V;
   Matrix4d Vinv;
@@ -46,7 +46,7 @@ public:
   Matrix4d getQQP(double);
   Vector4d getStationaryP() const { return stationaryP; }
   Vector6d getSymmetricQP() const { return symmetricQP; }
-  Vector4d getStatP() const { return stationaryP; }
+  Vector4d getStatP() const { return stationaryP; } //fixit: why this?
   void resetStationaryP(Vector4d p)
   {
     stationaryP = p;
@@ -65,5 +65,5 @@ public:
   }
   void mcmc(Alignment&,Tree&,int,double,mt19937_64&);
 };
-  
+
 #endif

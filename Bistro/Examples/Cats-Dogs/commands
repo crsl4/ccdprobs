@@ -46,3 +46,16 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o joint-birge --parsimony-scale 0.2 -s 1741439032 --jointMLE > joint-birge.log
 
 
+## after Q sampling (to compare with mrbayes: mb cats-dogs-no-fixed-q.nex)
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2 -o randQ --parsimony-scale 0.2  > randQ.log
+
+## compare different parsimony scales, after new sorted output
+## run in darwin machines (threads=10)
+## darwin04
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ01 --threads 10 --parsimony-scale 0.1  > randQ01.log
+## darwin05
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ03 --threads 10 --parsimony-scale 0.3  > randQ03.log
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ05 --threads 10   > randQ05.log
+## darwin06
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ07 --threads 10 --parsimony-scale 0.7  > randQ07.log
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ09 --threads 10 --parsimony-scale 0.9  > randQ09.log

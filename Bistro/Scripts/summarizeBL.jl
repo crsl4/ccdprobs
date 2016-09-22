@@ -1,366 +1,108 @@
-## julia script to summarize branch lengths in *.treeBL
-## Claudia August 2016
+## julia script to read root---*.treeBL files after bistro
+## to compare with mrbayes.nex.vstat
+## needs to read mrbayes.nex.parts to identify the important splits
+## based on old/sumamrizeBL.jl
+## creates bistroroot.vstat to compare to mrbayes.vstat
+## Claudia September 2016
+
+folder = "../Examples/Artiodactyl/"
+mbroot = "artiodactyl-6"
+bistroroot = "randQ"
+verbose = true
 
 using PhyloNetworks
-
-##################### whales ###############################################################
-## trying to understand how much we propose the clade 8-10
-
-trees = readMultiTopology("run5k-p.txt.treeBL");
-length(trees)
-
-taxa = tipLabels(trees[1])
-split = falses(length(taxa))
-split[16] = true
-split[17] = true
-split[19] = true
-
 using DataFrames
-dat = readtable("run5k-p.txt.out", header=true, separator=' ')
-logwt = convert(Array,dat[:logWt])
-logwt = logwt - maximum(logwt)
-wt = exp(logwt)
-wt = wt / sum(wt)
-sum(wt)
+
+searchdirTreeBL(path,key) = filter(x->(contains(x,key) && contains(x,".treeBL")), readdir(path))
+searchdirOut(path,key) = filter(x->(contains(x,key) && contains(x,".out")), readdir(path))
+
+## read all trees with branch lengths
+files = searchdirTreeBL(folder,"$bistroroot---")
+trees = readMultiTopology("$folder$(files[1])");
+for(j=2:length(files))
+    t = readMultiTopology("$folder$(files[j])");
+    trees = vcat(trees,t)
+end
+taxa = map(x->parse(Int,x),tipLabels(trees[1]))
+taxa = sort(taxa)
+taxa = map(x->string(x),taxa)
 
 
-wtsplit = Float64[]
-blsplit = Float64[]
+## read weights
+files = searchdirOut(folder,"$bistroroot---")
+dat = readtable("$folder$(files[1])", header=true, separator=' ');
+for(j=2:length(files))
+    t = readtable("$folder$(files[j])", header=true, separator=' ')
+    dat = vcat(dat,t)
+end
 
+logwt = convert(Array,dat[:logWt]);
+logwt = logwt - maximum(logwt);
+wt = exp(logwt);
+wt = wt / sum(wt);
+
+sum(wt) == 1.0 || error("weights do not sum up to 1")
+length(trees) == length(wt) || error("different length of trees vector and weights vector")
+
+mbfile = "$folder$mbroot.nex.parts"
+f = open(mbfile);
+lines = readlines(f);
+splits = AbstractString[]
+column1 = Float64[]
+column2 = Float64[]
+column3 = Float64[]
+column4 = Float64[]
+column5 = Float64[]
+column6 = Float64[]
+column7 = Float64[]
+column8 = Float64[]
 
 i = 1
-for(t in trees)
-    for(e in t.edge)
-        if(hardwiredCluster(e,taxa) == split)
-            push!(blsplit,e.length)
-            push!(wtsplit, wt[i])
+for(l in lines)
+    if(i > 2)
+        sb = split(l)
+        split1 = falses(length(sb[2])) ## cannot call split bc of function split
+        for(j=1:length(sb[2]))
+            if(sb[2][j] == '*')
+                split1[j] = true
+            end
         end
+        verbose && println("$(sb[2])")
+        verbose && println("$(split1)")
+
+        wtsplit = Float64[]
+        blsplit = Float64[]
+
+        k = 1
+        for(t in trees)
+            verbose && println("$t")
+            for(e in t.edge)
+                clus = hardwiredCluster(e,taxa)
+                if(clus == split1 || clus == !split1)
+                    verbose && println("found $(clus)")
+                    push!(blsplit,e.length)
+                    push!(wtsplit, wt[k])
+                end
+            end
+            k += 1
+        end
+
+        wtsplit = wtsplit / sum(wtsplit)
+
+        push!(splits,sb[2])
+        push!(column7,mean(blsplit))
+        push!(column8,std(blsplit))
+        push!(column1,dot(blsplit,wtsplit)) ## same as mean(blsplit, weights(wtsplit))
+        push!(column2,var(blsplit,weights(wtsplit)))
+        push!(column3,std(blsplit,weights(wtsplit)))
+        push!(column4,quantile(blsplit, weights(wtsplit), 0.025))
+        push!(column5,quantile(blsplit, weights(wtsplit), 0.975))
+        push!(column6,median(blsplit, weights(wtsplit)))
     end
     i += 1
 end
 
-length(wtsplit)
-
-mean(blsplit)
-
-##################### primates ###############################################################
-trees = readMultiTopology("../Examples/Primates/pars10k.treeBL");
-length(trees)
-
-taxa = tipLabels(trees[1])
-taxa = ["11", "4", "5", "6", "3", "1", "2", "12", "10", "9", "8", "7"]
-split20 = [false,true,true,true,true,false,false,false,false,false,false,false]
-split21 = [false,true,false,false,true,false,false,false,false,false,false,false]
-
-
-## WEIGHTS
-using DataFrames
-dat = readtable("../Examples/Primates/pars10k.out", header=true, separator=' ')
-logwt = convert(Array,dat[:logWt])
-logwt = logwt - maximum(logwt)
-wt = exp(logwt)
-wt = wt / sum(wt)
-sum(wt)
-
-
-wt20 = Float64[]
-wt21 = Float64[]
-
-bl20 = Float64[]
-bl21 = Float64[]
-
-
-
-i = 1
-for(t in trees)
-    for(e in t.edge)
-        if(hardwiredCluster(e,taxa) == split20)
-            push!(bl20,e.length)
-            push!(wt20, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split21)
-            push!(bl21,e.length)
-            push!(wt21, wt[i])
-        end
-    end
-    i += 1
-end
-
-mean(bl20)
-mean(bl21)
-
-
-std(bl20)
-std(bl21)
-
-
-wt20 = wt20 / sum(wt20)
-wt21 = wt21 / sum(wt21)
-
-dot(bl20,wt20)
-dot(bl21,wt21)
-
-
-##################### cats ###############################################################
-trees = readMultiTopology("../Examples/cats-dogs/pars10k.treeBL");
-trees = readMultiTopology("../Examples/cats-dogs/pars1k-scale.treeBL");
-length(trees)
-
-taxa = tipLabels(trees[1])
-taxa = ["11", "4", "5", "6", "3", "1", "2", "12", "10", "9", "8", "7"]
-split13 = [false,false,false,false,false,false,false,false,false,false,true,true]
-split14 = [true,false,false,false,false,false,false,true,true,true,true,true]
-split15 = [false,false,false,false,false,false,false,false,false,true,true,true]
-split16 = [false,true,true,false,false,false,false,false,false,false,false,false]
-split17 = [false,true,true,true,true,false,false,false,false,false,false,false]
-split18 = [false,false,false,false,false,false,false,false,true,true,true,true]
-split19 = [false,false,false,false,false,false,false,true,true,true,true,true]
-split20 = [false,true,true,true,false,false,false,false,false,false,false,false]
-split21 = [true,false,false,false,false,false,true,true,true,true,true,true]
-split22 = [true,true,true,true,true,false,false,true,true,true,true,true]
-
-## WEIGHTS
-using DataFrames
-dat = readtable("../Examples/cats-dogs/pars10k.out", header=true, separator=' ')
-dat = readtable("../Examples/cats-dogs/pars1k-scale.out", header=true, separator=' ')
-logwt = convert(Array,dat[:logWt])
-logwt = logwt - maximum(logwt)
-wt = exp(logwt)
-wt = wt / sum(wt)
-sum(wt)
-
-
-wt13 = Float64[]
-wt14 = Float64[]
-wt15 = Float64[]
-wt16 = Float64[]
-wt17 = Float64[]
-wt18 = Float64[]
-wt19 = Float64[]
-wt20 = Float64[]
-wt21 = Float64[]
-wt22 = Float64[]
-
-bl13 = Float64[]
-bl14 = Float64[]
-bl15 = Float64[]
-bl16 = Float64[]
-bl17 = Float64[]
-bl18 = Float64[]
-bl19 = Float64[]
-bl20 = Float64[]
-bl21 = Float64[]
-bl22 = Float64[]
-
-
-i = 1
-for(t in trees)
-    for(e in t.edge)
-        if(hardwiredCluster(e,taxa) == split13)
-            push!(bl13,e.length)
-            push!(wt13, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split14)
-            push!(bl14,e.length)
-            push!(wt14, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split15)
-            push!(bl15,e.length)
-            push!(wt15, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split16)
-            push!(bl16,e.length)
-            push!(wt16, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split17)
-            push!(bl17,e.length)
-            push!(wt17, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split18)
-            push!(bl18,e.length)
-            push!(wt18, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split19)
-            push!(bl19,e.length)
-            push!(wt19, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split20)
-            push!(bl20,e.length)
-            push!(wt20, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split21)
-            push!(bl21,e.length)
-            push!(wt21, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split22)
-            push!(bl22,e.length)
-            push!(wt22, wt[i])
-        end
-    end
-    i += 1
-end
-
-mean(bl13)
-mean(bl14)
-mean(bl15)
-mean(bl16)
-mean(bl17)
-mean(bl18)
-mean(bl19)
-mean(bl20)
-mean(bl21)
-mean(bl22)
-
-std(bl13)
-std(bl14)
-std(bl15)
-std(bl16)
-std(bl17)
-std(bl18)
-std(bl19)
-std(bl20)
-std(bl21)
-std(bl22)
-
-
-
-wt13 = wt13 / sum(wt13)
-wt14 = wt14 / sum(wt14)
-wt15 = wt15 / sum(wt15)
-wt16 = wt16 / sum(wt16)
-wt17 = wt17 / sum(wt17)
-wt18 = wt18 / sum(wt18)
-wt19 = wt19 / sum(wt19)
-wt20 = wt20 / sum(wt20)
-wt21 = wt21 / sum(wt21)
-wt22 = wt22 / sum(wt22)
-
-dot(bl13,wt13)
-dot(bl14,wt14)
-dot(bl15,wt15)
-dot(bl16,wt16)
-dot(bl17,wt17)
-dot(bl18,wt18)
-dot(bl19,wt19)
-dot(bl20,wt20)
-dot(bl21,wt21)
-dot(bl22,wt22)
-
-
-##################### artiodactyl ###############################################################
-trees = readMultiTopology("../Examples/Artiodactyl/pars1k.treeBL"); ## before fixing error
-trees = readMultiTopology("../Examples/Artiodactyl/new.txt.treeBL"); ## after fixing error
-trees = readMultiTopology("../Examples/Artiodactyl/pars10k.treeBL"); ## after fixing error
-
-## Now we want to find the mean BL (without weights) for edge above {4,6} in trees2 and {5-6} in trees1
-## 7	...***
-## 8	..****
-## 9	....**
-## 10	...*.*
-
-taxa = tipLabels(trees[1]) ## 2,5,6,4,3,1
-taxa = ["2","5","6","4","3","1"]
-split7 = [false,true,true,true,false,false]
-split8 = [false,true,true,true,true,false]
-split9 = [false,true,true,false,false,false]
-split10 = [false,false,true,true,false,false]
-
-## WEIGHTS
-using DataFrames
-dat = readtable("../Examples/Artiodactyl/pars1k", header=true, separator=' ') ## with error
-dat = readtable("../Examples/Artiodactyl/new.txt", header=true, separator=' ') ## without error
-dat = readtable("../Examples/Artiodactyl/pars10k.out", header=true, separator=' ') ## without error
-logwt = convert(Array,dat[:logWt])
-logwt = logwt - maximum(logwt)
-wt = exp(logwt)
-wt = wt / sum(wt)
-sum(wt)
-
-
-wt7 = Float64[]
-wt8 = Float64[]
-wt9 = Float64[]
-wt10 = Float64[]
-
-bl7 = Float64[]
-bl8 = Float64[]
-bl9 = Float64[]
-bl10 = Float64[]
-i = 1
-for(t in trees)
-    for(e in t.edge)
-        if(hardwiredCluster(e,taxa) == split9)
-            push!(bl9,e.length)
-            push!(wt9, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split10)
-            push!(bl10,e.length)
-            push!(wt10, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split7)
-            push!(bl7,e.length)
-            push!(wt7, wt[i])
-        elseif(hardwiredCluster(e,taxa) == split8)
-            push!(bl8,e.length)
-            push!(wt8, wt[i])
-        end
-    end
-    i += 1
-end
-
-## length[7]	5.083729e-02
-## length[8]	2.749753e-02
-## length[9]	1.871160e-02
-## length[10]	1.802578e-02
-
-mean(bl7)
-mean(bl8)
-mean(bl9)
-mean(bl10)
-
-std(bl7)
-std(bl8)
-std(bl9)
-std(bl10)
-
-wt7 = wt7 / sum(wt7)
-wt8 = wt8 / sum(wt8)
-wt9 = wt9 / sum(wt9)
-wt10 = wt10 / sum(wt10)
-
-dot(bl7,wt7)
-dot(bl8,wt8)
-dot(bl9,wt9)
-dot(bl10,wt10)
-
-
-
-
-#############################################################################
-tree1 = readTopology("(2,(((6,5),4),3),1);")
-tree2 = readTopology("(2,((5,(6,4)),3),1);")
-
-equal1 = repeat([-1],inner = [length(trees)])
-equal2 = repeat([-1],inner = [length(trees)])
-for(i in 1: length(trees))
-    equal1[i] = hardwiredClusterDistance(trees[i], tree1, false)
-    equal2[i] = hardwiredClusterDistance(trees[i], tree2, false)
-end
-
-f(x) = x == 0
-trees1 = trees[find(f,equal1)]
-length(trees1) ## 365
-trees2 = trees[find(f,equal2)]
-length(trees2) ## 197
-
-## Now we want to find the mean BL (without weights) for edge above {4,6} in trees2 and {5-6} in trees1
-taxa = tipLabels(tree1) ## 2,5,6,4,3,1
-
-bl56 = 0
-for(t in trees1)
-    for(e in t.edge)
-        if(hardwiredCluster(e,taxa) == [false,true,true,false,false,false])
-            bl56 += e.length
-        end
-    end
-end
-bl56/length(trees1) ## 0.01315549 (mb 0.0187152)
-
-bl46 = 0
-for(t in trees2)
-    for(e in t.edge)
-        if(hardwiredCluster(e,taxa) == [false,false,true,true,false,false])
-            bl46 += e.length
-        end
-    end
-end
-bl46/length(trees2) ## 0.0132982 (mb 0.017977)
+dataBL = DataFrame(bl=splits, mean=column1, var=column2, std=column3, CILower=column4, CIUpper=column5, median=column6, sampleMean=column7, sampleStd=column8)
+println("$dataBL")
+writetable("$folder$bistroroot.vstat",dataBL, separator='\t')
 

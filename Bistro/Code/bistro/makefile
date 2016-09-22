@@ -14,17 +14,24 @@ TARGET = all
 # current:
 CC = g++
 CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations
+LDLIBS = -lpthread
+
+# darwin:
+# CC = /s/gcc-5.3.0/bin/g++
+# CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations
+# LDLIBS = -lpthread
 
 # to debug with gdb, takes hours!
 # CC = g++
 # CFLAGS = -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations -g -v -da -Q
+# LDLIBS = -lpthread
 
 .SUFFIXES: .C .o
 
 all: bistro
 
 bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
-	$(CC) $(CFLAGS) -o bistro main-threads.C $(OBJS)
+	$(CC) $(CFLAGS) -o bistro main-threads.C $(OBJS) $(LDLIBS)
 
 .C.o:
 	$(CC) $(CFLAGS) -o $@ -c $<
