@@ -21,6 +21,7 @@ source("../../Scripts/summarizeOut.r")
     need to be in the folder with the bistro output files
     then we can compare mrbayes.pstat and bistro.pstat
 
-*** plots: readBistro.r can provide insightful plots
+*** plots: readBistro.r and summarizingBistroScript.r
+    can provide insightful plots
 
 

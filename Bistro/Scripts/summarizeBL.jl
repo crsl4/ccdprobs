@@ -104,7 +104,8 @@ for(l in lines)
     i += 1
 end
 
-dataBL = DataFrame(bl=splits, mean=column1, var=column2, std=column3, CILower=column4, CIUpper=column5, median=column6, sampleMean=column7, sampleStd=column8)
+dig = 6
+dataBL = DataFrame(bl=splits, mean=round(column1,dig), var=round(column2,dig), std=round(column3,dig), CILower=round(column4,dig), CIUpper=round(column5,dig), median=round(column6,dig), sampleMean=round(column7,dig), sampleStd=round(column8,dig))
 println("$dataBL")
 writetable("$folder$bistroroot.vstat",dataBL, separator='\t')
 

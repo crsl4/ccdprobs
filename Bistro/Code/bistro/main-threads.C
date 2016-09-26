@@ -311,7 +311,13 @@ int main(int argc, char* argv[])
     map<string,double>::iterator wm=topologyToWeightMap.begin();
     for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
     {
-      topCounts << (*cm).first << " " << setw(5) << (*cm).second << " " << setw(10) << setprecision(4) << fixed << (*wm).second;
+      Tree t((*cm).first);
+      t.relabel(alignment);
+      t.unroot();
+      t.reroot(1);
+      t.sortCanonical();
+      string top = t.makeTopologyNumbers();
+      topCounts << top << " " << setw(5) << (*cm).second << " " << setw(10) << setprecision(4) << fixed << (*wm).second;
       topCounts << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ] << endl;
       ++wm;
     }
@@ -481,7 +487,7 @@ int main(int argc, char* argv[])
     for (vector<pair<string,double>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i ) {
       prob = i->second / sum;
       se = sqrt(prob * (1-prob) * essInverse);
-      topPP << (i->first) << fixed << setprecision(4) << prob << " " << se << endl;
+      topPP << (i->first) << " " << fixed << setprecision(4) << prob << " " << se << endl;
     }
 
     // for ( map<string,double >::iterator p=topologyToUnnormalizedWeightMap.begin(); p!= topologyToUnnormalizedWeightMap.end(); ++p) {
