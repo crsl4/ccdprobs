@@ -59,3 +59,9 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m
 ## darwin06
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ07 --threads 10 --parsimony-scale 0.7  > randQ07.log
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ09 --threads 10 --parsimony-scale 0.9  > randQ09.log
+
+
+
+### after improving topCounts (darwin02)
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ05 --threads 10  > randQ05.log
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ20 --threads 10 --parsimony-scale 2 > randQ20.log

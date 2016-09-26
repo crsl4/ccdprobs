@@ -5,15 +5,15 @@
 ## creates bistroroot.vstat to compare to mrbayes.vstat
 ## Claudia September 2016
 
-#folder = "../Examples/Artiodactyl/"
-#mbroot = "artiodactyl-6"
+## folder = "../Examples/Artiodactyl/"
+## mbroot = "artiodactyl-6"
 folder = "../Examples/cats-dogs/"
 mbroot = "cats-dogs-no-fixed-q"
-bistroroot = "randQ09"
+bistroroot = "randQ20"
 verbose = false
 
-##using PhyloNetworks
-##using DataFrames
+#using PhyloNetworks
+#using DataFrames
 
 searchdirTreeBL(path,key) = filter(x->(contains(x,key) && contains(x,".treeBL")), readdir(path))
 searchdirOut(path,key) = filter(x->(contains(x,key) && contains(x,".out")), readdir(path))
@@ -90,16 +90,27 @@ for(l in lines)
         end
 
         wtsplit = wtsplit / sum(wtsplit)
-
         push!(splits,sb[2])
-        push!(column7,mean(blsplit))
-        push!(column8,std(blsplit))
-        push!(column1,dot(blsplit,wtsplit)) ## same as mean(blsplit, weights(wtsplit))
-        push!(column2,var(blsplit,weights(wtsplit)))
-        push!(column3,std(blsplit,weights(wtsplit)))
-        push!(column4,quantile(blsplit, weights(wtsplit), 0.025))
-        push!(column5,quantile(blsplit, weights(wtsplit), 0.975))
-        push!(column6,median(blsplit, weights(wtsplit)))
+        if(!isempty(blsplit))
+            push!(column7,mean(blsplit))
+            push!(column8,std(blsplit))
+            push!(column1,dot(blsplit,wtsplit)) ## same as mean(blsplit, weights(wtsplit))
+            push!(column2,var(blsplit,weights(wtsplit)))
+            push!(column3,std(blsplit,weights(wtsplit)))
+            push!(column4,quantile(blsplit, weights(wtsplit), 0.025))
+            push!(column5,quantile(blsplit, weights(wtsplit), 0.975))
+            push!(column6,median(blsplit, weights(wtsplit)))
+        else
+            push!(column7,0.0)
+            push!(column8,0.0)
+            push!(column1,0.0)
+            push!(column2,0.0)
+            push!(column3,0.0)
+            push!(column4,0.0)
+            push!(column5,0.0)
+            push!(column6,0.0)
+        end
+
     end
     i += 1
 end

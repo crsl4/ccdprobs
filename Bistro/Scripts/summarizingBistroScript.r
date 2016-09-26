@@ -6,10 +6,27 @@
 ## simulated data with 6 and 2 taxa
 
 source("../../Scripts/readBistro.r")
-library(ggplot2)
-data = computeEntropy("randQ")
+setwd("../Artiodactyl")
+setwd("../cats-dogs")
+setwd("../Simulations")
+
+data = computeEntropy("randQ05")
+data = computeEntropy("randQ20")
+data = computeEntropy("randQ05-6")
+data = computeEntropy("randQ20-6")
+data = computeEntropy("randQ05-12")
+data = computeEntropy("randQ20-12")
+
 plotProb(data)
 
+bistro = readBistro("randQ05")
+bistro = readBistro("randQ20")
+bistro = readBistro("randQ05-6")
+bistro = readBistro("randQ20-6")
+bistro = readBistro("randQ05-12")
+bistro = readBistro("randQ20-12")
+
+plotBistro(bistro)
 
 ## ========================================================
 ## studying the effect of different parsimony scores on

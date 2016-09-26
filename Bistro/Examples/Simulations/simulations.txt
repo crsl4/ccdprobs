@@ -1,3 +1,13 @@
+## to compare with artiodactyl and cats-dogs after improving topCounts
+## darwin03
+time ../../Code/bistro/bistro -f ../../Data/sim6.fasta -b 10000 -r 10000 -m 2 -o randQ05-6 --threads 10  > randQ05-6.log
+time ../../Code/bistro/bistro -f ../../Data/sim6.fasta -b 10000 -r 10000 -m 2 -o randQ20-6 --threads 10  --parsimony-scale 2 > randQ20-6.log
+## darwin04
+time ../../Code/bistro/bistro -f ../../Data/sim12.fasta -b 10000 -r 10000 -m 2 -o randQ05-12 --threads 10  > randQ05-12.log
+time ../../Code/bistro/bistro -f ../../Data/sim12.fasta -b 10000 -r 10000 -m 2 -o randQ20-12 --threads 10  --parsimony-scale 2 > randQ20-12.log
+
+
+===================================================================================================
 - Instructions after run:
 1) rename weights, trees, and blOneRep.txt based on fromto and nice/ugly bl
 2) remove out, fasta, make clean

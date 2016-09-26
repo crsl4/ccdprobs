@@ -101,3 +101,7 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 ## darwin04
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10000 -m 2 -o randQ09 --threads 10 --parsimony-scale 0.9 > randQ09.log
 
+
+### after improving topCounts (darwin00)
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10000 -m 2 -o randQ05 --threads 10  > randQ05.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 10000 -m 2 -o randQ20 --threads 10 --parsimony-scale 2 > randQ20.log
