@@ -29,7 +29,6 @@ rates = function(file){
 
 ## R function to find s and p from r and p when given as a single vector
 ## x = c(rac,...,rgt,pia,..,pit)
-
 getS = function(x)
 {
     x = as.vector(x)
@@ -41,4 +40,4 @@ getS = function(x)
     s = s/sum(s)
     return(c(s,p))
 }
-    
+
