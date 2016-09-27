@@ -81,8 +81,12 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	 }
        // here we need to sample a Q
        double logQ = 0;
-       VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), alignment.getNumSites(), logQ, rng);
-       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), alignment.getNumSites(), logQ, rng);
+//       VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), alignment.getNumSites(), logQ, rng);
+//       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), alignment.getNumSites(), logQ, rng);
+       VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), 1000000*alignment.getNumSites(), logQ, rng);
+       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), 1000000*alignment.getNumSites(), logQ, rng);
+       // !!!! change this back!!!
+       logQ = 0;
        QMatrix model(p_star,s_star);
 
        // if( parameters.getFixedQ() )
@@ -258,6 +262,23 @@ int main(int argc, char* argv[])
 
   milliseconds ms7 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
+  MatrixXd gtrDistanceMatrixCopy = gtrDistanceMatrix;
+  Tree gtrtree(gtrDistanceMatrixCopy);
+  gtrtree.reroot(1);
+  gtrtree.sortCanonical();
+
+  cout << "GTR Tree" << endl;
+  cout << gtrtree.makeTreeNumbers() << endl;
+
+  for ( int i=0; i<4; ++i )
+  {
+    double logFoo;
+    gtrtree.randomEdges(alignment,model,rng,logFoo,true);
+  }
+
+  cout << "MLE Branch Lengths" << endl;
+  cout << gtrtree.makeTreeNumbers() << endl;
+  
   // Do bootstrap with new pairwise distances
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
