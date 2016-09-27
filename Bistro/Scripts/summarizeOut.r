@@ -5,7 +5,7 @@
 ## need to be in the folder with files
 ## Claudia September 2016
 
-bistroroot = "randQ05"
+bistroroot = "goo"
 
 library(SDMTools)
 library(reldist)
