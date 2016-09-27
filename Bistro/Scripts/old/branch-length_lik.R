@@ -14,6 +14,30 @@
 ## Modified to use likelihood for proposal
 ## Claudia March 2016
 
+makeQfromS = function(s,p,n,symmetric=TRUE) {
+  Q = matrix(0,n,n)
+  Q[row(Q) > col(Q)] = s
+  Q = Q + t(Q)
+  Q = (1/diag(p)) %*% Q / 2
+  diag(Q) = -apply(Q,1,sum)
+  if ( symmetric ) {
+      p.sqrt = sqrt(p)
+      S = diag(p.sqrt) %*% Q %*% diag(1/p.sqrt)
+      eig = eigen(S,symmetric=TRUE) ## Error in eigen(S, symmetric = TRUE) (from branch-length.R#27) : infinite or missing values in 'x'
+      V = diag(1/p.sqrt) %*% eig$vectors
+      lambda = eig$values
+      Vinv = t(eig$vectors) %*% diag(p.sqrt)
+  }
+  else {
+      eig = eigen(Q)
+      V = eig$vectors
+      lambda = eig$values
+      Vinv = solve(V)
+  }
+  return( list(Q=Q,V=V,Vinv=Vinv,lambda=lambda,p=p,s=s) )
+}
+
+
 makeQ = function(r,p,n,rescale=FALSE,symmetric=TRUE) {
   Q = matrix(0,n,n)
   Q[row(Q) > col(Q)] = r

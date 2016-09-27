@@ -20,6 +20,6 @@ r = c(0.05274190, 0.3742855, 0.05746096, 0.01611567, 0.4916158, 0.007780191)
 s = getS(c(r,p))
 s = s[1:6]
 s = s/s[6]
-Q = makeQ(s,p,4, rescale=TRUE)
+Q = makeQfromS(s,p,4)
 
 x = simData(tree,nsites,Q,alpha)
