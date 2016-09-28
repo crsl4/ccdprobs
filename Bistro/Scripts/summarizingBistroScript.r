@@ -8,9 +8,26 @@ source("../../Scripts/readBistro.r")
 data = computeEntropy("randQpars")
 data = computeEntropy("randQlik")
 data = computeEntropy("randQno-wt")
-data = computeEntropy("fixedQ")
+data = computeEntropy("fixedQpars")
+data = computeEntropy("fixedQlik")
 
 plotProb(data)
+
+## for cats
+data$mb = NA
+data$mb[data$tree == "(1,(2,(((((7,8),9),10),12),11)),(3,((4,5),6)));"] = 0.774196
+data$mb[data$tree == "(1,2,((3,((4,5),6)),(((((7,8),9),10),12),11)));"] = 0.150627
+p2 <- ggplot(aes(x=tree,y=prob), data=data) +
+    geom_point() + ggtitle("black-weightProb, red-bootstrap, blue-parsimony wt, green-lik wt") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    geom_point(aes(y=count, col="red")) + guides(col=FALSE) +
+    geom_point(aes(y=parsimonyWt, col="blue")) +
+    geom_point(aes(y=loglikWt, col="green")) +
+    geom_point(aes(y=mb), shape=8)
+plot(p2)
+
+
+
 
 bistro = readBistro("randQpars")
 bistro = readBistro("randQlik")
@@ -20,7 +37,12 @@ bistro = readBistro("fixedQlik")
 
 plotBistro(bistro)
 
-
+library(ape)
+tre=read.tree(text="(1,(2,(((((7,8),9),10),12),11)),(3,((4,5),6)));")
+tre2 = read.tree(text="(1,2,((3,((4,5),6)),(((((7,8),9),10),12),11)));")
+layout(matrix(c(1,2),1,2))
+plot(tre)
+plot(tre2)
 
 ## ========================================================
 ## compare the entropy and plots for artiodactyl, cats and
