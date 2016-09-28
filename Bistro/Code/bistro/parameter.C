@@ -15,9 +15,9 @@ void usage(ostream& f)
   f << "Usage: bistro [options]" << endl;
   f << "Options:" << endl;
   f << "    -f sequence-file-name          |  the FASTA format file name with the sequence data" << endl;
-  f << "    -b num-bootstrap               |  nonnegative integer number of bootstrap trees" << endl;
-  f << "    -r num-random                  |  nonnegative integer number of random trees" << endl;
-  f << "    -m num-mle                     |  nonnegative integer number of MLE passes before generating random gamma lengths" << endl;
+  f << "    -b num-bootstrap               |  nonnegative integer number of bootstrap trees (1000)" << endl;
+  f << "    -r num-random                  |  nonnegative integer number of random trees (0, no sampling of trees)" << endl;
+  f << "    -m num-mle                     |  nonnegative integer number of MLE passes before generating random gamma lengths (2)" << endl;
   f << "    -o file-root                   |  name of root for all output files" << endl;
   f << "    -s seed                        |  positive integer random seed (machine chosen if not provided)" << endl;
   f << "    -h || --help                   |  print this help message" << endl;
@@ -26,10 +26,10 @@ void usage(ostream& f)
   f << "    -p stationary-distribution     |  [ not used ] four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
   f << "    -q symmetric-q-parameters      |  [ not used ] six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
-  f << "    --no-parsimony                 |  do *not* reweight bootstrap sample with weight proportional to exp(-parsimony score)" << endl;
-  f << "    --parsimony-scale scale        |  scale to compute the weights from counts, positive number" << endl;
+  f << "    --no-reweight                  |  do *not* reweight bootstrap sample with weight proportional to exp(-parsimony/loglik score)" << endl;
+  f << "    --parsimony-scale scale        |  scale to compute the weights from counts, positive number (0.5)" << endl;
   f << "    --threads num                  |  number of threads for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;
-  f << "    --fixedQ                       |  do not sample Q matrix, but use average of mcmc" << endl;
+  f << "    --fixedQ                       |  multiply dirichlet scale by 10million, and artificially set logQ=0" << endl;
   exit(1);
 }
 
@@ -237,9 +237,9 @@ void Parameter::processCommandLine(int argc,char* argv[])
     {
       jointMLE = true;
     }
-    else if ( strcmp(argv[k],"--no-parsimony") == 0 )
+    else if ( strcmp(argv[k],"--no-reweight") == 0 )
     {
-      useParsimony = false;
+      reweight = false;
     }
     else if ( strcmp(argv[k],"--parsimony-scale") == 0 )
     {

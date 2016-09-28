@@ -22,7 +22,7 @@ private:
   string outFileRoot;
   bool independent;
   bool jointMLE;
-  bool useParsimony;
+  bool reweight;
   double parsimonyScale;
   unsigned int numThreads;
   bool fixedQ;
@@ -39,7 +39,7 @@ public:
     outFileRoot = (string)("run1");
     independent = false;
     jointMLE = false;
-    useParsimony = true;
+    reweight = true;
     parsimonyScale = 0.5;
     numThreads = 0;
     fixedQ = false;
@@ -66,8 +66,8 @@ public:
   void setJointMLE(bool b) { jointMLE = b; }
   string getOutFileRoot() const { return outFileRoot; }
   void setOutFileRoot(string name) { outFileRoot = name; }
-  bool getUseParsimony() const { return useParsimony; }
-  void setUseParsimony(bool b) { useParsimony = b; }
+  bool getReweight() const { return reweight; }
+  void setReweight(bool b) { reweight = b; }
   double getParsimonyScale() const { return parsimonyScale; }
   void setParsimonyScale(double x) { parsimonyScale = x; }
   void processCommandLine(int,char* []);

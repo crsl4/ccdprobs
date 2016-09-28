@@ -218,6 +218,7 @@ public:
   void mleError(bool&);
   void makeBinary();
   int parsimonyScore(Alignment&);
+  double logLikelihoodScore(Alignment&, QMatrix&);
   void clearMapParent();
 };
 

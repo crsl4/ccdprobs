@@ -2206,6 +2206,21 @@ int Tree::parsimonyScore(Alignment& alignment)
   return score;
 }
 
+// do 2 MLE passes, and calculate likelihood of tree
+// assumes the tree is unrooted, and has set NJ branch lengths
+double Tree::logLikelihoodScore(Alignment& alignment, QMatrix& model)
+{
+  mt19937_64 rng(1234); //just need one as input, never used when onlyMLE=true
+  double logBL = 0; //just need one as input, never used when onlyMLE=true
+  for ( int i=0; i<2; ++i )
+    {
+      randomEdges(alignment,model,rng,logBL,true);
+    }
+  double logLik = calculate(alignment, model);
+  return logLik;
+}
+
+
 
 void Tree::clearMapParent()
 {

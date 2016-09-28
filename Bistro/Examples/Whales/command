@@ -42,3 +42,7 @@ time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 1000 -m 2 -
 
 ## after sampling Q (compare mrbayes whales.nex)
 time ../../Code/bistro/bistro -f ../../Data/whales.fasta -b 10000 -r 1000 -m 2 -o randQ > randQ.log
+
+
+#####################################################
+# changed no-parsimony to no-reweight

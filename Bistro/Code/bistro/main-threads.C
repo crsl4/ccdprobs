@@ -81,12 +81,13 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	 }
        // here we need to sample a Q
        double logQ = 0;
-//       VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), alignment.getNumSites(), logQ, rng);
-//       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), alignment.getNumSites(), logQ, rng);
-       VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), 1000000*alignment.getNumSites(), logQ, rng);
-       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), 1000000*alignment.getNumSites(), logQ, rng);
-       // !!!! change this back!!!
-       logQ = 0;
+       double scale = 1;
+       if( parameters.getFixedQ() )
+	 scale = 10000000;
+       VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), scale*alignment.getNumSites(), logQ, rng);
+       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), scale*alignment.getNumSites(), logQ, rng);
+       if( parameters.getFixedQ() )
+	 logQ = 0;
        QMatrix model(p_star,s_star);
 
        // if( parameters.getFixedQ() )
@@ -120,6 +121,8 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	}
       double logBL = 0;
 
+      if( parameters.getNumMLE() == 0 )
+	parameters.setNumMLE(2);
 
       for ( int i=0; i<parameters.getNumMLE(); ++i )
 	{
@@ -280,10 +283,14 @@ int main(int argc, char* argv[])
   cout << gtrtree.makeTreeNumbers() << endl;
   
   // Do bootstrap with new pairwise distances
+  if( parameters.getNumBootstrap() == 0)
+    parameters.setNumBootstrap(1000);
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
   map<string,int> topologyToParsimonyScoreMap;
+  map<string,double> topologyToLogLikScoreMap;
   int minimumParsimonyScore = -1;
+  int maximumLogLikScore = -1;
   MatrixXd bootDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   vector<int> weights(alignment.getNumSites());
   cerr << '|';
@@ -301,7 +308,7 @@ int main(int argc, char* argv[])
     bootTree.sortCanonical();
 
     string top = bootTree.makeTopologyNumbers();
-    // add score to map if it is not already there
+    // add parsimony score to map if it is not already there
     // update minimum parsimony score if new minimum found
     if ( topologyToParsimonyScoreMap.find(top) == topologyToParsimonyScoreMap.end() )
     {
@@ -310,6 +317,19 @@ int main(int argc, char* argv[])
       if ( score < minimumParsimonyScore || b==0 )
 	minimumParsimonyScore = score;
     }
+    // add likelihood score to map if not there already
+    // update minimum loglik
+    if ( topologyToLogLikScoreMap.find(top) == topologyToLogLikScoreMap.end() )
+    {
+      bootTree.unroot();
+      MatrixXd gtrDistanceMatrixCopy2(alignment.getNumTaxa(),alignment.getNumTaxa());
+      gtrDistanceMatrixCopy2 = gtrDistanceMatrix;
+      bootTree.setNJDistances(gtrDistanceMatrixCopy2,rng);
+      int score = bootTree.logLikelihoodScore(alignment, model);
+      topologyToLogLikScoreMap[ top ] = score;
+      if ( score > maximumLogLikScore || b==0 )
+	maximumLogLikScore = score;
+    }
     topologyToCountMap[ top ]++;
   }
   cerr << endl << "done." << endl;
@@ -317,11 +337,15 @@ int main(int argc, char* argv[])
   milliseconds ms8 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   map<string,double> topologyToWeightMap; // not normalized; normalization taken care of during alias creation
+  map<string,double> topologyToLogLikWeightMap; // not normalized; normalization taken care of during alias creation
   for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
   {
     topologyToWeightMap[ (*m).first ] =
       (*m).second * exp( parameters.getParsimonyScale() *
 			 (minimumParsimonyScore - topologyToParsimonyScoreMap[ (*m).first ]) );
+    topologyToLogLikWeightMap[ (*m).first ] =
+      (*m).second * exp( parameters.getParsimonyScale() *
+			 (topologyToLogLikScoreMap[ (*m).first ] - maximumLogLikScore) );
   }
 
 
@@ -330,6 +354,8 @@ int main(int argc, char* argv[])
     string topologyCountsFile = parameters.getOutFileRoot() + ".topCounts";
     ofstream topCounts(topologyCountsFile.c_str());
     map<string,double>::iterator wm=topologyToWeightMap.begin();
+    map<string,double>::iterator loglwm=topologyToLogLikWeightMap.begin();
+    topCounts << "tree count parsimonyWt parsimonyScore parsimonyDiff loglikWt loglikScore loglikDiff" << endl;
     for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
     {
       Tree t((*cm).first);
@@ -339,8 +365,11 @@ int main(int argc, char* argv[])
       t.sortCanonical();
       string top = t.makeTopologyNumbers();
       topCounts << top << " " << setw(5) << (*cm).second << " " << setw(10) << setprecision(4) << fixed << (*wm).second;
-      topCounts << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ] << endl;
+      topCounts << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ];
+      topCounts << " " << setw(10) << setprecision(4) << fixed << (*loglwm).second;
+      topCounts << " " << setw(5) << topologyToLogLikScoreMap[ (*cm).first ] << " " << setw(4) << topologyToLogLikScoreMap[ (*cm).first ] - maximumLogLikScore << endl;
       ++wm;
+      ++loglwm;
     }
     topCounts << endl;
     topCounts.close();
@@ -352,7 +381,6 @@ int main(int argc, char* argv[])
 
   milliseconds ms9 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-  // here do parsimony score (keep the option to do without parsimony)
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
   // write map out to temp files to check
@@ -375,13 +403,17 @@ int main(int argc, char* argv[])
 
   milliseconds ms10 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-  if ( parameters.getNumBootstrap() > 0 )
+  if ( parameters.getNumRandom() > 0 )
   {
     int numRandom = parameters.getNumRandom();
 
     unsigned int cores;
     if( parameters.getNumThreads() == 0 )
-      cores = thread::hardware_concurrency();
+      {
+	cores = thread::hardware_concurrency();
+	if( cores == 0 ) //hardware_concurrency could return 0
+	  cores = 1;
+      }
     else
       cores = parameters.getNumThreads();
     if( numRandom < cores )
@@ -422,7 +454,7 @@ int main(int argc, char* argv[])
     for ( int i=0; i<cores; ++i )
     {
 //      cerr << "Thread " << i << " beginning random trees from " << i*k << " to " << (i+1)*k-1 << endl;
-      if ( parameters.getUseParsimony() )
+      if ( parameters.getReweight() )
 	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       else
 	threads.push_back(thread(randomTrees<int>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));

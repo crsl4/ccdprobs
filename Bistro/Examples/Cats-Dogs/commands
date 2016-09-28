@@ -65,3 +65,6 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m
 ### after improving topCounts (darwin02)
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ05 --threads 10  > randQ05.log
 time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m 2 -o randQ20 --threads 10 --parsimony-scale 2 > randQ20.log
+
+#####################################################
+# changed no-parsimony to no-reweight
