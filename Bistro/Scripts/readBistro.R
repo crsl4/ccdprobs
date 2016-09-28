@@ -17,15 +17,17 @@ readBistro = function(stem)
 computeEntropy = function(stem){
     require(entropy)
     file1 = read.table(paste0(stem,".topPP"), header=TRUE)
-    file2 = read.table(paste0(stem,".topCounts"), header=FALSE)
-    colnames(file2) <- c("tree", "bootstrapCount", "parsimonyWeight", "parsimonyScore", "difference")
-    file2 <- within(file2,bootstrapCount <- bootstrapCount/sum(bootstrapCount))
-    file2 <- within(file2,parsimonyWeight <- parsimonyWeight/sum(parsimonyWeight))
-    entropyBootstrap = entropy.empirical(file2$bootstrapCount)
-    entropyParsimony = entropy.empirical(file2$parsimonyWeight)
+    file2 = read.table(paste0(stem,".topCounts"), header=TRUE)
+    file2 <- within(file2,count <- count/sum(count))
+    file2 <- within(file2,parsimonyWt <- parsimonyWt/sum(parsimonyWt))
+    file2 <- within(file2,loglikWt <- loglikWt/sum(loglikWt))
+    entropyBootstrap = entropy.empirical(file2$count)
+    entropyParsimony = entropy.empirical(file2$parsimonyWt)
+    entropyLik = entropy.empirical(file2$loglikWt)
     entropyWeight = entropy.empirical(file1$prob)
     print(paste("Entropy bootstrap sample:", entropyBootstrap))
     print(paste("Entropy bootstrap sample after parsimony weight:", entropyParsimony))
+    print(paste("Entropy bootstrap sample after lik weight:", entropyLik))
     print(paste("Entropy weighted sample:", entropyWeight))
     m=merge(file1,file2,by="tree", all=TRUE)
     return (m)
@@ -61,10 +63,11 @@ plotBistro = function(bistro) {
 plotProb = function(data){
     require(ggplot2)
     p2 <- ggplot(aes(x=tree,y=prob), data=data) +
-    geom_point() + ylab("black-weightProb, red-bootstrap, blue-parsimony weight") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    geom_point(aes(y=bootstrapCount, col="red")) + guides(col=FALSE) +
-    geom_point(aes(y=parsimonyWeight, col="blue"))
+        geom_point() + ggtitle("black-weightProb, red-bootstrap, blue-parsimony wt, green-lik wt") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+        geom_point(aes(y=count, col="red")) + guides(col=FALSE) +
+        geom_point(aes(y=parsimonyWt, col="blue")) +
+        geom_point(aes(y=loglikWt, col="green"))
     plot(p2)
     return(invisible(p2))
 }

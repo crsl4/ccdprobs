@@ -68,3 +68,8 @@ time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 10000 -r 10000 -m
 
 #####################################################
 # changed no-parsimony to no-reweight
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 1000 -r 1000 -m 2 -o randQpars > randQpars.log
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 1000 -r 1000 -m 2 -o fixedQpars --fixedQ > fixedQpars.log
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 1000 -r 1000 -m 2 -o randQlik --loglikweight > randQlik.log
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 1000 -r 1000 -m 2 -o randQno-wt --no-reweight > randQno-wt.log
+time ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -b 1000 -r 1000 -m 2 -o fixedQlik --fixedQ --loglikweight > fixedQlik.log

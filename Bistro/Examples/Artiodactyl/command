@@ -118,3 +118,4 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 1000 -r 1000 
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o fixedQpars --fixedQ > fixedQpars.log
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o randQlik --loglikweight > randQlik.log
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o randQno-wt --no-reweight > randQno-wt.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o fixedQlik --fixedQ --loglikweight > fixedQlik.log

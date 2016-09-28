@@ -2,6 +2,27 @@
 ## Claudia September 2016
 
 ## ========================================================
+## compare randQ, fixedQ, parsimony, lik, no weight
+source("../../Scripts/readBistro.r")
+
+data = computeEntropy("randQpars")
+data = computeEntropy("randQlik")
+data = computeEntropy("randQno-wt")
+data = computeEntropy("fixedQ")
+
+plotProb(data)
+
+bistro = readBistro("randQpars")
+bistro = readBistro("randQlik")
+bistro = readBistro("randQno-wt")
+bistro = readBistro("fixedQpars")
+bistro = readBistro("fixedQlik")
+
+plotBistro(bistro)
+
+
+
+## ========================================================
 ## compare the entropy and plots for artiodactyl, cats and
 ## simulated data with 6 and 2 taxa
 
