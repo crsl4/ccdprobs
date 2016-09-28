@@ -112,3 +112,9 @@ time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000
 
 # to test loglik weights for bootstrap trees
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 0 -o likwt > likwt.log
+
+# compare fixedQ, randQ (default), loglikwt, parsimonywt (default), no weight
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o randQpars > randQpars.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o fixedQpars --fixedQ > fixedQpars.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o randQlik --loglikweight > randQlik.log
+time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o randQno-wt --no-reweight > randQno-wt.log

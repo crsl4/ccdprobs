@@ -26,6 +26,7 @@ private:
   double parsimonyScale;
   unsigned int numThreads;
   bool fixedQ;
+  bool loglikwt;
 public:
   Parameter()
   {
@@ -43,6 +44,7 @@ public:
     parsimonyScale = 0.5;
     numThreads = 0;
     fixedQ = false;
+    loglikwt = false;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -75,6 +77,8 @@ public:
   unsigned int getNumThreads() const { return numThreads; }
   bool getFixedQ() const { return fixedQ; }
   void setFixedQ(bool b) { fixedQ = b; }
+  bool getLoglikWt() const { return loglikwt; }
+  void setLoglikWt(bool b) { loglikwt = b; }
 };
 
 #endif

@@ -383,11 +383,14 @@ int main(int argc, char* argv[])
 
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
+  CCDProbs<double> ccdLogLik(topologyToLogLikWeightMap,taxaNumbers,taxaNames);
   // write map out to temp files to check
   string originalSmapFile = parameters.getOutFileRoot() + "-nopars.smap";
   string originalTmapFile = parameters.getOutFileRoot() + "-nopars.tmap";
   string parsimonySmapFile = parameters.getOutFileRoot() + "-pars.smap";
   string parsimonyTmapFile = parameters.getOutFileRoot() + "-pars.tmap";
+  string loglikSmapFile = parameters.getOutFileRoot() + "-loglik.smap";
+  string loglikTmapFile = parameters.getOutFileRoot() + "-loglik.tmap";
   ofstream smap(originalSmapFile.c_str());
   ccd.writeCladeCount(smap);
   smap.close();
@@ -399,6 +402,12 @@ int main(int argc, char* argv[])
   smap.close();
   tmap.open(parsimonyTmapFile);
   ccdParsimony.writePairCount(tmap);
+  tmap.close();
+  smap.open(loglikSmapFile);
+  ccdLogLik.writeCladeCount(smap);
+  smap.close();
+  tmap.open(loglikTmapFile);
+  ccdLogLik.writePairCount(tmap);
   tmap.close();
 
   milliseconds ms10 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
@@ -450,14 +459,17 @@ int main(int argc, char* argv[])
     vector<double> maxLogW(cores); //vector of maxlogweight
     cerr << "jointMLE " << parameters.getJointMLE() << endl;
     cerr << "fixedQ " << parameters.getFixedQ() << endl;
+    cerr << "loglik weights " << parameters.getLoglikWt() << endl;
 
     for ( int i=0; i<cores; ++i )
     {
-//      cerr << "Thread " << i << " beginning random trees from " << i*k << " to " << (i+1)*k-1 << endl;
-      if ( parameters.getReweight() )
-	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
-      else
+      if ( !parameters.getReweight() )
 	threads.push_back(thread(randomTrees<int>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+      else
+	if( parameters.getLoglikWt() )
+	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccdLogLik, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	else
+	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
 
     for(auto &t : threads){

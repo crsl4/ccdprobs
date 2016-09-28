@@ -30,6 +30,7 @@ void usage(ostream& f)
   f << "    --parsimony-scale scale        |  scale to compute the weights from counts, positive number (0.5)" << endl;
   f << "    --threads num                  |  number of threads for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;
   f << "    --fixedQ                       |  multiply dirichlet scale by 10million, and artificially set logQ=0" << endl;
+  f << "    --loglikweight                 |  use loglik to weight bootstrap counts instead of parsimony" << endl;
   exit(1);
 }
 
@@ -240,6 +241,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--no-reweight") == 0 )
     {
       reweight = false;
+    }
+    else if ( strcmp(argv[k],"--loglikweight") == 0 )
+    {
+      loglikwt = true;
     }
     else if ( strcmp(argv[k],"--parsimony-scale") == 0 )
     {
