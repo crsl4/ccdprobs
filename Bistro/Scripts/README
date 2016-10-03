@@ -14,11 +14,10 @@ include("summarizeBL.jl")
     then we can compare mrbayes.vstat and bistro.vstat
 
 *** root---*.out = table with topology, logl, logTop, logPrior, logBL, logQ, logWt, pi and s
-    need to change the rootname in "summarizeOut.r" and run in R with
 ```R
 source("../../Scripts/summarizeOut.r")
+data = summarizeOut("goo")
 ```
-    need to be in the folder with the bistro output files
     then we can compare mrbayes.pstat and bistro.pstat
 
 *** plots: readBistro.r and summarizingBistroScript.r

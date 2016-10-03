@@ -156,7 +156,8 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       string top = tree.makeTopologyNumbers();
       f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logBL << " " << logBranchLengthPriorDensity << " " << logQ << " " << logWeight << " ";
       f << model.getStationaryP().transpose() << " " << model.getSymmetricQP().transpose() << endl;
-      logwt[k] = logWeight;
+      logwt.push_back( logWeight );
+      //logwt[k] = logWeight;
       if ( k==indStart || logWeight > maxLogWeight )
 	maxLogWeight = logWeight;
       //add to the multimap for the topology the logweight
@@ -455,7 +456,7 @@ int main(int argc, char* argv[])
 
     vector<thread> threads;
     vector< multimap<string,double> > topologymm(cores); //vector of multimaps
-    vector<double> logwt(numRandom,0);
+    vector< vector<double> > logwt0(cores);
     vector<double> maxLogW(cores); //vector of maxlogweight
     cerr << "jointMLE " << parameters.getJointMLE() << endl;
     cerr << "fixedQ " << parameters.getFixedQ() << endl;
@@ -464,12 +465,12 @@ int main(int argc, char* argv[])
     for ( int i=0; i<cores; ++i )
     {
       if ( !parameters.getReweight() )
-	threads.push_back(thread(randomTrees<int>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	threads.push_back(thread(randomTrees<int>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       else
 	if( parameters.getLoglikWt() )
-	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccdLogLik, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdLogLik, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
 	else
-	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
 
     for(auto &t : threads){
@@ -479,6 +480,7 @@ int main(int argc, char* argv[])
     //   threads.at(i).join();
     cerr << endl << "done." << endl;
 
+    // combine all maxlogweight
     double maxLogWeight = maxLogW[0];
     for(int i=1; i<cores; ++i)
       {
@@ -487,6 +489,20 @@ int main(int argc, char* argv[])
       }
     cerr << "maxLogWeight: " << maxLogWeight << endl;
 
+    // combine vector of all logwt
+    vector<double> logwt(numRandom,0);
+    int k = 0;
+    for( vector< vector<double> >::iterator p=logwt0.begin(); p != logwt0.end(); ++p)
+      {
+	for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+	  {
+	    logwt[k] = *q;
+	    //cerr << "logwt[" << k << "]= " << logwt[k] << endl;
+	    ++k;
+	  }
+      }
+
+    // combine topology maps to one 
     multimap<string,double> topologyToLogweightMMap;
     for ( vector< multimap<string,double>>::iterator p=topologymm.begin(); p!=topologymm.end(); ++p) //for every multimap in topologymm
       {
