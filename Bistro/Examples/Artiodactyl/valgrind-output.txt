@@ -1,3 +1,162 @@
+Even after passing one logwt vector to each thread.
+
+
+(master) $ valgrind --leak-check=full --show-leak-kinds=all ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o test-valgrind -s 2561016956
+==2673== Memcheck, a memory error detector
+==2673== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==2673== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==2673== Command: ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 100 -r 10 -m 2 -o test-valgrind -s 2561016956
+==2673== 
+Processing command line ... done.
+Reading alignment from FASTA file ... done.
+
+Alignment summary:
+ Camel: A=335 C=315 G=170 T=320
+ Dolphin: A=350 C=336 G=144 T=310
+ Pig: A=359 C=328 G=150 T=303
+ Cow: A=356 C=344 G=153 T=287
+ Sheep: A=359 C=322 G=148 T=311
+ Giraffe: A=357 C=327 G=149 T=307
+
+Finding initial Jukes-Cantor pairwise distances ... done.
+Jukes-Cantor Distance Matrix:
+
+       0 0.255695 0.244674  0.24346 0.261888 0.242247
+0.255695        0 0.223107 0.238621 0.227847 0.241036
+0.244674 0.223107        0 0.226659 0.216054 0.206752
+ 0.24346 0.238621 0.226659        0 0.186234 0.162984
+0.261888 0.227847 0.216054 0.186234        0 0.160807
+0.242247 0.241036 0.206752 0.162984 0.160807        0
+
+Finding initial neighbor-joining tree ... done.
+
+Tree topology:
+(1,(2,3),(4,(5,6)));
+
+
+Tree topology:
+(1,(2,3),(4,(5,6)));
+
+Initializing random number generator ... done.
+Seed = 2561016956
+Running MCMC to estimate Q matrix ...
+burn-in:
+|**********|**********|**********|**********|**********|**********|**********|**********|**********|**********|stationary acceptance: 0.399559
+symmetric acceptance: 0.451173
+0.288949 0.256975 0.157045  0.29703
+ 0.233204    0.1674  0.094201 0.0253126  0.469017 0.0108653
+
+-0.856214  0.403537  0.289671  0.163006
+ 0.453748  -1.41557 0.0492511  0.912574
+ 0.532967 0.0805899  -0.64815 0.0345928
+ 0.158571   0.78951 0.0182899 -0.966372
+
+
+ done.
+sampling:
+|**********|**********|**********|**********|**********|**********|**********|**********|**********|**********|stationary acceptance: 0.384887
+symmetric acceptance: 0.460342
+0.286696 0.259904 0.151826 0.301574
+  0.242593   0.160211  0.0870696  0.0207604   0.481558 0.00780769
+
+-0.854344  0.423085  0.279409   0.15185
+ 0.466698  -1.43305 0.0399386  0.926414
+ 0.527614 0.0683691 -0.621695 0.0257126
+ 0.144359  0.798409 0.0129449 -0.955712
+
+
+ done.
+
+ done.
+Finding initial GTR pairwise distances ... done.
+GTR Distance Matrix:
+
+       0 0.266973 0.252462 0.252693 0.272781 0.253827
+0.266973        0 0.231273 0.243637 0.235545 0.250467
+0.252462 0.231273        0 0.229755 0.223577 0.212526
+0.252693 0.243637 0.229755        0 0.184492 0.161739
+0.272781 0.235545 0.223577 0.184492        0 0.161425
+0.253827 0.250467 0.212526 0.161739 0.161425        0
+
+GTR Tree
+(1:0.1420521,(2:0.1241186,3:0.1071541):0.0020292,(4:0.0868450,(5:0.0854419,6:0.0759831):0.0055580):0.0293888);
+MLE Branch Lengths
+(1:0.1496049,(2:0.1254841,3:0.1072402):0.0205542,(4:0.0824222,(5:0.0872143,6:0.0762380):0.0211282):0.0483730);
+Beginning 100 bootstrap replicates ...
+|*==2673== Conditional jump or move depends on uninitialised value(s)
+==2673==    at 0x10009EDD6: Tree::unroot() (tree.C:1505)
+==2673==    by 0x10000440C: main (main-threads.C:325)
+==2673== 
+*********|**********|**********|**********|**********|**********|**********|**********|**********|**********|
+done.
+
+Topology counts to file
+Generating 10 random trees in 10 cores:
+Seed = 792289489
+Seeds per core: 
+     3595533516
+     3267980719
+     2554857678
+      955008302
+     2255563802
+     2906556839
+     4145870890
+      907081678
+      552217316
+     3632389876
+jointMLE 0
+fixedQ 0
+loglik weights 0
+==2673== 
+==2673== Process terminating with default action of signal 11 (SIGSEGV)
+==2673==  Access not within mapped region at address 0x7000040DB83E
+==2673==    at 0x1007B6351: _pthread_find_thread (in /usr/lib/system/libsystem_pthread.dylib)
+==2673==    by 0x1007B7835: _pthread_join_cleanup (in /usr/lib/system/libsystem_pthread.dylib)
+==2673==    by 0x1007B77C3: pthread_join (in /usr/lib/system/libsystem_pthread.dylib)
+==2673==    by 0x100317E94: std::__1::thread::join() (in /usr/lib/libc++.1.dylib)
+==2673==    by 0x10000AEA1: main (main-threads.C:477)
+==2673==  If you believe this happened as a result of a stack
+==2673==  overflow in your program's main thread (unlikely but
+==2673==  possible), you can try to increase the size of the
+==2673==  main thread stack using the --main-stacksize= flag.
+==2673==  The main thread stack size used in this run was 8388608.
+==2673== 
+==2673== HEAP SUMMARY:
+==2673==     in use at exit: 594,700 bytes in 5,532 blocks
+==2673==   total heap usage: 7,951,487 allocs, 7,945,955 frees, 1,056,831,359 bytes allocated
+==2673== 
+
+Memcheck: mc_leakcheck.c:1044 (void lc_scan_memory(Addr, SizeT, Bool, Int, Int, Addr, SizeT)): Assertion 'bad_scanned_addr >= VG_ROUNDUP(start, sizeof(Addr))' failed.
+
+host stacktrace:
+==2673==    at 0x23804087F: ???
+==2673==    by 0x238040C6E: ???
+==2673==    by 0x238040C51: ???
+==2673==    by 0x238003584: ???
+==2673==    by 0x238002E40: ???
+==2673==    by 0x238001CA3: ???
+==2673==    by 0x23800ECBC: ???
+==2673==    by 0x23804C268: ???
+==2673==    by 0x2380C4527: ???
+==2673==    by 0x2380C4628: ???
+
+sched status:
+  running_tid=8
+
+
+Note: see also the FAQ in the source distribution.
+It contains workarounds to several common problems.
+In particular, if Valgrind aborted or crashed after
+identifying problems in your program, there's a good chance
+that fixing those problems will prevent Valgrind aborting or
+crashing, especially if it happened in m_mallocfree.c.
+
+If that doesn't help, please report this bug to: www.valgrind.org
+
+In the bug report, send all the above text, the valgrind
+version, and what OS and version you are using.  Thanks.
+
+========================================================================
 even after modifying the way to join threads, we get segmentation
 fault on computer with more cores:
 Topology counts to file
