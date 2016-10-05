@@ -75,3 +75,15 @@ write("      mcmc ngen=1100000 printfreq=10000 samplefreq=50;", file=filename, a
 write("      sumt burnin=100000;", file=filename, append=TRUE)
 write("      sump burnin=100000;", file=filename, append=TRUE)
 write("end;", file=filename, append=TRUE)
+
+## making new names for the real data
+real.cd = read.dna("../Data/cats-dogs.fasta",format="fasta")
+## rename with short names to match
+cd.names = c("cat","cheetah","clouded_leopard","snow_leopard","leopard","tiger","dog","gray_wolf","coyote","dhole","red_fox","raccoon_dog")
+dimnames(real.cd)[[1]] = cd.names
+
+## part of code
+require(phangorn)
+parsimony(tree,as.phyDat(real.cd))
+round(as.matrix(dist.dna(sim.cd,model="TN93")),3)
+

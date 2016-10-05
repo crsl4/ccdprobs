@@ -18,7 +18,7 @@ makeQfromS = function(s,p,n,symmetric=TRUE) {
   Q = matrix(0,n,n)
   Q[row(Q) > col(Q)] = s
   Q = Q + t(Q)
-  Q = (1/diag(p)) %*% Q / 2
+  Q = diag(1/p) %*% Q / 2
   diag(Q) = -apply(Q,1,sum)
   if ( symmetric ) {
       p.sqrt = sqrt(p)
