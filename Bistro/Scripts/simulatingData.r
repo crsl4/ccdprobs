@@ -5,6 +5,85 @@ source("old/genetrees.R")
 source("old/branch-length_lik.R")
 source("old/transformRates.r")
 
+## ===============================================
+## artiodactyl
+
+seed = 0558
+set.seed(seed)
+
+nsites = 1500
+alpha = 1000
+tree.text = "(Camel:1.460221e-01,Dolphin:1.214757e-01,(Pig:1.072255e-01,(Cow:8.941711e-02,(Sheep:8.610459e-02,Giraffe:7.642583e-02):1.846791e-02):5.146787e-02):2.783294e-02);"
+
+tree = read.tree(text=tree.text)
+ntax = length(tree$tip.label)
+
+## from artiodactyl-6.nex.pstat
+p = c(0.2870113,0.2715106,0.1457293,0.2957489)
+r = c(0.2116111, 0.2557697, 0.6806020, 0.3338476, 0.4193366, 0.1183771)
+
+s = getS(c(r,p))
+s = s[1:6]
+Q = makeQfromS(s,p,4)
+
+##r=r/r[6]
+##Q = makeQ(r,p,4)
+
+x = simData(tree,nsites,Q,alpha)
+dat = convertData(x,ntax)
+
+## writing fasta file
+filename = paste0("../Data/sim-artiodactyl-6.fasta")
+for(i in 1:ntax){
+    if(i == 1){
+        write(paste0(">",tree$tip.label[i]), file=filename)
+    } else{
+        write(paste0(">",tree$tip.label[i]), file=filename, append=TRUE)
+    }
+    write(paste0(dat[[i]],collapse=""), file=filename, append=TRUE)
+    write("", file=filename, append=TRUE)
+}
+
+## writing nex file
+filename = paste0("../Examples/Artiodactyl/sim-artiodactyl-6.nex")
+
+## need to write a nex file as well
+write("#NEXUS", file=filename)
+write("", file=filename,append=TRUE)
+write("begin taxa;", file=filename, append=TRUE)
+write(paste0("dimensions ntax=",ntax,";"), file=filename, append=TRUE)
+write("taxlabels", file=filename, append=TRUE)
+for(i in 1:ntax){
+    write(tree$tip.label[i],file=filename,append=TRUE)
+}
+write(";", file=filename, append=TRUE)
+write("end;", file=filename, append=TRUE)
+write("", file=filename,append=TRUE)
+
+write("begin characters;", file=filename, append=TRUE)
+write(paste0("dimensions nchar=",nsites,";"), file=filename, append=TRUE)
+write("format datatype=dna gap=-;", file=filename, append=TRUE)
+write("matrix", file=filename, append=TRUE)
+for(i in 1:ntax){
+    seq = paste0(dat[[i]], collapse="")
+    write(paste0(sprintf("%-20s",paste0(tree$tip.label[i])),seq), file=filename, append=TRUE)
+}
+write(";", file=filename, append=TRUE)
+write("end;", file=filename, append=TRUE)
+write("begin mrbayes;", file=filename, append=TRUE)
+write("      set autoclose=yes nowarn=yes;", file=filename, append=TRUE)
+write("      lset nst=6;", file=filename, append=TRUE)
+write("      outgroup 1;", file=filename, append=TRUE)
+write("", file=filename, append=TRUE)
+write("      mcmc ngen=1100000 printfreq=10000 samplefreq=50;", file=filename, append=TRUE)
+write("      sumt burnin=100000;", file=filename, append=TRUE)
+write("      sump burnin=100000;", file=filename, append=TRUE)
+write("end;", file=filename, append=TRUE)
+
+
+
+## =======================================================================
+## cats and dogs
 seed = 1234
 set.seed(seed)
 
@@ -22,8 +101,8 @@ s = getS(c(r,p))
 s = s[1:6]
 Q = makeQfromS(s,p,4) ## Error in eigen(S, symmetric = TRUE) (from branch-length_lik.R#26) : infinite or missing values in 'x'
 
-r=r/r[6]
-Q = makeQ(r,p,4)
+##r=r/r[6]
+##Q = makeQ(r,p,4)
 
 x = simData(tree,nsites,Q,alpha)
 dat = convertData(x,ntax)

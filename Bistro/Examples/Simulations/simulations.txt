@@ -1,4 +1,15 @@
 ## to compare randQ, fixedQ, lik and parsimony weight
+## and to mrbayes ~/software/MrBayes/mb sim-artiodactyl-6.nex
+## darwin00
+time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b 1000 -r 1000 -m 2 --threads 5 -o randQpars > randQpars.log
+time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b 1000 -r 1000 -m 2 --threads 5 -o fixedQpars --fixedQ > fixedQpars.log
+time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b 1000 -r 1000 -m 2 --threads 5 -o randQlik --loglikweight > randQlik.log
+time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b 1000 -r 1000 -m 2 --threads 5 -o randQno-wt --no-reweight > randQno-wt.log
+time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b 1000 -r 1000 -m 2 --threads 4 -o fixedQlik --fixedQ --loglikweight > fixedQlik.log
+
+
+
+## to compare randQ, fixedQ, lik and parsimony weight
 ## and to mrbayes ~/software/MrBayes/mb sim-cats-dogs.nex
 ## darwin00
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 --threads 5 -o randQpars > randQpars.log
