@@ -77,6 +77,7 @@ write("      sump burnin=100000;", file=filename, append=TRUE)
 write("end;", file=filename, append=TRUE)
 
 ## making new names for the real data
+sim.cd = read.dna("../Data/sim-cats-dogs.fasta",format="fasta")
 real.cd = read.dna("../Data/cats-dogs.fasta",format="fasta")
 ## rename with short names to match
 cd.names = c("cat","cheetah","clouded_leopard","snow_leopard","leopard","tiger","dog","gray_wolf","coyote","dhole","red_fox","raccoon_dog")
@@ -85,5 +86,8 @@ dimnames(real.cd)[[1]] = cd.names
 ## part of code
 require(phangorn)
 parsimony(tree,as.phyDat(real.cd))
+parsimony(tree,as.phyDat(sim.cd))
 round(as.matrix(dist.dna(sim.cd,model="TN93")),3)
+round(as.matrix(dist.dna(real.cd,model="TN93")),3)
+round(cophenetic.phylo(tree),3)
 
