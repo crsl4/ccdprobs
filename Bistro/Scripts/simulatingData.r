@@ -45,7 +45,7 @@ for(i in 1:ntax){
 }
 
 ## writing nex file
-filename = paste0("../Examples/Artiodactyl/sim-artiodactyl-6.nex")
+filename = paste0("../Examples/Simulations/sim-artiodactyl-6.nex")
 
 ## need to write a nex file as well
 write("#NEXUS", file=filename)
@@ -120,7 +120,7 @@ for(i in 1:ntax){
 }
 
 ## writing nex file
-filename = paste0("../Examples/cats-dogs/sim-cats-dogs.nex")
+filename = paste0("../Examples/Simulations/sim-cats-dogs.nex")
 
 ## need to write a nex file as well
 write("#NEXUS", file=filename)
