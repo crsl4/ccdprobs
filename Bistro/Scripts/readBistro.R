@@ -55,7 +55,11 @@ plotBistro = function(bistro) {
         }
     bistro$Tree = with( bistro, reorder(Tree,Rank) )
     viridis.scale = viridis(n=length(levels(bistro$Tree)))
-    my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=w,shape=Tree)) + geom_point() + scale_color_viridis() + coord_fixed()
+    my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=w,shape=Tree)) +
+        geom_point() +
+            scale_color_viridis() +
+                ##coord_fixed() +
+                    theme(legend.position="top")
     plot(my.plot)
     return(invisible(my.plot))
 }
@@ -63,11 +67,11 @@ plotBistro = function(bistro) {
 plotProb = function(data){
     require(ggplot2)
     p2 <- ggplot(aes(x=tree,y=prob), data=data) +
-        geom_point() + ggtitle("black-weightProb, red-bootstrap, blue-parsimony wt, green-lik wt") +
-        theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-        geom_point(aes(y=count, col="red")) + guides(col=FALSE) +
-        geom_point(aes(y=parsimonyWt, col="blue")) +
-        geom_point(aes(y=loglikWt, col="green"))
+    geom_point() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    ggtitle("black-weightProb, red-bootstrap, blue-parsimony wt, green-lik wt") +
+    geom_point(aes(x=tree,y=count), col="red",data=data) + guides(col=FALSE) +
+    geom_point(aes(x=tree,y=parsimonyWt), col="blue",data=data) +
+    geom_point(aes(x=tree,y=loglikWt), col="green", data=data)
     plot(p2)
     return(invisible(p2))
 }

@@ -39,6 +39,11 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     {
       alpha1 = mu[0]*mu[0] / (L(0,0) * L(0,0));
       lambda1 = mu[0] / (L(0,0) * L(0,0));
+      if(alpha1 < 1) // avoid alpha1<1
+	{
+	  lambda1 = lambda1 / alpha1;
+	  alpha1 = 1.0;
+	}
     }
   // ------------ T1 ------------------
 //  cout << "Random gamma: alpha = " << alpha1 << ", lambda = " << lambda1 << ", mu = " << alpha1 / lambda1 << ", sigma = " << sqrt(alpha1) / lambda1 << endl;
@@ -65,6 +70,11 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     {
       alpha2 = (num * num) / (L(1,1) * L(1,1));
       lambda2 = num / (L(1,1) * L(1,1));
+      if(alpha2 < 1)
+	{
+	  lambda2 = lambda2 / alpha2;
+	  alpha2 = 1.0;
+	}
     }
 
 //  cout << "Random gamma: alpha = " << alpha2 << ", lambda = " << lambda2 << ", mu = " << alpha2 / lambda2 << ", sigma = " << sqrt(alpha2) / lambda2 << endl;
@@ -91,6 +101,11 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     {
       alpha3 = (num * num) / (L(2,2) * L(2,2));
       lambda3 = num / (L(2,2) * L(2,2));
+      if(alpha3 < 1)
+	{
+	  lambda3 = lambda3 / alpha3;
+	  alpha3 = 1.0;
+	}
     }
 //  cout << "Random gamma: alpha = " << alpha3 << ", lambda = " << lambda3 << ", mu = " << alpha3 / lambda3 << ", sigma = " << sqrt(alpha3) / lambda3 << endl;
 
@@ -100,7 +115,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   return bl;
 }
 
-Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& logdensity)
+// eta: scale parameter that multiplies alpha and lambda
+Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& logdensity)//, double& eta)
 {
   Vector2d bl;
   Matrix2d L( vc.llt().matrixL() );
@@ -121,6 +137,11 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     {
       alpha1 = mu[0]*mu[0] / (L(0,0) * L(0,0));
       lambda1 = mu[0] / (L(0,0) * L(0,0));
+      if(alpha1 < 1)
+	{
+	  lambda1 = lambda1 / alpha1;
+	  alpha1 = 1.0;
+	}
     }
   // ------------ T1 ------------------
 //  cout << "Random gamma: alpha = " << alpha1 << ", lambda = " << lambda1 << ", mu = " << alpha1 / lambda1 << ", sigma = " << sqrt(alpha1) / lambda1 << endl;
@@ -147,6 +168,11 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     {
       alpha2 = (num * num) / (L(1,1) * L(1,1));
       lambda2 = num / (L(1,1) * L(1,1));
+      if(alpha2 < 1)
+	{
+	  lambda2 = lambda2 / alpha2;
+	  alpha2 = 1.0;
+	}
     }
 
 //  cout << "Random gamma: alpha = " << alpha2 << ", lambda = " << lambda2 << ", mu = " << alpha2 / lambda2 << ", sigma = " << sqrt(alpha2) / lambda2 << endl;

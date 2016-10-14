@@ -7,13 +7,15 @@
 
 ## folder = "../Examples/Artiodactyl/"
 ## mbroot = "artiodactyl-6"
-folder = "../Examples/cats-dogs/"
-mbroot = "cats-dogs-no-fixed-q"
-bistroroot = "randQ20"
+## folder = "../Examples/cats-dogs/"
+## mbroot = "cats-dogs-no-fixed-q"
+folder = "../Examples/Simulations/"
+mbroot = "sim-cats-dogs"
+bistroroot = "fixedQlik"
 verbose = false
 
-#using PhyloNetworks
-#using DataFrames
+using PhyloNetworks
+using DataFrames
 
 searchdirTreeBL(path,key) = filter(x->(contains(x,key) && contains(x,".treeBL")), readdir(path))
 searchdirOut(path,key) = filter(x->(contains(x,key) && contains(x,".out")), readdir(path))
@@ -21,7 +23,7 @@ searchdirOut(path,key) = filter(x->(contains(x,key) && contains(x,".out")), read
 ## read all trees with branch lengths
 files = searchdirTreeBL(folder,"$bistroroot---")
 trees = readMultiTopology("$folder$(files[1])");
-for(j=2:length(files))
+for j=2:length(files)
     t = readMultiTopology("$folder$(files[j])");
     trees = vcat(trees,t)
 end
@@ -33,7 +35,7 @@ taxa = map(x->string(x),taxa)
 ## read weights
 files = searchdirOut(folder,"$bistroroot---")
 dat = readtable("$folder$(files[1])", header=true, separator=' ');
-for(j=2:length(files))
+for j=2:length(files)
     t = readtable("$folder$(files[j])", header=true, separator=' ')
     dat = vcat(dat,t)
 end
@@ -60,11 +62,11 @@ column7 = Float64[]
 column8 = Float64[]
 
 i = 1
-for(l in lines)
+for l in lines
     if(i > 2)
         sb = split(l)
         split1 = falses(length(sb[2])) ## cannot call split bc of function split
-        for(j=1:length(sb[2]))
+        for j=1:length(sb[2])
             if(sb[2][j] == '*')
                 split1[j] = true
             end
@@ -76,9 +78,9 @@ for(l in lines)
         blsplit = Float64[]
 
         k = 1
-        for(t in trees)
+        for t in trees
             verbose && println("$t")
-            for(e in t.edge)
+            for e in t.edge
                 clus = hardwiredCluster(e,taxa)
                 if(clus == split1 || clus == !split1)
                     verbose && println("found $(clus)")

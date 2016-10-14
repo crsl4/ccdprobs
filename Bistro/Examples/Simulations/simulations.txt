@@ -1,3 +1,7 @@
+## rerun cats and dogs sim data after changing code to check alpha<1
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o fixedQlik2 --fixedQ --loglikweight > fixedQlik2.log
+
+
 ## to compare randQ, fixedQ, lik and parsimony weight
 ## and to mrbayes ~/software/MrBayes/mb sim-artiodactyl-6.nex
 ## darwin00
