@@ -1,6 +1,77 @@
 ## script to analyze different bistro comparisons
 ## Claudia September 2016
 
+## for sim-cats-dogs-long
+source("../../Scripts/readBistro.r")
+bistro = readBistro("eta11-long")
+bistro = readBistro("eta11-long-short")
+plotBistro(bistro)
+plotBistro(subset(bistro,logl+logPrior>-10100))
+
+badTrees = bistro[bistro$logl+bistro$logPrior< -10050,]
+summary(badTrees)
+
+which(bistro$logl+bistro$logPrior< -10050)
+
+library(ape)
+tre=read.tree(text=as.character(data[18,]))
+
+tree.text = "(cheetah:0.11850973637208513101,((((snow_leopard:0.04020488777776567990,leopard:0.03846672365840048818):0.01445254156731264929,tiger:0.07079306712878565000):0.03190623639760595223,clouded_leopard:0.10461902411036745619):0.04344639957238824457,(red_fox:0.11974055940327851810,(((coyote:0.0840558068745050208,(gray_wolf:0.0306050882985083861,dog:0.0385256446369396789):0.03205946058703370433):0.03609285257533808938,dhole:0.07049077201732806275):0.13276609809571754406,raccoon_dog:0.15542990325076813662):0.07955504846187926027):0.79869116234474835103):0.03995629108638096977,cat:0.03751335233479641956):0.0;"
+truetre = read.tree(text=tree.text)
+
+plot(tre)
+nodelabels()
+edgelabels()
+plot(truetre)
+
+layout(matrix(1:2,nrow=1))
+plot(root(tre,node=16,resolve.root=TRUE)) ## 10
+plot(root(tre,node=15,resolve.root=TRUE)) ## 18
+plot(root(truetre,node=18,resolve.root=TRUE))
+
+truetre$edge.length[10]
+tre$edge.length[2]
+
+## to check if the trees far off are the ones with
+## bl == 0, but no
+data1= read.table("eta11-long---0-249.treeBL")
+data2= read.table("eta11-long---250-499.treeBL")
+data3= read.table("eta11-long---500-749.treeBL")
+data4= read.table("eta11-long---750-999.treeBL")
+data=rbind(data1,data2,data3,data4)
+f = function(x){
+    grepl("0.0000000",x)
+}
+bistro$zero = f(as.character(data$V1))
+require(viridis)
+temp.tree = as.character(bistro$tree)
+tab = with(bistro, rev(sort(table(tree))))
+if ( length(levels(bistro$tree)) > 6 ) {
+    ##        tab = with(bistro, rev(sort(table(tree))))
+    top.trees = names(tab)[1:5]
+    temp.tree[ !(bistro$tree %in% top.trees) ] = "other"
+}
+bistro$Tree = factor(temp.tree)
+rm(temp.tree)
+bistro$Rank = 6
+n = length(names(tab))
+for ( i in 1:6 )
+    {
+        if ( i < n )
+            bistro$Rank[bistro$Tree==names(tab)[i]] = i
+    }
+bistro$Tree = with( bistro, reorder(Tree,Rank) )
+viridis.scale = viridis(n=length(levels(bistro$Tree)))
+
+my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=zero,shape=Tree)) +
+    geom_point() +
+    ##scale_color_viridis() +
+    coord_fixed()+
+    ##xlim(c(-9175,-9075)) +
+    theme(legend.position="top")
+plot(my.plot)
+
+
 ## eta11, fixedQ on:
 p=c(0.248164,0.231821,0.203022,0.316992)
 s2=c(0.047163,0.317142,0.0752714,0.0134576,0.539146,0.00781998)

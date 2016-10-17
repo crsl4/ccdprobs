@@ -1,3 +1,11 @@
+## testing with longer bl, but shorter internal bl
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-long-short.fasta -b 1000 -r 1000 -m 2 -o eta11-long-short --fixedQ --loglikweight -eta 1.1 > eta11-long-short.log
+
+
+## testing with longer bl
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-long.fasta -b 1000 -r 1000 -m 2 -o eta11-long --fixedQ --loglikweight -eta 1.1 > eta11-long.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-long.fasta -b 1000 -r 1000 -m 2 -o eta10-long --fixedQ --loglikweight > eta10-long.log
+
 ## testing different values of eta for sim-cats-dogs
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta2 -s 2767106266 --fixedQ --loglikweight -eta 2 > eta2.log
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta4 -s 2767106266 --fixedQ --loglikweight -eta 4 > eta4.log
