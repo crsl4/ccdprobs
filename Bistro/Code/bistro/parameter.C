@@ -31,6 +31,7 @@ void usage(ostream& f)
   f << "    --threads num                  |  number of threads for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;
   f << "    --fixedQ                       |  multiply dirichlet scale by 10million, and artificially set logQ=0" << endl;
   f << "    --loglikweight                 |  use loglik to weight bootstrap counts instead of parsimony" << endl;
+  f << "    -eta eta                       |  scale to divide the variance of gamma r.v. for branch lengths (1)" << endl;
   exit(1);
 }
 
@@ -257,6 +258,20 @@ void Parameter::processCommandLine(int argc,char* argv[])
       else
       {
         cerr << "Error: flag `--parsimony-scale' not followed by a postive value" << endl;
+        usage(cerr);
+      }
+    }
+    else if ( strcmp(argv[k],"-eta") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> eta;
+      }
+      else
+      {
+        cerr << "Error: flag `-eta' not followed by a postive value" << endl;
         usage(cerr);
       }
     }

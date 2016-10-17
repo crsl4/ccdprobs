@@ -197,7 +197,7 @@ public:
   void depthFirstNodeList(list<Node*>&);
   void postorderCherryNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
-  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&, bool);
+  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&, bool, double);
   void reroot(int);
   void setMinNumber() { root->setMinNumber(NULL); }
   void sortCanonical()

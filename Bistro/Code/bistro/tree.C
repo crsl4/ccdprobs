@@ -1527,7 +1527,7 @@ double Tree::logPriorExp(double mean)
 
 
 // based on generateBranchLengths in BranchLengths/Code/test/tree.C
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool jointMLE)
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool jointMLE, double eta)
 {
   // clear probability maps from all nodes for fresh calculation
   clearProbMaps();
@@ -1620,7 +1620,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
       Vector3d mu = t;
       Matrix3d cov = (-1) * prop_hessian.inverse();
-      t = multivariateGamma3D(mu,cov,rng, logdensity);
+      t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
       x->getEdgeParent()->setLength( t[0] );
       y->getEdgeParent()->setLength( t[1] );
       z->getEdgeParent()->setLength( t[2] );
@@ -1658,7 +1658,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
 	Vector2d mu = t;
 	Matrix2d cov = (-1) * prop_hessian.inverse();
-	t = multivariateGamma2D(mu,cov,rng, logdensity);
+	t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
 	x->getEdgeParent()->setLength( t[0] );
 	y->getEdgeParent()->setLength( t[1] );
 	x->getEdgeParent()->calculate(qmatrix);

@@ -1,3 +1,18 @@
+## testing different values of eta for sim-cats-dogs
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta2 -s 2767106266 --fixedQ --loglikweight -eta 2 > eta2.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta4 -s 2767106266 --fixedQ --loglikweight -eta 4 > eta4.log
+
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta02 -s 2767106266 --fixedQ --loglikweight -eta 0.2 > eta02.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta08 -s 2767106266 --fixedQ --loglikweight -eta 0.8 > eta08.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta11 -s 2767106266 --fixedQ --loglikweight -eta 1.1 > eta11.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta15 -s 2767106266 --fixedQ --loglikweight -eta 1.5 > eta15.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta09 -s 2767106266 --fixedQ --loglikweight -eta 0.9 > eta09.log
+
+
+## rerun cats and dogs sim data after adding eta to make sure it is
+   the same
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o fixedQlik3 -s 2767106266 --fixedQ --loglikweight > fixedQlik3.log
+
 ## rerun cats and dogs sim data after changing code to check alpha<1
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o fixedQlik2 --fixedQ --loglikweight > fixedQlik2.log
 

@@ -27,6 +27,7 @@ private:
   unsigned int numThreads;
   bool fixedQ;
   bool loglikwt;
+  double eta;
 public:
   Parameter()
   {
@@ -45,6 +46,7 @@ public:
     numThreads = 0;
     fixedQ = false;
     loglikwt = false;
+    eta = 1.0;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -79,6 +81,8 @@ public:
   void setFixedQ(bool b) { fixedQ = b; }
   bool getLoglikWt() const { return loglikwt; }
   void setLoglikWt(bool b) { loglikwt = b; }
+  double getEta() const { return eta; }
+  void setEta(double x) { eta = x; }
 };
 
 #endif

@@ -86,15 +86,12 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	 scale = 10000000;
        VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), scale*alignment.getNumSites(), logQ, rng);
        VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), scale*alignment.getNumSites(), logQ, rng);
+
+       // VectorXd p_star(0.248164000,0.231821000,0.203022000,0.316992000);
+       // VectorXd s_star(0.047560014,0.295583052,0.070852406,0.011888824,0.566267391,0.007848313);
        if( parameters.getFixedQ() )
 	 logQ = 0;
        QMatrix model(p_star,s_star);
-
-       // if( parameters.getFixedQ() )
-       // 	 {
-       // 	   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
-       // 	   logQ = 0;
-       // 	 }
 
       double logTopologyProbability=0;
       string treeString;
@@ -137,7 +134,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       else
 	{
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE());
+	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), parameters.getEta());
 	}
 //      cout << tree.makeTreeNumbers() << endl;
       treebl << tree.makeTreeNumbers() << endl;
@@ -282,7 +279,7 @@ int main(int argc, char* argv[])
 
   cout << "MLE Branch Lengths" << endl;
   cout << gtrtree.makeTreeNumbers() << endl;
-  
+
   // Do bootstrap with new pairwise distances
   if( parameters.getNumBootstrap() == 0)
     parameters.setNumBootstrap(1000);
@@ -461,6 +458,7 @@ int main(int argc, char* argv[])
     cerr << "jointMLE " << parameters.getJointMLE() << endl;
     cerr << "fixedQ " << parameters.getFixedQ() << endl;
     cerr << "loglik weights " << parameters.getLoglikWt() << endl;
+    cerr << "eta " << parameters.getEta() << endl;
 
     for ( int i=0; i<cores; ++i )
     {
@@ -502,7 +500,7 @@ int main(int argc, char* argv[])
 	  }
       }
 
-    // combine topology maps to one 
+    // combine topology maps to one
     multimap<string,double> topologyToLogweightMMap;
     for ( vector< multimap<string,double>>::iterator p=topologymm.begin(); p!=topologymm.end(); ++p) //for every multimap in topologymm
       {

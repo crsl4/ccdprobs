@@ -18,7 +18,8 @@ double gamma(double alpha, double b, mt19937_64& rng)
   return gam1(rng);
 }
 
-Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& logdensity)
+// eta is dividing the variance: var/eta
+Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& logdensity, double eta)
 {
   Vector3d bl;
   Matrix3d L( vc.llt().matrixL() );
@@ -37,8 +38,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   else
     {
-      alpha1 = mu[0]*mu[0] / (L(0,0) * L(0,0));
-      lambda1 = mu[0] / (L(0,0) * L(0,0));
+      alpha1 = eta*mu[0]*mu[0] / (L(0,0) * L(0,0));
+      lambda1 = eta*mu[0] / (L(0,0) * L(0,0));
       if(alpha1 < 1) // avoid alpha1<1
 	{
 	  lambda1 = lambda1 / alpha1;
@@ -68,8 +69,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   else
     {
-      alpha2 = (num * num) / (L(1,1) * L(1,1));
-      lambda2 = num / (L(1,1) * L(1,1));
+      alpha2 = eta * (num * num) / (L(1,1) * L(1,1));
+      lambda2 = eta * num / (L(1,1) * L(1,1));
       if(alpha2 < 1)
 	{
 	  lambda2 = lambda2 / alpha2;
@@ -99,8 +100,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   else
     {
-      alpha3 = (num * num) / (L(2,2) * L(2,2));
-      lambda3 = num / (L(2,2) * L(2,2));
+      alpha3 = eta * (num * num) / (L(2,2) * L(2,2));
+      lambda3 = eta * num / (L(2,2) * L(2,2));
       if(alpha3 < 1)
 	{
 	  lambda3 = lambda3 / alpha3;
@@ -115,8 +116,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   return bl;
 }
 
-// eta: scale parameter that multiplies alpha and lambda
-Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& logdensity)//, double& eta)
+// eta divides the variance: var/eta
+Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& logdensity, double eta)
 {
   Vector2d bl;
   Matrix2d L( vc.llt().matrixL() );
@@ -135,8 +136,8 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     }
   else
     {
-      alpha1 = mu[0]*mu[0] / (L(0,0) * L(0,0));
-      lambda1 = mu[0] / (L(0,0) * L(0,0));
+      alpha1 = eta*mu[0]*mu[0] / (L(0,0) * L(0,0));
+      lambda1 = eta*mu[0] / (L(0,0) * L(0,0));
       if(alpha1 < 1)
 	{
 	  lambda1 = lambda1 / alpha1;
@@ -166,8 +167,8 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     }
   else
     {
-      alpha2 = (num * num) / (L(1,1) * L(1,1));
-      lambda2 = num / (L(1,1) * L(1,1));
+      alpha2 = eta*(num * num) / (L(1,1) * L(1,1));
+      lambda2 = eta*num / (L(1,1) * L(1,1));
       if(alpha2 < 1)
 	{
 	  lambda2 = lambda2 / alpha2;

@@ -1,14 +1,59 @@
 ## script to analyze different bistro comparisons
 ## Claudia September 2016
 
+## eta11, fixedQ on:
+p=c(0.248164,0.231821,0.203022,0.316992)
+s2=c(0.047163,0.317142,0.0752714,0.0134576,0.539146,0.00781998)
+
+## comparing eta=1 and eta=2
+source("../../Scripts/readBistro.r")
+bistro = readBistro("fixedQlik") ## without alpha<1
+bistro = readBistro("fixedQlik2") ## eta=1
+bistro = readBistro("eta2")
+bistro = readBistro("eta4")
+bistro = readBistro("eta02")
+bistro = readBistro("eta08")
+bistro = readBistro("eta11")
+
+range(bistro$logBL)
+plotBistro(bistro)
+plotBistro(subset(bistro,logl+logPrior>-9200))
+
+require(viridis)
+temp.tree = as.character(bistro$tree)
+tab = with(bistro, rev(sort(table(tree))))
+if ( length(levels(bistro$tree)) > 6 ) {
+    ##        tab = with(bistro, rev(sort(table(tree))))
+    top.trees = names(tab)[1:5]
+    temp.tree[ !(bistro$tree %in% top.trees) ] = "other"
+}
+bistro$Tree = factor(temp.tree)
+rm(temp.tree)
+bistro$Rank = 6
+n = length(names(tab))
+for ( i in 1:6 )
+    {
+        if ( i < n )
+            bistro$Rank[bistro$Tree==names(tab)[i]] = i
+    }
+bistro$Tree = with( bistro, reorder(Tree,Rank) )
+viridis.scale = viridis(n=length(levels(bistro$Tree)))
+
+my.plot = ggplot(bistro,aes(x=1:length(logBL),y=logBL,color=w,shape=Tree))
+my.plot = my.plot +geom_point(size=2) +
+    scale_color_viridis() +
+    ##coord_fixed() +
+    theme(legend.position="top")
+plot(my.plot)
+
+
+
 ## after alpha<1 gone
 source("../../Scripts/readBistro.r")
 bistro = readBistro("fixedQlik2")
 plotBistro(bistro)
 
-
-
-
+## identify which trees are bad, and if the order of branch lengths matter:
 bistro[bistro$logl+bistro$logPrior< -9400,] ## 728
 ## in fixedQlik---500-749.treeBL, line 228:
 tree ="((5:0.0890146,((12:0.0324841,1:0.1280738):0.0326449,(((10:0.0837049,(7:0.1706488,(8:0.0018742,9:0.0000000):0.0251494):0.0000033):0.0050635,11:0.1718760):0.0637874,6:0.0853249):0.7941643):0.0479423):0.0232329,(2:0.0448230,3:0.0307667):0.0142521,4:0.0871662);"
