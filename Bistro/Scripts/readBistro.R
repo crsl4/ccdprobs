@@ -104,9 +104,24 @@ getRoot <- function(tree){
 ## need to modify this to not use the max, but how to find the nodes objects?
 isRootGood <- function(tree){
     root = getRoot(tree)
-    ind = c(which(tree$edge[,1] == root), which(tree$edge[,2] == root))
-    maxx = max(tree$edge.length)
-    res = any(tree$edge.length[ind] == maxx)
+    ind = which(tree$edge[,1] == root)
+    other = tree$edge[ind,2]
+    taxa = tree$tip.label
+    cats = c(1,2,3,4,5,12)
+    dogs = c(6,7,8,9,10,11)
+
+    res = FALSE
+    for(i in 1:3){
+        des = getDescendants(tree,other[i])
+        desc = taxa[des]
+        truedesc = desc[!is.na(desc)]
+        sorttruedesc = sort(as.numeric(truedesc))
+        if(length(sorttruedesc) == 6){
+            res = all(sorttruedesc == cats) | all(sorttruedesc == dogs)
+            break
+        }
+    }
+
     return(res)
 }
 
