@@ -11,7 +11,7 @@
 ## mbroot = "cats-dogs-no-fixed-q"
 folder = "../Examples/Simulations/"
 mbroot = "sim-cats-dogs"
-bistroroot = "fixedQlik"
+bistroroot = "eta11"
 verbose = false
 
 using PhyloNetworks

@@ -1,6 +1,49 @@
 ## script to analyze different bistro comparisons
 ## Claudia September 2016
 
+## we want to know if all bad trees have a bad root
+## (not one of the two nodes next to long branch)
+library(ape)
+source("../../Scripts/readBistro.r")
+bistro = readBistro("eta11")
+plotBistro(bistro)
+ind = which(bistro$logl+bistro$logPrior< -9125)
+plotBistro(bistro[ind,])
+
+data1= read.table("eta11---0-249.treeBL")
+data2= read.table("eta11---250-499.treeBL")
+data3= read.table("eta11---500-749.treeBL")
+data4= read.table("eta11---750-999.treeBL")
+data=rbind(data1,data2,data3,data4)
+
+## databad=data[ind,] ## keep only bad trees
+## tree = read.tree(text=as.character(databad[1]))
+## which(tree$edge.length > 0.7)
+## plot(tree, use.edge.length=FALSE)
+
+goodroot=rep(NA,1000)
+for(i in 1:length(data[,1])){
+    tree = read.tree(text=as.character(data[i,1]))
+    goodroot[i] = isRootGood(tree)
+}
+
+bistro$goodroot = goodroot
+
+require(ggplot2)
+my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=w,shape=goodroot)) +
+    geom_point() +
+    scale_color_viridis() +
+    ##coord_fixed() +
+    theme(legend.position="top")
+my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=goodroot)) +
+    geom_point() +
+    ##scale_color_viridis() +
+    ##coord_fixed() +
+    theme(legend.position="top")
+plot(my.plot)
+
+
+
 ## for sim-cats-dogs-long
 source("../../Scripts/readBistro.r")
 bistro = readBistro("eta11-long")

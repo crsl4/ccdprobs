@@ -54,7 +54,7 @@ plotBistro = function(bistro) {
                 bistro$Rank[bistro$Tree==names(tab)[i]] = i
         }
     bistro$Tree = with( bistro, reorder(Tree,Rank) )
-    viridis.scale = viridis(n=length(levels(bistro$Tree)))
+##    viridis.scale = viridis(n=length(levels(bistro$Tree)))
     my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=w,shape=Tree)) +
         geom_point() +
             scale_color_viridis() +
@@ -75,3 +75,37 @@ plotProb = function(data){
     plot(p2)
     return(invisible(p2))
 }
+
+
+## to identify the bad trees, whether they have a bad root
+getDescendants<-function(tree,node,curr=NULL){
+  if(is.null(curr)) curr<-vector()
+  daughters<-tree$edge[which(tree$edge[,1]==node),2]
+  curr<-c(curr,daughters)
+  w<-which(daughters>=length(tree$tip))
+  if(length(w)>0) for(i in 1:length(w))
+    curr<-getDescendants(tree,daughters[w[i]],curr)
+  return(curr)
+}
+
+getRoot <- function(tree){
+    totalN = tree$Nnode + length(tree$tip.label)
+    al = seq(1,totalN,by=1)
+    root = 0
+    for(i in 1:totalN){
+        desc = getDescendants(tree, node=i)
+        if(length(desc) > 0 & length(desc) == length(al[-i]))
+            if(all(sort(desc) == al[-i]))
+                root = i
+    }
+    return(root)
+}
+
+isRootGood <- function(tree){
+    root = getRoot(tree)
+    ind = c(which(tree$edge[,1] == root), which(tree$edge[,2] == root))
+    maxx = max(tree$edge.length)
+    res = any(tree$edge.length[ind] == maxx)
+    return(res)
+}
+
