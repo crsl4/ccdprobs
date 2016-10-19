@@ -1,6 +1,49 @@
 ## script to analyze different bistro comparisons
 ## Claudia September 2016
 
+## study eta11-root after choosing good root:
+library(ape)
+source("../../Scripts/readBistro.r")
+bistro = readBistro("eta11-root")
+plotBistro(bistro)
+plotBistro(subset(bistro, logl+logPrior>-9200))
+
+data1= read.table("eta11-root---0-249.treeBL")
+data2= read.table("eta11-root---250-499.treeBL")
+data3= read.table("eta11-root---500-749.treeBL")
+data4= read.table("eta11-root---750-999.treeBL")
+data=rbind(data1,data2,data3,data4)
+
+goodroot=rep(NA,1000)
+for(i in 1:length(data[,1])){
+    tree = read.tree(text=as.character(data[i,1]))
+    goodroot[i] = isRootGood(tree)
+}
+
+bistro$goodroot = goodroot
+
+require(ggplot2)
+my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=w,shape=goodroot)) +
+    geom_point() +
+    scale_color_viridis() +
+    ##coord_fixed() +
+    theme(legend.position="top")
+my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=goodroot)) +
+    geom_point() +
+    ##scale_color_viridis() +
+    ##coord_fixed() +
+    theme(legend.position="top")
+plot(my.plot)
+
+## who is the tree with bad root?
+which(bistro$goodroot == FALSE) ## 845
+tre = read.tree(text=as.character(data[845,]))
+plot(tre,use.edge.length=FALSE)
+nodelabels()
+getRoot(tre)
+isRootGood(tre)
+plot(tre)
+
 ## we want to know if all bad trees have a bad root
 ## (not one of the two nodes next to long branch)
 library(ape)

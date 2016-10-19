@@ -186,6 +186,7 @@ public:
   void randomBranchLengths(mt19937_64&,double);
   double calculate(const Alignment&,QMatrix&);
   void randomize(mt19937_64&);
+  void randomizeBL(mt19937_64&);
   void clearProbMaps();
   void clearProbMapsSmart();
   /* void partialPathCalculations(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double&,double&,double&,bool); */
@@ -220,6 +221,7 @@ public:
   int parsimonyScore(Alignment&);
   double logLikelihoodScore(Alignment&, QMatrix&);
   void clearMapParent();
+  int whichMaxBranch(); //finds edge with max length
 };
 
 #endif

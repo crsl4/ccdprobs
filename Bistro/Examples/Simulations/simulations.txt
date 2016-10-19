@@ -1,3 +1,6 @@
+## testing with chosen root node
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta11-root -s 2767106266 --fixedQ --loglikweight -eta 1.1 > eta11-root.log
+
 ## testing with longer bl, but shorter internal bl
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-long-short.fasta -b 1000 -r 1000 -m 2 -o eta11-long-short --fixedQ --loglikweight -eta 1.1 > eta11-long-short.log
 

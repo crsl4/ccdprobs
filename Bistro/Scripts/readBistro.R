@@ -101,6 +101,7 @@ getRoot <- function(tree){
     return(root)
 }
 
+## need to modify this to not use the max, but how to find the nodes objects?
 isRootGood <- function(tree){
     root = getRoot(tree)
     ind = c(which(tree$edge[,1] == root), which(tree$edge[,2] == root))

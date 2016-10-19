@@ -670,6 +670,40 @@ void Tree::randomize(mt19937_64& rng)
   setNodeLevels();
 }
 
+// similar to randomize, but uses edges' lengths to 
+// choose the root
+void Tree::randomizeBL(mt19937_64& rng)
+{
+  // if tree has a long branch, choose one of the nodes attached to it
+  int indEdge = whichMaxBranch(); // returns the index of the edge with max length
+  uniform_real_distribution<double> rint(0.0,1.0);
+  if(rint(rng) < 0.5)
+    root = edges[indEdge]->getNode(0);
+  else
+    root = edges[indEdge]->getNode(1);
+
+  // uniform_int_distribution<> rint(numTaxa,getNumNodes()-1);
+  // root = nodes[ rint(rng) ];
+  root->randomize(rng,NULL);
+  setNodeLevels();
+}
+
+int Tree::whichMaxBranch()
+{
+  double maxbl = 0;
+  int indmax = 0;
+  int i = 0;
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    {
+      if( (*e)->getLength() > maxbl )
+	{
+	  maxbl = (*e)->getLength();
+	  indmax = i;
+	}
+      i++;
+    }
+  return indmax;
+}
 // void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl,bool recurse)
 // {
 //   Matrix4d P = qmatrix.getTransitionMatrix(t);
