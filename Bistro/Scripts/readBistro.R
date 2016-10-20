@@ -14,6 +14,18 @@ readBistro = function(stem)
     return ( bistro )
 }
 
+readData = function(stem)
+{
+    files = list.files(pattern=paste0("^",stem,"---.*\\.treeBL"))
+    bistro = data.frame()
+    for ( f in files ) {
+        temp = read.table(f,header=FALSE)
+        bistro = rbind(bistro,temp)
+        rm(temp)
+    }
+    return ( bistro )
+}
+
 computeEntropy = function(stem){
     require(entropy)
     file1 = read.table(paste0(stem,".topPP"), header=TRUE)

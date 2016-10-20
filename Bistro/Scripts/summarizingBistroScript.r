@@ -5,14 +5,14 @@
 library(ape)
 source("../../Scripts/readBistro.r")
 bistro = readBistro("eta11-root")
+bistro = readBistro("eta11-root-2")
+bistro = readBistro("eta11-root-3")
 plotBistro(bistro)
 plotBistro(subset(bistro, logl+logPrior>-9200))
 
-data1= read.table("eta11-root---0-249.treeBL")
-data2= read.table("eta11-root---250-499.treeBL")
-data3= read.table("eta11-root---500-749.treeBL")
-data4= read.table("eta11-root---750-999.treeBL")
-data=rbind(data1,data2,data3,data4)
+data = readData("eta11-root")
+data = readData("eta11-root-2")
+data = readData("eta11-root-3")
 
 goodroot=rep(NA,1000)
 for(i in 1:length(data[,1])){
@@ -35,13 +35,16 @@ my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=goodroot))
     theme(legend.position="top")
 plot(my.plot)
 
-## who is the tree with bad root?
-which(bistro$goodroot == FALSE) ## 845
-tre = read.tree(text=as.character(data[845,]))
-plot(tre,use.edge.length=FALSE)
-nodelabels()
-getRoot(tre)
-isRootGood(tre)
+
+## which are the far off trees?
+ind = which(bistro$logl+bistro$logPrior< -9300)
+tre=read.tree(text=as.character(data[ind,]))
+plot(tre)
+
+truetre = read.tree(text="(cheetah:0.11850973637208513101,((((snow_leopard:0.04020488777776567990,leopard:0.03846672365840048818):0.01445254156731264929,tiger:0.07079306712878565000):0.01190623639760595223,clouded_leopard:0.10461902411036745619):0.04344639957238824457,(red_fox:0.11974055940327851810,(((coyote:0.00840558068745050208,(gray_wolf:0.00206050882985083861,dog:0.00185256446369396789):0.03205946058703370433):0.02609285257533808938,dhole:0.07049077201732806275):0.13276609809571754406,raccoon_dog:0.15542990325076813662):0.07955504846187926027):0.79869116234474835103):0.03995629108638096977,cat:0.03751335233479641956):0.0;")
+
+layout(matrix(c(1,2),1,2))
+plot(truetre)
 plot(tre)
 
 ## we want to know if all bad trees have a bad root
