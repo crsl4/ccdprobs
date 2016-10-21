@@ -675,34 +675,45 @@ void Tree::randomize(mt19937_64& rng)
 void Tree::randomizeBL(mt19937_64& rng)
 {
   // if tree has a long branch, choose one of the nodes attached to it
-  int indEdge = whichMaxBranch(); // returns the index of the edge with max length
-  uniform_real_distribution<double> rint(0.0,1.0);
-  if(rint(rng) < 0.5)
-    root = edges[indEdge]->getNode(0);
+  Edge* maxEdge = whichMaxBranch(); 
+  if( maxEdge->isTerminal() )
+    {
+      if( maxEdge->getNode(0)->getLeaf() )
+	root = maxEdge->getNode(1);
+      else
+	root = maxEdge->getNode(0);
+    }
   else
-    root = edges[indEdge]->getNode(1);
-
+    {
+      uniform_real_distribution<double> rint(0.0,1.0);
+      if(rint(rng) < 0.5)
+	root = maxEdge->getNode(0);
+      else
+	root = maxEdge->getNode(1);
+    }
   // uniform_int_distribution<> rint(numTaxa,getNumNodes()-1);
   // root = nodes[ rint(rng) ];
   root->randomize(rng,NULL);
   setNodeLevels();
 }
 
-int Tree::whichMaxBranch()
+Edge* Tree::whichMaxBranch()
 {
   double maxbl = 0;
-  int indmax = 0;
-  int i = 0;
+  Edge* maxEdge = *edges.begin();
+  // int indmax = 0;
+  // int i = 0;
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     {
       if( (*e)->getLength() > maxbl )
 	{
 	  maxbl = (*e)->getLength();
-	  indmax = i;
+	  //	  indmax = i;
+	  maxEdge = *e;
 	}
-      i++;
+      //i++;
     }
-  return indmax;
+  return maxEdge;
 }
 // void Tree::partialPathCalculations(double t,Alignment& alignment,Node* na,Edge* ea,Node* nb,Edge* eb,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl,bool recurse)
 // {
@@ -2280,4 +2291,12 @@ bool Node::isPrunedLeaf(Edge* parent)
 	prunedLeaf &= ( neighbor->getLeaf() || neighbor->isPrunedLeaf(*e) );
       }
   return prunedLeaf;
+}
+
+bool Edge::isTerminal()
+{
+  if( nodes[0]->getLeaf() || nodes[1]->getLeaf() )
+    return true;
+  else
+    return false;
 }

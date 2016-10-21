@@ -60,6 +60,7 @@ public:
   void calculate(double,Alignment&,QMatrix&,double&,double&,double&);
   double mleLength(Alignment&,QMatrix&,bool&);
   void randomLength(Alignment&,QMatrix&,mt19937_64&,double&,bool);
+  bool isTerminal();
 };
 
 class Node
@@ -221,7 +222,7 @@ public:
   int parsimonyScore(Alignment&);
   double logLikelihoodScore(Alignment&, QMatrix&);
   void clearMapParent();
-  int whichMaxBranch(); //finds edge with max length
+  Edge* whichMaxBranch(); //finds edge with max length
 };
 
 #endif

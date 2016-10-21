@@ -32,3 +32,16 @@ plot(tree,use.edge.length = FALSE)
 nodelabels()
 edgelabels()
 
+
+## plot each branch length
+ggplot(as.data.frame(m),aes(x="15:14"))+geom_density()
+colnames(m)
+
+pdf("bl-densities.pdf")
+for(i in 1:ncol(m)){
+    df = data.frame(x=m[,i])
+    plot(ggplot(df,aes(x=x))+geom_density() + ggtitle(colnames(m)[i]))
+}
+dev.off()
+
+ggplot(data.frame(x=m[,1],y=m[,2]), aes(x=x,y=y)) + geom_point()
