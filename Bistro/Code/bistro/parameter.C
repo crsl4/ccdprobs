@@ -32,6 +32,7 @@ void usage(ostream& f)
   f << "    --fixedQ                       |  multiply dirichlet scale by 10million, and artificially set logQ=0" << endl;
   f << "    --loglikweight                 |  use loglik to weight bootstrap counts instead of parsimony" << endl;
   f << "    -eta eta                       |  scale to divide the variance of gamma r.v. for branch lengths (1)" << endl;
+  f << "    --rootFix                       |  fix the root at one of the two nodes attached to longest branch (false)" << endl;
   exit(1);
 }
 
@@ -230,6 +231,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--independent") == 0 )
     {
       independent = true;
+    }
+    else if ( strcmp(argv[k],"--rootFix") == 0 )
+    {
+      rootFix = true;
     }
     else if ( strcmp(argv[k],"--fixedQ") == 0 )
     {

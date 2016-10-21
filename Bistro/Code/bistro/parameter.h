@@ -28,6 +28,7 @@ private:
   bool fixedQ;
   bool loglikwt;
   double eta;
+  bool rootFix;
 public:
   Parameter()
   {
@@ -47,6 +48,7 @@ public:
     fixedQ = false;
     loglikwt = false;
     eta = 1.0;
+    rootFix = false;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }

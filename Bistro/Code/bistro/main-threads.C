@@ -103,7 +103,11 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
       tree.setNJDistances(gtrDistanceMatrixCopy,rng);
-      tree.randomizeBL(rng);
+      if( parameters.rootFix() )
+	tree.randomizeBL(rng);
+      else
+	tree.randomize(rng);
+
       if(VERBOSE)
 	{
 	  cout << coreID << " " << k << "th tree" << endl << flush;
