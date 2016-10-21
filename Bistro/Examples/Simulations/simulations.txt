@@ -1,3 +1,7 @@
+## rerunning to have branch length trees in canonical order
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta11-bl-root --fixedQ --loglikweight -eta 1.1 -s 2767106266 --rootFix > eta11-bl-root.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta11-bl --fixedQ --loglikweight -eta 1.1 -s 2767106266 > eta11-bl.log
+
 ## comparing the ESS when not using the correct root
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta11-root-2-oldroot --fixedQ --loglikweight -eta 1.1 -s 3020687993 > eta11-root-2-oldroot.log
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta11-root-3-oldroot --fixedQ --loglikweight -eta 1.1 -s 4052502222 > eta11-root-3-oldroot.log
