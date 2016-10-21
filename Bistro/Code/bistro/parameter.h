@@ -85,6 +85,8 @@ public:
   void setLoglikWt(bool b) { loglikwt = b; }
   double getEta() const { return eta; }
   void setEta(double x) { eta = x; }
+  bool getRootFix() const { return rootFix; }
+  void setRootFix(bool b) { rootFix = b; }
 };
 
 #endif

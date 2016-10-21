@@ -68,6 +68,8 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
   ofstream f(outFile.c_str());
   string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBL";
   ofstream treebl(treeBLFile.c_str());
+  string treeBLFileSort = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBLsort";
+  ofstream treeblsort(treeBLFileSort.c_str());
    f << "tree logl logTop logBL logPrior logQ logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
 
    for ( int k=indStart; k<indEnd; ++k )
@@ -103,7 +105,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
       tree.setNJDistances(gtrDistanceMatrixCopy,rng);
-      if( parameters.rootFix() )
+      if( parameters.getRootFix() )
 	tree.randomizeBL(rng);
       else
 	tree.randomize(rng);
@@ -154,6 +156,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       // string top0 = tree.makeTopologyNumbers();
       tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
       tree.sortCanonical();
+      treeblsort << tree.makeTreeNumbers() << endl;
       string top = tree.makeTopologyNumbers();
       f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logBL << " " << logBranchLengthPriorDensity << " " << logQ << " " << logWeight << " ";
       f << model.getStationaryP().transpose() << " " << model.getSymmetricQP().transpose() << endl;
@@ -165,6 +168,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
     }
   treebl.close();
+  treeblsort.close();
 }
 
 
