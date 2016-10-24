@@ -1,0 +1,25 @@
+In Examples/Simulations
+
+~/software/MrBayes/mb sim-cats-dogs-short1.nex
+~/software/MrBayes/mb sim-cats-dogs-short2.nex
+~/software/MrBayes/mb sim-cats-dogs-short3.nex
+
+sed -f mb.sed sim-cats-dogs-short1.nex.run1.t > sim-cats-short1-run1.t
+sed -f mb.sed sim-cats-dogs-short1.nex.run2.t > sim-cats-short1-run2.t
+../../Code/badger/mb2badger sim-cats-short1-run1.t
+../../Code/badger/mb2badger sim-cats-short1-run2.t
+## then read in R sim-cats-short1.tre and .top
+
+
+----------------------------------------
+I also create a file I name mb.sed that has just this line.
+s/\[&U\]//g;
+I use this to eliminate the text [&U] that appears in the MrBayes 3.2
+.t files. I should just fix the mb2badger program.
+
+So, here is an example work flow.
+
+mb birds4.nex     // this creates birds4.nex.t and other files
+sed -f mb.sed birds4.nex.t > birds4.t
+mb2badger birds4.t
+summarize -s 1001 birds4.tre
