@@ -6,15 +6,9 @@
 // Output: a .top file and a .tre file
 //         where each tree is binary and in sorted subtree order
 // 
-// 
-//
-// 
-//
-// 
-// 
-//
-
-using namespace std;
+// 25 October 2016
+//   Changed code so that parent edge is not always last
+//     and do not print binary tree if a node has degree greater than 3
 
 #include <iostream>
 #include <iomanip>
@@ -23,6 +17,8 @@ using namespace std;
 #include <sstream>
 #include <vector>
 #include <algorithm>
+
+using namespace std; // put this after the #includes
 
 class Node;
 
@@ -66,7 +62,7 @@ class Node {
   void reorder(Edge*);
   void rootReorder();
   int getMinTaxa() { return minTaxa; }
-  int setMinTaxa(int x) { minTaxa = x; }
+  int setMinTaxa(int x) { minTaxa = x; return( minTaxa ); }
   int setMinTaxa(Edge*);
   void setNumbers(int&,Edge*);
   void printInfo(ostream&);
@@ -114,7 +110,7 @@ void Node::rootReorder() {
     return;
 
   if(edges.size()>2)
-    sort(edges.begin(),edges.end()-1,RootEdgeCompare(this));
+    sort(edges.begin(),edges.end(),RootEdgeCompare(this)); // XXX changed this line to sort all edges of the root
 }
 
 void Node::reorder(Edge* par) {
@@ -427,27 +423,27 @@ void Tree::printTop(ostream& f) {
   }
   f << "(";
   int degree = root->getNumEdges();
-  if(degree==2) {
+//  if(degree==2) { XXX always do this case
     for(int i=0;i<degree;i++) {
       Edge* e = root->getEdge(i);
       e->getOtherNode(root)->printTop(f,e);
       if(i < degree-1)
 	f << ",";
     }
-  }
-  else { // degree is 3 or more
-    // combine first degree-1 subtrees 
-    f << "(";
-    for(int i=0;i<degree-1;i++) {
-      Edge* e = root->getEdge(i);
-      e->getOtherNode(root)->printTop(f,e);
-      if(i < degree-2)
-	f << ",";
-    }
-    f << "),";
-    Edge* last = root->getEdge(degree-1);
-    last->getOtherNode(root)->printTop(f,last);
-  }
+//  }
+//  else { // degree is 3 or more
+    // combine first degree-1 subtrees XXX do not combine subtrees
+//    f << "(";
+//    for(int i=0;i<degree;i++) { // XXX changed this line
+//      Edge* e = root->getEdge(i);
+//      e->getOtherNode(root)->printTop(f,e);
+//      if(i < degree-1) // XXX changed this line
+//	f << ",";
+//    }
+//    f << "),";
+//    Edge* last = root->getEdge(degree-1);
+//    last->getOtherNode(root)->printTop(f,last);
+//  }
   f << ");" << endl;
 }
 
@@ -475,27 +471,27 @@ void Tree::printTree(ostream& f) {
   }
   f << "(";
   int degree = root->getNumEdges();
-  if(degree==2) {
+//  if(degree==2) {
     for(int i=0;i<degree;i++) {
       Edge* e = root->getEdge(i);
       e->getOtherNode(root)->printTree(f,e);
       if(i < degree-1)
 	f << ",";
     }
-  }
-  else { // degree is 3 or more
-    // combine first degree-1 subtrees 
-    f << "(";
-    for(int i=0;i<degree-1;i++) {
-      Edge* e = root->getEdge(i);
-      e->getOtherNode(root)->printTree(f,e);
-      if(i < degree-2)
-	f << ",";
-    }
-    f << "):0,";
-    Edge* last = root->getEdge(degree-1);
-    last->getOtherNode(root)->printTree(f,last);
-  }
+//  }
+//  else { // degree is 3 or more
+//    // combine first degree-1 subtrees 
+//    f << "(";
+//    for(int i=0;i<degree-1;i++) {
+//      Edge* e = root->getEdge(i);
+//      e->getOtherNode(root)->printTree(f,e);
+//      if(i < degree-2)
+//	f << ",";
+//    }
+//    f << "):0,";
+//    Edge* last = root->getEdge(degree-1);
+//    last->getOtherNode(root)->printTree(f,last);
+//  }
   f << ");" << endl;
 }
 

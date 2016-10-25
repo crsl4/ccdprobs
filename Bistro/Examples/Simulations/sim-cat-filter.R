@@ -1,3 +1,5 @@
+
+
 ## Filter out burnin-in plus trees that do not have the most common topology
 
 ## after simulated data with different sizes on the internal branch length:
@@ -64,11 +66,11 @@ plot(tree)
 length(tree$edge.length)
 
 N = length(tre)
-m = matrix(0,N,ncol=21) ## 21 works in this case!!!
+m2 = matrix(0,N,ncol=21) ## 21 works in this case!!!
 for ( i in 1:N )
 {
   tree = read.tree(text=as.character(tre[i]))
-  m[i,] = tree$edge.length
+  m2[i,] = tree$edge.length
 }
 
 colnames(m) = paste(tree$edge[,2],tree$edge[,1],sep=":")
@@ -99,13 +101,20 @@ tre2 = read.table("sim-cats-dogs.run2.tre")
 top = c(as.character(top1[-(1:2001),]),as.character(top2[-(1:2001),]))
 tre = c(as.character(tre1[-(1:2001),]),as.character(tre2[-(1:2001),]))
 
-keep = which(top=="((((((2,3),4),5),(6,(((7,(8,9)),10),11))),12),1);")
+####keep = which(top=="((((((2,3),4),5),(6,(((7,(8,9)),10),11))),12),1);")
+keep = which(top=="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);")
 
+top = top[keep]
 tre = tre[keep]
 
 require(ape)
 N = length(tre)
-m = matrix(0,N,ncol=22) ## 22 works in this case!!!
+### Because now print out unrooted trees with mb2badger,
+###  no longer need to get rid of fake root column
+### m = matrix(0,N,ncol=22) ## 22 works in this case!!!
+tree = read.tree(text=tre[1])
+m = matrix(0,N,length(tree$edge.length))
+
 for ( i in 1:N )
 {
   tree = read.tree(text=tre[i])
@@ -115,7 +124,8 @@ for ( i in 1:N )
 colnames(m) = paste(tree$edge[,2],tree$edge[,1],sep=":")
 
 ## get rid of first column which is a fake 0 length edge from root
-m = m[,-1]
+### no longer needed!
+###m = m[,-1]
 
 round(cor(m),1)
 
@@ -137,3 +147,158 @@ for(i in 1:ncol(m)){
 dev.off()
 
 ggplot(data.frame(x=m[,1],y=m[,2]), aes(x=x,y=y)) + geom_point()
+
+## Function to find all pairs of adjacent edges
+getAdjacentEdges = function(tree)
+{
+  require(ape)
+  edges = tree$edge
+  internal = unique(edges[,1])
+  n = length(internal)
+  out = matrix(0,3*n,2)
+  curr = 1
+  for( i in internal )
+  {
+    keep = which(edges[,1]==i | edges[,2]==i)
+    if ( length(keep) !=3 )
+    {
+      print(edges[keep,])
+      stop("Something screwed up")
+    }
+    out[curr,] = c(keep[1],keep[2])
+    curr = curr+1
+    out[curr,] = c(keep[1],keep[3])
+    curr = curr+1
+    out[curr,] = c(keep[2],keep[3])
+    curr = curr+1
+  }
+  return( out )
+}
+
+## Loop to plot scatter plots of all adjacent edge lengths
+adjEdges = getAdjacentEdges(tree)
+colnames(m) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
+df = data.frame(m)
+
+pdf("scatter-plots-mrbayes.pdf")
+for( i in 1:nrow(adjEdges))
+{
+  plot(
+    ggplot(df,aes(x=df[,adjEdges[i,1]],y=df[,adjEdges[i,2]])) +
+    geom_point(alpha=0.1) +
+    ggtitle(paste(names(df)[adjEdges[i,1]],names(df)[adjEdges[i,2]]))
+  )
+}
+dev.off()
+
+adjEdges = getAdjacentEdges(tree)
+colnames(m2) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
+df = data.frame(m2)
+
+pdf("scatter-plots-bistro.pdf")
+for( i in 1:nrow(adjEdges))
+{
+  plot(
+    ggplot(df,aes(x=df[,adjEdges[i,1]],y=df[,adjEdges[i,2]])) +
+      geom_point(alpha=0.1) +
+      ggtitle(paste(names(df)[adjEdges[i,1]],names(df)[adjEdges[i,2]]))
+  )
+}
+dev.off()
+
+#### Combined graphs, all code
+#### Bret
+#### 25 October 2016
+
+## mrbayes
+top1 = read.table("sim-cats-dogs.run1.top")
+top2 = read.table("sim-cats-dogs.run2.top")
+tre1 = read.table("sim-cats-dogs.run1.tre")
+tre2 = read.table("sim-cats-dogs.run2.tre")
+
+## remove burnin
+top = c(as.character(top1[-(1:2001),]),as.character(top2[-(1:2001),]))
+tre = c(as.character(tre1[-(1:2001),]),as.character(tre2[-(1:2001),]))
+
+## best tree
+keep = which(top=="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);")
+
+## sample 1000 for better plots
+keep = sort(sample(keep,1000))
+
+tre.mb = tre[keep]
+
+## remove big stuff
+rm(top1,top2,tre1,tre2,top,tre,keep)
+
+require(ape)
+N.mb = length(tre.mb) ### 1000 now!!!
+
+## get number of edges
+tree = read.tree(text=tre.mb[1])
+m.mb = matrix(0,N.mb,length(tree$edge.length))
+colnames(m.mb) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
+
+for ( i in 1:N.mb )
+{
+  tree = read.tree(text=tre.mb[i])
+  m.mb[i,] = tree$edge.length
+}
+
+### now do bistro
+
+source("../../Scripts/readBistro.r")
+
+bistro = readBistro("eta11-bl-root")
+data = readDataSort("eta11-bl-root")
+
+keep = which(bistro$tree=="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);")
+tre.bistro = data$V1[keep]
+require(ape)
+tree=read.tree(text=as.character(tre.bistro[1]))
+
+
+N.bistro = length(tre.bistro)
+## get number of edges
+m.bistro = matrix(0,N.bistro,length(tree$edge.length))
+colnames(m.bistro) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
+
+## check same names!!!
+##cbind(colnames(m.mb),colnames(m.bistro))
+all( colnames(m.mb) == colnames(m.bistro) )
+
+for ( i in 1:N.bistro )
+{
+  tree = read.tree(text=as.character(tre.bistro[i]))
+  m.bistro[i,] = tree$edge.length
+}
+
+## combine data for combined plots
+m = rbind(m.bistro,m.mb)
+df = data.frame(m)
+df$set = factor( c(rep("Bistro",N.bistro),rep("Mrbayes",N.mb)) )
+
+## make the plots
+adjEdges = getAdjacentEdges(tree)
+
+pdf("scatter-plots-2.pdf")
+require(viridis)
+vpal = viridis(2)
+
+for( i in 1:nrow(adjEdges))
+{
+  plot(
+    ggplot(df,aes(x=df[,adjEdges[i,1]],
+                  y=df[,adjEdges[i,2]],
+                  color=set)
+           ) +
+      geom_point(alpha=0.5) +
+      scale_color_manual(values=vpal) +
+   #   facet_grid(set ~ .) +
+      ggtitle(paste(names(df)[adjEdges[i,1]],names(df)[adjEdges[i,2]])) +
+      theme_bw()
+  )
+}
+dev.off()
+
+
