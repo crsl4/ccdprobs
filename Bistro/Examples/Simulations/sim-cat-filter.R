@@ -276,7 +276,7 @@ for ( i in 1:N.bistro )
 ## combine data for combined plots
 m = rbind(m.bistro,m.mb)
 df = data.frame(m)
-df$set = factor( c(rep("Bistro",N.bistro),rep("Mrbayes",N.mb)) )
+df$set = factor( c(rep("Bistro",N.bistro),rep("MrBayes",N.mb)) )
 
 ## make the plots
 adjEdges = getAdjacentEdges(tree)
@@ -285,8 +285,16 @@ pdf("scatter-plots-2.pdf")
 require(viridis)
 vpal = viridis(2)
 
+require(dplyr)
 for( i in 1:nrow(adjEdges))
 {
+  i1 = adjEdges[i,1]
+  i2 = adjEdges[i,2]
+  median.bistro.1 = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i1))) )
+  median.bistro.2 = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i2))) )
+  median.mb.1 = median( drop(as.matrix(filter(df,set=="MrBayes") %>% select(i1))) )
+  median.mb.2 = median( drop(as.matrix(filter(df,set=="MrBayes") %>% select(i2))) )
+  
   plot(
     ggplot(df,aes(x=df[,adjEdges[i,1]],
                   y=df[,adjEdges[i,2]],
@@ -294,6 +302,10 @@ for( i in 1:nrow(adjEdges))
            ) +
       geom_point(alpha=0.5) +
       scale_color_manual(values=vpal) +
+      geom_vline(xintercept=median.bistro.1,color=vpal[1]) +
+      geom_vline(xintercept=median.mb.1,color=vpal[2]) +
+      geom_hline(yintercept=median.bistro.2,color=vpal[1]) +
+      geom_hline(yintercept=median.mb.2,color=vpal[2]) +
    #   facet_grid(set ~ .) +
       ggtitle(paste(names(df)[adjEdges[i,1]],names(df)[adjEdges[i,2]])) +
       theme_bw()
