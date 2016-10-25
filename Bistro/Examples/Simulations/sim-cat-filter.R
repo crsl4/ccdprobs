@@ -148,32 +148,6 @@ dev.off()
 
 ggplot(data.frame(x=m[,1],y=m[,2]), aes(x=x,y=y)) + geom_point()
 
-## Function to find all pairs of adjacent edges
-getAdjacentEdges = function(tree)
-{
-  require(ape)
-  edges = tree$edge
-  internal = unique(edges[,1])
-  n = length(internal)
-  out = matrix(0,3*n,2)
-  curr = 1
-  for( i in internal )
-  {
-    keep = which(edges[,1]==i | edges[,2]==i)
-    if ( length(keep) !=3 )
-    {
-      print(edges[keep,])
-      stop("Something screwed up")
-    }
-    out[curr,] = c(keep[1],keep[2])
-    curr = curr+1
-    out[curr,] = c(keep[1],keep[3])
-    curr = curr+1
-    out[curr,] = c(keep[2],keep[3])
-    curr = curr+1
-  }
-  return( out )
-}
 
 ## Loop to plot scatter plots of all adjacent edge lengths
 adjEdges = getAdjacentEdges(tree)
@@ -281,11 +255,12 @@ df$set = factor( c(rep("Bistro",N.bistro),rep("MrBayes",N.mb)) )
 ## make the plots
 adjEdges = getAdjacentEdges(tree)
 
-pdf("scatter-plots-2.pdf")
 require(viridis)
-vpal = viridis(2)
-
+require(ggplot2)
 require(dplyr)
+
+pdf("scatter-plots-2.pdf")
+vpal = viridis(2)
 for( i in 1:nrow(adjEdges))
 {
   i1 = adjEdges[i,1]
@@ -294,7 +269,7 @@ for( i in 1:nrow(adjEdges))
   median.bistro.2 = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i2))) )
   median.mb.1 = median( drop(as.matrix(filter(df,set=="MrBayes") %>% select(i1))) )
   median.mb.2 = median( drop(as.matrix(filter(df,set=="MrBayes") %>% select(i2))) )
-  
+
   plot(
     ggplot(df,aes(x=df[,adjEdges[i,1]],
                   y=df[,adjEdges[i,2]],
