@@ -59,6 +59,7 @@ keep = which(bistro$tree=="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);")
 head(data)
 tre=data$V1[keep]
 require(ape)
+
 tree=read.tree(text=as.character(tre[1]))
 plot(tree)
 length(tree$edge.length)
@@ -86,6 +87,24 @@ for(i in 1:ncol(m)){
     plot(ggplot(df,aes(x=x))+geom_density() + ggtitle(colnames(m)[i]))
 }
 dev.off()
+
+## bivariate plots
+require(ggplot2)
+df = data.frame(x=m[,2],y=m[,21])
+ggplot(df,aes(x=x,y=y)) + geom_point()
+
+
+## adding info on which was the root
+datarand = readData("eta11-bl-root")
+treesrand = datarand$V1[keep]
+rt=rep(NA,length(treesrand))
+for(i in 1:length(treesrand)){
+    tree = read.tree(text=as.character(treesrand[i]))
+    rt[i] = isRootOnCats(tree)
+}
+
+df = data.frame(x=m[,2],y=m[,21], r = rt)
+ggplot(df,aes(x=x,y=y, color=r)) + geom_point()
 
 
 ## want to study the correlation matrix and density plots
