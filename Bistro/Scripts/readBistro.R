@@ -172,3 +172,30 @@ isRootOnCats <- function(tree){
     return(res)
 }
 
+## Function to find all pairs of adjacent edges
+getAdjacentEdges = function(tree)
+{
+  require(ape)
+  edges = tree$edge
+  internal = unique(edges[,1])
+  n = length(internal)
+  out = matrix(0,3*n,2)
+  curr = 1
+  for( i in internal )
+  {
+    keep = which(edges[,1]==i | edges[,2]==i)
+    if ( length(keep) !=3 )
+    {
+      print(edges[keep,])
+      stop("Something screwed up")
+    }
+    out[curr,] = c(keep[1],keep[2])
+    curr = curr+1
+    out[curr,] = c(keep[1],keep[3])
+    curr = curr+1
+    out[curr,] = c(keep[2],keep[3])
+    curr = curr+1
+  }
+  return( out )
+}
+
