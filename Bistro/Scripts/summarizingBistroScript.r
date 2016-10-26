@@ -1,18 +1,32 @@
 ## script to analyze different bistro comparisons
 ## Claudia September 2016
 
+## studying after removing the exp
+library(ape)
+source("../../Scripts/readBistro.r")
+bistro = readBistro("eta1-root-cats")
+bistro = readBistro("test")
+plotBistro(bistro)
+
+data = readData("eta1-root-cats")
+ind = which(bistro$logBL == Inf)
+tre = data$V1[ind]
+
+
 ## study eta11-root after choosing good root:
 library(ape)
 source("../../Scripts/readBistro.r")
 bistro = readBistro("eta11-root")
 bistro = readBistro("eta11-root-2")
 bistro = readBistro("eta11-root-3")
+bistro = readBistro("eta1-root-cats")
 plotBistro(bistro)
 plotBistro(subset(bistro, logl+logPrior>-9200))
 
 data = readData("eta11-root")
 data = readData("eta11-root-2")
 data = readData("eta11-root-3")
+data = readData("eta1-root-cats")
 
 goodroot=rep(NA,1000)
 for(i in 1:length(data[,1])){

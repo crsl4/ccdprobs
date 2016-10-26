@@ -1,3 +1,11 @@
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test --fixedQ --loglikweight --rootFix -s 522331455 > test.log
+
+
+## after removing exponential, with eta=1
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta1-root-cats --fixedQ --loglikweight --rootFix > eta1-root-cats.log
+time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o eta1-art --fixedQ --loglikweight > eta1-art.log
+
+
 ## rerunning to have branch length trees in canonical order
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta11-bl-root --fixedQ --loglikweight -eta 1.1 -s 2767106266 --rootFix > eta11-bl-root.log
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o eta11-bl --fixedQ --loglikweight -eta 1.1 -s 2767106266 > eta11-bl.log
