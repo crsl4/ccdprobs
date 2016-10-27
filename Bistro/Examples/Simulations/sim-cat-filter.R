@@ -209,6 +209,11 @@ top2 = read.table("sim-cats-dogs.run2.top")
 tre1 = read.table("sim-cats-dogs.run1.tre")
 tre2 = read.table("sim-cats-dogs.run2.tre")
 
+top1 = read.table("sim-cats-short3-run1.top")
+top2 = read.table("sim-cats-short3-run2.top")
+tre1 = read.table("sim-cats-short3-run1.tre")
+tre2 = read.table("sim-cats-short3-run2.tre")
+
 ## remove burnin
 top = c(as.character(top1[-(1:2001),]),as.character(top2[-(1:2001),]))
 tre = c(as.character(tre1[-(1:2001),]),as.character(tre2[-(1:2001),]))
@@ -250,6 +255,19 @@ data = readDataSort("eta11-bl-root")
 bistro = readBistro("test")
 data = readDataSort("test")
 
+bistro = readBistro("test3")
+data = readDataSort("test3")
+
+bistro = readBistro("test-eta11")
+data = readDataSort("test-eta11")
+
+bistro = readBistro("short33")
+data = readDataSort("short33")
+
+bistro = readBistro("test4")
+data = readDataSort("test4")
+
+
 keep = which(bistro$tree=="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);")
 tre.bistro = data$V1[keep]
 require(ape)
@@ -283,7 +301,7 @@ require(viridis)
 require(ggplot2)
 require(dplyr)
 
-pdf("scatter-plots-test.pdf")
+pdf("scatter-plots-test4.pdf")
 vpal = viridis(2)
 for( i in 1:nrow(adjEdges))
 {
@@ -320,6 +338,11 @@ top1 = read.table("sim-cats-dogs.run1.top")
 top2 = read.table("sim-cats-dogs.run2.top")
 tre1 = read.table("sim-cats-dogs.run1.tre")
 tre2 = read.table("sim-cats-dogs.run2.tre")
+
+top1 = read.table("sim-cats-short3-run1.top")
+top2 = read.table("sim-cats-short3-run2.top")
+tre1 = read.table("sim-cats-short3-run1.tre")
+tre2 = read.table("sim-cats-short3-run2.tre")
 
 ## remove burnin
 top = c(as.character(top1[-(1:2001),]),as.character(top2[-(1:2001),]))
@@ -362,6 +385,19 @@ data = readDataSort("eta1-root-cats")
 bistro = readBistro("test")
 data = readDataSort("test")
 
+bistro = readBistro("test3")
+data = readDataSort("test3")
+
+bistro = readBistro("test-eta11")
+data = readDataSort("test-eta11")
+
+bistro = readBistro("short33")
+data = readDataSort("short33")
+
+bistro = readBistro("test4")
+data = readDataSort("test4")
+
+
 keep = which(bistro$tree=="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);")
 tre.bistro = data$V1[keep]
 require(ape)
@@ -394,7 +430,7 @@ require(viridis)
 require(ggplot2)
 require(dplyr)
 
-pdf("density-plots-test.pdf")
+pdf("density-plots-test4.pdf")
 vpal = viridis(2)
 for(i in 1:ncol(m))
 {

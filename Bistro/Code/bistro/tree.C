@@ -670,12 +670,12 @@ void Tree::randomize(mt19937_64& rng)
   setNodeLevels();
 }
 
-// similar to randomize, but uses edges' lengths to 
+// similar to randomize, but uses edges' lengths to
 // choose the root
 void Tree::randomizeBL(mt19937_64& rng)
 {
   // if tree has a long branch, choose one of the nodes attached to it
-  Edge* maxEdge = whichMaxBranch(); 
+  Edge* maxEdge = whichMaxBranch();
   if( maxEdge->isTerminal() )
     {
       if( maxEdge->getNode(0)->getLeaf() )
@@ -687,12 +687,11 @@ void Tree::randomizeBL(mt19937_64& rng)
     {
       uniform_real_distribution<double> rint(0.0,1.0);
       if(rint(rng) < 0.5)
+	      //if(true)
 	root = maxEdge->getNode(0);
       else
 	root = maxEdge->getNode(1);
     }
-  // uniform_int_distribution<> rint(numTaxa,getNumNodes()-1);
-  // root = nodes[ rint(rng) ];
   root->randomize(rng,NULL);
   setNodeLevels();
 }
@@ -1655,8 +1654,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       bool converge = true;
       Vector3d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength(),z->getEdgeParent()->getLength());
       if(jointMLE)
-	t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge); 
-	
+	t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge);
+
       if(!converge)
 	cout << "Newton-Raphson did not converge" << endl;
       double prop_logl;
@@ -1666,6 +1665,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       Vector3d mu = t;
       Matrix3d cov = (-1) * prop_hessian.inverse();
       t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
+      //t = multivariateNormal(mu,cov,rng, logdensity, eta);
       x->getEdgeParent()->setLength( t[0] );
       y->getEdgeParent()->setLength( t[1] );
       z->getEdgeParent()->setLength( t[2] );
@@ -1704,6 +1704,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	Vector2d mu = t;
 	Matrix2d cov = (-1) * prop_hessian.inverse();
 	t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
+	//	t = multivariateNormal(mu,cov,rng, logdensity,eta);
 	x->getEdgeParent()->setLength( t[0] );
 	y->getEdgeParent()->setLength( t[1] );
 	x->getEdgeParent()->calculate(qmatrix);

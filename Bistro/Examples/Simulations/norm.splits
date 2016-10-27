@@ -1,0 +1,27 @@
+translate
+       1 cheetah,
+       2 snow_leopard,
+       3 leopard,
+       4 tiger,
+       5 clouded_leopard,
+       6 red_fox,
+       7 coyote,
+       8 gray_wolf,
+       9 dog,
+      10 dhole,
+      11 raccoon_dog,
+      12 cat;
+prob crudeSE(ESS=nan) clade
+       nan nan {1-12} ************
+       nan nan {2-12} .***********
+       nan nan {2-5,12} .****......*
+       nan nan {2-11} .**********.
+       nan nan {6-11} .....******.
+       nan nan {7-11} ......*****.
+       nan nan {7-10} ......****..
+       nan nan {7-9} ......***...
+       nan nan {8-9} .......**...
+       nan nan {2-5} .****.......
+       nan nan {2-3,5} .**.*.......
+       nan nan {2-4} .***........
+       nan nan {2-3} .**.........

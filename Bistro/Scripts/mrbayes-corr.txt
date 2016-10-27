@@ -8,9 +8,9 @@ sed -f mb.sed sim-cats-dogs-short1.nex.run1.t > sim-cats-short1-run1.t
 sed -f mb.sed sim-cats-dogs-short1.nex.run2.t > sim-cats-short1-run2.t
 ../../Code/badger/mb2badger sim-cats-short1-run1.t
 ../../Code/badger/mb2badger sim-cats-short1-run2.t
-## then read in R sim-cats-short1.tre and .top
+## then read in R sim-cats-short1-run1.tre and .top
 
-
+## had to rerun with new mb2badger
 ----------------------------------------
 I also create a file I name mb.sed that has just this line.
 s/\[&U\]//g;

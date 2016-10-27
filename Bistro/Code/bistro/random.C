@@ -54,8 +54,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
 
   if(alpha1<1)
     {
+      lambda1 = (alpha1 + 1.0) * lambda1/alpha1;
       alpha1 = alpha1 + 1.0;
-      lambda1 = lambda1 + 1.0;
     }
   // ------------ T1 ------------------
 //  cout << "Random gamma: alpha = " << alpha1 << ", lambda = " << lambda1 << ", mu = " << alpha1 / lambda1 << ", sigma = " << sqrt(alpha1) / lambda1 << endl;
@@ -96,8 +96,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
 //  cout << "Random gamma: alpha = " << alpha2 << ", lambda = " << lambda2 << ", mu = " << alpha2 / lambda2 << ", sigma = " << sqrt(alpha2) / lambda2 << endl;
   if(alpha2<1)
     {
+      lambda2 = (alpha2 + 1.0) * lambda2/alpha2;
       alpha2 = alpha2 + 1.0;
-      lambda2 = lambda2 + 1.0;
     }
 
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization
@@ -135,19 +135,14 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
 //  cout << "Random gamma: alpha = " << alpha3 << ", lambda = " << lambda3 << ", mu = " << alpha3 / lambda3 << ", sigma = " << sqrt(alpha3) / lambda3 << endl;
   if(alpha3<1)
     {
+      lambda3 = (alpha3 + 1.0) * lambda3/alpha3;
       alpha3 = alpha3 + 1.0;
-      lambda3 = lambda3 + 1.0;
     }
 
   bl[2] = gamma(alpha3,1.0 / lambda3,rng); //c++ gamma has different parametrization
 //  cout << "T3: " << bl[2] << endl;
-  if(logdensity > 1000000000)
-    {
-      cerr << "before computing new: " << logdensity << endl;
-      exit(1);
-    }
   logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + alpha3*log(lambda3) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1]+(alpha3-1)*log(bl[2])-lambda3*bl[2] - lgamma(alpha1) - lgamma(alpha2) - lgamma(alpha3);
-  if(logdensity > 1000000000)
+  if(logdensity > 1000000000) //check for logdensity=Inf
     {
       cerr << alpha1 << endl;
       cerr << alpha2 << endl;
@@ -199,8 +194,8 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
 //  cout << "Random gamma: alpha = " << alpha1 << ", lambda = " << lambda1 << ", mu = " << alpha1 / lambda1 << ", sigma = " << sqrt(alpha1) / lambda1 << endl;
   if(alpha1<1)
     {
+      lambda1 = (alpha1 + 1.0) * lambda1/alpha1;
       alpha1 = alpha1 + 1.0;
-      lambda1 = lambda1 + 1.0;
     }
 
   bl[0] = gamma(alpha1,1.0 / lambda1,rng); //c++ gamma has different parametrization
@@ -239,14 +234,14 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
   lambda2 = eta*num / (L(1,1) * L(1,1));
   if(alpha2<1)
     {
+      lambda2 = (alpha2 + 1.0) * lambda2/alpha2;
       alpha2 = alpha2 + 1.0;
-      lambda2 = lambda2 + 1.0;
     }
 
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization
 //  cout << "T2: " << bl[1] << endl;
   logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1] - lgamma(alpha1) - lgamma(alpha2);
-  if(logdensity > 1000000000)
+  if(logdensity > 1000000000) //check for logdensity=inf
     {
       cerr << "Random gamma: alpha = " << alpha2 << ", lambda = " << lambda2 << ", mu = " << alpha2 / lambda2 << ", sigma = " << sqrt(alpha2) / lambda2 << endl;
       cerr << alpha1 << endl;
@@ -260,4 +255,19 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     }
 
   return bl;
+}
+
+VectorXd multivariateNormal(VectorXd mu,MatrixXd vc,mt19937_64& rng, double& logdensity, double eta)
+{
+  int r = vc.rows();
+  VectorXd v( r );
+  MatrixXd L( vc.llt().matrixL() );
+
+  normal_distribution<double> rnorm;
+  for ( int i=0; i<r; ++i )
+    v( i ) = rnorm( rng );
+
+  logdensity -= v.dot(v);
+
+  return mu + L * v;
 }

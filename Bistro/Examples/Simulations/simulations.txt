@@ -1,3 +1,23 @@
+## test without randomizing
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test4 --fixedQ --loglikweight --rootFix -s 522331455 > test4.log
+
+## test with short3 and independent sampling
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-short3.fasta -b 1000 -r 1000 -m 2 -o short33 --independent > short3.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-short3.fasta -b 1000 -r 1000 -m 2 -o short33-fix --independent --fixedQ --loglikweight > short3-fix.log
+
+## test with new lambda parametrization
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test3 --fixedQ --loglikweight --rootFix -s 522331455 > test3.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test-eta11 -eta 1.1 --fixedQ --loglikweight --rootFix -s 522331455 > test-eta11.log
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test-eta09 -eta 0.9 --fixedQ --loglikweight --rootFix -s 522331455 > test-eta09.log
+time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o eta1-art2 --fixedQ --loglikweight > eta1-art2.log
+
+## test with mvnormal
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o norm --fixedQ --loglikweight --rootFix -s
+522331455 > norm.log
+## without normal
+time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test2 --fixedQ --loglikweight --rootFix -s 522331455 > test2.log
+
+## with weird fix of alpha+1, lambda+1
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test --fixedQ --loglikweight --rootFix -s 522331455 > test.log
 
 
