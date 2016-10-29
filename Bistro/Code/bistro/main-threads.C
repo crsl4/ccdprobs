@@ -3,6 +3,9 @@
 // Copyright 2016
 // May 20, 2016
 
+#define MCMC_Q_BURN 100
+#define MCMC_Q_SAMPLE 1000
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -62,7 +65,7 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
 template<typename T>
 void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
 {
-  //   cerr << "Random trees from " << indStart << " to " << indEnd << endl;
+//     cerr << "Random trees from " << indStart << " to " << indEnd << endl;
 
   string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
   ofstream f(outFile.c_str());
@@ -245,12 +248,12 @@ int main(int argc, char* argv[])
 
   // burnin
   cerr << "burn-in:" << endl;
-  q_init.mcmc(alignment,jctree,1000,alignment.getNumSites(),rng);
+  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
 
   // mcmc to get final Q
   cerr << "sampling:" << endl;
-  q_init.mcmc(alignment,jctree,10000,alignment.getNumSites(),rng);
+  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
@@ -354,7 +357,6 @@ int main(int argc, char* argv[])
 			 (topologyToLogLikScoreMap[ (*m).first ] - maximumLogLikScore) );
   }
 
-
   cout << endl << "Topology counts to file" << endl;
   {
     string topologyCountsFile = parameters.getOutFileRoot() + ".topCounts";
@@ -370,7 +372,8 @@ int main(int argc, char* argv[])
       t.reroot(1);
       t.sortCanonical();
       string top = t.makeTopologyNumbers();
-      topCounts << top << " " << setw(5) << (*cm).second << " " << setw(10) << setprecision(4) << fixed << (*wm).second;
+      topCounts << top << " " << setw(5) << (*cm).second << " ";
+      topCounts << setw(10) << setprecision(4) << fixed << (*wm).second;
       topCounts << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ];
       topCounts << " " << setw(10) << setprecision(4) << fixed << (*loglwm).second;
       topCounts << " " << setw(5) << topologyToLogLikScoreMap[ (*cm).first ] << " " << setw(4) << topologyToLogLikScoreMap[ (*cm).first ] - maximumLogLikScore << endl;
@@ -415,7 +418,6 @@ int main(int argc, char* argv[])
   tmap.open(loglikTmapFile);
   ccdLogLik.writePairCount(tmap);
   tmap.close();
-
   milliseconds ms10 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   if ( parameters.getNumRandom() > 0 )
@@ -470,6 +472,7 @@ int main(int argc, char* argv[])
 
     for ( int i=0; i<cores; ++i )
     {
+      cerr << "core = " << i << endl;
       if ( !parameters.getReweight() )
 	threads.push_back(thread(randomTrees<int>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       else

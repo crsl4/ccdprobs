@@ -1,0 +1,20 @@
+#NEXUS
+[ID: 0071083883]
+begin taxa;
+	dimensions ntax=4;
+	taxlabels
+		Cat
+		Cheetah
+		Dog
+		Wolf
+		;
+end;
+begin trees;
+	translate
+		1	Cat,
+		2	Cheetah,
+		3	Dog,
+		4	Wolf
+		;
+   tree con_50_majrule = [&U] (1[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:5.952430e-02[&length_mean=5.98337641e-02,length_median=5.95243000e-02,length_95%HPD={4.41451400e-02,7.56568900e-02}],2[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:6.246772e-02[&length_mean=6.27686681e-02,length_median=6.24677200e-02,length_95%HPD={4.67001500e-02,7.90600200e-02}],(3[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:3.863356e-03[&length_mean=4.08678486e-03,length_median=3.86335600e-03,length_95%HPD={7.75227800e-04,7.74102000e-03}],4[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:1.400145e-03[&length_mean=1.70775806e-03,length_median=1.40014500e-03,length_95%HPD={1.40053500e-07,4.37276400e-03}])[&prob=1.00000000e+00,prob_stddev=0.00000000e+00,prob_range={1.00000000e+00,1.00000000e+00},prob(percent)="100",prob+-sd="100+-0"]:1.853026e-01[&length_mean=1.85779467e-01,length_median=1.85302600e-01,length_95%HPD={1.58914000e-01,2.12269200e-01}]);
+end;

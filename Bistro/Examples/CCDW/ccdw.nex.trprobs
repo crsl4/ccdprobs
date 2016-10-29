@@ -1,0 +1,15 @@
+#NEXUS
+[ID: 0071083883]
+[This file contains the trees that were found during the MCMC
+search, sorted by posterior probability. "p" indicates the
+posterior probability of the tree whereas "P" indicates the
+cumulative posterior probability.]
+
+begin trees;
+   translate
+    1 Cat,
+    2 Cheetah,
+    3 Dog,
+    4 Wolf;
+   tree tree_1 [p = 1.000, P = 1.000] = [&W 1.000000] (2,(4,3),1);
+end;
