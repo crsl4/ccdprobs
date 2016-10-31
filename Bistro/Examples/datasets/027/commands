@@ -1,0 +1,5 @@
+
+time ../../../Code/bistro/bistro -f ../../../Data/datasets/027.fasta -b 1000 -r 1000 -m 2 -o default > default.log
+time ../../../Code/bistro/bistro -f ../../../Data/datasets/027.fasta -b 1000 -r 1000 -m 2 -o fixQ --fixedQ > fixQ.log
+time ../../../Code/bistro/bistro -f ../../../Data/datasets/027.fasta -b 1000 -r 1000 -m 2 -o loglik --loglikweight > loglik.log
+time ../../../Code/bistro/bistro -f ../../../Data/datasets/027.fasta -b 1000 -r 1000 -m 2 -o loglik-fixQ --loglikweight --fixedQ > loglik-fixQ.log

@@ -11,16 +11,22 @@ top2 = read.table(paste0(rootname,"-run2.top"))
 tre1 = read.table(paste0(rootname,"-run1.tre"))
 tre2 = read.table(paste0(rootname,"-run2.tre"))
 
+top1 = read.table("sim-cats-dogs.run1.top")
+top2 = read.table("sim-cats-dogs.run2.top")
+tre1 = read.table("sim-cats-dogs.run1.tre")
+tre2 = read.table("sim-cats-dogs.run2.tre")
+
+
 top = c(as.character(top1[-(1:2001),]),as.character(top2[-(1:2001),]))
 tre = c(as.character(tre1[-(1:2001),]),as.character(tre2[-(1:2001),]))
 
-keep = which(top=="((((((2,3),4),5),(6,(((7,(8,9)),10),11))),12),1);")
+keep = which(top=="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);")
 
 tre = tre[keep]
 
 require(ape)
 N = length(tre)
-m = matrix(0,N,ncol=22) ## 22 works in this case!!!
+m = matrix(0,N,ncol=21) ## 21 works in this case!!!
 for ( i in 1:N )
 {
   tree = read.tree(text=tre[i])
@@ -30,9 +36,10 @@ for ( i in 1:N )
 colnames(m) = paste(tree$edge[,2],tree$edge[,1],sep=":")
 
 ## get rid of first column which is a fake 0 length edge from root
-m = m[,-1]
+## m = m[,-1]
 
-round(cor(m),1)
+round(cor(m),1)[1:3,1:3]
+round(cor(m),1)[11:13,11:13]
 
 plot(tree,use.edge.length = FALSE)
 nodelabels()
@@ -302,7 +309,7 @@ require(ggplot2)
 require(dplyr)
 
 pdf("scatter-plots-test4.pdf")
-vpal = viridis(2)
+vpal = viridis(2,end=0.8)
 for( i in 1:nrow(adjEdges))
 {
   i1 = adjEdges[i,1]
@@ -430,17 +437,21 @@ require(viridis)
 require(ggplot2)
 require(dplyr)
 
-pdf("density-plots-test4.pdf")
-vpal = viridis(2)
+pdf("density-plots-short3.pdf")
+vpal = viridis(2,end=0.8)
 for(i in 1:ncol(m))
 {
     median.bistro = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i))) )
     median.mb = median( drop(as.matrix(filter(df,set=="MrBayes") %>% select(i))) )
+    mean.bistro = mean( drop(as.matrix(filter(df,set=="Bistro") %>% select(i))) )
+    mean.mb = mean( drop(as.matrix(filter(df,set=="MrBayes") %>% select(i))) )
 
-    plot(ggplot(df,aes(x=df[,i],col=set))+geom_density() +
+    plot(ggplot(df,aes(x=df[,i],col=set))+geom_density(size=1.2) +
          scale_color_manual(values=vpal) +
          geom_vline(xintercept=median.bistro,color=vpal[1]) +
          geom_vline(xintercept=median.mb,color=vpal[2]) +
+         geom_vline(xintercept=mean.bistro,color=vpal[1],linetype="dotted") +
+         geom_vline(xintercept=mean.mb,color=vpal[2], linetype="dotted") +
          ggtitle(paste(names(df)[i])) +
          theme_bw())
 
