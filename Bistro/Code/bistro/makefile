@@ -12,14 +12,14 @@ TARGET = all
 #CFLAGS = -O3 -I. -std=c++11
 
 # current:
-CC = g++
-CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations
-LDLIBS = -lpthread
+#CC = g++
+#CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations
+#LDLIBS = -lpthread
 
 # darwin:
-# CC = /s/gcc-5.3.0/bin/g++
-# CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations
-# LDLIBS = -lpthread
+CC = /s/gcc-5.3.0/bin/g++
+CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations
+LDLIBS = -lpthread
 
 # to debug with gdb, takes hours!
 # CC = g++
