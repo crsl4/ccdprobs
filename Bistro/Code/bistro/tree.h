@@ -5,6 +5,7 @@
 #define MAX_EDGE_LENGTH 10
 #define TOL 1.0e-6
 #define VERBOSE false
+#define PRIOR_MEAN 0.1
 
 #include <iostream>
 #include <iomanip>

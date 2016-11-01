@@ -51,11 +51,17 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     }
   alpha1 = eta*mu0*mu0 / (L(0,0) * L(0,0));
   lambda1 = eta*mu0 / (L(0,0) * L(0,0));
+//  alpha1 = mu0*mu0 / (L(0,0) * L(0,0));
+//  lambda1 = mu0 / (L(0,0) * L(0,0));
 
   if(alpha1<1)
     {
-      lambda1 = (alpha1 + 1.0) * lambda1/alpha1;
-      alpha1 = alpha1 + 1.0;
+//      lambda1 = (alpha1 + 1.0) * lambda1/alpha1;
+//      alpha1 = alpha1 + 1.0;
+
+      lambda1 = sqrt( (alpha1+1)/alpha1 ) * lambda1;
+      alpha1 = (alpha1 + 1.0);
+      
     }
   // ------------ T1 ------------------
 //  cout << "Random gamma: alpha = " << alpha1 << ", lambda = " << lambda1 << ", mu = " << alpha1 / lambda1 << ", sigma = " << sqrt(alpha1) / lambda1 << endl;
@@ -92,12 +98,18 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
     // }
   alpha2 = eta * (num * num) / (L(1,1) * L(1,1));
   lambda2 = eta * num / (L(1,1) * L(1,1));
+//  alpha2 = (num * num) / (L(1,1) * L(1,1));
+//  lambda2 = num / (L(1,1) * L(1,1));
 
 //  cout << "Random gamma: alpha = " << alpha2 << ", lambda = " << lambda2 << ", mu = " << alpha2 / lambda2 << ", sigma = " << sqrt(alpha2) / lambda2 << endl;
   if(alpha2<1)
     {
-      lambda2 = (alpha2 + 1.0) * lambda2/alpha2;
-      alpha2 = alpha2 + 1.0;
+//      lambda2 = (alpha2 + 1.0) * lambda2/alpha2;
+//      alpha2 = alpha2 + 1.0;
+
+      lambda2 = sqrt( (alpha2+1)/alpha2 ) * lambda2;
+      alpha2 = (alpha2 + 1.0);
+
     }
 
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization
@@ -132,11 +144,17 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   //   }
   alpha3 = eta * (num * num) / (L(2,2) * L(2,2));
   lambda3 = eta * num / (L(2,2) * L(2,2));
+//  alpha3 = (num * num) / (L(2,2) * L(2,2));
+//  lambda3 = num / (L(2,2) * L(2,2));
 //  cout << "Random gamma: alpha = " << alpha3 << ", lambda = " << lambda3 << ", mu = " << alpha3 / lambda3 << ", sigma = " << sqrt(alpha3) / lambda3 << endl;
   if(alpha3<1)
     {
-      lambda3 = (alpha3 + 1.0) * lambda3/alpha3;
-      alpha3 = alpha3 + 1.0;
+//      lambda3 = (alpha3 + 1.0) * lambda3/alpha3;
+//      alpha3 = alpha3 + 1.0;
+
+      lambda3 = sqrt( (alpha3+1)/alpha3 ) * lambda3;
+      alpha3 = (alpha3 + 1.0);
+
     }
 
   bl[2] = gamma(alpha3,1.0 / lambda3,rng); //c++ gamma has different parametrization
@@ -190,12 +208,18 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     }
   alpha1 = eta*mu0*mu0 / (L(0,0) * L(0,0));
   lambda1 = eta*mu0 / (L(0,0) * L(0,0));
+//  alpha1 = mu0*mu0 / (L(0,0) * L(0,0));
+//  lambda1 = mu0 / (L(0,0) * L(0,0));
   // ------------ T1 ------------------
 //  cout << "Random gamma: alpha = " << alpha1 << ", lambda = " << lambda1 << ", mu = " << alpha1 / lambda1 << ", sigma = " << sqrt(alpha1) / lambda1 << endl;
   if(alpha1<1)
     {
-      lambda1 = (alpha1 + 1.0) * lambda1/alpha1;
-      alpha1 = alpha1 + 1.0;
+//      lambda1 = (alpha1 + 1.0) * lambda1/alpha1;
+//      alpha1 = alpha1 + 1.0;
+      
+      lambda1 = sqrt( (alpha1+1)/alpha1 ) * lambda1;
+      alpha1 = (alpha1 + 1.0);
+
     }
 
   bl[0] = gamma(alpha1,1.0 / lambda1,rng); //c++ gamma has different parametrization
@@ -232,10 +256,16 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
 //  cout << "Random gamma: alpha = " << alpha2 << ", lambda = " << lambda2 << ", mu = " << alpha2 / lambda2 << ", sigma = " << sqrt(alpha2) / lambda2 << endl;
   alpha2 = eta*(num * num) / (L(1,1) * L(1,1));
   lambda2 = eta*num / (L(1,1) * L(1,1));
+//  alpha2 = (num * num) / (L(1,1) * L(1,1));
+//  lambda2 = num / (L(1,1) * L(1,1));
   if(alpha2<1)
     {
-      lambda2 = (alpha2 + 1.0) * lambda2/alpha2;
-      alpha2 = alpha2 + 1.0;
+//      lambda2 = (alpha2 + 1.0) * lambda2/alpha2;
+//      alpha2 = alpha2 + 1.0;
+
+      lambda2 = sqrt( (alpha2+1)/alpha2 ) * lambda2;
+      alpha2 = (alpha2 + 1.0);
+
     }
 
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization

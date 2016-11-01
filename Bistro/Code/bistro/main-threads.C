@@ -147,7 +147,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	}
 //      cout << tree.makeTreeNumbers() << endl;
       treebl << tree.makeTreeNumbers() << endl;
-      double logBranchLengthPriorDensity = tree.logPriorExp(0.1);
+      double logBranchLengthPriorDensity = tree.logPriorExp( (PRIOR_MEAN) );
       // if(VERBOSE)
       // 	cout << "calculating the final loglik now before clearing map" << endl;
       // double logLik0 = tree.calculate(alignment, model);

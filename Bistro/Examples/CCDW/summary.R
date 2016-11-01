@@ -40,8 +40,11 @@ for ( i in 1:N.mb )
 ### now do bistro
 source("../../Scripts/readBistro.r")
 
-bistro = readBistro("test1")
-data = readDataSort("test1")
+#bistro = readBistro("test1")
+#data = readDataSort("test1")
+
+bistro = readBistro("test6")
+data = readDataSort("test6")
 
 
 keep = which(bistro$tree=="(1,2,(3,4));")
@@ -77,7 +80,7 @@ require(viridis)
 require(ggplot2)
 require(dplyr)
 
-pdf("scatter-plots-test4.pdf")
+pdf("test6-scatter.pdf")
 vpal = viridis(2,end=0.8)
 for( i in 1:nrow(adjEdges))
 {
@@ -106,7 +109,7 @@ for( i in 1:nrow(adjEdges))
 }
 dev.off()
 
-pdf("test1.pdf")
+pdf("test6-density.pdf")
 vpal = viridis(2,end=0.8)
 for(i in 1:ncol(m))
 {

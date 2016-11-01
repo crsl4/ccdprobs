@@ -1,0 +1,3 @@
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test2 -r 1000 -b 1000 > test2.log
+
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test5 -r 1000 -b 1000 --threads 1 -eta 0.8 > test5.log

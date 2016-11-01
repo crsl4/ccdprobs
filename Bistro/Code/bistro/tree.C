@@ -1664,6 +1664,15 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
       Vector3d mu = t;
       Matrix3d cov = (-1) * prop_hessian.inverse();
+      	// XXX replace mle mu with weighted average of mle and prior mean
+	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
+	// use weights proportional to 1 / variance of each estimate
+
+//      double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
+//      mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
+//      mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
+//      mu(2) = ( (PRIOR_MEAN) * cov(2,2) + mu(2)*priorVariance ) / (priorVariance + cov(2,2));
+
       t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
       //t = multivariateNormal(mu,cov,rng, logdensity, eta);
       x->getEdgeParent()->setLength( t[0] );
@@ -1703,6 +1712,14 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
 	Vector2d mu = t;
 	Matrix2d cov = (-1) * prop_hessian.inverse();
+	// XXX replace mle mu with weighted average of mle and prior mean
+	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
+	// use weights proportional to 1 / variance of each estimate
+
+//	double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
+//	mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
+//	mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
+
 	t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
 	//	t = multivariateNormal(mu,cov,rng, logdensity,eta);
 	x->getEdgeParent()->setLength( t[0] );
