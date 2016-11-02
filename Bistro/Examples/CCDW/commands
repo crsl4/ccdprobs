@@ -1,5 +1,19 @@
+## after testing using mu[0] instead of mu0 for x1
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test10 -r 1000 -b 1000 > test10.log
+
+## after adding print to see when enters the alpha<1 case
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test9 -r 1000 -b 1000 --threads 1 > test9.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test9-2 -r 1000 -b 1000 > test9-2.log
+
+
+## after multiplying by eta after alpha<1 check
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test8 -r 1000 -b 1000 > test8.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test8-eta08 -r 1000 -b 1000 --eta 0.8 > test8-eta08.log
+
+
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test2 -r 1000 -b 1000 > test2.log
 
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test5 -r 1000 -b 1000 --threads 1 -eta 0.8 > test5.log
 
+## this one has to have ~5% ESS, I don't get it
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test7 -r 1000 -b 1000 --threads 1 --eta 0.8 -s 372873156 > test7.log

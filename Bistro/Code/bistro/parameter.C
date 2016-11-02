@@ -33,6 +33,7 @@ void usage(ostream& f)
   f << "    --loglikweight                 |  use loglik to weight bootstrap counts instead of parsimony" << endl;
   f << "    --eta eta                      |  scale to divide the variance of gamma r.v. for branch lengths (1)" << endl;
   f << "    --rootFix                      |  fix the root at one of the two nodes attached to longest branch (false)" << endl;
+  f << "    --weightMean                   |  weight the MLE with prior mean (false)" << endl;
   exit(1);
 }
 
@@ -235,6 +236,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--rootFix") == 0 )
     {
       rootFix = true;
+    }
+    else if ( strcmp(argv[k],"--weightMean") == 0 )
+    {
+      weightMean = true;
     }
     else if ( strcmp(argv[k],"--fixedQ") == 0 )
     {

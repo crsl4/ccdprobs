@@ -9,8 +9,7 @@ time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-short3.fasta -b 1000 -
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test3 --fixedQ --loglikweight --rootFix -s 522331455 > test3.log
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test-eta11 -eta 1.1 --fixedQ --loglikweight --rootFix -s 522331455 > test-eta11.log
 time ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs.fasta -b 1000 -r 1000 -m 2 -o test-eta09 -eta 0.9 --fixedQ --loglikweight --rootFix -s 522331455 > test-eta09.log
-time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b
-1000 -r 1000 -m 2 -o eta1-art2 --fixedQ --loglikweight > eta1-art2.log
+time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o eta1-art2 --fixedQ --loglikweight > eta1-art2.log
 time ../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -b 1000 -r 1000 -m 2 -o eta1-randQ --loglikweight > eta1-randQ.log
 
 ## test with mvnormal

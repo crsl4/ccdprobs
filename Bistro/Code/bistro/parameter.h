@@ -29,6 +29,7 @@ private:
   bool loglikwt;
   double eta;
   bool rootFix;
+  bool weightMean;
 public:
   Parameter()
   {
@@ -49,6 +50,7 @@ public:
     loglikwt = false;
     eta = 1.0;
     rootFix = false;
+    weightMean = false;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -87,6 +89,8 @@ public:
   void setEta(double x) { eta = x; }
   bool getRootFix() const { return rootFix; }
   void setRootFix(bool b) { rootFix = b; }
+  bool getWeightMean() const { return weightMean; }
+  void setWeightMean(bool b) { weightMean = b; }
 };
 
 #endif

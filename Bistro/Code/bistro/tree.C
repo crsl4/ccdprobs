@@ -1571,7 +1571,7 @@ double Tree::logPriorExp(double mean)
 
 
 // based on generateBranchLengths in BranchLengths/Code/test/tree.C
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool jointMLE, double eta)
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool jointMLE, double eta, bool weightMean)
 {
   // clear probability maps from all nodes for fresh calculation
   clearProbMaps();
@@ -1636,7 +1636,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
     if ( par==root )
     {
-      if(VERBOSE)
+      //if(VERBOSE)
 	cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
       x-> clearProbMapsSmart(x->getEdgeParent());
       y-> clearProbMapsSmart(y->getEdgeParent());
@@ -1668,11 +1668,13 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
 	// use weights proportional to 1 / variance of each estimate
 
-      double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
-      mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
-      mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
-      mu(2) = ( (PRIOR_MEAN) * cov(2,2) + mu(2)*priorVariance ) / (priorVariance + cov(2,2));
-
+      if(weightMean)
+	{
+	  double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
+	  mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
+	  mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
+	  mu(2) = ( (PRIOR_MEAN) * cov(2,2) + mu(2)*priorVariance ) / (priorVariance + cov(2,2));
+	}
       t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
       //t = multivariateNormal(mu,cov,rng, logdensity, eta);
       x->getEdgeParent()->setLength( t[0] );
@@ -1685,7 +1687,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
     else //par not root
       {
-	if(VERBOSE)
+	//if(VERBOSE)
 	  cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
 	x-> clearProbMapsSmart(x->getEdgeParent());
 	y-> clearProbMapsSmart(y->getEdgeParent());
@@ -1715,11 +1717,12 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	// XXX replace mle mu with weighted average of mle and prior mean
 	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
 	// use weights proportional to 1 / variance of each estimate
-
-	double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
-	mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
-	mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
-
+	if(weightMean)
+	  {
+	    double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
+	    mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
+	    mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
+	  }
 	t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
 	//	t = multivariateNormal(mu,cov,rng, logdensity,eta);
 	x->getEdgeParent()->setLength( t[0] );

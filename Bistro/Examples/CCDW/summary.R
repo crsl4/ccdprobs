@@ -2,6 +2,8 @@
 #### Bret
 #### 25 October 2016
 
+## bistro -o test4 = stem="test4"
+summaryBistro = function(stem){
 ## mrbayes
 top1 = read.table("ccdw.run1.top")
 top2 = read.table("ccdw.run2.top")
@@ -39,13 +41,11 @@ for ( i in 1:N.mb )
 
 ### now do bistro
 source("../../Scripts/readBistro.r")
-
-#bistro = readBistro("test1")
-#data = readDataSort("test1")
-
-bistro = readBistro("test6")
-data = readDataSort("test6")
-
+bistro = readBistro(stem)
+data = readDataSort(stem)
+pdf(paste0(stem,"-cloud.pdf"))
+plotBistro(bistro)
+dev.off()
 
 keep = which(bistro$tree=="(1,2,(3,4));")
 tre.bistro = data$V1[keep]
@@ -80,7 +80,7 @@ require(viridis)
 require(ggplot2)
 require(dplyr)
 
-pdf("test6-scatter.pdf")
+pdf(paste0(stem,"-scatter.pdf"))
 vpal = viridis(2,end=0.8)
 for( i in 1:nrow(adjEdges))
 {
@@ -109,7 +109,7 @@ for( i in 1:nrow(adjEdges))
 }
 dev.off()
 
-pdf("test6-density.pdf")
+pdf(paste0(stem,"-density.pdf"))
 vpal = viridis(2,end=0.8)
 for(i in 1:ncol(m))
 {
@@ -125,4 +125,4 @@ for(i in 1:ncol(m))
 
 }
 dev.off()
-
+}
