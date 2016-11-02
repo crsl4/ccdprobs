@@ -18,7 +18,7 @@ void calculateAlphaLambda(double mu, double v, double eta, double& alpha, double
   lambda = mu / (v * v);
   if(alpha<1)
     {
-      cout << "Entering alpha<1 case" << endl;
+      //cout << "Entering alpha<1 case" << endl;
       lambda = sqrt( (alpha+1.0)/alpha ) * lambda;
       alpha = (alpha + 1.0);
     }
@@ -52,7 +52,8 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   bl[0] = gamma(alpha1,1.0 / lambda1,rng); //c++ gamma has different parametrization
 
   // ------------ T2 ------------------
-  double z1 = (bl[0] - mu[0]) / L(0,0);
+  double z1 = (bl[0] - (alpha1/lambda1)) / L(0,0);
+  //  double z1 = (bl[0] - mu[0]) / L(0,0);
   //double z1 = (bl[0] - mu0) / L(0,0);
   double num = mu[1] + L(1,0)*z1;
   double alpha2;
@@ -63,8 +64,9 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization
 
   // ------------ T3 ------------------
-  double z2 = (bl[1] - mu[1] - L(1,0)*z1) / L(1,1);
-    //double z2 = (bl[1] - num) / L(1,1);
+  double z2 = (bl[1] - (alpha2/lambda2)) / L(1,1);
+  //  double z2 = (bl[1] - mu[1] - L(1,0)*z1) / L(1,1);
+  //double z2 = (bl[1] - num) / L(1,1);
   num = mu[2] + L(2,0)*z1 + L(2,1)*z2;
   double alpha3;
   double lambda3;
@@ -94,7 +96,8 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
   bl[0] = gamma(alpha1,1.0 / lambda1,rng); //c++ gamma has different parametrization
 
   // ------------ T2 ------------------
-  double z1 = (bl[0] - mu[0]) / L(0,0);
+  double z1 = (bl[0] - (alpha1/lambda1)) / L(0,0);
+  //  double z1 = (bl[0] - mu[0]) / L(0,0);
   //double z1 = (bl[0] - mu0) / L(0,0);
   double num = mu[1] + L(1,0)*z1;
   double alpha2;

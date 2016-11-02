@@ -1636,7 +1636,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
     if ( par==root )
     {
-      //if(VERBOSE)
+      if(VERBOSE)
 	cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
       x-> clearProbMapsSmart(x->getEdgeParent());
       y-> clearProbMapsSmart(y->getEdgeParent());
@@ -1687,7 +1687,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
     else //par not root
       {
-	//if(VERBOSE)
+	if(VERBOSE)
 	  cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
 	x-> clearProbMapsSmart(x->getEdgeParent());
 	y-> clearProbMapsSmart(y->getEdgeParent());

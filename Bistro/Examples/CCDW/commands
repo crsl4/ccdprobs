@@ -1,5 +1,11 @@
+## after modifying the way z1 is created
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test11-2 -r 1000 -b 1000 --eta 0.8 -s 449464908 > test11-2.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test11-3 -r 1000 -b 1000 --eta 0.6 -s 449464908 > test11-3.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test11-3-wt -r 1000 -b 1000 --eta 0.6 -s 449464908 --weightMean > test11-3-wt.log
+
 ## after testing using mu[0] instead of mu0 for x1
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test10 -r 1000 -b 1000 > test10.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test11 -r 1000 -b 1000 --eta 0.8 > test11.log
 
 ## after adding print to see when enters the alpha<1 case
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test9 -r 1000 -b 1000 --threads 1 > test9.log

@@ -68,6 +68,12 @@ for ( i in 1:N.bistro )
   m.bistro[i,] = tree$edge.length
 }
 
+require(corrplot)
+pdf(paste0(stem,"-corr.pdf"))
+corrplot(cor(m.bistro))
+corrplot(cor(m.mb))
+dev.off()
+
 ## combine data for combined plots
 m = rbind(m.bistro,m.mb)
 df = data.frame(m)
