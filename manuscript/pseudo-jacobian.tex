@@ -1,0 +1,119 @@
+\documentclass[12pt,letterpaper]{article}
+
+\usepackage[english]{babel}
+
+% Page Layout
+\usepackage[hmargin={1.0in, 1.0in}, vmargin={1.0in, 1.0in}]{geometry}
+
+% Spacing
+\usepackage{setspace}
+% Use \singlespacing, \onehalfspacing, or \doublespacing,
+% or alternatively \setstretch{3} for triple spacing (or any other number).
+
+% Mathematical Notation
+\usepackage{amsmath,amstext,amssymb}
+
+\renewcommand{\Pr}{\mathsf{P}}
+\newcommand{\prob}[1]{\Pr\left(#1\right)}
+\newcommand{\given}{\mid}
+\newcommand{\me}{\mathrm{e}}
+\renewcommand{\emptyset}{\varnothing} % use a circle instead of a zero for the empty set, requires amssymb
+
+% our commands:
+\usepackage{color}
+\newcommand{\help}[1]{\textcolor{blue}{#1}}
+\newcommand{\falta}[1]{\textcolor{red}{#1}}
+
+%\usepackage{alltt}
+% for mathematical notation in a verbatim-like environment
+% \begin{alltt} ... \end{alltt}
+
+% Graphics
+\usepackage{graphicx}
+%\usepackage[small]{subfigure}
+% for subfigures in a single figure
+%\usepackage{epsfig,rotating,epsf,psfrag,lscape}
+
+% Lists
+\usepackage{enumitem}
+% usage: \begin{enumerate}[resume] will continue numbering from previous enumerate block
+
+% Citations
+\usepackage{natbib}
+
+
+%==================================================== ALGORITHM SETUP
+\usepackage[ruled,vlined]{algorithm2e}
+%Algorithms
+\def \validationAlg{{\hyperref[validationAlg]{Algorithm \ref{validationAlg}}}}
+
+\begin{document}
+\begin{center}
+\textbf{Jacobian for Q matrix}
+\end{center}
+
+Let $h:\mathbf{R}^8 \rightarrow \mathbf{R}^{12}$, let
+$s=(s_{12},s_{13},s_{14},s_{23},s_{24})$, with $s_{34}=1-\sum s_{ij}$,
+and $\pi=(\pi_1,\pi_2,\pi_3)$ with $\pi_4=1-\sum \pi_i$:
+\begin{align*}
+Q_{12}&=\frac{S_{12}}{2\pi_2}, Q_{13}=\frac{s_{13}}{2\pi_1},
+Q_{14}=\frac{s_{14}}{2\pi_1}\\
+Q_{21}&=\frac{s_{12}}{2\pi_2}, Q_{23}=\frac{s_{23}}{2\pi_2},
+Q_{24}=\frac{s_{24}}{2\pi_2}\\
+Q_{31}&=\frac{s_{13}}{2\pi_3}, Q_{32}=\frac{s_{23}}{2\pi_3},
+Q_{34}=\frac{1-\sum s_{ij}}{2\pi_3}\\
+Q_{41}&=\frac{s_{14}}{2(1-\sum \pi_i)}, Q_{42}=\frac{s_{24}}{2(1-\sum
+  \pi_i)}, Q_{43}=\frac{1-\sum s_{ij}}{2(1-\sum \pi_i)}
+\end{align*}
+
+The Jacobian matrix of $h$ $J_h$ is the $12 \times 8$ matrix given by
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{cccccc|ccc}
+& $s_{12}$ & $s_{13}$ & $s_{14}$ & $s_{23}$ & $s_{124}$ & $\pi_1$ &
+$\pi_2$ & $\pi_3$ \\
+$Q_{12}$ & $\frac{1}{2\pi_1}$ & 0 & 0 & 0 & 0 &
+$-\frac{s_{12}}{2\pi_1^2}$ & 0 & 0\\
+$Q_{13}$ & 0 & $\frac{1}{2\pi_1}$ & 0 & 0 & 0 &
+$-\frac{s_{13}}{2\pi_1^2}$ & 0 & 0\\
+$Q_{14}$ & 0 & 0 & $\frac{1}{2\pi_1}$ & 0 & 0 &
+$-\frac{s_{14}}{2\pi_1^2}$ & 0 & 0\\
+\hline
+$Q_{21}$ & $\frac{1}{2\pi_2}$ & 0 & 0 & 0 & 0 &
+0 & $-\frac{s_{12}}{2\pi_2^2}$ & 0\\
+$Q_{23}$ & 0 & 0 & 0 & $\frac{1}{2\pi_2}$ & 0 &
+0 & $-\frac{s_{23}}{2\pi_2^2}$ & 0\\
+$Q_{24}$ & 0 & 0 & 0 & 0 & $\frac{1}{2\pi_2}$ &
+0 & $-\frac{s_{24}}{2\pi_2^2}$ & 0\\
+\hline
+$Q_{31}$ & 0 & $\frac{1}{2\pi_3}$ & 0 & 0 & 0 &
+0 & 0 & $-\frac{s_{13}}{2\pi_3^2}$\\
+$Q_{32}$ & 0 & 0 & 0 & $\frac{1}{2\pi_3}$ & 0 &
+0 & 0 & $-\frac{s_{23}}{2\pi_3^2}$\\
+$Q_{34}$ & $-\frac{1}{2\pi_3}$ & $-\frac{1}{2\pi_3}$ & $-\frac{1}{2\pi_3}$ & $-\frac{1}{2\pi_3}$ & $-\frac{1}{2\pi_3}$ &
+0 & 0 & $-\frac{1-\sum s_{ij}}{2\pi_3^2}$\\
+\hline
+$Q_{41}$ & 0 & 0 & $\frac{1}{2(1-\sum \pi_i)}$ & 0 & 0 &
+$\frac{s_{14}}{2(1-\sum \pi_i)^2}$ & $\frac{s_{14}}{2(1-\sum \pi_i)^2}$ & $\frac{s_{14}}{2(1-\sum \pi_i)^2}$\\
+$Q_{42}$ & 0 & 0 & 0 & 0 & $\frac{1}{2(1-\sum \pi_i)}$ &
+$\frac{s_{24}}{2(1-\sum \pi_i)^2}$ & $\frac{s_{24}}{2(1-\sum \pi_i)^2}$ & $\frac{s_{24}}{2(1-\sum \pi_i)^2}$\\
+$Q_{43}$ & $-\frac{1}{2(1-\sum \pi_i)}$ & $-\frac{1}{2(1-\sum \pi_i)}$ & $-\frac{1}{2(1-\sum \pi_i)}$ & $-\frac{1}{2(1-\sum \pi_i)}$ & $-\frac{1}{2(1-\sum \pi_i)}$ &
+$\frac{1-\sum s_{ij}}{2(1-\sum \pi_i)^2}$ & $\frac{1-\sum
+  s_{ij}}{2(1-\sum \pi_i)^2}$ & $\frac{1- \sum s_{ij}}{2(1-\sum \pi_i)^2}$
+\end{tabular}
+\end{table}
+
+We have the density of $f(s,p)$, and we want the density of
+\begin{align*}
+g(Q) &= f(h^{-1}(Q))*|J_{h^{-1}}| \\
+&= f(h^{-1}(Q))*\frac{1}{|J_{h}|}
+\end{align*}
+
+But $J_h$ is not a square matrix, so the determinant is not
+defined. We are using the SVD to get a \textit{pseudo}-determinant:
+\begin{align*}
+J_h & = U \Lambda V^T \\
+|J_h| & = \prod_{i=1}^8 \lambda_i
+\end{align*}
+\end{document}

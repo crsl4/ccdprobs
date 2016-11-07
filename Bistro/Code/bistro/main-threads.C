@@ -25,6 +25,7 @@
 
 #include "Eigen/Core"
 #include "Eigen/Eigenvalues"
+#include "Eigen/SVD"
 
 using namespace std;
 using namespace std::chrono;
@@ -32,7 +33,7 @@ using namespace Eigen;
 
 bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string, double> &p2)
 {
-    return p1.second < p2.second;
+  return p1.second < p2.second;
 }
 
 VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDensity,mt19937_64& rng)
@@ -59,6 +60,36 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
   }
   logProposalDensity += lgamma(sumalpha);
   return y;
+}
+
+double determinantJacobian(VectorXd s, VectorXd p)
+{
+  if(1.0-TOL > s.sum() || s.sum() > 1.0+TOL)
+    {
+      cerr << "vector s should add to 1: " << s.sum() << ", " << s.transpose() << endl;
+      exit(1);
+    }
+  if(1.0-TOL > p.sum() || p.sum() > 1.0+TOL)
+    {
+      cerr << "vector p should add to 1: " << p.sum() << ", " << p.transpose() << endl;
+      exit(1);
+    }
+  MatrixXd mat(12,8);
+  mat << 1/(2*p(0)), 0, 0, 0, 0, -s(0)/(2*p(0)*p(0)), 0, 0, //Q12
+    0, 1/(2*p(0)), 0, 0, 0, -s(1)/(2*p(0)*p(0)), 0, 0, //Q13
+    0, 0, 1/(2*p(0)), 0 ,0, -s(2)/(2*p(0)*p(0)), 0, 0, //Q14
+    1/(2*p(1)), 0, 0, 0, 0, 0, -s(0)/(2*p(1)*p(1)), 0, //Q21
+    0, 0, 0, 1/(2*p(1)), 0, 0, -s(3)/(2*p(1)*p(1)), 0, //Q23
+    0, 0, 0, 0, 1/(2*p(1)), 0, -s(4)/(2*p(1)*p(1)), 0, //Q24
+    0, 1/(2*p(2)), 0, 0, 0, 0, 0, -s(1)/(2*p(2)*p(2)), //Q31
+    0, 0, 0, 1/(2*p(2)), 0, 0, 0, -s(3)/(2*p(2)*p(2)), //Q32
+    -1/(2*p(2)), -1/(2*p(2)), -1/(2*p(2)), -1/(2*p(2)), -1/(2*p(2)), 0, 0, -s(5)/(2*p(2)*p(2)), //Q34
+    0, 0, 1/(2*p(3)), 0, 0, s(2)/(2*p(3)*p(3)), s(2)/(2*p(3)*p(3)), s(2)/(2*p(3)*p(3)), //Q41
+    0, 0, 0, 0, 1/(2*p(3)), s(4)/(2*p(3)*p(3)), s(4)/(2*p(3)*p(3)), s(4)/(2*p(3)*p(3)), //Q42
+    -1/(2*p(3)), -1/(2*p(3)), -1/(2*p(3)), -1/(2*p(3)), -1/(2*p(3)), s(5)/(2*p(3)*p(3)), s(5)/(2*p(3)*p(3)), s(5)/(2*p(3)*p(3)); //Q43
+  JacobiSVD<MatrixXd> svd(mat, ComputeThinU | ComputeThinV);
+  double det = svd.singularValues().prod(); 
+  return 1/det; // inverse of determinant because Jacobian is computed for f, not f^{-1}
 }
 
 // arguments made reference to avoid copying in each thread
@@ -92,8 +123,10 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), scale*alignment.getNumSites(), logQ, rng);
        VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), scale*alignment.getNumSites(), logQ, rng);
 
-       // VectorXd p_star(0.248164000,0.231821000,0.203022000,0.316992000);
-       // VectorXd s_star(0.047560014,0.295583052,0.070852406,0.011888824,0.566267391,0.007848313);
+       // here we update logQ with the jacobian
+       double detJacobian = determinantJacobian(s_star,p_star);
+       logQ += log(detJacobian);
+
        if( parameters.getFixedQ() )
 	 logQ = 0;
        QMatrix model(p_star,s_star);

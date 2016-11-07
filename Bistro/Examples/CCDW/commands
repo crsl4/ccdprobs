@@ -1,3 +1,9 @@
+## test without/with jacobian
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o withoutJ -r 1000 -b 1000 --eta 0.8 -s 449464908 > withoutJ.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o withJ -r 1000 -b 1000 --eta 0.8 -s 449464908 > withJ.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o withJ-wt -r 1000 -b 1000 --eta 0.8 -s 449464908 --weightMean > withJ-wt.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o withJ-2 -r 1000 -b 1000 --eta 0.8 > withJ-2.log
+
 ## after modifying the way z1 is created
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test11-2 -r 1000 -b 1000 --eta 0.8 -s 449464908 > test11-2.log
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test11-3 -r 1000 -b 1000 --eta 0.6 -s 449464908 > test11-3.log
