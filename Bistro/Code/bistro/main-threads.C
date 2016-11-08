@@ -88,7 +88,7 @@ double determinantJacobian(VectorXd s, VectorXd p)
     0, 0, 0, 0, 1/(2*p(3)), s(4)/(2*p(3)*p(3)), s(4)/(2*p(3)*p(3)), s(4)/(2*p(3)*p(3)), //Q42
     -1/(2*p(3)), -1/(2*p(3)), -1/(2*p(3)), -1/(2*p(3)), -1/(2*p(3)), s(5)/(2*p(3)*p(3)), s(5)/(2*p(3)*p(3)), s(5)/(2*p(3)*p(3)); //Q43
   JacobiSVD<MatrixXd> svd(mat, ComputeThinU | ComputeThinV);
-  double det = svd.singularValues().prod(); 
+  double det = svd.singularValues().prod();
   return 1/det; // inverse of determinant because Jacobian is computed for f, not f^{-1}
 }
 
@@ -121,11 +121,11 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        if( parameters.getFixedQ() )
 	 scale = 10000000;
        VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), scale*alignment.getNumSites(), logQ, rng);
-       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), scale*alignment.getNumSites(), logQ, rng);
+       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), scale*alignment.getNumSites()/5, logQ, rng);
 
        // here we update logQ with the jacobian
-       double detJacobian = determinantJacobian(s_star,p_star);
-       logQ += log(detJacobian);
+       //       double detJacobian = determinantJacobian(s_star,p_star);
+       //logQ += log(detJacobian);
 
        if( parameters.getFixedQ() )
 	 logQ = 0;
