@@ -1,0 +1,222 @@
+---
+title: "Jacobian Question"
+author: "Bret Larget"
+date: "11/7/2016"
+output: html_document
+#output: pdf_document
+#header-includes:
+#   - \usepackage{dsfont}
+---
+
+```{r setup, include=FALSE,message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(ggplot2)
+require(ggtern)
+```
+
+### Example Question
+
+Suppose that we have a parameter vector
+$\theta = (\theta_1,\ldots,\theta_k) \in \mathbb{R}^k$
+and $\theta \sim F$ for some distribution $F$.
+We also have a function $h: \mathbb{R}^k \rightarrow \Delta^m$
+where
+$\Delta^m = \{(t_1,\ldots,t_m) \in \mathbb{R}^m: \sum_i t_i = 1 \ \text{and} \ t_i > 0 \ \text{for all} \ i\}$
+is the $m$ dimensional simplex.
+Let $\phi = (\phi_1,\ldots,\phi_m) = h(\theta)$.
+Then, suppose that we have an iid multinomial sample
+$X = (X_1,\ldots,X_n)$ with
+$X_i \sim \text{Multinomial}(\phi)$ for $i=1,\ldots,n$.
+
+The Bayesian posterior density $p(\theta \mid X)$ is our target density.
+We want to estimate this density using importance sampling.
+We generate $B$ realizations $\theta^* \sim G$ with $\theta^* \in \mathbb{R}^k$.
+How do we calculate the correct importance weights?
+
+### Specific Example 1
+
+Let $\theta \sim \text{Dirichlet}(1,1,1)$.
+Define $\eta_1 = \theta_1$,
+$\eta_2 = \theta_2$,
+$\eta_3 = \theta_3$,
+and
+$\eta_4 = \theta_1\theta_2\theta_3$.
+Define $\phi_i = \eta_i / \sum_j \eta_j$.
+If $X \sim \text{Multinomial}(\phi)$,
+the $X$ has possible values $1,\ldots,4$ with probabilities $\phi$.
+
+Here is code to generate random data.
+
+```{r example1}
+rx1 = function(n)
+{
+  theta = rgamma(3,1)
+  theta = theta / sum(theta)
+  eta = c(theta,prod(theta))
+  phi = eta/sum(eta)
+  x = sample(1:4,size=n,replace=TRUE,prob=phi)
+  return(list(x=x,theta=theta))
+}
+set.seed(25463)
+out1 = rx1(100)
+x1 = out1$x
+theta1 = out1$theta
+tab1 = table(x1)
+tab1
+theta1
+```
+
+MLE estimation
+
+```{r mle}
+mle = function(x)
+{
+  tab1 = tabulate(x,4)
+  foo1 = tab1[1] + tab1[4]
+  foo2 = tab1[2] + tab1[4]
+  foo3 = tab1[3] + tab1[4]
+  mle1 = c(foo1*foo3,foo2*foo3)/((foo1+foo3)*(foo2+foo3)-(foo1*foo2))
+  return(mle1)
+}
+mle1 = mle(x1)
+theta1.hat = c(mle1,1-sum(mle1))
+theta1.hat
+```
+
+Do MCMC.
+
+```{r mcmc}
+## Assumes flat prior for theta
+log.post = function(theta,tab)
+{
+  eta = c(theta,prod(theta))
+  phi = eta/sum(eta)
+  return ( sum(tab*log(phi)) )
+}
+## random dirichlet with alpha[i] = eta*x[i] + 1
+rdirichlet = function(alpha)
+{
+##  alpha = eta*x+1
+  n = length(alpha)
+  y = rgamma(n,alpha,1)
+  return(y/sum(y))
+}
+
+ddirichlet = function(x,alpha,log=TRUE)
+{
+  k = lgamma(sum(alpha)) - sum(lgamma(alpha))
+  y = sum( (alpha-1)*log(x) )
+  if ( log )
+    return( k + y )
+  else
+    return( exp(k + y) )
+}
+
+mcmc1 = function(x,B=10000,tune=1)
+{
+  tab = tabulate(x,4)
+  theta = matrix(0,B,3)
+  curr = mle(x)
+  curr = c(curr,1-sum(curr))
+  n = sum(tab)
+  accept = rep(0,B)
+  log.like = rep(0,B)
+  for ( i in 1:B )
+  {
+    alpha = curr*n*tune + 1
+    prop = rdirichlet(alpha)
+    log.prob = 
+      log.post(prop,tab) -
+      log.post(curr,tab) +
+      ddirichlet(curr,prop*n*tune+1,log=TRUE) -
+      ddirichlet(prop,alpha,log=TRUE)
+    if ( log.prob > 0 )
+      p = 1
+    else
+      p = exp(log.prob)
+    log.like[i] = log.post(curr,tab)
+    accept[i] = p
+    if ( runif(1) < p )
+    {
+      curr = prop
+    }
+    theta[i,] = curr
+  }
+  df = data.frame(gen=1:B,log.like=log.like,theta1=theta[,1],theta2=theta[,2],theta3=theta[,3],accept=accept)
+  return(df)
+}
+out1 = mcmc1(x=x1,B=11000)
+```
+
+Plot output
+
+```{r plots-1, fig.height=3}
+require(viridis)
+df0 = out1
+df = out1[1001:11000,]
+ggplot(df0,aes(x=gen,y=accept)) +
+  geom_point(alpha=0.2) +
+  geom_hline(yintercept=mean(df0$accept),color="red") +
+  ggtitle(paste("Mean Acceptance Rate = ",round(mean(df0$accept),3)))
+ggplot(df0,aes(x=gen,y=log.like)) +
+  geom_line()
+ggplot(df,aes(x=theta1,y=theta2,color=log.like)) +
+  geom_point(alpha=0.2) +
+  scale_color_viridis() +
+  theme_bw()
+ggtern(df,aes(theta1,theta2,theta3,color=log.like)) +
+  tern_limits(0.8,0.6,0.7) +
+  geom_point(alpha=0.2) +
+  scale_color_viridis() +
+  theme_bw()
+```
+
+### Specific Example 2
+
+Let $\theta_{i,j} \sim N(0,1)$
+for $1 \le i < j \le 4$,
+so there are a total of six iid standard normal random variables.
+Define the symmetric $4 \times 4$ matrix $M = \{m_{i,j}\}$
+by
+$$
+m_{i,j} = \left\{
+\begin{array}{ll}
+\mathrm{e}^{\theta_{i,j}} & \text{if $i<j$} \\
+\mathrm{e}^{\theta_{j,i}} & \text{if $j<i$} \\
+0 & \text{if $i=j$}
+\end{array}
+\right.
+$$
+Define $\mathbf{1} = (1,1,1,1)^\top$.
+Let $\phi = M\mathbf{1}\, /\, (\mathbf{1}^\top M \mathbf{1})$.
+Note that $\phi = (\phi_1,\ldots,\phi_4)$,
+where $\phi_j>0$ and $\sum_j \phi_j = 1$.
+
+Here is code to generate $X$ from this model.
+
+```{r generate-x}
+rx = function(n)
+{
+  theta = rnorm(6)
+  m = matrix(0,4,4)
+  m[row(m) > col(m)] = exp(theta)
+  m = m + t(m)
+  phi = apply(m,1,sum)
+  phi = phi / sum(phi)
+  x = sample(1:4,size=n,replace=TRUE,prob=phi)
+  return( list(x=x,theta=theta,phi=phi) )
+}
+```
+
+
+##### Get a data set
+
+```{r data, message=FALSE}
+set.seed(35345)
+out = rx(100)
+x = out$x
+theta = out$theta
+rm(out)
+table(x)
+print(theta)
+```
