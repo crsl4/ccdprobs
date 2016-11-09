@@ -62,36 +62,6 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
   return y;
 }
 
-double determinantJacobian(VectorXd s, VectorXd p)
-{
-  if(1.0-TOL > s.sum() || s.sum() > 1.0+TOL)
-    {
-      cerr << "vector s should add to 1: " << s.sum() << ", " << s.transpose() << endl;
-      exit(1);
-    }
-  if(1.0-TOL > p.sum() || p.sum() > 1.0+TOL)
-    {
-      cerr << "vector p should add to 1: " << p.sum() << ", " << p.transpose() << endl;
-      exit(1);
-    }
-  MatrixXd mat(12,8);
-  mat << 1/(2*p(0)), 0, 0, 0, 0, -s(0)/(2*p(0)*p(0)), 0, 0, //Q12
-    0, 1/(2*p(0)), 0, 0, 0, -s(1)/(2*p(0)*p(0)), 0, 0, //Q13
-    0, 0, 1/(2*p(0)), 0 ,0, -s(2)/(2*p(0)*p(0)), 0, 0, //Q14
-    1/(2*p(1)), 0, 0, 0, 0, 0, -s(0)/(2*p(1)*p(1)), 0, //Q21
-    0, 0, 0, 1/(2*p(1)), 0, 0, -s(3)/(2*p(1)*p(1)), 0, //Q23
-    0, 0, 0, 0, 1/(2*p(1)), 0, -s(4)/(2*p(1)*p(1)), 0, //Q24
-    0, 1/(2*p(2)), 0, 0, 0, 0, 0, -s(1)/(2*p(2)*p(2)), //Q31
-    0, 0, 0, 1/(2*p(2)), 0, 0, 0, -s(3)/(2*p(2)*p(2)), //Q32
-    -1/(2*p(2)), -1/(2*p(2)), -1/(2*p(2)), -1/(2*p(2)), -1/(2*p(2)), 0, 0, -s(5)/(2*p(2)*p(2)), //Q34
-    0, 0, 1/(2*p(3)), 0, 0, s(2)/(2*p(3)*p(3)), s(2)/(2*p(3)*p(3)), s(2)/(2*p(3)*p(3)), //Q41
-    0, 0, 0, 0, 1/(2*p(3)), s(4)/(2*p(3)*p(3)), s(4)/(2*p(3)*p(3)), s(4)/(2*p(3)*p(3)), //Q42
-    -1/(2*p(3)), -1/(2*p(3)), -1/(2*p(3)), -1/(2*p(3)), -1/(2*p(3)), s(5)/(2*p(3)*p(3)), s(5)/(2*p(3)*p(3)), s(5)/(2*p(3)*p(3)); //Q43
-  JacobiSVD<MatrixXd> svd(mat, ComputeThinU | ComputeThinV);
-  double det = svd.singularValues().prod();
-  return 1/det; // inverse of determinant because Jacobian is computed for f, not f^{-1}
-}
-
 // arguments made reference to avoid copying in each thread
 template<typename T>
 void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
@@ -122,10 +92,6 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	 scale = 10000000;
        VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), scale*alignment.getNumSites(), logQ, rng);
        VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), scale*alignment.getNumSites()/5, logQ, rng);
-
-       // here we update logQ with the jacobian
-       //       double detJacobian = determinantJacobian(s_star,p_star);
-       //logQ += log(detJacobian);
 
        if( parameters.getFixedQ() )
 	 logQ = 0;

@@ -35,3 +35,20 @@ bistro.s = select(bistro, sAC,sAG,sAT,sCG,sCT,sGT)
 bistro.var = apply(as.matrix(bistro.s),2,var)
 bistro.var / foo.var
 ```
+
+```R
+ccdw = read.dna("ccdw.fasta", format="fasta", as.character=TRUE)
+table(ccdw[1,],ccd[2,])
+paste(ccdw[,1],collapse="")
+patterns = apply(ccdw,2,function(x) paste(x,collapse=""))
+str(patterns)
+unique(patterns)
+table(patterns) ## very rare only cg,gt
+```
+
+maybe the problem is that the rates CG, GT are very low
+
+partition by codon
+```R
+table(patterns[seq(3,1545,3)]) ## third codon position
+```

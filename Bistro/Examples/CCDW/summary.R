@@ -131,4 +131,47 @@ for(i in 1:ncol(m))
 
 }
 dev.off()
+
+########################################################################################
+foo1 = read.table("ccdw.run1.p", header=TRUE)
+foo2 = read.table("ccdw.run2.p", header=TRUE)
+foo = rbind(foo1[-(1:2001),],foo2[-(1:2001),])
+foo$sAC = with(foo, r.A...C. * pi.A. * pi.C.)
+foo$sAG = with(foo, r.A...G. * pi.A. * pi.G.)
+foo$sAT = with(foo, r.A...T. * pi.A. * pi.T.)
+foo$sCG = with(foo, r.C...G. * pi.C. * pi.G.)
+foo$sCT = with(foo, r.C...T. * pi.C. * pi.T.)
+foo$sGT = with(foo, r.G...T. * pi.G. * pi.T.)
+s = with(foo,sAC+sAG+sAT+sCG+sCT+sGT)
+foo$sAC = foo$sAC/s
+foo$sAG = foo$sAG/s
+foo$sAT = foo$sAT/s
+foo$sCG = foo$sCG/s
+foo$sCT = foo$sCT/s
+foo$sGT = foo$sGT/s
+N.mb2 = length(foo$Gen)
+N.bistro2 = length(bistro$w)
+
+foo2 = subset(foo,select=c("pi.A.","pi.C.","pi.G.","pi.T.","sAC","sAG","sAT","sCG","sCT","sGT"))
+bistro2 = subset(bistro,select=c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6"))
+names(foo2) = c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6")
+
+df2 = rbind(bistro2,foo2)
+df2$set = factor( c(rep("Bistro",N.bistro2),rep("MrBayes",N.mb2)) )
+
+
+pdf(paste0(stem,"-rates-density.pdf"))
+vpal = viridis(2,end=0.8)
+for(i in 1:(ncol(df2)-1))
+{
+    median.bistro = median( drop(as.matrix(filter(df2,set=="Bistro") %>% select(i))) )
+    median.mb = median( drop(as.matrix(filter(df2,set=="MrBayes") %>% select(i))) )
+    plot(ggplot(df2,aes(x=df2[,i],col=set))+geom_density() +
+         scale_color_manual(values=vpal) +
+         geom_vline(xintercept=median.bistro,color=vpal[1]) +
+         geom_vline(xintercept=median.mb,color=vpal[2]) +
+         ggtitle(paste(names(df2)[i])) +
+         theme_bw())
+}
+dev.off()
 }

@@ -1,3 +1,7 @@
+## test with new scale to dirichlet
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o randQ-scale5 -r 1000 -b 1000 > randQ-scale5.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o randQ-scale6 -r 1000 -b 1000 > randQ-scale6.log
+
 ## test without jacobian to compare fixedQ and not fixed
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o fixQ -r 1000 -b 1000 --fixedQ > fixQ.log
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o fixQ2 -r 1000 -b 1000 --fixedQ -s 449464908 > fixQ2.log
