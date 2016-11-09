@@ -29,7 +29,7 @@ void QMatrix::completeConstruction()
 
   // Q matrix
   Matrix4d qmatrix;
-  
+
   for ( int i=0; i<4; ++i )
   {
     qmatrix(i,i) = 0;
@@ -54,10 +54,10 @@ void QMatrix::completeConstruction()
     psqrt(i) = sqrt( stationaryP(i) );
     psqrtinv(i) = 1 / psqrt(i);
   }
-  
+
   DiagonalMatrix<double,4> pSqrtDiag = psqrt.asDiagonal();
   DiagonalMatrix<double,4> pSqrtDiagInv = psqrtinv.asDiagonal();
-  
+
   Matrix4d symmat = pSqrtDiag * qmatrix * pSqrtDiagInv;
   SelfAdjointEigenSolver<Matrix4d> es(symmat);
   lambda = es.eigenvalues();
@@ -143,9 +143,29 @@ void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double sca
   double sumAcceptP = 0;
   double sumAcceptS = 0;
   Vector4d avgP;
+  Vector4d avgPold;
+  Vector4d sP;
+  Vector4d prod1;
+  Vector4d prod2;
+  Vector4d prod12;
   avgP << 0,0,0,0;
+  avgPold << 0,0,0,0;
+  sP << 0,0,0,0;
+  prod1 << 0,0,0,0;
+  prod2 << 0,0,0,0;
+  prod12 << 0,0,0,0;
   VectorXd avgS(6);
+  VectorXd avgSold(6);
+  VectorXd sS(6);
+  VectorXd prod3(6);
+  VectorXd prod4(6);
+  VectorXd prod34(6);
   avgS << 0,0,0,0,0,0;
+  avgSold << 0,0,0,0,0,0;
+  sS << 0,0,0,0,0,0;
+  prod3 << 0,0,0,0,0,0;
+  prod4 << 0,0,0,0,0,0;
+  prod34 << 0,0,0,0,0,0;
   cerr << '|';
   for ( int i=0; i<numGenerations; ++i )
   {
@@ -169,7 +189,14 @@ void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double sca
       resetStationaryP(y);
       currLogLikelihood = propLogLikelihood;
     }
-    avgP += getStationaryP();
+    //    avgP += getStationaryP();
+    prod1 = getStationaryP() - avgPold;
+    avgP = avgPold + prod1/(i+1);
+    prod2 = getStationaryP() - avgP;
+    for ( int i=0; i<4; ++i )
+	prod12(i) = prod1(i)*prod2(i);
+    sP += prod12;
+    avgPold = avgP;
     VectorXd xx = getSymmetricQP();
     logProposalRatio = 0;
     VectorXd yy(6);
@@ -186,12 +213,25 @@ void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double sca
       resetSymmetricQP(yy);
       currLogLikelihood = propLogLikelihood;
     }
-    avgS += getSymmetricQP();
+    //    avgS += getSymmetricQP();
+    prod3 = getSymmetricQP() - avgSold;
+    avgS = avgSold + prod3/(i+1);
+    prod4 = getSymmetricQP() - avgS;
+    for ( int i=0; i<6; ++i )
+	prod34(i) = prod3(i)*prod4(i);
+    sS += prod34;
+    avgSold = avgS;
   }
   cout << "stationary acceptance: " << sumAcceptP / numGenerations << endl;
   cout << "symmetric acceptance: " << sumAcceptS / numGenerations << endl;
-  avgP /= numGenerations;
-  avgS /= numGenerations;
+  //  avgP /= numGenerations;
+  //  avgS /= numGenerations;
+  sP /= (numGenerations-1);
+  sS /= (numGenerations-1);
+  cout << "avgP: " << avgP.transpose() << endl;
+  cout << "sP: " << sP.transpose() << endl;
+  cout << "avgS: " << avgS.transpose() << endl;
+  cout << "sS: " << sS.transpose() << endl;
   reset(avgP,avgS);
   cout << stationaryP.transpose() << endl;
   cout << symmetricQP.transpose() << endl;
