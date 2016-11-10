@@ -62,6 +62,44 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
   return y;
 }
 
+// will use x as the mean to the dirichlet, and v as the variance for each entry
+// we calculate the scale inside
+// E(yi) = alpha_i/sum{alpha_i}=x_i (because sum{x_i}=1)
+// Var(yi) = alpha_i*(sum{alpha_i}-alpha_i)/(sum{alpha_i})^2*(sum{alpha_i}+1)
+// if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi 
+VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposalDensity,mt19937_64& rng)
+{
+  //  cout << "vector x: " << x.transpose() << endl;
+  //cout << "vector v: " << v.transpose() << endl;
+  VectorXd alpha(x.size());
+  VectorXd y(x.size());
+  double sum = 0;
+  double sumalpha = 0;
+  double scale;
+  for ( int i=0; i<x.size(); ++i )
+    scale += x(i)*(1-x(i))/v(i);
+  scale /= x.size(); //we need to use the same scale or we create bias
+  cout << "Scale: " << scale << endl;  
+  for ( int i=0; i<x.size(); ++i )
+  {
+    alpha(i) = scale*x(i) + 1;
+    gamma_distribution<double> rgamma(alpha(i),1.0);
+    y(i) = rgamma(rng);
+    sum += y(i);
+    sumalpha += alpha(i);
+  }
+  for ( int i=0; i<x.size(); ++i )
+  {
+    y(i) /= sum;
+  }
+  for ( int i=0; i<x.size(); ++i )
+  {
+    logProposalDensity += ( - lgamma(alpha(i)) + scale*x(i)*log(y(i)) ) ;
+  }
+  logProposalDensity += lgamma(sumalpha);
+  return y;
+}
+
 // arguments made reference to avoid copying in each thread
 template<typename T>
 void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
@@ -90,8 +128,8 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        double scale = 1;
        if( parameters.getFixedQ() )
 	 scale = 10000000;
-       VectorXd p_star = dirichletProposalDensity(q_init.getStationaryP(), scale*alignment.getNumSites(), logQ, rng);
-       VectorXd s_star = dirichletProposalDensity(q_init.getSymmetricQP(), scale*alignment.getNumSites()/5, logQ, rng);
+       VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), q_init.getMcmcVarP(), logQ, rng);
+       VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), q_init.getMcmcVarQP(), logQ, rng);
 
        if( parameters.getFixedQ() )
 	 logQ = 0;
@@ -257,6 +295,8 @@ int main(int argc, char* argv[])
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
+  model.setMcmcVarP(q_init.getMcmcVarP());
+  model.setMcmcVarQP(q_init.getMcmcVarQP());
   cerr << endl << " done." << endl;
 
   milliseconds ms6 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );

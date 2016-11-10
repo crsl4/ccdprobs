@@ -35,6 +35,8 @@ private:
   Matrix4d V;
   Matrix4d Vinv;
   Matrix4d Q;
+  Vector6d mcmcVarQP;
+  Vector4d mcmcVarP;
 public:
   void completeConstruction();
   QMatrix(vector<double>,vector<double>); // p and s, assumes sum to 1 and positive
@@ -64,6 +66,10 @@ public:
     completeConstruction();
   }
   void mcmc(Alignment&,Tree&,int,double,mt19937_64&);
+  Vector6d getMcmcVarQP() const { return mcmcVarQP; }
+  Vector4d getMcmcVarP() const { return mcmcVarP; }
+  void setMcmcVarQP(VectorXd v) { mcmcVarQP = v; }
+  void setMcmcVarP(Vector4d v) { mcmcVarP = v; }
 };
 
 #endif

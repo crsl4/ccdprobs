@@ -176,6 +176,7 @@ public:
   Node* getNode(int n) { return nodes[n]; }
   Edge* getEdge(int n) { return edges[n]; }
   string getTreeString() { return treeString; }
+  vector<Edge*> getEdges() {return edges; }
   void readSubtree(istringstream&,Node*,int);
   void setNumbers(Node*);
   void print(ostream&);
