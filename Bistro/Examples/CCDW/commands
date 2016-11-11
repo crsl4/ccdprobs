@@ -1,3 +1,6 @@
+## after changing mcmc to do bl
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o randQ-scale5-4 -r 1000 -b 1000 -s 1948444759 > randQ-scale5-4.log
+
 ## after adding scale depending on mcmc variance
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o randQ-scale5-3 -r 1000 -b 1000 -s 1948444759 > randQ-scale5-3.log
 

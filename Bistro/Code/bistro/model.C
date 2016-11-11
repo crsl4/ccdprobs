@@ -319,7 +319,7 @@ void mcmc(QMatrix& Q,Alignment& alignment,Tree& tree,int numGenerations,double s
     VectorXd xx = Q.getSymmetricQP();
     logProposalRatio = 0;
     VectorXd yy(6);
-    yy = dirichletProposal(xx,scale,logProposalRatio,rng);
+    yy = dirichletProposal(xx,scale/5,logProposalRatio,rng);
     propQ.reset(Q.getStationaryP(),yy);
     tree.clearProbMaps();
     propLogLikelihood = tree.calculate(alignment,propQ);
@@ -341,27 +341,38 @@ void mcmc(QMatrix& Q,Alignment& alignment,Tree& tree,int numGenerations,double s
     avgSold = avgS;
     // now with Q, we want to sample branch lengths
     tree.clearProbMaps();
-    double xxx;
-    double yyy;
-    int j = 0;
-    double logl,dlogl,ddlogl; //??? or scale??
+    int j = 0; 
+    //make tree function
     for ( vector<Edge*>::iterator e=tree.getEdges().begin(); e!=tree.getEdges().end(); ++e )
       {
-	xxx = (*e)->getLength();
+	cerr << "anything" << endl;
+	cerr << "edge number: " << (*e)->getNumber() << endl;
+	double xxx = (*e)->getLength();
 	logProposalRatio = 0;
-	(*e)->calculate(xxx,alignment,Q,logl,dlogl,ddlogl);
-	yyy = gammaProposal(xxx,ddlogl,logProposalRatio,rng);
+	uniform_real_distribution<double> runif(0,1);
+	double r = exp(LAMBDA*(runif(rng)-0.5));
+	double yyy = xxx * r;
+	cerr << "new branch proposed: " << yyy << endl;
+	(*e)->setLength(yyy);
 	tree.clearProbMaps();
-	propLogLikelihood = tree.calculate(alignment,Q); //for the whole tree?
-	acceptProbability = exp(propLogLikelihood - currLogLikelihood + logProposalRatio);
+	cerr << "starting lik calculation" << endl;
+	propLogLikelihood = tree.calculate(alignment,Q); //make faster later
+	cerr << "after lik calculation" << endl;
+	acceptProbability = exp(propLogLikelihood - currLogLikelihood + 3*log(r));
 	if ( acceptProbability > 1 )
 	  acceptProbability = 1;
-	//	sumAcceptBL += acceptProbability; // ??
-	uniform_real_distribution<double> runif(0,1);
+	//	sumAcceptBL += acceptProbability; // total for all branches
+	//	uniform_real_distribution<double> runif(0,1);
 	if ( runif(rng) < acceptProbability )
 	  {
+	    cerr << "accepted" << endl;
 	    (*e)->setLength(yyy);
 	    currLogLikelihood = propLogLikelihood;
+	  }
+	else
+	  {
+	    cerr << "rejected" << endl;
+	    (*e)->setLength(xxx);
 	  }
 	avgBL(j) += (*e)->getLength();
 	j++;

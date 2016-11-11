@@ -6,6 +6,7 @@
 #define MCMC_Q_BURN 100
 #define MCMC_Q_SAMPLE 1000
 
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -257,6 +258,13 @@ int main(int argc, char* argv[])
   cerr << endl << "Tree topology:" << endl;
   cerr << jctree.makeTopologyNumbers() << endl << endl;
 
+  // for ( int i=0; i<4; ++i )
+  // {
+  //   double logFoo;
+  //   jctree.randomEdges(alignment,model,rng,logFoo,true);
+  // }
+
+  
   milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   // Initialize random number generator
@@ -285,12 +293,14 @@ int main(int argc, char* argv[])
 
   // burnin
   cerr << "burn-in:" << endl;
-  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+  //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+  mcmc(q_init,alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
 
   // mcmc to get final Q
   cerr << "sampling:" << endl;
-  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+  //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+  mcmc(q_init,alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());

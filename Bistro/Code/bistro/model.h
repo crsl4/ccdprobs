@@ -1,6 +1,8 @@
 #ifndef __MODEL_H
 #define __MODEL_H
 
+#define LAMBDA 0.19
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -71,5 +73,7 @@ public:
   void setMcmcVarQP(VectorXd v) { mcmcVarQP = v; }
   void setMcmcVarP(Vector4d v) { mcmcVarP = v; }
 };
+
+void mcmc(QMatrix& ,Alignment& ,Tree& ,int ,double ,mt19937_64& );
 
 #endif
