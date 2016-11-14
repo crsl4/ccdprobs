@@ -1,5 +1,14 @@
+## after going back to mcmc for Q only, but doing MLE for jctree in between
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o mcmc-q-mle -r 1000 -b 1000 > mcmc-q-mle.log
+## with 2 passes:
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o mcmc-q-mle-2 -r 1000 -b 1000 > mcmc-q-mle-2.log
+
+## after removing scale/5 for yy
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o mcmc-bl-2 -r 1000 -b 1000 > mcmc-bl-2.log
+
 ## after changing mcmc to do bl
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o randQ-scale5-4 -r 1000 -b 1000 -s 1948444759 > randQ-scale5-4.log
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o mcmc-bl -r 1000 -b 1000 > mcmc-bl.log
 
 ## after adding scale depending on mcmc variance
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o randQ-scale5-3 -r 1000 -b 1000 -s 1948444759 > randQ-scale5-3.log

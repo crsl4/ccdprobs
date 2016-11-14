@@ -2389,7 +2389,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
     VectorXd xx = Q.getSymmetricQP();
     logProposalRatio = 0;
     VectorXd yy(6);
-    yy = dirichletProposal(xx,scale/5,logProposalRatio,rng);
+    yy = dirichletProposal(xx,scale,logProposalRatio,rng);
     propQ.reset(Q.getStationaryP(),yy);
     clearProbMaps();
     propLogLikelihood = calculate(alignment,propQ);

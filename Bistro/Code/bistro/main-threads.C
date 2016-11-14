@@ -293,15 +293,47 @@ int main(int argc, char* argv[])
 
   // burnin
   cerr << "burn-in:" << endl;
-  //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-  jctree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
-
   // mcmc to get final Q
   cerr << "sampling:" << endl;
-  //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  jctree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
+  cerr << endl << "MLE branches for jctree" << endl;
+  for( int j=0; j<2; ++j)
+    {
+      // mle branches for jctree
+      for ( int i=0; i<3; ++i )
+	{
+	  double logFoo;
+	  jctree.randomEdges(alignment,q_init,rng,logFoo,true);
+	}
+      cerr << "done." << endl;
+      // burnin
+      cerr << "burn-in:" << endl;
+      q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+      cerr << endl << " done." << endl;
+      // mcmc to get final Q
+      cerr << "sampling:" << endl;
+      q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+      cerr << endl << " done." << endl;
+    }
+
+  // // burnin
+  // cerr << "burn-in:" << endl;
+  // //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+  // jctree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+  // cerr << endl << " done." << endl;
+  // cerr << "JC tree: " << endl;
+  // cerr << jctree.makeTreeNumbers() << endl;
+
+  // // mcmc to get final Q
+  // cerr << "sampling:" << endl;
+  // //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+  // jctree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+  // cerr << endl << " done." << endl;
+  // cerr << "JC tree: " << endl;
+  // cerr << jctree.makeTreeNumbers() << endl;
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
