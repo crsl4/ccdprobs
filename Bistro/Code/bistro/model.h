@@ -74,4 +74,6 @@ public:
   void setMcmcVarP(Vector4d v) { mcmcVarP = v; }
 };
 
+VectorXd dirichletProposal(VectorXd ,double ,double& ,mt19937_64& );
+
 #endif

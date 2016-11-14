@@ -2415,19 +2415,14 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
     //make tree function
     for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
       {
-	cerr << "anything" << endl;
-	cerr << "edge number: " << (*e)->getNumber() << endl;
 	double xxx = (*e)->getLength();
 	logProposalRatio = 0;
 	uniform_real_distribution<double> runif(0,1);
 	double r = exp(LAMBDA*(runif(rng)-0.5));
 	double yyy = xxx * r;
-	cerr << "new branch proposed: " << yyy << endl;
 	(*e)->setLength(yyy);
 	clearProbMaps();
-	cerr << "starting lik calculation" << endl;
 	propLogLikelihood = calculate(alignment,Q); //make faster later
-	cerr << "after lik calculation" << endl;
 	acceptProbability = exp(propLogLikelihood - currLogLikelihood + 3*log(r));
 	if ( acceptProbability > 1 )
 	  acceptProbability = 1;
@@ -2435,13 +2430,11 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
 	//	uniform_real_distribution<double> runif(0,1);
 	if ( runif(rng) < acceptProbability )
 	  {
-	    cerr << "accepted" << endl;
 	    (*e)->setLength(yyy);
 	    currLogLikelihood = propLogLikelihood;
 	  }
 	else
 	  {
-	    cerr << "rejected" << endl;
 	    (*e)->setLength(xxx);
 	  }
 	avgBL(j) += (*e)->getLength();
