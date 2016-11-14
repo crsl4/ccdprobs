@@ -225,6 +225,7 @@ public:
   double logLikelihoodScore(Alignment&, QMatrix&);
   void clearMapParent();
   Edge* whichMaxBranch(); //finds edge with max length
+  void mcmc(QMatrix&, Alignment& ,int ,double , mt19937_64& );
 };
 
 #endif

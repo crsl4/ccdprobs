@@ -74,6 +74,4 @@ public:
   void setMcmcVarP(Vector4d v) { mcmcVarP = v; }
 };
 
-void mcmc(QMatrix& ,Alignment& ,Tree& ,int ,double ,mt19937_64& );
-
 #endif

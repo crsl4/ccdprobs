@@ -294,13 +294,13 @@ int main(int argc, char* argv[])
   // burnin
   cerr << "burn-in:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-  mcmc(q_init,alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+  jctree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
 
   // mcmc to get final Q
   cerr << "sampling:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  mcmc(q_init,alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+  jctree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
