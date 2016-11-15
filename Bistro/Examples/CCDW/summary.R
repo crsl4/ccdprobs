@@ -5,26 +5,36 @@
 ## bistro -o test4 = stem="test4"
 summaryBistro = function(stem){
 ## mrbayes
-top1 = read.table("ccdw.run1.top")
-top2 = read.table("ccdw.run2.top")
-tre1 = read.table("ccdw.run1.tre")
-tre2 = read.table("ccdw.run2.tre")
+###top1 = read.table("ccdw.run1.top")
+###top2 = read.table("ccdw.run2.top")
+###tre1 = read.table("ccdw.run1.tre")
+###tre2 = read.table("ccdw.run2.tre")
 
 ## remove burnin
-top = c(as.character(top1[-(1:2001),]),as.character(top2[-(1:2001),]))
-tre = c(as.character(tre1[-(1:2001),]),as.character(tre2[-(1:2001),]))
-
+##top = c(as.character(top1[-(1:2001),]),as.character(top2[-(1:2001),]))
+##tre = c(as.character(tre1[-(1:2001),]),as.character(tre2[-(1:2001),]))
 ## best tree
-keep = which(top=="(1,2,(3,4));")
+##keep = which(top=="(1,2,(3,4));")
 
 ## sample 1000 for better plots
-keep = sort(sample(keep,1000))
+##keep = sort(sample(keep,1000))
 
-tre.mb = tre[keep]
+##tre.mb = tre[keep]
 
 ## remove big stuff
-rm(top1,top2,tre1,tre2,top,tre,keep)
+##rm(top1,top2,tre1,tre2,top,tre,keep)
 
+## New using bmcmc    
+    tre = read.table("mcmc2.tre")
+    n = nrow(tre)
+    burn = n/11
+## remove burnin, first 1000 saved values
+    tre = as.character(tre[-(1:burn),])
+    if ( n > 1000 )
+        tre.mb = tre[sample(1:length(tre),1000,replace=FALSE)]
+    else
+        tre.mb = tre
+    
 require(ape)
 N.mb = length(tre.mb) ### 1000 now!!!
 
@@ -77,7 +87,7 @@ dev.off()
 ## combine data for combined plots
 m = rbind(m.bistro,m.mb)
 df = data.frame(m)
-df$set = factor( c(rep("Bistro",N.bistro),rep("MrBayes",N.mb)) )
+df$set = factor( c(rep("Bistro",N.bistro),rep("MCMC",N.mb)) )
 
 ## make the plots
 adjEdges = getAdjacentEdges(tree)
@@ -94,8 +104,8 @@ for( i in 1:nrow(adjEdges))
   i2 = adjEdges[i,2]
   median.bistro.1 = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i1))) )
   median.bistro.2 = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i2))) )
-  median.mb.1 = median( drop(as.matrix(filter(df,set=="MrBayes") %>% select(i1))) )
-  median.mb.2 = median( drop(as.matrix(filter(df,set=="MrBayes") %>% select(i2))) )
+  median.mb.1 = median( drop(as.matrix(filter(df,set=="MCMC") %>% select(i1))) )
+  median.mb.2 = median( drop(as.matrix(filter(df,set=="MCMC") %>% select(i2))) )
 
   plot(
     ggplot(df,aes(x=df[,adjEdges[i,1]],
@@ -120,7 +130,7 @@ vpal = viridis(2,end=0.8)
 for(i in 1:ncol(m))
 {
     median.bistro = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i))) )
-    median.mb = median( drop(as.matrix(filter(df,set=="MrBayes") %>% select(i))) )
+    median.mb = median( drop(as.matrix(filter(df,set=="MCMC") %>% select(i))) )
 
     plot(ggplot(df,aes(x=df[,i],col=set))+geom_density() +
          scale_color_manual(values=vpal) +
@@ -133,31 +143,39 @@ for(i in 1:ncol(m))
 dev.off()
 
 ########################################################################################
-foo1 = read.table("ccdw.run1.p", header=TRUE)
-foo2 = read.table("ccdw.run2.p", header=TRUE)
-foo = rbind(foo1[-(1:2001),],foo2[-(1:2001),])
-foo$sAC = with(foo, r.A...C. * pi.A. * pi.C.)
-foo$sAG = with(foo, r.A...G. * pi.A. * pi.G.)
-foo$sAT = with(foo, r.A...T. * pi.A. * pi.T.)
-foo$sCG = with(foo, r.C...G. * pi.C. * pi.G.)
-foo$sCT = with(foo, r.C...T. * pi.C. * pi.T.)
-foo$sGT = with(foo, r.G...T. * pi.G. * pi.T.)
-s = with(foo,sAC+sAG+sAT+sCG+sCT+sGT)
-foo$sAC = foo$sAC/s
-foo$sAG = foo$sAG/s
-foo$sAT = foo$sAT/s
-foo$sCG = foo$sCG/s
-foo$sCT = foo$sCT/s
-foo$sGT = foo$sGT/s
-N.mb2 = length(foo$Gen)
-N.bistro2 = length(bistro$w)
+##foo1 = read.table("ccdw.run1.p", header=TRUE)
+##foo2 = read.table("ccdw.run2.p", header=TRUE)
+##foo = rbind(foo1[-(1:2001),],foo2[-(1:2001),])
+##foo$sAC = with(foo, r.A...C. * pi.A. * pi.C.)
+##foo$sAG = with(foo, r.A...G. * pi.A. * pi.G.)
+##foo$sAT = with(foo, r.A...T. * pi.A. * pi.T.)
+##foo$sCG = with(foo, r.C...G. * pi.C. * pi.G.)
+##foo$sCT = with(foo, r.C...T. * pi.C. * pi.T.)
+##foo$sGT = with(foo, r.G...T. * pi.G. * pi.T.)
+##s = with(foo,sAC+sAG+sAT+sCG+sCT+sGT)
+##foo$sAC = foo$sAC/s
+##foo$sAG = foo$sAG/s
+##foo$sAT = foo$sAT/s
+##foo$sCG = foo$sCG/s
+##foo$sCT = foo$sCT/s
+##foo$sGT = foo$sGT/s
+##N.mb2 = length(foo$Gen)
+##N.bistro2 = length(bistro$w)
 
-foo2 = subset(foo,select=c("pi.A.","pi.C.","pi.G.","pi.T.","sAC","sAG","sAT","sCG","sCT","sGT"))
+##foo2 = subset(foo,select=c("pi.A.","pi.C.","pi.G.","pi.T.","sAC","sAG","sAT","sCG","sCT","sGT"))
+
+    foo2 = read.table("mcmc2.par")
+    foo2 = foo2[-(1:burn),-1]
+    if ( n > 1000 )
+        foo2 = foo2[sample(1:nrow(foo2),1000,replace=FALSE),]
+    names(foo2) = c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6")
+    
 bistro2 = subset(bistro,select=c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6"))
-names(foo2) = c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6")
+N.bistro2 = nrow(bistro2)
+N.mb2 = nrow(foo2)
 
 df2 = rbind(bistro2,foo2)
-df2$set = factor( c(rep("Bistro",N.bistro2),rep("MrBayes",N.mb2)) )
+df2$set = factor( c(rep("Bistro",N.bistro2),rep("MCMC",N.mb2)) )
 
 
 pdf(paste0(stem,"-rates-density.pdf"))
@@ -165,7 +183,7 @@ vpal = viridis(2,end=0.8)
 for(i in 1:(ncol(df2)-1))
 {
     median.bistro = median( drop(as.matrix(filter(df2,set=="Bistro") %>% select(i))) )
-    median.mb = median( drop(as.matrix(filter(df2,set=="MrBayes") %>% select(i))) )
+    median.mb = median( drop(as.matrix(filter(df2,set=="MCMC") %>% select(i))) )
     plot(ggplot(df2,aes(x=df2[,i],col=set))+geom_density() +
          scale_color_manual(values=vpal) +
          geom_vline(xintercept=median.bistro,color=vpal[1]) +

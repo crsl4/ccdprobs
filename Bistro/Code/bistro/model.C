@@ -194,8 +194,8 @@ void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double sca
     prod1 = getStationaryP() - avgPold;
     avgP = avgPold + prod1/(i+1);
     prod2 = getStationaryP() - avgP;
-    for ( int i=0; i<4; ++i )
-	prod12(i) = prod1(i)*prod2(i);
+    for ( int j=0; j<4; ++j )
+	prod12(j) = prod1(j)*prod2(j);
     sP += prod12;
     avgPold = avgP;
     VectorXd xx = getSymmetricQP();
@@ -218,8 +218,8 @@ void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double sca
     prod3 = getSymmetricQP() - avgSold;
     avgS = avgSold + prod3/(i+1);
     prod4 = getSymmetricQP() - avgS;
-    for ( int i=0; i<6; ++i )
-	prod34(i) = prod3(i)*prod4(i);
+    for ( int j=0; j<6; ++j )
+	prod34(j) = prod3(j)*prod4(j);
     sS += prod34;
     avgSold = avgS;
   }

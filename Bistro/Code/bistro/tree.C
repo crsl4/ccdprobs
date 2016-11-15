@@ -2323,13 +2323,25 @@ bool Edge::isTerminal()
     return false;
 }
 
-
 void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng)
+{
+  ofstream treeStream;
+  ofstream parStream;
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,false);
+}
+
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream)
+{
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true);
+}
+
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput)
 {
   clearProbMaps();
   double currLogLikelihood = calculate(alignment,Q);
   double sumAcceptP = 0;
   double sumAcceptS = 0;
+  double sumAcceptBL = 0;
   Vector4d avgP;
   Vector4d avgPold;
   Vector4d sP;
@@ -2354,7 +2366,8 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
   prod3 << 0,0,0,0,0,0;
   prod4 << 0,0,0,0,0,0;
   prod34 << 0,0,0,0,0,0;
-  VectorXd avgBL(getNumEdges());
+  VectorXd avgBL = VectorXd::Zero(getNumEdges());
+  
   cerr << '|';
   for ( int i=0; i<numGenerations; ++i )
   {
@@ -2382,8 +2395,8 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
     prod1 = Q.getStationaryP() - avgPold;
     avgP = avgPold + prod1/(i+1);
     prod2 = Q.getStationaryP() - avgP;
-    for ( int i=0; i<4; ++i )
-	prod12(i) = prod1(i)*prod2(i);
+    for ( int j=0; j<4; ++j )
+	prod12(j) = prod1(j)*prod2(j);
     sP += prod12;
     avgPold = avgP;
     VectorXd xx = Q.getSymmetricQP();
@@ -2405,8 +2418,8 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
     prod3 = Q.getSymmetricQP() - avgSold;
     avgS = avgSold + prod3/(i+1);
     prod4 = Q.getSymmetricQP() - avgS;
-    for ( int i=0; i<6; ++i )
-	prod34(i) = prod3(i)*prod4(i);
+    for ( int j=0; j<6; ++j )
+	prod34(j) = prod3(j)*prod4(j);
     sS += prod34;
     avgSold = avgS;
     // now with Q, we want to sample branch lengths
@@ -2414,37 +2427,43 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
     int j = 0; 
     //make tree function
     for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    {
+      double xxx = (*e)->getLength();
+      logProposalRatio = 0;
+      uniform_real_distribution<double> runif(0,1);
+      double r = exp(LAMBDA*(runif(rng)-0.5));
+      double yyy = xxx * r;
+      (*e)->setLength(yyy);
+      clearProbMaps();
+      propLogLikelihood = calculate(alignment,Q); //make faster later
+      acceptProbability = exp(propLogLikelihood - currLogLikelihood + 3*log(r));
+      if ( acceptProbability > 1 )
+	acceptProbability = 1;
+      sumAcceptBL += acceptProbability; // total for all branches
+      if ( runif(rng) < acceptProbability )
       {
-	double xxx = (*e)->getLength();
-	logProposalRatio = 0;
-	uniform_real_distribution<double> runif(0,1);
-	double r = exp(LAMBDA*(runif(rng)-0.5));
-	double yyy = xxx * r;
 	(*e)->setLength(yyy);
-	clearProbMaps();
-	propLogLikelihood = calculate(alignment,Q); //make faster later
-	acceptProbability = exp(propLogLikelihood - currLogLikelihood + 3*log(r));
-	if ( acceptProbability > 1 )
-	  acceptProbability = 1;
-	//	sumAcceptBL += acceptProbability; // total for all branches
-	//	uniform_real_distribution<double> runif(0,1);
-	if ( runif(rng) < acceptProbability )
-	  {
-	    (*e)->setLength(yyy);
-	    currLogLikelihood = propLogLikelihood;
-	  }
-	else
-	  {
-	    (*e)->setLength(xxx);
-	  }
-	avgBL(j) += (*e)->getLength();
-	j++;
+	currLogLikelihood = propLogLikelihood;
       }
+      else
+      {
+	(*e)->setLength(xxx);
+      }
+      avgBL(j) += (*e)->getLength();
+      j++;
+    }
+    if ( printOutput )
+    {
+      parStream << currLogLikelihood << " " << Q.getStationaryP().transpose() << " " << Q.getSymmetricQP().transpose() << endl;
+      sortCanonical();
+      treeStream << makeTreeNumbers() << endl;
+    }
   }
   cout << "stationary acceptance: " << sumAcceptP / numGenerations << endl;
   cout << "symmetric acceptance: " << sumAcceptS / numGenerations << endl;
-  sP /= (numGenerations-1);
-  sS /= (numGenerations-1);
+  cout << "branch length acceptance: " << sumAcceptBL / numGenertions << endl;
+  sP /= numGenerations;
+  sS /= numGenerations;
   cout << "avgP: " << avgP.transpose() << endl;
   cout << "sP: " << sP.transpose() << endl;
   cout << "avgS: " << avgS.transpose() << endl;
@@ -2458,7 +2477,15 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
   int i = 0;
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     {
-      (*e)->setLength(avgBL(i));
+      (*e)->setLength(avgBL(i)/numGenerations);
       i++;
     }
+}
+
+void Tree::setInitialEdgeLengths(double x)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  {
+    (*e)->setLength(x);
+  }
 }
