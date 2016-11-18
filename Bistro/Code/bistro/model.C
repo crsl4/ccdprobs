@@ -136,7 +136,7 @@ VectorXd dirichletProposal(VectorXd x,double scale,double& logProposalRatio,mt19
   return y;
 }
 
-// for the variance: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+// old function: new one in tree.C
 void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double scale,mt19937_64& rng)
 {
   tree.clearProbMaps();

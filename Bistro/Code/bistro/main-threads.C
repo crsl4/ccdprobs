@@ -67,7 +67,7 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
 // we calculate the scale inside
 // E(yi) = alpha_i/sum{alpha_i}=x_i (because sum{x_i}=1)
 // Var(yi) = alpha_i*(sum{alpha_i}-alpha_i)/(sum{alpha_i})^2*(sum{alpha_i}+1)
-// if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi 
+// if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi
 VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposalDensity,mt19937_64& rng)
 {
   //  cout << "vector x: " << x.transpose() << endl;
@@ -80,7 +80,7 @@ VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposal
   for ( int i=0; i<x.size(); ++i )
     scale += x(i)*(1-x(i))/v(i);
   scale /= x.size(); //we need to use the same scale or we create bias
-  cout << "Scale: " << scale << endl;  
+//  cout << "Scale: " << scale << endl;
   for ( int i=0; i<x.size(); ++i )
   {
     alpha(i) = scale*x(i) + 1;
@@ -264,7 +264,6 @@ int main(int argc, char* argv[])
   //   jctree.randomEdges(alignment,model,rng,logFoo,true);
   // }
 
-  
   milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   // Initialize random number generator
@@ -288,52 +287,37 @@ int main(int argc, char* argv[])
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;
   s_init[4] = 0.3;
+  // p_init[0] = 0.2429295; //mb values for cats-dogs
+  // p_init[1] =  0.2356097;
+  // p_init[2] = 0.2067433;
+  // p_init[3] = 0.3147175;
+
+  // s_init[0] = 0.047201519;
+  // s_init[1] = 0.293928352;
+  // s_init[2] = 0.068691153;
+  // s_init[3] = 0.012274385;
+  // s_init[4] = 0.569989255;
+  // s_init[5] = 0.007915336;
 
   QMatrix q_init(p_init,s_init);
-
-  // // burnin
-  // cerr << "burn-in:" << endl;
-  // q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-  // cerr << endl << " done." << endl;
-  // // mcmc to get final Q
-  // cerr << "sampling:" << endl;
-  // q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  // cerr << endl << " done." << endl;
-  // cerr << endl << "MLE branches for jctree" << endl;
-  // for( int j=0; j<2; ++j)
-  //   {
-  //     // mle branches for jctree
-  //     for ( int i=0; i<3; ++i )
-  // 	{
-  // 	  double logFoo;
-  // 	  jctree.randomEdges(alignment,q_init,rng,logFoo,true);
-  // 	}
-  //     cerr << "done." << endl;
-  //     // burnin
-  //     cerr << "burn-in:" << endl;
-  //     q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-  //     cerr << endl << " done." << endl;
-  //     // mcmc to get final Q
-  //     cerr << "sampling:" << endl;
-  //     q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  //     cerr << endl << " done." << endl;
-  //   }
+//  jctree.setInitialEdgeLengths(0.1); //0.1 ignored, and branches set inside close to true for cats-dogs CCLT
 
  // burnin
- cerr << "burn-in:" << endl;
+  cerr << "burn-in:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
   jctree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
-  cerr << "JC tree: " << endl;
-  cerr << jctree.makeTreeNumbers() << endl;
+  cout << "JC tree: " << endl;
+  cout << jctree.makeTreeNumbers() << endl;
 
   // mcmc to get final Q
   cerr << "sampling:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
   jctree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
-  cerr << "JC tree: " << endl;
-  cerr << jctree.makeTreeNumbers() << endl;
+  cout << "JC tree: " << endl;
+  cout << jctree.makeTreeNumbers() << endl;
+
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
