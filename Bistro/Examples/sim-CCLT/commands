@@ -1,0 +1,7 @@
+## run bistro with correct jacobian and lambda
+../../Code/bistro/bistro -f ../../Data/sim-cclt.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
+
+## to run bmcmc
+../../Code/bistro/bmcmc -f ../../Data/sim-cclt.fasta -o mcmc1 -r 10000 -b 1000 -t "(1,2,(3,4));" > mcmc1.log
+
+

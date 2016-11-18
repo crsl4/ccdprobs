@@ -1,0 +1,223 @@
+commit c98c629019467c0ad180f80d5c1eb801eeb8db71
+tree 9aa24bf879e0c5e7b24d68ad98ba486b2ca5f1b3
+parent aecfa36f3e18e71b89bdf3fa5bd7761cf3977264
+author Claudia Solis-Lemus <claudiar.solislemus@gmail.com> 1479487736 -0600
+committer Claudia Solis-Lemus <claudiar.solislemus@gmail.com> 1479487736 -0600
+
+    fixed jacobian
+
+diff --git a/Bistro/Code/bistro/bistro b/Bistro/Code/bistro/bistro
+index 7a89d43..44870d1 100755
+Binary files a/Bistro/Code/bistro/bistro and b/Bistro/Code/bistro/bistro differ
+diff --git a/Bistro/Code/bistro/bmcmc b/Bistro/Code/bistro/bmcmc
+index 2e462bc..96d3fa1 100755
+Binary files a/Bistro/Code/bistro/bmcmc and b/Bistro/Code/bistro/bmcmc differ
+diff --git a/Bistro/Code/bistro/main-threads.C b/Bistro/Code/bistro/main-threads.C
+index ce111e4..e177829 100644
+--- a/Bistro/Code/bistro/main-threads.C
++++ b/Bistro/Code/bistro/main-threads.C
+@@ -67,7 +67,7 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
+ // we calculate the scale inside
+ // E(yi) = alpha_i/sum{alpha_i}=x_i (because sum{x_i}=1)
+ // Var(yi) = alpha_i*(sum{alpha_i}-alpha_i)/(sum{alpha_i})^2*(sum{alpha_i}+1)
+-// if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi 
++// if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi
+ VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposalDensity,mt19937_64& rng)
+ {
+   //  cout << "vector x: " << x.transpose() << endl;
+@@ -80,7 +80,7 @@ VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposal
+   for ( int i=0; i<x.size(); ++i )
+     scale += x(i)*(1-x(i))/v(i);
+   scale /= x.size(); //we need to use the same scale or we create bias
+-  cout << "Scale: " << scale << endl;  
++//  cout << "Scale: " << scale << endl;
+   for ( int i=0; i<x.size(); ++i )
+   {
+     alpha(i) = scale*x(i) + 1;
+@@ -264,7 +264,6 @@ int main(int argc, char* argv[])
+   //   jctree.randomEdges(alignment,model,rng,logFoo,true);
+   // }
+ 
+-  
+   milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+ 
+   // Initialize random number generator
+@@ -288,52 +287,37 @@ int main(int argc, char* argv[])
+   vector<double> s_init(6,0.1);
+   s_init[1] = 0.3;
+   s_init[4] = 0.3;
++  // p_init[0] = 0.2429295; //mb values for cats-dogs
++  // p_init[1] =  0.2356097;
++  // p_init[2] = 0.2067433;
++  // p_init[3] = 0.3147175;
++
++  // s_init[0] = 0.047201519;
++  // s_init[1] = 0.293928352;
++  // s_init[2] = 0.068691153;
++  // s_init[3] = 0.012274385;
++  // s_init[4] = 0.569989255;
++  // s_init[5] = 0.007915336;
+ 
+   QMatrix q_init(p_init,s_init);
+-
+-  // // burnin
+-  // cerr << "burn-in:" << endl;
+-  // q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+-  // cerr << endl << " done." << endl;
+-  // // mcmc to get final Q
+-  // cerr << "sampling:" << endl;
+-  // q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+-  // cerr << endl << " done." << endl;
+-  // cerr << endl << "MLE branches for jctree" << endl;
+-  // for( int j=0; j<2; ++j)
+-  //   {
+-  //     // mle branches for jctree
+-  //     for ( int i=0; i<3; ++i )
+-  // 	{
+-  // 	  double logFoo;
+-  // 	  jctree.randomEdges(alignment,q_init,rng,logFoo,true);
+-  // 	}
+-  //     cerr << "done." << endl;
+-  //     // burnin
+-  //     cerr << "burn-in:" << endl;
+-  //     q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+-  //     cerr << endl << " done." << endl;
+-  //     // mcmc to get final Q
+-  //     cerr << "sampling:" << endl;
+-  //     q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+-  //     cerr << endl << " done." << endl;
+-  //   }
++//  jctree.setInitialEdgeLengths(0.1); //0.1 ignored, and branches set inside close to true for cats-dogs CCLT
+ 
+  // burnin
+- cerr << "burn-in:" << endl;
++  cerr << "burn-in:" << endl;
+   //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+   jctree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+   cerr << endl << " done." << endl;
+-  cerr << "JC tree: " << endl;
+-  cerr << jctree.makeTreeNumbers() << endl;
++  cout << "JC tree: " << endl;
++  cout << jctree.makeTreeNumbers() << endl;
+ 
+   // mcmc to get final Q
+   cerr << "sampling:" << endl;
+   //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+   jctree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+   cerr << endl << " done." << endl;
+-  cerr << "JC tree: " << endl;
+-  cerr << jctree.makeTreeNumbers() << endl;
++  cout << "JC tree: " << endl;
++  cout << jctree.makeTreeNumbers() << endl;
++
+ 
+ //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
+   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
+diff --git a/Bistro/Code/bistro/model.C b/Bistro/Code/bistro/model.C
+index 2c8f6e7..e4bf229 100644
+--- a/Bistro/Code/bistro/model.C
++++ b/Bistro/Code/bistro/model.C
+@@ -136,7 +136,7 @@ VectorXd dirichletProposal(VectorXd x,double scale,double& logProposalRatio,mt19
+   return y;
+ }
+ 
+-// for the variance: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
++// old function: new one in tree.C
+ void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double scale,mt19937_64& rng)
+ {
+   tree.clearProbMaps();
+diff --git a/Bistro/Code/bistro/tree.C b/Bistro/Code/bistro/tree.C
+index c13600c..a4f3c9a 100644
+--- a/Bistro/Code/bistro/tree.C
++++ b/Bistro/Code/bistro/tree.C
+@@ -2335,6 +2335,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
+   mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true);
+ }
+ 
++// for the variance: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput)
+ {
+   clearProbMaps();
+@@ -2342,30 +2343,18 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
+   double sumAcceptP = 0;
+   double sumAcceptS = 0;
+   double sumAcceptBL = 0;
+-  Vector4d avgP;
+-  Vector4d avgPold;
+-  Vector4d sP;
+-  Vector4d prod1;
+-  Vector4d prod2;
+-  Vector4d prod12;
+-  avgP << 0,0,0,0;
+-  avgPold << 0,0,0,0;
+-  sP << 0,0,0,0;
+-  prod1 << 0,0,0,0;
+-  prod2 << 0,0,0,0;
+-  prod12 << 0,0,0,0;
+-  VectorXd avgS(6);
+-  VectorXd avgSold(6);
+-  VectorXd sS(6);
+-  VectorXd prod3(6);
+-  VectorXd prod4(6);
+-  VectorXd prod34(6);
+-  avgS << 0,0,0,0,0,0;
+-  avgSold << 0,0,0,0,0,0;
+-  sS << 0,0,0,0,0,0;
+-  prod3 << 0,0,0,0,0,0;
+-  prod4 << 0,0,0,0,0,0;
+-  prod34 << 0,0,0,0,0,0;
++  Vector4d avgP = Vector4d::Zero();
++  Vector4d avgPold = Vector4d::Zero();
++  Vector4d sP = Vector4d::Zero();
++  Vector4d prod1 = Vector4d::Zero();
++  Vector4d prod2 = Vector4d::Zero();
++  Vector4d prod12 = Vector4d::Zero();
++  VectorXd avgS = VectorXd::Zero(6);
++  VectorXd avgSold = VectorXd::Zero(6);
++  VectorXd sS = VectorXd::Zero(6);
++  VectorXd prod3 = VectorXd::Zero(6);
++  VectorXd prod4 = VectorXd::Zero(6);
++  VectorXd prod34 = VectorXd::Zero(6);
+   VectorXd avgBL = VectorXd::Zero(getNumEdges());
+   
+   cerr << '|';
+@@ -2391,7 +2380,6 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
+       Q.resetStationaryP(y);
+       currLogLikelihood = propLogLikelihood;
+     }
+-    //    avgP += Q.getStationaryP();
+     prod1 = Q.getStationaryP() - avgPold;
+     avgP = avgPold + prod1/(i+1);
+     prod2 = Q.getStationaryP() - avgP;
+@@ -2436,7 +2424,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
+       (*e)->setLength(yyy);
+       clearProbMaps();
+       propLogLikelihood = calculate(alignment,Q); //make faster later
+-      acceptProbability = exp(propLogLikelihood - currLogLikelihood + 3*log(r));
++      acceptProbability = exp(propLogLikelihood - currLogLikelihood + log(r));
+       if ( acceptProbability > 1 )
+ 	acceptProbability = 1;
+       sumAcceptBL += acceptProbability; // total for all branches
+@@ -2461,7 +2449,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
+   }
+   cout << "stationary acceptance: " << sumAcceptP / numGenerations << endl;
+   cout << "symmetric acceptance: " << sumAcceptS / numGenerations << endl;
+-  cout << "branch length acceptance: " << sumAcceptBL / numGenertions << endl;
++  cout << "branch length acceptance: " << sumAcceptBL / numGenerations << endl;
+   sP /= numGenerations;
+   sS /= numGenerations;
+   cout << "avgP: " << avgP.transpose() << endl;
+@@ -2486,6 +2474,13 @@ void Tree::setInitialEdgeLengths(double x)
+ {
+   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+   {
++    // cerr << "edge number: " << (*e)->getNumber() << endl;
++    // cerr << "edge length: " << (*e)->getLength() << endl;
+     (*e)->setLength(x);
+   }
++  // getEdge(0)->setLength(0.03751); // for CCLT
++  // getEdge(1)->setLength(0.1185);
++  // getEdge(2)->setLength(0.095308);
++  // getEdge(3)->setLength(0.052919);
++  // getEdge(4)->setLength(0.070793);
+ }
