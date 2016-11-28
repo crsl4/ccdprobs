@@ -1,3 +1,24 @@
+## with true Q as starting point, but without average of burnin, with longer mcmc chain, lambda=0.45
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro8 -r 1000 -b 1000 > bistro8.log
+
+## with true Q as starting point, but without average of burnin, with longer mcmc chain
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro7 -r 1000 -b 1000 > bistro7.log
+
+## with true Q after mcmc: this does not work!
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro6 -r 1000 -b 1000 > bistro6.log
+
+## with true Q as starting point, but without average of burnin
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro5 -r 1000 -b 1000 > bistro5.log
+
+## without true Q as starting point, but without average of burnin
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro4 -r 1000 -b 1000 > bistro4.log
+
+## with true Q as starting point, and half scale
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro3 -r 1000 -b 1000 > bistro3.log
+
+## with true Q as starting point
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro2 -r 1000 -b 1000 > bistro2.log
+
 ## run bistro with good code
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
 

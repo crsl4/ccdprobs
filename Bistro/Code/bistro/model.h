@@ -1,8 +1,6 @@
 #ifndef __MODEL_H
 #define __MODEL_H
 
-#define LAMBDA 0.19
-
 #include <iostream>
 #include <iomanip>
 #include <vector>

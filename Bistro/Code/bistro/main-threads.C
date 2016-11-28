@@ -3,8 +3,8 @@
 // Copyright 2016
 // May 20, 2016
 
-#define MCMC_Q_BURN 100
-#define MCMC_Q_SAMPLE 1000
+#define MCMC_Q_BURN 10000
+#define MCMC_Q_SAMPLE 100000
 
 
 #include <iostream>
@@ -80,7 +80,6 @@ VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposal
   for ( int i=0; i<x.size(); ++i )
     scale += x(i)*(1-x(i))/v(i);
   scale /= x.size(); //we need to use the same scale or we create bias
-//  cout << "Scale: " << scale << endl;
   for ( int i=0; i<x.size(); ++i )
   {
     alpha(i) = scale*x(i) + 1;
@@ -287,17 +286,17 @@ int main(int argc, char* argv[])
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;
   s_init[4] = 0.3;
-  // p_init[0] = 0.2429295; //mb values for cats-dogs
-  // p_init[1] =  0.2356097;
-  // p_init[2] = 0.2067433;
-  // p_init[3] = 0.3147175;
+  p_init[0] = 0.2429295; //mb values for cats-dogs
+  p_init[1] =  0.2356097;
+  p_init[2] = 0.2067433;
+  p_init[3] = 0.3147175;
 
-  // s_init[0] = 0.047201519;
-  // s_init[1] = 0.293928352;
-  // s_init[2] = 0.068691153;
-  // s_init[3] = 0.012274385;
-  // s_init[4] = 0.569989255;
-  // s_init[5] = 0.007915336;
+  s_init[0] = 0.047201519;
+  s_init[1] = 0.293928352;
+  s_init[2] = 0.068691153;
+  s_init[3] = 0.012274385;
+  s_init[4] = 0.569989255;
+  s_init[5] = 0.007915336;
 
   QMatrix q_init(p_init,s_init);
 //  jctree.setInitialEdgeLengths(0.1); //0.1 ignored, and branches set inside close to true for cats-dogs CCLT
@@ -305,7 +304,7 @@ int main(int argc, char* argv[])
  // burnin
   cerr << "burn-in:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-  jctree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+  jctree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
   cerr << endl << " done." << endl;
   cout << "JC tree: " << endl;
   cout << jctree.makeTreeNumbers() << endl;
@@ -313,7 +312,7 @@ int main(int argc, char* argv[])
   // mcmc to get final Q
   cerr << "sampling:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  jctree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+  jctree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
   cerr << endl << " done." << endl;
   cout << "JC tree: " << endl;
   cout << jctree.makeTreeNumbers() << endl;

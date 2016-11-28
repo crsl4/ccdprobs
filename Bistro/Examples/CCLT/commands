@@ -1,3 +1,6 @@
+## with true Q as starting point, but without average of burnin, with longer mcmc chain
+../../Code/bistro/bistro -f ../../Data/cclt.fasta -o bistro7 -r 1000 -b 1000 > bistro7.log
+
 ## run bistro with correct jacobian and lambda
 ../../Code/bistro/bistro -f ../../Data/cclt.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
 

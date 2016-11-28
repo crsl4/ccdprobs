@@ -2323,20 +2323,20 @@ bool Edge::isTerminal()
     return false;
 }
 
-void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng)
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, bool burnin)
 {
   ofstream treeStream;
   ofstream parStream;
-  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,false);
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,false, burnin);
 }
 
-void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream)
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool burnin)
 {
-  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true);
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true, burnin);
 }
 
 // for the variance: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput)
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput, bool burnin)
 {
   clearProbMaps();
   double currLogLikelihood = calculate(alignment,Q);
@@ -2449,25 +2449,31 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
   }
   cout << "stationary acceptance: " << sumAcceptP / numGenerations << endl;
   cout << "symmetric acceptance: " << sumAcceptS / numGenerations << endl;
-  cout << "branch length acceptance: " << sumAcceptBL / numGenerations << endl;
+  cout << "branch length acceptance: " << sumAcceptBL / (getNumEdges() * numGenerations) << endl;
   sP /= numGenerations;
   sS /= numGenerations;
   cout << "avgP: " << avgP.transpose() << endl;
   cout << "sP: " << sP.transpose() << endl;
   cout << "avgS: " << avgS.transpose() << endl;
   cout << "sS: " << sS.transpose() << endl;
-  Q.reset(avgP,avgS);
-  Q.setMcmcVarP(sP);
-  Q.setMcmcVarQP(sS);
+  if ( !burnin )
+  {
+    Q.reset(avgP,avgS);
+    Q.setMcmcVarP(sP);
+    Q.setMcmcVarQP(sS);
+  }
   cout << Q.getStationaryP().transpose() << endl;
   cout << Q.getSymmetricQP().transpose() << endl;
   cout << endl << Q.getQ() << endl << endl;
-  int i = 0;
-  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  if ( !burnin )
+  {
+    int i = 0;
+    for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     {
       (*e)->setLength(avgBL(i)/numGenerations);
       i++;
     }
+  }
 }
 
 void Tree::setInitialEdgeLengths(double x)
