@@ -1,3 +1,6 @@
+## with true Q, mcmc 1million, lambda=0.19
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro9 -r 1000 -b 1000 > bistro9.log
+
 ## with true Q as starting point, but without average of burnin, with longer mcmc chain, lambda=0.45
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro8 -r 1000 -b 1000 > bistro8.log
 
@@ -83,3 +86,7 @@
 
 ## this one has to have ~5% ESS, I don't get it
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test7 -r 1000 -b 1000 --threads 1 --eta 0.8 -s 372873156 > test7.log
+
+
+--------------------------------
+../../Code/bistro/bccd -f ../../Data/ccdw.fasta -o ccd -r 1000 -b 1000 > ccd.log

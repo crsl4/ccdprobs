@@ -28,7 +28,7 @@ LDLIBS = -lpthread
 
 .SUFFIXES: .C .o
 
-all: bistro bmcmc
+all: bistro bmcmc bccd
 
 bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
 	$(CC) $(CFLAGS) -o bistro main-threads.C $(OBJS) $(LDLIBS)
@@ -36,8 +36,11 @@ bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h 
 bmcmc: main-mcmc.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
 	$(CC) $(CFLAGS) -o bmcmc main-mcmc.C $(OBJS) $(LDLIBS)
 
+bccd: main-ccd.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
+	$(CC) $(CFLAGS) -o bccd main-ccd.C $(OBJS) $(LDLIBS)
+
 .C.o:
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	-rm -f $(OBJS) bistro bmcmc
+	-rm -f $(OBJS) bistro bmcmc bccd
