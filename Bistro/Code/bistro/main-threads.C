@@ -3,8 +3,8 @@
 // Copyright 2016
 // May 20, 2016
 
-#define MCMC_Q_BURN 100000
-#define MCMC_Q_SAMPLE 1000000
+#define MCMC_Q_BURN 1000
+#define MCMC_Q_SAMPLE 10000
 
 
 #include <iostream>
@@ -76,7 +76,7 @@ VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposal
   VectorXd y(x.size());
   double sum = 0;
   double sumalpha = 0;
-  double scale;
+  double scale = 0;
   for ( int i=0; i<x.size(); ++i )
     scale += x(i)*(1-x(i))/v(i);
   scale /= x.size(); //we need to use the same scale or we create bias
@@ -128,8 +128,14 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        double scale = 1;
        if( parameters.getFixedQ() )
 	 scale = 10000000;
+       if ( VERBOSE )
+	 cout << "logQ before p_star = " << logQ << endl;
        VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), scale*q_init.getMcmcVarP(), logQ, rng);
+       if ( VERBOSE )
+	 cout << "logQ after p_star = " << logQ << endl;
        VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), scale*q_init.getMcmcVarQP(), logQ, rng);
+       if ( VERBOSE )
+	 cout << "logQ after s_star = " << logQ << endl;
 
        if( parameters.getFixedQ() )
 	 logQ = 0;
@@ -193,6 +199,14 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	cout << "calculating the final loglik now without clearing map" << endl;
       double logLik = tree.calculate(alignment, model);
       double logWeight = logBranchLengthPriorDensity + logLik - logBL - logTopologyProbability - logQ;
+      if ( VERBOSE )
+      {
+	cout << "logBranchLengthPriorDensity = " << logBranchLengthPriorDensity << endl;
+	cout << "logLik = " << logLik << endl;
+	cout << "logBL = " << logBL << endl;
+	cout << "logTopologyProbability = " << logTopologyProbability << endl;
+	cout << "logQ = " << logQ << endl;
+      }
       // string top0 = tree.makeTopologyNumbers();
       tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
       tree.sortCanonical();

@@ -1,0 +1,9 @@
+translate
+       1 Felis_catus___domestic_cat,
+       2 Acinonyx_jubatus___cheetah,
+       3 Panthera_pardus___leopard,
+       4 Panthera_tigris___tiger;
+prob crudeSE(ESS=6.97) clade
+1.00000000 0.00000000 {1-4} ****
+1.00000000 0.00000000 {2-4} .***
+1.00000000 0.00000000 {3-4} ..**
