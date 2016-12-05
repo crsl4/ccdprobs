@@ -1,5 +1,5 @@
 ## run bmcmc
-../../Code/bistro/bmcmc -f ../../Data/artiodactyl-6.fasta -o mcmc1 -r 10000 -b 1000 -t "((Pig,((Cow,Giraffe),Sheep)),Dolphin,Camel);" > mcmc1.log
+../../Code/bistro/bmcmc -f ../../Data/artiodactyl-6.fasta -o mcmc1 -r 10000 -b 1000 -t "(Camel,Dolphin,(Pig,(Cow,(Sheep,Giraffe))));" > mcmc1.log
 ## run bistro
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
 

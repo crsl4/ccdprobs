@@ -2,7 +2,10 @@
 ## mb=TRUE will compare to the ccdw runs of MrBayes
 ## o.w. it will compare to mcmc1.tre, mcmc1.par from bmcmc
 
-summaryBistro = function(stem, mb=FALSE){
+## artiodactyl "(1,2,(3,(4,(5,6))));"
+## cats-dogs "(1,(2,(((((7,8),9),10),12),11)),(3,((4,5),6)));"
+
+summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));"){
     if(mb)
         {
             ## mrbayes
@@ -15,7 +18,7 @@ summaryBistro = function(stem, mb=FALSE){
             top = c(as.character(top1[-(1:2001),]),as.character(top2[-(1:2001),]))
             tre = c(as.character(tre1[-(1:2001),]),as.character(tre2[-(1:2001),]))
             ## best tree
-            keep = which(top=="(1,2,(3,4));")
+            keep = which(top==besttree)
 
             ## sample 1000 for better plots
             keep = sort(sample(keep,1000))
@@ -34,7 +37,7 @@ summaryBistro = function(stem, mb=FALSE){
             burn = n/11
             ## remove burnin, first 1000 saved values
             tre = as.character(tre[-(1:burn),])
-            if ( n > 1000 )
+            if( n > 1000 )
                 tre.mb = tre[sample(1:length(tre),1000,replace=FALSE)]
             else
                 tre.mb = tre
@@ -63,7 +66,7 @@ summaryBistro = function(stem, mb=FALSE){
     plotBistro(bistro)
     dev.off()
 
-    keep = which(bistro$tree=="(1,2,(3,4));")
+    keep = which(bistro$tree==besttree)
     tre.bistro = data$V1[keep]
 
     tree=read.tree(text=as.character(tre.bistro[1]))
