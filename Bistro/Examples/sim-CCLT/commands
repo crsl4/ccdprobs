@@ -1,4 +1,4 @@
-## run bistro with correct jacobian and lambda
+## run bistro
 ../../Code/bistro/bistro -f ../../Data/sim-cclt.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
 
 

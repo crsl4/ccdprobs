@@ -1,3 +1,10 @@
+## rerun bistro after fixing typo
+../../Code/bistro/bistro -f ../../Data/cclt.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
+
+## to run bmcmc
+../../Code/bistro/bmcmc -f ../../Data/cclt.fasta -o mcmc1 -r 10000 -b 1000 -t "(1,2,(3,4));" > mcmc1.log
+
+
 ## with true Q as starting point, but without average of burnin, with longer mcmc chain
 ../../Code/bistro/bistro -f ../../Data/cclt.fasta -o bistro7 -r 1000 -b 1000 > bistro7.log
 
