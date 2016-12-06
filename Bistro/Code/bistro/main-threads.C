@@ -111,19 +111,26 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    f << "tree logl logTop logBL logPrior logQ logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
 
 // calculate the scale for P and QP: fixit, this is done twice
-   double scaleP = 0;
+   double scaleP = 100000000;
+   double temp;
    VectorXd x = q_init.getStationaryP();
    VectorXd v = q_init.getMcmcVarP();
    for ( int i=0; i<x.size(); ++i )
-     scaleP += x(i)*(1-x(i))/v(i);
-   scaleP /= x.size(); //we need to use the same scale or we create bias
+   {
+     temp = x(i)*(1-x(i))/v(i);
+     if(temp < scaleP)
+       scaleP = temp;
+   }
 
-   double scaleQP = 0;
+   double scaleQP = 100000000;
    x = q_init.getSymmetricQP();
    v = q_init.getMcmcVarQP();
    for ( int i=0; i<x.size(); ++i )
-     scaleQP += x(i)*(1-x(i))/v(i);
-   scaleQP /= x.size(); //we need to use the same scale or we create bias
+   {
+     temp = x(i)*(1-x(i))/v(i);
+     if( temp < scaleQP )
+       scaleQP = temp;
+   }
 
    for ( int k=indStart; k<indEnd; ++k )
      {
@@ -332,27 +339,29 @@ int main(int argc, char* argv[])
   cout << jctree.makeTreeNumbers() << endl;
 
 // calculate the scale for P and QP
-   double scaleP = 0;
+   double scaleP = 100000000;
+   double temp;
    VectorXd x = q_init.getStationaryP();
    VectorXd v = q_init.getMcmcVarP();
    for ( int i=0; i<x.size(); ++i )
    {
-     cout << "Scale for pi: " << i << " is " << x(i)*(1-x(i))/v(i) << endl;
-     scaleP += x(i)*(1-x(i))/v(i);
+     temp = x(i)*(1-x(i))/v(i);
+     cout << "Scale for p" << i << " is " << temp << endl;
+     if(temp < scaleP)
+       scaleP = temp;
    }
-   scaleP /= x.size(); //we need to use the same scale or we create bias
+   cout << "Dirichlet for P scale: " << scaleP << endl;
 
-   double scaleQP = 0;
+   double scaleQP = 100000000;
    x = q_init.getSymmetricQP();
    v = q_init.getMcmcVarQP();
    for ( int i=0; i<x.size(); ++i )
    {
-     cout << "Scale for si: " << i << " is " << x(i)*(1-x(i))/v(i) << endl;
-     scaleQP += x(i)*(1-x(i))/v(i);
+     temp = x(i)*(1-x(i))/v(i);
+     cout << "Scale for s" << i << " is " << temp << endl;
+     if( temp < scaleQP )
+       scaleQP = temp;
    }
-   scaleQP /= x.size(); //we need to use the same scale or we create bias
-
-   cout << "Dirichlet for P scale: " << scaleP << endl;
    cout << "Dirichlet for QP scale: " << scaleQP << endl;
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());

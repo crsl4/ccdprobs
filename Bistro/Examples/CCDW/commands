@@ -1,3 +1,6 @@
+## without +1 in alpha(i), and using min scale
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro3 -r 1000 -b 1000 > bistro3.log
+
 ## without +1 in alpha(i)
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o bistro2 -r 1000 -b 1000 > bistro2.log
 
