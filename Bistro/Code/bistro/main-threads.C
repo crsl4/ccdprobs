@@ -300,17 +300,17 @@ int main(int argc, char* argv[])
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;
   s_init[4] = 0.3;
-  p_init[0] = 0.2429295; //mb values for cats-dogs
-  p_init[1] =  0.2356097;
-  p_init[2] = 0.2067433;
-  p_init[3] = 0.3147175;
+  // p_init[0] = 0.2429295; //mb values for cats-dogs
+  // p_init[1] =  0.2356097;
+  // p_init[2] = 0.2067433;
+  // p_init[3] = 0.3147175;
 
-  s_init[0] = 0.047201519;
-  s_init[1] = 0.293928352;
-  s_init[2] = 0.068691153;
-  s_init[3] = 0.012274385;
-  s_init[4] = 0.569989255;
-  s_init[5] = 0.007915336;
+  // s_init[0] = 0.047201519;
+  // s_init[1] = 0.293928352;
+  // s_init[2] = 0.068691153;
+  // s_init[3] = 0.012274385;
+  // s_init[4] = 0.569989255;
+  // s_init[5] = 0.007915336;
 
   QMatrix q_init(p_init,s_init);
 //  jctree.setInitialEdgeLengths(0.1); //0.1 ignored, and branches set inside close to true for cats-dogs CCLT
