@@ -3,7 +3,7 @@ translate
        2 Cheetah,
        3 Dog,
        4 Wolf;
-prob crudeSE(ESS=152.78) clade
+prob crudeSE(ESS=482.44) clade
 1.00000000 0.00000000 {1-4} ****
 1.00000000 0.00000000 {2-4} .***
 1.00000000 0.00000000 {3-4} ..**

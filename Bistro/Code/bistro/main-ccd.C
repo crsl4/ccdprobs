@@ -64,154 +64,6 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
   return y;
 }
 
-// will use x as the mean to the dirichlet, and v as the variance for each entry
-// we calculate the scale inside
-// E(yi) = alpha_i/sum{alpha_i}=x_i (because sum{x_i}=1)
-// Var(yi) = alpha_i*(sum{alpha_i}-alpha_i)/(sum{alpha_i})^2*(sum{alpha_i}+1)
-// if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi
-VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposalDensity,mt19937_64& rng)
-{
-  //  cout << "vector x: " << x.transpose() << endl;
-  //cout << "vector v: " << v.transpose() << endl;
-  VectorXd alpha(x.size());
-  VectorXd y(x.size());
-  double sum = 0;
-  double sumalpha = 0;
-  double scale;
-  for ( int i=0; i<x.size(); ++i )
-    scale += x(i)*(1-x(i))/v(i);
-  scale /= x.size(); //we need to use the same scale or we create bias
-  for ( int i=0; i<x.size(); ++i )
-  {
-    alpha(i) = scale*x(i) + 1;
-    gamma_distribution<double> rgamma(alpha(i),1.0);
-    y(i) = rgamma(rng);
-    sum += y(i);
-    sumalpha += alpha(i);
-  }
-  for ( int i=0; i<x.size(); ++i )
-  {
-    y(i) /= sum;
-  }
-  for ( int i=0; i<x.size(); ++i )
-  {
-    logProposalDensity += ( - lgamma(alpha(i)) + scale*x(i)*log(y(i)) ) ;
-  }
-  logProposalDensity += lgamma(sumalpha);
-  return y;
-}
-
-// arguments made reference to avoid copying in each thread
-template<typename T>
-void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
-{
-//     cerr << "Random trees from " << indStart << " to " << indEnd << endl;
-
-  string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
-  ofstream f(outFile.c_str());
-  string treeBLFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBL";
-  ofstream treebl(treeBLFile.c_str());
-  string treeBLFileSort = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".treeBLsort";
-  ofstream treeblsort(treeBLFileSort.c_str());
-   f << "tree logl logTop logBL logPrior logQ logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
-
-   for ( int k=indStart; k<indEnd; ++k )
-     {
-       if(indStart == 0)
-	 {
-	   if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
-	     cerr << '*';
-	   if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
-	     cerr << '|';
-	 }
-       // here we need to sample a Q
-       double logQ = 0;
-       double scale = 1;
-       if( parameters.getFixedQ() )
-	 scale = 10000000;
-       VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), q_init.getMcmcVarP(), logQ, rng);
-       VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), q_init.getMcmcVarQP(), logQ, rng);
-
-       if( parameters.getFixedQ() )
-	 logQ = 0;
-       QMatrix model(p_star,s_star);
-
-      double logTopologyProbability=0;
-      string treeString;
-      treeString = ccd.randomTree(rng,logTopologyProbability);
-
-      Tree tree(treeString);
-      tree.relabel(alignment);
-      tree.unroot();
-      MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
-      gtrDistanceMatrixCopy = gtrDistanceMatrix;
-      tree.setNJDistances(gtrDistanceMatrixCopy,rng);
-      if( parameters.getRootFix() )
-	tree.randomizeBL(rng);
-      else
-	tree.randomize(rng);
-
-      if(VERBOSE)
-	{
-	  cout << coreID << " " << k << "th tree" << endl << flush;
-	  tree.print(cout);
-	  cout << tree.makeTreeNumbers() << endl << flush;
-	  list<Node*> nodeList;
-	  tree.postorderCherryNodeList(nodeList);
-	  cout << "Postorder Node List:";
-	  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-	    cout << " " << (*p)->getNumber();
-	  cout << endl << flush;
-	}
-      double logBL = 0;
-
-      if( parameters.getNumMLE() == 0 )
-	parameters.setNumMLE(2);
-
-      for ( int i=0; i<parameters.getNumMLE(); ++i )
-	{
-	  tree.randomEdges(alignment,model,rng,logBL,true);
-//	  cout << tree.makeTreeNumbers() << endl;
-	}
-      if( parameters.getIndependent() )
-	{
-//	  cout << "Branch lengths sampled independently" << endl;
-	  tree.randomEdges(alignment,model,rng,logBL,false);
-	}
-      else
-	{
-//	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), parameters.getEta(), parameters.getWeightMean());
-	}
-//      cout << tree.makeTreeNumbers() << endl;
-      treebl << tree.makeTreeNumbers() << endl;
-      double logBranchLengthPriorDensity = tree.logPriorExp( (PRIOR_MEAN) );
-      // if(VERBOSE)
-      // 	cout << "calculating the final loglik now before clearing map" << endl;
-      // double logLik0 = tree.calculate(alignment, model);
-      // tree.clearProbMaps(); //added just to see if this was missing
-      if(VERBOSE)
-	cout << "calculating the final loglik now without clearing map" << endl;
-      double logLik = tree.calculate(alignment, model);
-      double logWeight = logBranchLengthPriorDensity + logLik - logBL - logTopologyProbability - logQ;
-      // string top0 = tree.makeTopologyNumbers();
-      tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
-      tree.sortCanonical();
-      treeblsort << tree.makeTreeNumbers() << endl;
-      string top = tree.makeTopologyNumbers();
-      f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logBL << " " << logBranchLengthPriorDensity << " " << logQ << " " << logWeight << " ";
-      f << model.getStationaryP().transpose() << " " << model.getSymmetricQP().transpose() << endl;
-      logwt.push_back( logWeight );
-      //logwt[k] = logWeight;
-      if ( k==indStart || logWeight > maxLogWeight )
-	maxLogWeight = logWeight;
-      //add to the multimap for the topology the logweight
-      topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
-    }
-  treebl.close();
-  treeblsort.close();
-}
-
 
 int main(int argc, char* argv[])
 {
@@ -348,9 +200,7 @@ int main(int argc, char* argv[])
   cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
   map<string,int> topologyToCountMap;
   map<string,int> topologyToParsimonyScoreMap;
-  map<string,double> topologyToLogLikScoreMap;
   int minimumParsimonyScore = -1;
-  int maximumLogLikScore = -1;
   MatrixXd bootDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   vector<int> weights(alignment.getNumSites());
   cerr << '|';
@@ -377,19 +227,6 @@ int main(int argc, char* argv[])
       if ( score < minimumParsimonyScore || b==0 )
 	minimumParsimonyScore = score;
     }
-    // add likelihood score to map if not there already
-    // update minimum loglik
-    if ( topologyToLogLikScoreMap.find(top) == topologyToLogLikScoreMap.end() )
-    {
-      bootTree.unroot();
-      MatrixXd gtrDistanceMatrixCopy2(alignment.getNumTaxa(),alignment.getNumTaxa());
-      gtrDistanceMatrixCopy2 = gtrDistanceMatrix;
-      bootTree.setNJDistances(gtrDistanceMatrixCopy2,rng);
-      int score = bootTree.logLikelihoodScore(alignment, model);
-      topologyToLogLikScoreMap[ top ] = score;
-      if ( score > maximumLogLikScore || b==0 )
-	maximumLogLikScore = score;
-    }
     topologyToCountMap[ top ]++;
   }
   cerr << endl << "done." << endl;
@@ -403,9 +240,6 @@ int main(int argc, char* argv[])
     topologyToWeightMap[ (*m).first ] =
       (*m).second * exp( parameters.getParsimonyScale() *
 			 (minimumParsimonyScore - topologyToParsimonyScoreMap[ (*m).first ]) );
-    topologyToLogLikWeightMap[ (*m).first ] =
-      (*m).second * exp( parameters.getParsimonyScale() *
-			 (topologyToLogLikScoreMap[ (*m).first ] - maximumLogLikScore) );
   }
 
   cout << endl << "Topology counts to file" << endl;
@@ -413,8 +247,7 @@ int main(int argc, char* argv[])
     string topologyCountsFile = parameters.getOutFileRoot() + ".topCounts";
     ofstream topCounts(topologyCountsFile.c_str());
     map<string,double>::iterator wm=topologyToWeightMap.begin();
-    map<string,double>::iterator loglwm=topologyToLogLikWeightMap.begin();
-    topCounts << "tree count parsimonyWt parsimonyScore parsimonyDiff loglikWt loglikScore loglikDiff" << endl;
+    topCounts << "tree count parsimonyWt parsimonyScore parsimonyDiff" << endl;
     for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
     {
       Tree t((*cm).first);
@@ -426,10 +259,8 @@ int main(int argc, char* argv[])
       topCounts << top << " " << setw(5) << (*cm).second << " ";
       topCounts << setw(10) << setprecision(4) << fixed << (*wm).second;
       topCounts << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ];
-      topCounts << " " << setw(10) << setprecision(4) << fixed << (*loglwm).second;
-      topCounts << " " << setw(5) << topologyToLogLikScoreMap[ (*cm).first ] << " " << setw(4) << topologyToLogLikScoreMap[ (*cm).first ] - maximumLogLikScore << endl;
+      topCounts << " " << endl;
       ++wm;
-      ++loglwm;
     }
     topCounts << endl;
     topCounts.close();
@@ -449,8 +280,6 @@ int main(int argc, char* argv[])
   string originalTmapFile = parameters.getOutFileRoot() + "-nopars.tmap";
   string parsimonySmapFile = parameters.getOutFileRoot() + "-pars.smap";
   string parsimonyTmapFile = parameters.getOutFileRoot() + "-pars.tmap";
-  string loglikSmapFile = parameters.getOutFileRoot() + "-loglik.smap";
-  string loglikTmapFile = parameters.getOutFileRoot() + "-loglik.tmap";
   ofstream smap(originalSmapFile.c_str());
   ccd.writeCladeCount(smap);
   smap.close();
@@ -462,12 +291,6 @@ int main(int argc, char* argv[])
   smap.close();
   tmap.open(parsimonyTmapFile);
   ccdParsimony.writePairCount(tmap);
-  tmap.close();
-  smap.open(loglikSmapFile);
-  ccdLogLik.writeCladeCount(smap);
-  smap.close();
-  tmap.open(loglikTmapFile);
-  ccdLogLik.writePairCount(tmap);
   tmap.close();
 
   return 0;

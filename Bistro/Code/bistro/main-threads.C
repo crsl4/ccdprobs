@@ -462,9 +462,12 @@ int main(int argc, char* argv[])
     topologyToWeightMap[ (*m).first ] =
       (*m).second * exp( parameters.getParsimonyScale() *
 			 (minimumParsimonyScore - topologyToParsimonyScoreMap[ (*m).first ]) );
-    topologyToLogLikWeightMap[ (*m).first ] =
-      (*m).second * exp( parameters.getParsimonyScale() *
-			 (topologyToLogLikScoreMap[ (*m).first ] - maximumLogLikScore) );
+    if( parameters.getLoglikWt() )
+    {
+      topologyToLogLikWeightMap[ (*m).first ] =
+	(*m).second * exp( parameters.getParsimonyScale() *
+			   (topologyToLogLikScoreMap[ (*m).first ] - maximumLogLikScore) );
+    }
   }
 
   cout << endl << "Topology counts to file" << endl;
@@ -485,10 +488,14 @@ int main(int argc, char* argv[])
       topCounts << top << " " << setw(5) << (*cm).second << " ";
       topCounts << setw(10) << setprecision(4) << fixed << (*wm).second;
       topCounts << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ];
-      topCounts << " " << setw(10) << setprecision(4) << fixed << (*loglwm).second;
-      topCounts << " " << setw(5) << topologyToLogLikScoreMap[ (*cm).first ] << " " << setw(4) << topologyToLogLikScoreMap[ (*cm).first ] - maximumLogLikScore << endl;
+      topCounts << " ";
+      if( parameters.getLoglikWt() )
+      {
+	topCounts << setw(10) << setprecision(4) << fixed << (*loglwm).second;
+	topCounts << " " << setw(5) << topologyToLogLikScoreMap[ (*cm).first ] << " " << setw(4) << topologyToLogLikScoreMap[ (*cm).first ] - maximumLogLikScore << endl;
+	++loglwm;
+      }
       ++wm;
-      ++loglwm;
     }
     topCounts << endl;
     topCounts.close();
