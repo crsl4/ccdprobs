@@ -57,7 +57,7 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
   }
   for ( int i=0; i<x.size(); ++i )
   {
-    logProposalDensity += ( - lgamma(alpha(i)) + scale*x(i)*log(y(i)) ) ;
+    logProposalDensity += ( - lgamma(alpha(i)) + (alpha(i)-1)*log(y(i)) ) ;
   }
   logProposalDensity += lgamma(sumalpha);
   return y;
@@ -68,7 +68,7 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
 // E(yi) = alpha_i/sum{alpha_i}=x_i (because sum{x_i}=1)
 // Var(yi) = alpha_i*(sum{alpha_i}-alpha_i)/(sum{alpha_i})^2*(sum{alpha_i}+1)
 // if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi
-VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposalDensity,mt19937_64& rng)
+VectorXd dirichletProposalDensityScale(VectorXd x,double scale,double& logProposalDensity,mt19937_64& rng)
 {
   //  cout << "vector x: " << x.transpose() << endl;
   //cout << "vector v: " << v.transpose() << endl;
@@ -76,13 +76,9 @@ VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposal
   VectorXd y(x.size());
   double sum = 0;
   double sumalpha = 0;
-  double scale = 0;
-  for ( int i=0; i<x.size(); ++i )
-    scale += x(i)*(1-x(i))/v(i);
-  scale /= x.size(); //we need to use the same scale or we create bias
   for ( int i=0; i<x.size(); ++i )
   {
-    alpha(i) = scale*x(i) + 1;
+    alpha(i) = scale*x(i);
     gamma_distribution<double> rgamma(alpha(i),1.0);
     y(i) = rgamma(rng);
     sum += y(i);
@@ -94,7 +90,7 @@ VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposal
   }
   for ( int i=0; i<x.size(); ++i )
   {
-    logProposalDensity += ( - lgamma(alpha(i)) + scale*x(i)*log(y(i)) ) ;
+    logProposalDensity += ( - lgamma(alpha(i)) + (alpha(i)-1)*log(y(i)) ) ;
   }
   logProposalDensity += lgamma(sumalpha);
   return y;
@@ -114,6 +110,21 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
   ofstream treeblsort(treeBLFileSort.c_str());
    f << "tree logl logTop logBL logPrior logQ logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
 
+// calculate the scale for P and QP: fixit, this is done twice
+   double scaleP = 0;
+   VectorXd x = q_init.getStationaryP();
+   VectorXd v = q_init.getMcmcVarP();
+   for ( int i=0; i<x.size(); ++i )
+     scaleP += x(i)*(1-x(i))/v(i);
+   scaleP /= x.size(); //we need to use the same scale or we create bias
+
+   double scaleQP = 0;
+   x = q_init.getSymmetricQP();
+   v = q_init.getMcmcVarQP();
+   for ( int i=0; i<x.size(); ++i )
+     scaleQP += x(i)*(1-x(i))/v(i);
+   scaleQP /= x.size(); //we need to use the same scale or we create bias
+
    for ( int k=indStart; k<indEnd; ++k )
      {
        if(indStart == 0)
@@ -125,15 +136,15 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	 }
        // here we need to sample a Q
        double logQ = 0;
-       double scale = 1;
+       double otherscale = 1;
        if( parameters.getFixedQ() )
-	 scale = 10000000;
+	 otherscale = 10000000;
        if ( VERBOSE )
 	 cout << "logQ before p_star = " << logQ << endl;
-       VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), scale*q_init.getMcmcVarP(), logQ, rng);
+       VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), otherscale*scaleP, logQ, rng);
        if ( VERBOSE )
 	 cout << "logQ after p_star = " << logQ << endl;
-       VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), scale*q_init.getMcmcVarQP(), logQ, rng);
+       VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), otherscale*scaleQP, logQ, rng);
        if ( VERBOSE )
 	 cout << "logQ after s_star = " << logQ << endl;
 
@@ -300,17 +311,6 @@ int main(int argc, char* argv[])
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;
   s_init[4] = 0.3;
-  p_init[0] = 0.2429295; //mb values for cats-dogs
-  p_init[1] =  0.2356097;
-  p_init[2] = 0.2067433;
-  p_init[3] = 0.3147175;
-
-  s_init[0] = 0.047201519;
-  s_init[1] = 0.293928352;
-  s_init[2] = 0.068691153;
-  s_init[3] = 0.012274385;
-  s_init[4] = 0.569989255;
-  s_init[5] = 0.007915336;
 
   QMatrix q_init(p_init,s_init);
 //  jctree.setInitialEdgeLengths(0.1); //0.1 ignored, and branches set inside close to true for cats-dogs CCLT
@@ -331,6 +331,29 @@ int main(int argc, char* argv[])
   cout << "JC tree: " << endl;
   cout << jctree.makeTreeNumbers() << endl;
 
+// calculate the scale for P and QP
+   double scaleP = 0;
+   VectorXd x = q_init.getStationaryP();
+   VectorXd v = q_init.getMcmcVarP();
+   for ( int i=0; i<x.size(); ++i )
+   {
+     cout << "Scale for pi: " << i << " is " << x(i)*(1-x(i))/v(i) << endl;
+     scaleP += x(i)*(1-x(i))/v(i);
+   }
+   scaleP /= x.size(); //we need to use the same scale or we create bias
+
+   double scaleQP = 0;
+   x = q_init.getSymmetricQP();
+   v = q_init.getMcmcVarQP();
+   for ( int i=0; i<x.size(); ++i )
+   {
+     cout << "Scale for si: " << i << " is " << x(i)*(1-x(i))/v(i) << endl;
+     scaleQP += x(i)*(1-x(i))/v(i);
+   }
+   scaleQP /= x.size(); //we need to use the same scale or we create bias
+
+   cout << "Dirichlet for P scale: " << scaleP << endl;
+   cout << "Dirichlet for QP scale: " << scaleQP << endl;
 
 //  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
