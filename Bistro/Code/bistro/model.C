@@ -229,13 +229,13 @@ void QMatrix::mcmc(Alignment& alignment,Tree& tree,int numGenerations,double sca
   //  avgS /= numGenerations;
   sP /= (numGenerations-1);
   sS /= (numGenerations-1);
-  cout << "avgP: " << avgP.transpose() << endl;
-  cout << "sP: " << sP.transpose() << endl;
-  cout << "avgS: " << avgS.transpose() << endl;
-  cout << "sS: " << sS.transpose() << endl;
   reset(avgP,avgS);
   setMcmcVarP(sP);
   setMcmcVarQP(sS);
+  cout << "avgP: " << avgP.transpose() << endl;
+  cout << "sP: " << sqrt(sP(0)) << "," << sqrt(sP(1)) << "," << sqrt(sP(2)) << "," << sqrt(sP(3)) << endl;
+  cout << "avgS: " << avgS.transpose() << endl;
+  cout << "sS: " << sqrt(sS(0)) << "," << sqrt(sS(1)) << "," << sqrt(sS(2)) << "," << sqrt(sS(3)) << "," << sqrt(sS(4)) << "," << sqrt(sS(5))  << endl;
   cout << stationaryP.transpose() << endl;
   cout << symmetricQP.transpose() << endl;
   cout << endl << getQ() << endl << endl;

@@ -488,7 +488,7 @@ int main(int argc, char* argv[])
       topCounts << top << " " << setw(5) << (*cm).second << " ";
       topCounts << setw(10) << setprecision(4) << fixed << (*wm).second;
       topCounts << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ];
-      topCounts << " ";
+      topCounts << " " << endl;
       if( parameters.getLoglikWt() )
       {
 	topCounts << setw(10) << setprecision(4) << fixed << (*loglwm).second;
