@@ -1,9 +1,9 @@
 translate
-       1 Cat,
-       2 Cheetah,
-       3 Dog,
-       4 Wolf;
-prob crudeSE(ESS=443.14) clade
+       1 cat,
+       2 cheetah,
+       3 gray_wolf,
+       4 dog;
+prob crudeSE(ESS=83.26) clade
 1.00000000 0.00000000 {1-4} ****
 1.00000000 0.00000000 {2-4} .***
 1.00000000 0.00000000 {3-4} ..**

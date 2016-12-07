@@ -3,7 +3,8 @@
 ## o.w. it will compare to mcmc1.tre, mcmc1.par from bmcmc
 
 ## artiodactyl "(1,2,(3,(4,(5,6))));"
-## cats-dogs "(1,(2,(((((7,8),9),10),12),11)),(3,((4,5),6)));"
+## cats-dogs "(1,(2,(((((3,4),5),6),7),8)),(9,((10,11),12)));"
+## bistro writes it like this: "(1,(2,(((((7,8),9),10),12),11)),(3,((4,5),6)));"
 
 summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));"){
     if(mb)
@@ -47,8 +48,8 @@ summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));"){
     require(ape)
     N.mb = length(tre.mb) ### 1000 now!!!
 
-    ## get number of edges
     tree = read.tree(text=tre.mb[1])
+    ## get number of edges
     m.mb = matrix(0,N.mb,length(tree$edge.length))
     colnames(m.mb) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
 
@@ -66,15 +67,21 @@ summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));"){
     plotBistro(bistro)
     dev.off()
 
-    keep = which(bistro$tree==besttree)
-    tre.bistro = data$V1[keep]
-
-    tree=read.tree(text=as.character(tre.bistro[1]))
+    ## we need to treat the cats-dogs differently because canonical sort in bistro does not
+    ## write it in the same way as in mcmc
+    if(besttree == "(1,(2,(((((3,4),5),6),7),8)),(9,((10,11),12)));"){
+        keep = which(bistro$tree=="(1,(2,(((((7,8),9),10),12),11)),(3,((4,5),6)));")
+        tre.bistro = data$V1[keep]
+    }else{
+        keep = which(bistro$tree==besttree)
+        tre.bistro = data$V1[keep]
+        tree=read.tree(text=as.character(tre.bistro[1]))
+    }
 
 
     N.bistro = length(tre.bistro)
     ## get number of edges
-    m.bistro = matrix(0,N.bistro,length(tree$edge.length))
+    m.bistro = matrix(0,N.bistro,length(tree$edge[,1]))
     colnames(m.bistro) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
 
     ## check same names!!!

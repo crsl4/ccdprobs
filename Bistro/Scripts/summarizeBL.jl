@@ -7,18 +7,18 @@
 
 ## folder = "../Examples/Artiodactyl/"
 ## mbroot = "artiodactyl-6"
-## folder = "../Examples/cats-dogs/"
+folder = "../Examples/cats-dogs/"
 ## mbroot = "cats-dogs-no-fixed-q"
-folder = "../Examples/Simulations/"
-mbroot = "sim-cats-dogs"
-bistroroot = "eta11"
+##folder = "../Examples/Simulations/"
+mbroot = "cats-dogs-2"
+bistroroot = "test"
 verbose = false
 
 using PhyloNetworks
 using DataFrames
 
-searchdirTreeBL(path,key) = filter(x->(contains(x,key) && contains(x,".treeBL")), readdir(path))
-searchdirOut(path,key) = filter(x->(contains(x,key) && contains(x,".out")), readdir(path))
+searchdirTreeBL(path,key) = filter(x->(contains(x,key) && endswith(x,".treeBL")), readdir(path))
+searchdirOut(path,key) = filter(x->(contains(x,key) && endswith(x,".out")), readdir(path))
 
 ## read all trees with branch lengths
 files = searchdirTreeBL(folder,"$bistroroot---")

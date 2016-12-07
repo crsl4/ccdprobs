@@ -1,5 +1,6 @@
 ## run bistro
 ../../Code/bistro/bistro -f ../../Data/sim-ccdw.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
+../../Code/bistro/bistro -f ../../Data/sim-ccdw.fasta -o bistro2 -r 1000 -b 1000 > bistro2.log
 
 ## to run bmcmc
 ../../Code/bistro/bmcmc -f ../../Data/sim-ccdw.fasta -o mcmc1 -r 10000 -b 1000 -t "(1,2,(3,4));" > mcmc1.log

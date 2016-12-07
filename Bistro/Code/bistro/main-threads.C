@@ -37,37 +37,12 @@ bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string,
   return p1.second < p2.second;
 }
 
-VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDensity,mt19937_64& rng)
-{
-  VectorXd alpha(x.size());
-  VectorXd y(x.size());
-  double sum = 0;
-  double sumalpha = 0;
-  for ( int i=0; i<x.size(); ++i )
-  {
-    alpha(i) = scale*x(i) + 1;
-    gamma_distribution<double> rgamma(alpha(i),1.0);
-    y(i) = rgamma(rng);
-    sum += y(i);
-    sumalpha += alpha(i);
-  }
-  for ( int i=0; i<x.size(); ++i )
-  {
-    y(i) /= sum;
-  }
-  for ( int i=0; i<x.size(); ++i )
-  {
-    logProposalDensity += ( - lgamma(alpha(i)) + (alpha(i)-1)*log(y(i)) ) ;
-  }
-  logProposalDensity += lgamma(sumalpha);
-  return y;
-}
-
 // will use x as the mean to the dirichlet, and v as the variance for each entry
 // we calculate the scale inside
 // E(yi) = alpha_i/sum{alpha_i}=x_i (because sum{x_i}=1)
 // Var(yi) = alpha_i*(sum{alpha_i}-alpha_i)/(sum{alpha_i})^2*(sum{alpha_i}+1)
 // if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi
+// this function is not used in mcmc, that one used is in model.C
 VectorXd dirichletProposalDensityScale(VectorXd x,double scale,double& logProposalDensity,mt19937_64& rng)
 {
   //  cout << "vector x: " << x.transpose() << endl;
