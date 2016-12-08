@@ -55,5 +55,6 @@ public:
   void calculateGTRDistances(QMatrix,MatrixXd&,MatrixXd&);
   void setBootstrapWeights(vector<int>&,mt19937_64&);
   void getTaxaNumbersAndNames(vector<int>&,vector<string>&);
+  vector<double> baseFrequencies();
 };
 #endif

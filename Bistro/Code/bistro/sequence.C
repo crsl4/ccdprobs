@@ -104,6 +104,23 @@ void Alignment::summarize(ostream& f )
   }
 }
 
+vector<double> Alignment::baseFrequencies()
+{
+  map<char,int> counts;
+  vector<double> pi(4);
+  for ( vector<Sequence*>::iterator p=sequences.begin(); p!= sequences.end(); ++p )
+    for ( int k=0; k<(*p)->getSize(); ++k )
+      counts[(*p)->getBase(k)]++;
+  int i = 0;
+  cerr << "read all counts" << endl;
+  for ( map<char,int>::iterator m=counts.begin(); m !=counts.end(); ++m )
+  {
+    pi.at(i) = (m->second)/(counts.size()*numSites+0.0);
+    i++;
+  }
+  return pi;
+}
+
 bool baseNotUncertain(char a)
 {
   return ( (a=='a') || (a=='c') || (a=='g') || (a=='t') );

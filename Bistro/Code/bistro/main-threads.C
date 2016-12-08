@@ -289,7 +289,11 @@ int main(int argc, char* argv[])
   // Run MCMC on tree to estimate Q matrix parameters
   //   initial Q matrix
 
-  vector<double> p_init(4,0.25);
+// base frequencies
+  vector<double> p_init = alignment.baseFrequencies();
+  cerr << "Estimated base frequencies: " << p_init.at(0) << "," << p_init.at(1) << "," << p_init.at(2) << "," << p_init.at(3) << endl;
+
+//  vector<double> p_init(4,0.25);
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;
   s_init[4] = 0.3;
