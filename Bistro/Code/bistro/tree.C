@@ -418,7 +418,7 @@ Vector4d translate(char base)
     condProbs(1) = condProbs(2) = 1;
     break;
   case 'w' :
-    condProbs(0) = condProbs(4) = 1;
+    condProbs(0) = condProbs(3) = 1;
     break;
   case 'b' :
     condProbs(1) = condProbs(2) = condProbs(3) = 1;
@@ -573,6 +573,7 @@ double Tree::calculate(const Alignment& alignment,QMatrix& qmatrix)
     root->calculate(k,alignment,NULL);//,true);
     pair<double,Vector4d> condProbPair = root->getProb();
     logLikelihood(k) = condProbPair.first + log( qmatrix.getStationaryP().dot(condProbPair.second) );
+
     if(VERBOSE)
       {
 	Node* x = root->getEdge(0)->getOtherNode(root);

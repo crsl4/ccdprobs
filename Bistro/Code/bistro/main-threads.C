@@ -295,7 +295,7 @@ int main(int argc, char* argv[])
   s_init[4] = 0.3;
 
   QMatrix q_init(p_init,s_init);
-//  jctree.setInitialEdgeLengths(0.1); //0.1 ignored, and branches set inside close to true for cats-dogs CCLT
+  jctree.setInitialEdgeLengths(0.1); //0.1 ignored, and branches set inside close to true for cats-dogs CCLT
 
  // burnin
   cerr << "burn-in:" << endl;
