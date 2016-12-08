@@ -1,4 +1,0 @@
-tree count parsimonyWt parsimonyScore parsimonyDiff loglikWt loglikScore loglikDiff
-(1,(2,4),3);     1     0.0000   604 -195     0.0000 -4176.0000 -454.0000
-(1,2,(3,4));   999   999.0000   409    0   999.0000 -3722.0000 0.0000
-
