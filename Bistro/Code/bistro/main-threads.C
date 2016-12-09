@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
 
   cerr << "treetext: " << treetext << endl;
   Tree starttree(treetext);
-// starttree.relabel(alignment);
+  starttree.relabel(alignment);
 
   cerr << "Start tree: " << starttree.makeTopologyNumbers() << endl;
 

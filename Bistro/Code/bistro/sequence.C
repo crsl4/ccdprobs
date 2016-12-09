@@ -11,6 +11,17 @@
 
 using namespace std;
 
+string trim(const string& str)
+{
+    size_t first = str.find_first_not_of(' ');
+    if (string::npos == first)
+    {
+        return str;
+    }
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last - first + 1));
+}
+
 int Sequence::readFastaSequence(istream& f)
 {
   char c;
@@ -20,10 +31,10 @@ int Sequence::readFastaSequence(istream& f)
   {
     return 1;
   }
-  
+
   string line;
   getline(f,line);
-  name = line;
+  name = trim(line);
 
   stringstream s;
   while ( f.good() )
