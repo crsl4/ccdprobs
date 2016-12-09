@@ -293,9 +293,12 @@ int main(int argc, char* argv[])
   vector<double> p_init = alignment.baseFrequencies();
   cerr << "Estimated base frequencies: " << p_init.at(0) << "," << p_init.at(1) << "," << p_init.at(2) << "," << p_init.at(3) << endl;
 
-  MatrixXd mat = MatrixXd::Zero(4,4);
-  alignment.calculatePairwiseCounts(0,1,mat);
-  cerr << "Pairwise counts for sequences 1 and 2 : " << endl << mat << endl;
+  VectorXd s_pairwise(6);
+  s_pairwise = alignment.averagePairwiseS();
+  cerr << s_pairwise.transpose() << endl;
+  
+//  alignment.calculatePairwiseCounts(0,1,mat);
+//  cerr << "Pairwise counts for sequences 1 and 2 : " << endl << mat << endl;
 //  vector<double> p_init(4,0.25);
   vector<double> s_init(6,0.1);
   s_init[1] = 0.3;

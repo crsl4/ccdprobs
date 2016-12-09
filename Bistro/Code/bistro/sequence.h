@@ -56,6 +56,7 @@ public:
   void setBootstrapWeights(vector<int>&,mt19937_64&);
   void getTaxaNumbersAndNames(vector<int>&,vector<string>&);
   vector<double> baseFrequencies();
-  void calculatePairwiseCounts(int,int,MatrixXd&);
+  MatrixXi calculatePairwiseCounts(int,int);
+  VectorXd averagePairwiseS();
 };
 #endif

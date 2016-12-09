@@ -315,14 +315,41 @@ void Alignment::calculateGTRDistances(QMatrix model,MatrixXd& init,MatrixXd& gtr
 }
 
 // matrix has been initialized to zero outside
-void Alignment::calculatePairwiseCounts(int i, int j, MatrixXd& jc)
+MatrixXi Alignment::calculatePairwiseCounts(int i, int j)
 {
-//initialize at zero
-  //jc = MatrixXd::Zero(4,4);
+  MatrixXi jc=MatrixXi::Zero(4,4);
   for ( int k=0; k<numSites; ++k )
   {
     char a = tolower( getBase(i+1,k) );
     char b = tolower( getBase(j+1,k) );
-    jc(baseToInt(a),baseToInt(b))++;
+    if ( baseNotUncertain(a) && baseNotUncertain(b) )
+      jc(baseToInt(a),baseToInt(b))++;
   }
+  return jc;
+}
+
+VectorXd Alignment::averagePairwiseS()
+{
+  int total=0;
+  VectorXd s = VectorXd::Zero(6);
+  for ( int i=0; i<numTaxa; ++i ) // when i==numTaxa-1, j loop not executed
+  {
+    for ( int j=i+1; j<numTaxa; ++j )
+    {
+      MatrixXi mat = calculatePairwiseCounts(i,j);
+      VectorXd foo(6);
+      foo(0) = mat(0,1) + mat(1,0);
+      foo(1) = mat(0,2) + mat(2,0);
+      foo(2) = mat(0,3) + mat(3,0);
+      foo(3) = mat(1,2) + mat(2,1);
+      foo(4) = mat(1,3) + mat(3,1);
+      foo(5) = mat(2,3) + mat(3,2);
+      foo /= foo.sum();
+      ++total;
+      s += foo;
+      cerr <<  i << " " << j << ": " << foo.transpose() << endl;
+    }
+  }
+  s /= total;
+  return s;
 }
