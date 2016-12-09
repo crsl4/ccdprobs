@@ -302,3 +302,16 @@ void Alignment::calculateGTRDistances(QMatrix model,MatrixXd& init,MatrixXd& gtr
   vector<int> weights(numSites,1);
   calculateGTRDistancesUsingWeights(weights,model,init,gtr);
 }
+
+// matrix has been initialized to zero outside
+void Alignment::calculatePairwiseCounts(int i, int j, MatrixXd& jc)
+{
+//initialize at zero
+  //jc = MatrixXd::Zero(4,4);
+  for ( int k=0; k<numSites; ++k )
+  {
+    char a = tolower( getBase(i+1,k) );
+    char b = tolower( getBase(j+1,k) );
+    jc(baseToInt(a),baseToInt(b))++;
+  }
+}
