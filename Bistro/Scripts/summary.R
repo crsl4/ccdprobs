@@ -202,6 +202,7 @@ summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));"){
         {
             median.bistro = mean( drop(as.matrix(filter(df2,set=="Bistro") %>% select(i))) )
             median.mb = mean( drop(as.matrix(filter(df2,set==other) %>% select(i))) )
+            print(median.mb)
             plot(ggplot(df2,aes(x=df2[,i],col=set))+geom_density() +
                  scale_color_manual(values=vpal) +
                  geom_vline(xintercept=median.bistro,color=vpal[1]) +

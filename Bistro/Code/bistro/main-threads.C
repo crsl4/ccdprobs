@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
   // s_init[4] = 0.3;
 
 //  QMatrix q_init(p_init,s_init);
-  QMatrix q_init(p_init,s_pairwise);
+  QMatrix q_init(convert(p_init),s_pairwise);
 
   for ( int i=0; i<4; ++i )
   {
