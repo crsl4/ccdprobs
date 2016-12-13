@@ -300,27 +300,39 @@ int main(int argc, char* argv[])
 //  alignment.calculatePairwiseCounts(0,1,mat);
 //  cerr << "Pairwise counts for sequences 1 and 2 : " << endl << mat << endl;
 //  vector<double> p_init(4,0.25);
-  vector<double> s_init(6,0.1);
-  s_init[1] = 0.3;
-  s_init[4] = 0.3;
+  // vector<double> s_init(6,0.1);
+  // s_init[1] = 0.3;
+  // s_init[4] = 0.3;
 
-  QMatrix q_init(p_init,s_init);
+//  QMatrix q_init(p_init,s_init);
+  QMatrix q_init(p_init,s_pairwise);
+
+  for ( int i=0; i<4; ++i )
+  {
+    double logFoo;
+    starttree.randomEdges(alignment,q_init,rng,logFoo,true);
+  }
+
+  cout << "MLE Branch Lengths" << endl;
+  cout << starttree.makeTreeNumbers() << endl;
 
  // burnin
   cerr << "burn-in:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-  starttree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
+//  starttree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
+  q_init.mcmc(alignment,starttree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
-  cout << "Start tree after MCMC burnin: " << endl;
-  cout << starttree.makeTreeNumbers() << endl;
+  // cout << "Start tree after MCMC burnin: " << endl;
+  // cout << starttree.makeTreeNumbers() << endl;
 
   // mcmc to get final Q
   cerr << "sampling:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
+  // starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
+  q_init.mcmc(alignment,starttree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
   cerr << endl << " done." << endl;
-  cout << "Start tree after MCMC: " << endl;
-  cout << starttree.makeTreeNumbers() << endl;
+  // cout << "Start tree after MCMC: " << endl;
+  // cout << starttree.makeTreeNumbers() << endl;
 
 // calculate the scale for P and QP
    double scaleP = 100000000;
