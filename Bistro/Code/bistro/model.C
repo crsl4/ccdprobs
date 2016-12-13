@@ -254,3 +254,18 @@ double gammaProposal(double x,double ddlogl,double& logProposalRatio,mt19937_64&
   return y;
 }
 
+VectorXd convert(vector<double> x)
+{
+  VectorXd y(x.size());
+  for ( int i=0; i<x.size(); ++i )
+    y(i) = x[i];
+  return y;
+}
+
+vector<double> convert(VectorXd x)
+{
+  vector<double> y(x.size());
+  for ( int i=0; i<x.size(); ++i )
+    y[i] = x(i);
+  return y;
+}
