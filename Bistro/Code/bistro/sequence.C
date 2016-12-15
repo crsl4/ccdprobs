@@ -115,6 +115,7 @@ void Alignment::summarize(ostream& f )
   }
 }
 
+// fixit: Change baseFreqencies to return a Vector4d
 vector<double> Alignment::baseFrequencies()
 {
   map<char,int> counts;
@@ -126,7 +127,7 @@ vector<double> Alignment::baseFrequencies()
   cerr << "read all counts" << endl;
   for ( map<char,int>::iterator m=counts.begin(); m !=counts.end(); ++m )
   {
-    pi.at(i) = (m->second)/(counts.size()*numSites+0.0);
+    pi.at(i) = (m->second)/(counts.size()*(double)numSites);
     i++;
   }
   return pi;

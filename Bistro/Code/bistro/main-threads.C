@@ -324,7 +324,7 @@ int main(int argc, char* argv[])
   cerr << endl << " done." << endl;
   // cout << "Start tree after MCMC burnin: " << endl;
   // cout << starttree.makeTreeNumbers() << endl;
-
+  
   // mcmc to get final Q
   cerr << "sampling:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
@@ -333,38 +333,41 @@ int main(int argc, char* argv[])
   cerr << endl << " done." << endl;
   // cout << "Start tree after MCMC: " << endl;
   // cout << starttree.makeTreeNumbers() << endl;
-
+  
 // calculate the scale for P and QP
-   double scaleP = 100000000;
-   double temp;
-   VectorXd x = q_init.getStationaryP();
-   VectorXd v = q_init.getMcmcVarP();
-   for ( int i=0; i<x.size(); ++i )
-   {
-     temp = x(i)*(1-x(i))/v(i);
-     cout << "Scale for p" << i << " is " << temp << endl;
-     if(temp < scaleP)
-       scaleP = temp;
-   }
-   cout << "Dirichlet for P scale: " << scaleP << endl;
-
-   double scaleQP = 100000000;
-   x = q_init.getSymmetricQP();
-   v = q_init.getMcmcVarQP();
-   for ( int i=0; i<x.size(); ++i )
-   {
-     temp = x(i)*(1-x(i))/v(i);
-     cout << "Scale for s" << i << " is " << temp << endl;
-     if( temp < scaleQP )
-       scaleQP = temp;
-   }
-   cout << "Dirichlet for QP scale: " << scaleQP << endl;
-
-//  QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
+  double scaleP = 100000000;
+  double temp;
+  VectorXd x = q_init.getStationaryP();
+  VectorXd v = q_init.getMcmcVarP();
+  for ( int i=0; i<x.size(); ++i )
+  {
+    temp = x(i)*(1-x(i))/v(i);
+    cout << "Scale for p" << i << " is " << temp << endl;
+    if(temp < scaleP)
+      scaleP = temp;
+  }
+  cout << "Dirichlet for P scale: " << scaleP << endl;
+  
+  double scaleQP = 100000000;
+  x = q_init.getSymmetricQP();
+  v = q_init.getMcmcVarQP();
+  for ( int i=0; i<x.size(); ++i )
+  {
+    temp = x(i)*(1-x(i))/v(i);
+    cout << "Scale for s" << i << " is " << temp << endl;
+    if( temp < scaleQP )
+      scaleQP = temp;
+  }
+  cout << "Dirichlet for QP scale: " << scaleQP << endl;
+  
+  //QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
   model.setMcmcVarP(q_init.getMcmcVarP());
   model.setMcmcVarQP(q_init.getMcmcVarQP());
   cerr << endl << " done." << endl;
+
+// will use the starting estimate of Q for the bootstrap:
+//  QMatrix model(convert(p_init),s_pairwise);
 
   milliseconds ms6 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
@@ -379,21 +382,6 @@ int main(int argc, char* argv[])
   cout << endl << gtrDistanceMatrix << endl << endl;
 
   milliseconds ms7 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
-
-  // MatrixXd gtrDistanceMatrixCopy = gtrDistanceMatrix;
-  // Tree gtrtree(gtrDistanceMatrixCopy);
-  // gtrtree.reroot(1);
-  // gtrtree.sortCanonical();
-  // cout << "GTR Tree" << endl;
-  // cout << gtrtree.makeTreeNumbers() << endl;
-  // for ( int i=0; i<4; ++i )
-  // {
-  //   double logFoo;
-  //   gtrtree.randomEdges(alignment,model,rng,logFoo,true);
-  // }
-
-  // cout << "MLE Branch Lengths" << endl;
-  // cout << gtrtree.makeTreeNumbers() << endl;
 
 // not normalized maps; normalization taken care of during alias creation
   map<string,int> topologyToCountMap;
@@ -548,7 +536,60 @@ int main(int argc, char* argv[])
   ccdLogLik.writePairCount(tmap);
   tmap.close();
   milliseconds ms10 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
-    
+
+// here we need to do mcmc on separate trees (fixit: do in multiple threads later)
+// we will choose the 10 trees with higher bootstrap frequency
+  vector< pair<string,double> > trees;
+  copy(topologyToCountMap.begin(), topologyToCountMap.end(), back_inserter(trees));
+  sort(trees.begin(), trees.end(), comparePairStringDouble);
+  int c = -1;
+  vector<VectorXd> avgP(10);
+  vector<VectorXd> varP(10);
+  vector<VectorXd> avgS(10);
+  vector<VectorXd> varS(10);
+  for (vector<pair<string,double>>::reverse_iterator i = trees.rbegin(); i != trees.rend(); ++i ) {
+    if( ++c < 10 ) // only do the first 10 trees
+    {
+      Tree tree(i->first);
+//      tree.relabel(alignment);
+      cerr << "Bootstrap tree: " << tree.makeTopologyNumbers() << " with count " << (i->second) << endl;
+      jcDistanceMatrixCopy = jcDistanceMatrix;
+      tree.setNJDistances(jcDistanceMatrixCopy,rng);
+      cerr << tree.makeTreeNumbers() << endl;
+      cerr << "Q " << endl << model.getQ() << endl;
+      for ( int j=0; j<4; ++j )
+      {
+	double logFoo;
+	tree.randomEdges(alignment,model,rng,logFoo,true);
+      }
+      cerr << "MLE Branch Lengths" << endl;
+      cerr << tree.makeTreeNumbers() << endl;
+      QMatrix q_loc(convert(p_init),s_pairwise);
+      // burnin
+      cerr << "burn-in:" << endl;
+      q_loc.mcmc(alignment,tree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+      cerr << endl << " done." << endl;
+      // mcmc to get final Q
+      cerr << "sampling:" << endl;
+      q_loc.mcmc(alignment,tree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+      cerr << endl << " done." << endl;
+      avgP[c] = q_loc.getStationaryP();
+      varP[c] = q_loc.getMcmcVarP();
+      avgS[c] = q_loc.getSymmetricQP();
+      varS[c] = q_loc.getMcmcVarQP();
+    }
+    else
+      break;
+  }
+
+  for ( int c=0; c<avgP.size(); ++c )
+  {
+    cerr << "avgP[" << c << "] = " << avgP[c].transpose() << endl;
+    cerr << "varP[" << c << "] = " << varP[c].transpose() << endl;
+    cerr << "avgS[" << c << "] = " << avgS[c].transpose() << endl;
+    cerr << "varS[" << c << "] = " << varS[c].transpose() << endl;
+  }
+
   if ( parameters.getNumRandom() > 0 )
   {
     int numRandom = parameters.getNumRandom();
