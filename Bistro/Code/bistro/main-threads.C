@@ -537,6 +537,7 @@ int main(int argc, char* argv[])
   tmap.close();
   milliseconds ms10 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
+// new here
 // here we need to do mcmc on separate trees (fixit: do in multiple threads later)
 // we will choose the 10 trees with higher bootstrap frequency
   vector< pair<string,double> > trees;
