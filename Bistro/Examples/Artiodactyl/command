@@ -1,3 +1,6 @@
+## tests with mcmc for 10 first bootstrap trees
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro4 -r 1000 -b 1000 > bistro4.log
+
 ## run bistro for fixed tree
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o testtree -r 1000 -b 1000 -t "(Camel,Dolphin,(Pig,(Cow,(Sheep,Giraffe))));" > testtree.log
 

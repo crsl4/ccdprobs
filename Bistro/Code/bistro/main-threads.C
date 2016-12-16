@@ -267,7 +267,7 @@ int main(int argc, char* argv[])
   cerr << "treetext: " << treetext << endl;
   Tree starttree(treetext);
   starttree.relabel(alignment);
-
+  starttree.unroot();
   cerr << "Start tree: " << starttree.makeTopologyNumbers() << endl;
 
   // Initialize random number generator
@@ -283,6 +283,8 @@ int main(int argc, char* argv[])
 
   jcDistanceMatrixCopy = jcDistanceMatrix;
   starttree.setNJDistances(jcDistanceMatrixCopy,rng);
+  cerr << "Setting NJ distances to tree: " << endl;
+  cerr << starttree.makeTreeNumbers() << endl;
 
   milliseconds ms5 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   cerr << "Running MCMC to estimate Q matrix ..." << endl;
@@ -544,35 +546,41 @@ int main(int argc, char* argv[])
   copy(topologyToCountMap.begin(), topologyToCountMap.end(), back_inserter(trees));
   sort(trees.begin(), trees.end(), comparePairStringDouble);
   int c = -1;
-  vector<VectorXd> avgP(10);
+  vector<VectorXd> avgP(10); //just keeping the avg for now, fixit
   vector<VectorXd> varP(10);
   vector<VectorXd> avgS(10);
   vector<VectorXd> varS(10);
   for (vector<pair<string,double>>::reverse_iterator i = trees.rbegin(); i != trees.rend(); ++i ) {
     if( ++c < 10 ) // only do the first 10 trees
     {
-      Tree tree(i->first);
-//      tree.relabel(alignment);
-      cerr << "Bootstrap tree: " << tree.makeTopologyNumbers() << " with count " << (i->second) << endl;
-      jcDistanceMatrixCopy = jcDistanceMatrix;
-      tree.setNJDistances(jcDistanceMatrixCopy,rng);
-      cerr << tree.makeTreeNumbers() << endl;
+      Tree newtree(i->first);
+      newtree.relabel(alignment);
+      newtree.unroot();
+      cerr << "Bootstrap tree: " << newtree.makeTopologyNumbers() << " with count " << (i->second) << endl;
+      cout << "Bootstrap tree: " << newtree.makeTopologyNumbers() << " with count " << (i->second) << endl;
+      MatrixXd jcDistanceMatrixNewCopy = jcDistanceMatrix;
+      newtree.setNJDistances(jcDistanceMatrixNewCopy,rng);
+      cerr << newtree.makeTreeNumbers() << endl;
+      cout << newtree.makeTreeNumbers() << endl;
       cerr << "Q " << endl << model.getQ() << endl;
+      cout << "Q " << endl << model.getQ() << endl;
       for ( int j=0; j<4; ++j )
       {
 	double logFoo;
-	tree.randomEdges(alignment,model,rng,logFoo,true);
+	newtree.randomEdges(alignment,model,rng,logFoo,true);
       }
       cerr << "MLE Branch Lengths" << endl;
-      cerr << tree.makeTreeNumbers() << endl;
+      cerr << newtree.makeTreeNumbers() << endl;
+      cout << "MLE Branch Lengths" << endl;
+      cout << newtree.makeTreeNumbers() << endl;
       QMatrix q_loc(convert(p_init),s_pairwise);
       // burnin
       cerr << "burn-in:" << endl;
-      q_loc.mcmc(alignment,tree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+      q_loc.mcmc(alignment,newtree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
       cerr << endl << " done." << endl;
       // mcmc to get final Q
       cerr << "sampling:" << endl;
-      q_loc.mcmc(alignment,tree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+      q_loc.mcmc(alignment,newtree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
       cerr << endl << " done." << endl;
       avgP[c] = q_loc.getStationaryP();
       varP[c] = q_loc.getMcmcVarP();
