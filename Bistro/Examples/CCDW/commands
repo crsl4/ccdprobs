@@ -1,3 +1,6 @@
+## test
+../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o test -r 1000 -b 1000 > test.log
+
 ## after adding the option to input tree
 ../../Code/bistro/bistro -f ../../Data/ccdw.fasta -o testtree -r 1000 -b 1000 -t "(1,2,(3,4));" > testtree.log
 

@@ -919,6 +919,8 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
 
 double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 {
+  if(VERBOSE)
+    cout << "starting mleLength" << endl;
   int iter=0;
   double curr = length;
 //  cerr << "Edge::mleLength, initial length = " << length << endl;;
@@ -952,6 +954,8 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   {
     do
     {
+      if(VERBOSE)
+	cout << "Positive derivative, curr: " << curr << endl;
       curr = prop;
       curr_logl = prop_logl;
       curr_dlogl = prop_dlogl;
@@ -971,6 +975,8 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   {
     do
     {
+      if(VERBOSE)
+	cout << "Negative derivative, curr: " << curr << endl;
       curr = prop;
       curr_logl = prop_logl;
       curr_dlogl = prop_dlogl;
