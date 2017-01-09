@@ -1,0 +1,52 @@
+translate
+       1 Tarsius_syrichta,
+       2 Lemur_catta,
+       3 Homo_sapiens,
+       4 Pan,
+       5 Gorilla,
+       6 Pongo,
+       7 Hylobates,
+       8 Macaca_fuscata,
+       9 M_mulatta,
+      10 M_fascicularis,
+      11 M_sylvanus,
+      12 Saimiri_sciureus;
+prob crudeSE(ESS=nan) clade
+       nan nan {2,11} .*........*.
+       nan nan {2-5,7-10} .****.****..
+       nan nan {7-10} ......****..
+       nan nan {2-6,8-10} .*****.***..
+       nan nan {2,6,8-10} .*...*.***..
+       nan nan {6,8-10} .....*.***..
+       nan nan {2-5,8-10} .****..***..
+       nan nan {3-5,8-10} ..***..***..
+       nan nan {3-4} ..**........
+       nan nan {8-10} .......***..
+       nan nan {9-10} ........**..
+       nan nan {8-9} .......**...
+       nan nan {2,7} .*....*.....
+       nan nan {2,6} .*...*......
+       nan nan {2-5} .****.......
+       nan nan {3-5} ..***.......
+       nan nan {4-5} ...**.......
+       nan nan {3,5} ..*.*.......
+       nan nan {2,8-10} .*.....***..
+       nan nan {1-12} ************
+       nan nan {2-12} .***********
+       nan nan {2,6-12} .*...*******
+       nan nan {2-5,7-12} .****.******
+       nan nan {2-6,8-12} .*****.*****
+       nan nan {2-5,7,11-12} .****.*...**
+       nan nan {2-6,11-12} .*****....**
+       nan nan {6,11-12} .....*....**
+       nan nan {2-5,11} .****.....*.
+       nan nan {2,6-10,12} .*...*****.*
+       nan nan {2-5,7-10,12} .****.****.*
+       nan nan {7-10,12} ......****.*
+       nan nan {2-6,8-10,12} .*****.***.*
+       nan nan {6,8-10,12} .....*.***.*
+       nan nan {8-10,12} .......***.*
+       nan nan {7,12} ......*....*
+       nan nan {6,12} .....*.....*
+       nan nan {2,6,11} .*...*....*.
+       nan nan {2-10,12} .*********.*

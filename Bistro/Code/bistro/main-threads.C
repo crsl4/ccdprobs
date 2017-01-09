@@ -114,6 +114,8 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	   if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
 	     cerr << '|';
 	 }
+       if(VERBOSE)
+	 cout << "------------------" << endl;
        // here we need to sample a Q
        double logQ = 0;
        double otherscale = 1;
@@ -167,6 +169,13 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	  tree.randomEdges(alignment,model,rng,logBL,true);
 //	  cout << tree.makeTreeNumbers() << endl;
 	}
+      if(VERBOSE)
+	{
+	  cout << "After MLE passes: " << endl << flush;
+	  tree.print(cout);
+	  cout << tree.makeTreeNumbers() << endl << flush;
+	  cout << endl << flush;
+	}
       if( parameters.getIndependent() )
 	{
 //	  cout << "Branch lengths sampled independently" << endl;
@@ -177,7 +186,11 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
 	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), parameters.getEta(), parameters.getWeightMean());
 	}
-//      cout << tree.makeTreeNumbers() << endl;
+      if(VERBOSE)
+      {
+	cout << "After generating branch lengths: " << endl;
+	cout << tree.makeTreeNumbers() << endl;
+      }
       treebl << tree.makeTreeNumbers() << endl;
       double logBranchLengthPriorDensity = tree.logPriorExp( (PRIOR_MEAN) );
       // if(VERBOSE)
@@ -235,7 +248,18 @@ int main(int argc, char* argv[])
 
   milliseconds ms2 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-  // Find Jukes-Cantor pairwise distances
+  // Initialize random number generator
+  cerr << "Initializing random number generator ...";
+  if ( parameters.getSeed() == 0 )
+  {
+    random_device rd;
+    parameters.setSeed(rd());
+  }
+  mt19937_64 rng(parameters.getSeed());
+  cerr << " done." << endl;
+  cout << "Seed = " << parameters.getSeed() << endl;
+
+  // -------------- Find Jukes-Cantor pairwise distances and JC tree -----------------------------
   cerr << "Finding initial Jukes-Cantor pairwise distances ...";
   MatrixXd jcDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   alignment.calculateJCDistances(jcDistanceMatrix);
@@ -257,127 +281,117 @@ int main(int argc, char* argv[])
   cerr << jctree.makeTopologyNumbers() << endl << endl;
   milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-// the tree to use in MCMC will depend on whether a tree was input or not
-  string treetext;
+// --------------------------- Use JC tree or input tree, and NJ branch lengths  ---------------
+  string treetext; // the tree to use in MCMC will depend on whether a tree was input or not
   if ( !parameters.getTopology().empty() )
     treetext = parameters.getTopology();
   else
     treetext = jctree.makeTopologyNumbers();
-
   cerr << "treetext: " << treetext << endl;
   Tree starttree(treetext);
   starttree.relabel(alignment);
   starttree.unroot();
   cerr << "Start tree: " << starttree.makeTopologyNumbers() << endl;
-
-  // Initialize random number generator
-  cerr << "Initializing random number generator ...";
-  if ( parameters.getSeed() == 0 )
-  {
-    random_device rd;
-    parameters.setSeed(rd());
-  }
-  mt19937_64 rng(parameters.getSeed());
-  cerr << " done." << endl;
-  cout << "Seed = " << parameters.getSeed() << endl;
-
   jcDistanceMatrixCopy = jcDistanceMatrix;
   starttree.setNJDistances(jcDistanceMatrixCopy,rng);
   cerr << "Setting NJ distances to tree: " << endl;
   cerr << starttree.makeTreeNumbers() << endl;
 
   milliseconds ms5 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
-  cerr << "Running MCMC to estimate Q matrix ..." << endl;
-  // Run MCMC on tree to estimate Q matrix parameters
-  //   initial Q matrix
 
-// base frequencies
+// ---------------------- Estimate Q with base frequencies and pairwise counts -----------------
   vector<double> p_init = alignment.baseFrequencies();
   cerr << "Estimated base frequencies: " << p_init.at(0) << "," << p_init.at(1) << "," << p_init.at(2) << "," << p_init.at(3) << endl;
 
   VectorXd s_pairwise(6);
   s_pairwise = alignment.averagePairwiseS();
+  cerr << "Estimated rates: " << endl;
   cerr << s_pairwise.transpose() << endl;
-  
-//  alignment.calculatePairwiseCounts(0,1,mat);
-//  cerr << "Pairwise counts for sequences 1 and 2 : " << endl << mat << endl;
+  QMatrix q_init(convert(p_init),s_pairwise);
+
+// old initialization of Q:
 //  vector<double> p_init(4,0.25);
   // vector<double> s_init(6,0.1);
   // s_init[1] = 0.3;
   // s_init[4] = 0.3;
-
 //  QMatrix q_init(p_init,s_init);
-  QMatrix q_init(convert(p_init),s_pairwise);
 
+// ------------------------------ Put MLE branch lengths to tree -------------------------
   for ( int i=0; i<4; ++i )
   {
     double logFoo;
     starttree.randomEdges(alignment,q_init,rng,logFoo,true);
   }
-
   cout << "MLE Branch Lengths" << endl;
   cout << starttree.makeTreeNumbers() << endl;
 
- // burnin
-  cerr << "burn-in:" << endl;
-  //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+// ------------------------------ MCMC for Q on fixed tree with MLE branch lengths -------------
+  if(true)
+  {
+    cerr << "Running MCMC to estimate Q matrix ..." << endl;
+    // Run MCMC on tree to estimate Q matrix parameters
+
+    // burnin
+    cerr << "burn-in:" << endl;
+    //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
 //  starttree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
-  q_init.mcmc(alignment,starttree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-  cerr << endl << " done." << endl;
-  // cout << "Start tree after MCMC burnin: " << endl;
-  // cout << starttree.makeTreeNumbers() << endl;
-  
-  // mcmc to get final Q
-  cerr << "sampling:" << endl;
-  //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  // starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
-  q_init.mcmc(alignment,starttree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  cerr << endl << " done." << endl;
-  // cout << "Start tree after MCMC: " << endl;
-  // cout << starttree.makeTreeNumbers() << endl;
-  
-// calculate the scale for P and QP
-  double scaleP = 100000000;
-  double temp;
-  VectorXd x = q_init.getStationaryP();
-  VectorXd v = q_init.getMcmcVarP();
-  for ( int i=0; i<x.size(); ++i )
-  {
-    temp = x(i)*(1-x(i))/v(i);
-    cout << "Scale for p" << i << " is " << temp << endl;
-    if(temp < scaleP)
-      scaleP = temp;
+    q_init.mcmc(alignment,starttree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+    cerr << endl << " done." << endl;
+    // cout << "Start tree after MCMC burnin: " << endl;
+    // cout << starttree.makeTreeNumbers() << endl;
+
+    // mcmc to get final Q
+    cerr << "sampling:" << endl;
+    //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+    // starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
+    q_init.mcmc(alignment,starttree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+    cerr << endl << " done." << endl;
+    // cout << "Start tree after MCMC: " << endl;
+    // cout << starttree.makeTreeNumbers() << endl;
+
+// calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
+// save to file)
+    double scaleP = 100000000;
+    double temp;
+    VectorXd x = q_init.getStationaryP();
+    VectorXd v = q_init.getMcmcVarP();
+    for ( int i=0; i<x.size(); ++i )
+    {
+      temp = x(i)*(1-x(i))/v(i);
+      cout << "Scale for p" << i << " is " << temp << endl;
+      if(temp < scaleP)
+	scaleP = temp;
+    }
+    cout << "Dirichlet for P scale: " << scaleP << endl;
+    double scaleQP = 100000000;
+    x = q_init.getSymmetricQP();
+    v = q_init.getMcmcVarQP();
+    for ( int i=0; i<x.size(); ++i )
+    {
+      temp = x(i)*(1-x(i))/v(i);
+      cout << "Scale for s" << i << " is " << temp << endl;
+      if( temp < scaleQP )
+	scaleQP = temp;
+    }
+    cout << "Dirichlet for QP scale: " << scaleQP << endl;
   }
-  cout << "Dirichlet for P scale: " << scaleP << endl;
-  
-  double scaleQP = 100000000;
-  x = q_init.getSymmetricQP();
-  v = q_init.getMcmcVarQP();
-  for ( int i=0; i<x.size(); ++i )
-  {
-    temp = x(i)*(1-x(i))/v(i);
-    cout << "Scale for s" << i << " is " << temp << endl;
-    if( temp < scaleQP )
-      scaleQP = temp;
-  }
-  cout << "Dirichlet for QP scale: " << scaleQP << endl;
-  
-  //QMatrix model(parameters.getStationaryP(),parameters.getSymmetricQP());
-  QMatrix model(q_init.getStationaryP(),q_init.getSymmetricQP());
-  model.setMcmcVarP(q_init.getMcmcVarP());
-  model.setMcmcVarQP(q_init.getMcmcVarQP());
+
+  // Initial Q, either from naive estimate or MCMC on fixed tree with MLE BL
+  //QMatrix model_init(parameters.getStationaryP(),parameters.getSymmetricQP());
+  QMatrix model_init(q_init.getStationaryP(),q_init.getSymmetricQP());
+  model_init.setMcmcVarP(q_init.getMcmcVarP());
+  model_init.setMcmcVarQP(q_init.getMcmcVarQP());
   cerr << endl << " done." << endl;
 
 // will use the starting estimate of Q for the bootstrap:
-//  QMatrix model(convert(p_init),s_pairwise);
+//  QMatrix model_init(convert(p_init),s_pairwise);
 
   milliseconds ms6 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
-
 
   // Recalculate pairwise distances using estimated Q matrix (TODO: add site rate heterogeneity)
   cerr << "Finding initial GTR pairwise distances ...";
   MatrixXd gtrDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
-  alignment.calculateGTRDistances(model,jcDistanceMatrix,gtrDistanceMatrix);
+  alignment.calculateGTRDistances(model_init,jcDistanceMatrix,gtrDistanceMatrix);
   cerr << " done." << endl;
 
   cout << "GTR Distance Matrix:" << endl;
@@ -387,12 +401,13 @@ int main(int argc, char* argv[])
 
 // not normalized maps; normalization taken care of during alias creation
   map<string,int> topologyToCountMap;
-  map<string,double> topologyToWeightMap; 
+  map<string,double> topologyToWeightMap;
   map<string,double> topologyToLogLikWeightMap;
 
+// --------------------------------------- Bootstrap of topologies -----------------------
   if( parameters.getTopology().empty() ) //only do bootstrap if not fixed topology as input
   {
-    cerr << "Do boostrap with new pairwise distances"<< endl; 
+    cerr << "Do boostrap with new pairwise distances"<< endl;
    // Do bootstrap with new pairwise distances
     if( parameters.getNumBootstrap() == 0)
       parameters.setNumBootstrap(1000);
@@ -411,12 +426,12 @@ int main(int argc, char* argv[])
       if ( (b+1) % (parameters.getNumBootstrap() / 10) == 0 )
 	cerr << '|';
       alignment.setBootstrapWeights(weights,rng);
-      alignment.calculateGTRDistancesUsingWeights(weights,model,gtrDistanceMatrix,bootDistanceMatrix);
+      alignment.calculateGTRDistancesUsingWeights(weights,model_init,gtrDistanceMatrix,bootDistanceMatrix);
       Tree bootTree(bootDistanceMatrix);
       bootTree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
       bootTree.makeBinary();
       bootTree.sortCanonical();
-      
+
       string top = bootTree.makeTopologyNumbers();
       // add parsimony score to map if it is not already there
       // update minimum parsimony score if new minimum found
@@ -437,7 +452,7 @@ int main(int argc, char* argv[])
 	  MatrixXd gtrDistanceMatrixCopy2(alignment.getNumTaxa(),alignment.getNumTaxa());
 	  gtrDistanceMatrixCopy2 = gtrDistanceMatrix;
 	  bootTree.setNJDistances(gtrDistanceMatrixCopy2,rng);
-	  int score = bootTree.logLikelihoodScore(alignment, model);
+	  int score = bootTree.logLikelihoodScore(alignment, model_init);
 	  topologyToLogLikScoreMap[ top ] = score;
 	  if ( score > maximumLogLikScore || b==0 )
 	    maximumLogLikScore = score;
@@ -446,7 +461,7 @@ int main(int argc, char* argv[])
       topologyToCountMap[ top ]++;
     }
     cerr << endl << "done." << endl;
-    
+
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
     {
       topologyToWeightMap[ (*m).first ] =
@@ -459,7 +474,7 @@ int main(int argc, char* argv[])
 			     (topologyToLogLikScoreMap[ (*m).first ] - maximumLogLikScore) );
       }
     }
-    
+
     cout << endl << "Topology counts to file" << endl;
     {
       string topologyCountsFile = parameters.getOutFileRoot() + ".topCounts";
@@ -501,14 +516,15 @@ int main(int argc, char* argv[])
     topologyToCountMap[ t ]++;
     topologyToWeightMap[ t ] = 1.0;
     topologyToLogLikWeightMap[ t ] = 1.0;
-  } 
+  }
 
-  milliseconds ms8 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );   
+  milliseconds ms8 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   vector<int> taxaNumbers;
   vector<string> taxaNames;
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
   milliseconds ms9 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
-  
+
+// --------------------- Clade distribution from bootstrap sample ------------------------------------
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdLogLik(topologyToLogLikWeightMap,taxaNumbers,taxaNames);
@@ -546,12 +562,15 @@ int main(int argc, char* argv[])
   copy(topologyToCountMap.begin(), topologyToCountMap.end(), back_inserter(trees));
   sort(trees.begin(), trees.end(), comparePairStringDouble);
   int c = -1;
-  vector<VectorXd> avgP(10); //just keeping the avg for now, fixit
-  vector<VectorXd> varP(10);
-  vector<VectorXd> avgS(10);
-  vector<VectorXd> varS(10);
+  int sizeTrees = trees.size();
+  if(sizeTrees > 10)
+    sizeTrees = 10;// only do the first 10 trees
+  vector<VectorXd> avgP(sizeTrees); //just keeping the avg for now, fixit
+  vector<VectorXd> varP(sizeTrees);
+  vector<VectorXd> avgS(sizeTrees);
+  vector<VectorXd> varS(sizeTrees);
   for (vector<pair<string,double>>::reverse_iterator i = trees.rbegin(); i != trees.rend(); ++i ) {
-    if( ++c < 10 ) // only do the first 10 trees
+    if( ++c < sizeTrees )
     {
       Tree newtree(i->first);
       newtree.relabel(alignment);
@@ -562,12 +581,12 @@ int main(int argc, char* argv[])
       newtree.setNJDistances(jcDistanceMatrixNewCopy,rng);
       cerr << newtree.makeTreeNumbers() << endl;
       cout << newtree.makeTreeNumbers() << endl;
-      cerr << "Q " << endl << model.getQ() << endl;
-      cout << "Q " << endl << model.getQ() << endl;
+      cerr << "Q " << endl << model_init.getQ() << endl;
+      cout << "Q " << endl << model_init.getQ() << endl;
       for ( int j=0; j<4; ++j )
       {
 	double logFoo;
-	newtree.randomEdges(alignment,model,rng,logFoo,true);
+	newtree.randomEdges(alignment,model_init,rng,logFoo,true);
       }
       cerr << "MLE Branch Lengths" << endl;
       cerr << newtree.makeTreeNumbers() << endl;
@@ -591,18 +610,47 @@ int main(int argc, char* argv[])
       break;
   }
 
+  VectorXd sumAvgP = VectorXd::Zero(4);
+  VectorXd sumVarP = VectorXd::Zero(4);
+  VectorXd sumAvgS = VectorXd::Zero(6);
+  VectorXd sumVarS = VectorXd::Zero(6);
   for ( int c=0; c<avgP.size(); ++c )
   {
+    sumAvgP += avgP[c];
+    sumVarP += varP[c];
+    sumAvgS += avgS[c];
+    sumVarS += varS[c];
     cerr << "avgP[" << c << "] = " << avgP[c].transpose() << endl;
     cerr << "varP[" << c << "] = " << varP[c].transpose() << endl;
     cerr << "avgS[" << c << "] = " << avgS[c].transpose() << endl;
     cerr << "varS[" << c << "] = " << varS[c].transpose() << endl;
   }
 
+  for(int jj=0; jj<sumAvgP.size(); ++jj)
+  {
+    sumAvgP[jj] /= sumAvgP.size();
+    sumVarP[jj] /= sumVarP.size();
+  }
+  for(int jj=0; jj<sumAvgS.size(); ++jj)
+  {
+    sumAvgS[jj] /= sumAvgS.size();
+    sumVarS[jj] /= sumVarS.size();
+  }
+
+  // using average Q
+  // QMatrix model(sumAvgP,sumAvgS);
+  // model.setMcmcVarP(sumVarP);
+  // model.setMcmcVarQP(sumVarS);
+
+  // using the same model_init (either from initial MCMC or naive estimate)
+  QMatrix model(model_init.getStationaryP(),model_init.getSymmetricQP());
+  model.setMcmcVarP(model_init.getMcmcVarP());
+  model.setMcmcVarQP(model_init.getMcmcVarQP());
+
   if ( parameters.getNumRandom() > 0 )
   {
     int numRandom = parameters.getNumRandom();
-    
+
     unsigned int cores;
     if( parameters.getNumThreads() == 0 )
     {
@@ -622,7 +670,7 @@ int main(int argc, char* argv[])
     for ( int i=0; i<cores; ++i )
       startTreeNumber[i] = i*div + (i < remainder ? i : remainder);
     startTreeNumber.push_back(numRandom);
-    
+
     // generating the seeds for each core
     uniform_int_distribution<> rint_orig(0,4294967295);
     unsigned int initial_seed = rint_orig(rng);

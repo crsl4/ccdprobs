@@ -127,7 +127,7 @@ vector<double> Alignment::baseFrequencies()
   cerr << "read all counts" << endl;
   for ( map<char,int>::iterator m=counts.begin(); m !=counts.end(); ++m )
   {
-    pi.at(i) = (m->second)/(counts.size()*(double)numSites);
+    pi[i] = (m->second)/(counts.size()*(double)numSites);
     i++;
   }
   return pi;

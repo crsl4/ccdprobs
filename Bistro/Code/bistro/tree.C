@@ -511,8 +511,8 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
 	neighbor->calculateAfterPattern(site,alignment,*e);//,recurse);
     }
   }
-  if( VERBOSE)
-    cout << "Calculate after pattern for node: " << number << " for site " << site << endl << flush;
+  // if( VERBOSE)
+  //   cout << "Calculate after pattern for node: " << number << " for site " << site << endl << flush;
   m = patternToProbMap.find(pattern);
   if ( m == patternToProbMap.end() ) // first time this pattern calculated
   {
@@ -524,12 +524,12 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
       if ( (*e) != parent )
       {
         pair<double,Vector4d> condProbPair = getNeighbor(*e)->getProb();
-	if(VERBOSE)
-	  {
-	    cout << "pattern not found in map" << endl;
-	    cout << "Neighbor is " << getNeighbor(*e)->getNumber() << endl;
-	    cout << "with condProbPair: " << condProbPair.first << ", " << condProbPair.second.transpose() << endl;
-	  }
+	// if(VERBOSE)
+	//   {
+	//     cout << "pattern not found in map" << endl;
+	//     cout << "Neighbor is " << getNeighbor(*e)->getNumber() << endl;
+	//     cout << "with condProbPair: " << condProbPair.first << ", " << condProbPair.second.transpose() << endl;
+	//   }
         scale += condProbPair.first;
         Vector4d partProb = (*e)->getTransitionMatrix() * condProbPair.second;
         for ( int i=0; i<4; ++i )
@@ -540,8 +540,8 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
     scale += log( vmax );
     tempProb /= vmax;
     patternToProbMap[ pattern ] = pair<double,Vector4d> (scale,tempProb);
-    if(VERBOSE)
-      cout << "  " << pattern << " --> " << scale << "," << tempProb.transpose() << endl;
+    // if(VERBOSE)
+    //   cout << "  " << pattern << " --> " << scale << "," << tempProb.transpose() << endl;
   }
 }
 
@@ -574,21 +574,21 @@ double Tree::calculate(const Alignment& alignment,QMatrix& qmatrix)
     pair<double,Vector4d> condProbPair = root->getProb();
     logLikelihood(k) = condProbPair.first + log( qmatrix.getStationaryP().dot(condProbPair.second) );
 
-    if(VERBOSE)
-      {
-	Node* x = root->getEdge(0)->getOtherNode(root);
-	Node* y = root->getEdge(1)->getOtherNode(root);
-	Node* z = root->getEdge(2)->getOtherNode(root);
-	pair<double,Vector4d> condProbPairx = x->getProb();
-	pair<double,Vector4d> condProbPairy = y->getProb();
-	pair<double,Vector4d> condProbPairz = z->getProb();
-	cout << "Site: " << k << endl;
-	cout << "root getProb: " << condProbPair.first << ", " << condProbPair.second.transpose() << endl;
-	cout << "x getProb: " << condProbPairx.first << ", " << condProbPairx.second.transpose() << endl;
-	cout << "y getProb: " << condProbPairy.first << ", " << condProbPairy.second.transpose() << endl;
-	cout << "z getProb: " << condProbPairz.first << ", " << condProbPairz.second.transpose() << endl;
-	cout << logLikelihood(k) << endl;
-      }
+    // if(VERBOSE)
+    //   {
+    // 	Node* x = root->getEdge(0)->getOtherNode(root);
+    // 	Node* y = root->getEdge(1)->getOtherNode(root);
+    // 	Node* z = root->getEdge(2)->getOtherNode(root);
+    // 	pair<double,Vector4d> condProbPairx = x->getProb();
+    // 	pair<double,Vector4d> condProbPairy = y->getProb();
+    // 	pair<double,Vector4d> condProbPairz = z->getProb();
+    // 	cout << "Site: " << k << endl;
+    // 	cout << "root getProb: " << condProbPair.first << ", " << condProbPair.second.transpose() << endl;
+    // 	cout << "x getProb: " << condProbPairx.first << ", " << condProbPairx.second.transpose() << endl;
+    // 	cout << "y getProb: " << condProbPairy.first << ", " << condProbPairy.second.transpose() << endl;
+    // 	cout << "z getProb: " << condProbPairz.first << ", " << condProbPairz.second.transpose() << endl;
+    // 	cout << logLikelihood(k) << endl;
+    //   }
   }
   return logLikelihood.sum();
 }
@@ -1059,6 +1059,8 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
       double alpha = length*lambda;
       gamma_distribution<double> rgamma(alpha,1.0 / lambda);
       length = rgamma(rng);
+      if(isnan(length))
+	cerr << "found nan bl with alpha: " << alpha << " and lambda: " << lambda << endl;
       logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length) - lambda*length;
     }
   }
@@ -1655,6 +1657,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
       bool converge = true;
       Vector3d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength(),z->getEdgeParent()->getLength());
+      if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
+	cerr << "found nan bl in generateBranchLengths, initial BL" << endl;
       if(jointMLE)
 	t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge);
 
@@ -1679,6 +1683,9 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	}
       t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
       //t = multivariateNormal(mu,cov,rng, logdensity, eta);
+      if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
+	cerr << "found nan bl in generateBranchLengths, after multivariate gamma BL" << endl;
+
       x->getEdgeParent()->setLength( t[0] );
       y->getEdgeParent()->setLength( t[1] );
       z->getEdgeParent()->setLength( t[2] );
@@ -2357,7 +2364,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
   VectorXd prod4 = VectorXd::Zero(6);
   VectorXd prod34 = VectorXd::Zero(6);
   VectorXd avgBL = VectorXd::Zero(getNumEdges());
-  
+
   cerr << '|';
   for ( int i=0; i<numGenerations; ++i )
   {
@@ -2413,7 +2420,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
     avgSold = avgS;
     // now with Q, we want to sample branch lengths
     clearProbMaps();
-    int j = 0; 
+    int j = 0;
     //make tree function
     for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     {
