@@ -952,9 +952,40 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   double prop_ddlogl = curr_ddlogl;
   if(-TOL < curr_dlogl && curr_dlogl < TOL)
   {
-    // prop1 = 1/2*curr, prop2 = 2*curr, until we find one positive and one negative
+    double prop1 = 0.5*curr;
+    double prop1_logl = curr_logl;
+    double prop1_dlogl = curr_dlogl;
+    double prop1_ddlogl = curr_ddlogl;
+    calculate(prop1,alignment,qmatrix,prop1_logl,prop1_dlogl,prop1_ddlogl);
+    double prop2 = 2*curr;
+    double prop2_logl = curr_logl;
+    double prop2_dlogl = curr_dlogl;
+    double prop2_ddlogl = curr_ddlogl;
+    calculate(prop2,alignment,qmatrix,prop2_logl,prop2_dlogl,prop2_ddlogl);
+    do
+    {
+      if(prop1_dlogl < TOL)
+      {
+	prop1 = 0.5*curr;
+	calculate(prop1,alignment,qmatrix,prop1_logl,prop1_dlogl,prop1_ddlogl);
+      }
+      if(prop2_dlogl > TOL)
+      {
+	prop2 = 2*curr;
+	calculate(prop2,alignment,qmatrix,prop2_logl,prop2_dlogl,prop2_ddlogl);
+      }
+    } while ( prop1_dlogl < TOL || prop2_dlogl > TOL);
+    // here we want to change prop1, prop2, to prop and curr
+    prop = prop2;
+    prop_logl = prop2_logl;
+    prop_dlogl = prop2_dlogl;
+    prop_ddlogl = prop2_ddlogl;
+    curr = prop1;
+    curr_logl = prop1_logl;
+    curr_dlogl = prop1_dlogl;
+    curr_ddlogl = prop1_ddlogl;
   }
-  if ( curr_dlogl > TOL )
+  else if ( curr_dlogl > TOL )
   {
     do
     {
@@ -1001,6 +1032,25 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
       return prop;
     }
   }
+  double lowerlimit;
+  double upperlimit;
+  if(prop_dlogl > TOL && curr_dlogl < -TOL)
+  {
+    lowerlimit = prop;
+    upperlimit = curr;
+  }
+  else if(prop_dlogl < -TOL && curr_dlogl > TOL)
+  {
+    lowerlimit = curr;
+    upperlimit = prop;
+  }
+  else
+  {
+    cerr << "Warning: something wrong here. prop and curr should have different sign in derivative" << endl;
+    cerr << "prop and dlogl: " << prop << ", " << prop_dlogl << endl;
+    cerr << "curr and dlogl: " << curr << ", " << curr_dlogl << endl;
+  }
+  
   // switch to protected Newton-Raphson
 //  cerr << "protected" << endl;
 // keep the positive and negative points as limits for the NR, change these limits as NR goes, with the previous point (if the new point is bigger than the previous point, then set the lower limit to be the previous point, and viceversa)
@@ -1021,7 +1071,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
     }
     double delta = -curr_dlogl / curr_ddlogl;
     prop = curr + delta;
-    while ( prop < MIN_EDGE_LENGTH )
+    while ( prop < lowerlimit || prop > upperlimit ) // we don't want to go outside the (lower,upper)
     {
       delta = 0.5*delta;
       prop = curr + delta;
@@ -1029,13 +1079,23 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
     calculate(prop,alignment,qmatrix,prop_logl,prop_dlogl,prop_ddlogl);
     if ( ++iter > 100 )
       mleError(converge);
-    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 )
+    while ( ( fabs(prop_dlogl) > fabs(curr_dlogl) ) && fabs(curr - prop) >1.0e-8 ) // we don't want to go far from maximum
     {
       delta = 0.5*delta;
       prop = curr + delta;
       calculate(prop,alignment,qmatrix,prop_logl,prop_dlogl,prop_ddlogl);
       if ( ++iter > 100 )
         mleError(converge);
+    }
+    if(prop_dlogl > TOL && curr_dlogl < -TOL) //if close to 0, don't update the limits anymore
+    {
+      lowerlimit = prop;
+      upperlimit = curr;
+    }
+    else if(prop_dlogl < -TOL && curr_dlogl > TOL)
+    {
+      lowerlimit = curr;
+      upperlimit = prop;
     }
   } while ( fabs(curr - prop) > 1.0e-8);
   return prop;

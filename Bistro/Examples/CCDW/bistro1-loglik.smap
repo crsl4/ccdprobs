@@ -1,9 +1,13 @@
 translate
-       1 Cat,
-       2 Cheetah,
-       3 Dog,
-       4 Wolf;
-0.00000000 0.00000000 {2,4}
-1.00000000 998.00000000 {3-4}
-1.00000000 998.00000000 {2-4}
-1.00000000 998.00000000 {1-4}
+       1 Tarsius_syrichta,
+       2 Lemur_catta,
+       3 Homo_sapiens,
+       4 Pan,
+       5 Gorilla,
+       6 Pongo,
+       7 Hylobates,
+       8 Macaca_fuscata,
+       9 M_mulatta,
+      10 M_fascicularis,
+      11 M_sylvanus,
+      12 Saimiri_sciureus;
