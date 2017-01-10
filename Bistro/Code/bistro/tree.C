@@ -950,7 +950,11 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   double prop_logl = curr_logl;
   double prop_dlogl = curr_dlogl;
   double prop_ddlogl = curr_ddlogl;
-  if ( curr_dlogl > 0 )
+  if(-TOL < curr_dlogl && curr_dlogl < TOL)
+  {
+    // prop1 = 1/2*curr, prop2 = 2*curr, until we find one positive and one negative
+  }
+  if ( curr_dlogl > TOL )
   {
     do
     {
@@ -969,7 +973,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 	prop = MAX_EDGE_LENGTH;
 	return prop;
       }
-    } while ( prop_dlogl > 0 && (prop_logl > curr_logl) );
+    } while ( prop_dlogl > TOL && (prop_logl > curr_logl) );
   }
   else
   {
@@ -990,7 +994,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 	prop = MIN_EDGE_LENGTH;
 	return prop;
       }
-    } while ( prop_dlogl < 0 && (prop_logl > curr_logl) && prop > MIN_EDGE_LENGTH );
+    } while ( prop_dlogl < TOL && (prop_logl > curr_logl) && prop > MIN_EDGE_LENGTH );
     if ( prop < MIN_EDGE_LENGTH )
     {
       prop = MIN_EDGE_LENGTH;
@@ -999,7 +1003,9 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   }
   // switch to protected Newton-Raphson
 //  cerr << "protected" << endl;
-
+// keep the positive and negative points as limits for the NR, change these limits as NR goes, with the previous point (if the new point is bigger than the previous point, then set the lower limit to be the previous point, and viceversa)
+// if trying to jump outside with NR, we do a parabolic interpolation to get a new point
+// not doing this now, let's see if the modified NR works
   prop = curr - curr_dlogl * (prop - curr) / (prop_dlogl - curr_dlogl);
   do
   {
