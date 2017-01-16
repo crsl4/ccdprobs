@@ -964,17 +964,24 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
     calculate(prop2,alignment,qmatrix,prop2_logl,prop2_dlogl,prop2_ddlogl);
     do
     {
-      if(prop1_dlogl < TOL)
+      if(prop1_dlogl < 0)
       {
 	prop1 = 0.5*curr;
 	calculate(prop1,alignment,qmatrix,prop1_logl,prop1_dlogl,prop1_ddlogl);
       }
-      if(prop2_dlogl > TOL)
+      if(prop2_dlogl > 0)
       {
 	prop2 = 2*curr;
 	calculate(prop2,alignment,qmatrix,prop2_logl,prop2_dlogl,prop2_ddlogl);
       }
-    } while ( prop1_dlogl < TOL || prop2_dlogl > TOL);
+      if ( ++iter > 100 )
+      {
+        mleError(converge);
+	cerr << "Can't find MLE?" << endl;
+	prop = 0.5*(prop1+prop2);
+	return prop;
+      }
+    } while ( prop1_dlogl < 0 || prop2_dlogl > 0);
     // here we want to change prop1, prop2, to prop and curr
     prop = prop2;
     prop_logl = prop2_logl;
