@@ -5,7 +5,7 @@ translate
        4 Cow,
        5 Sheep,
        6 Giraffe;
-prob crudeSE(ESS=3.46) clade
+prob crudeSE(ESS=5.76) clade
 1.00000000 0.00000000 {1-6} ******
 1.00000000 0.00000000 {2-6} .*****
 1.00000000 0.00000000 {3-6} ..****

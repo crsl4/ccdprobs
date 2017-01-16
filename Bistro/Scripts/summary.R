@@ -6,7 +6,7 @@
 ## cats-dogs "(1,(2,(((((3,4),5),6),7),8)),(9,((10,11),12)));"
 ## bistro writes it like this: "(1,(2,(((((7,8),9),10),12),11)),(3,((4,5),6)));"
 
-summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));"){
+summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));", bmcmc="mcmc1"){
     if(mb)
         {
             ## mrbayes
@@ -33,7 +33,7 @@ summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));"){
     else
         {
             ## New using bmcmc
-            tre = read.table("mcmc1.tre")
+            tre = read.table(paste0(bmcmc,".tre"))
             n = nrow(tre)
             burn = n/11
             ## remove burnin, first 1000 saved values
@@ -182,7 +182,7 @@ summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));"){
         }
     else
         {
-            foo2 = read.table("mcmc1.par")
+            foo2 = read.table(paste0(bmcmc,".par"))
             foo2 = foo2[-(1:burn),-1]
             if ( n > 1000 )
                 foo2 = foo2[sample(1:nrow(foo2),1000,replace=FALSE),]
