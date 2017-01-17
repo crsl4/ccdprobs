@@ -1,5 +1,5 @@
 ## test with bistro
-../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 10 -o test > test.log
+../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 100 -o test > test.log
 ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 100 -o bistro1 > bistro1.log
 ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 10 -o verbose -s 2508922806 --threads 1 > verbose.log
 ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 2 -o verbose2 -s 2508922806 --threads 1 > verbose2.log
