@@ -923,6 +923,10 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
     cout << "starting mleLength" << endl;
   int iter=0;
   double curr = length;
+  // trying to avoid really bad large initial values
+  if ( curr > 1 )
+    curr = 1.0;
+  
 //  cerr << "Edge::mleLength, initial length = " << length << endl;;
 
   /*
