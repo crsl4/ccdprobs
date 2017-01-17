@@ -326,55 +326,53 @@ int main(int argc, char* argv[])
   cout << starttree.makeTreeNumbers() << endl;
 
 // ------------------------------ MCMC for Q on fixed tree with MLE branch lengths -------------
-  if(true)
-  {
-    cerr << "Running MCMC to estimate Q matrix ..." << endl;
-    // Run MCMC on tree to estimate Q matrix parameters
-
-    // burnin
-    cerr << "burn-in:" << endl;
-    //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-    starttree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
+  cerr << "Running MCMC to estimate Q matrix ..." << endl;
+  // Run MCMC on tree to estimate Q matrix parameters
+  
+  // burnin
+  cerr << "burn-in:" << endl;
+  //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+  starttree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
 //    q_init.mcmc(alignment,starttree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-    cerr << endl << " done." << endl;
-    // cout << "Start tree after MCMC burnin: " << endl;
-    // cout << starttree.makeTreeNumbers() << endl;
-
-    // mcmc to get final Q
-    cerr << "sampling:" << endl;
-    //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-    starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
+  cerr << endl << " done." << endl;
+  // cout << "Start tree after MCMC burnin: " << endl;
+  // cout << starttree.makeTreeNumbers() << endl;
+  
+  // mcmc to get final Q
+  cerr << "sampling:" << endl;
+  //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+  starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
 //    q_init.mcmc(alignment,starttree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-    cerr << endl << " done." << endl;
-    // cout << "Start tree after MCMC: " << endl;
-    // cout << starttree.makeTreeNumbers() << endl;
-
+  cerr << endl << " done." << endl;
+  // cout << "Start tree after MCMC: " << endl;
+  // cout << starttree.makeTreeNumbers() << endl;
+  
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
 // save to file)
-    double scaleP = 100000000;
-    double temp;
-    VectorXd x = q_init.getStationaryP();
-    VectorXd v = q_init.getMcmcVarP();
-    for ( int i=0; i<x.size(); ++i )
-    {
-      temp = x(i)*(1-x(i))/v(i);
-      cout << "Scale for p" << i << " is " << temp << endl;
-      if(temp < scaleP)
-	scaleP = temp;
-    }
-    cout << "Dirichlet for P scale: " << scaleP << endl;
-    double scaleQP = 100000000;
-    x = q_init.getSymmetricQP();
-    v = q_init.getMcmcVarQP();
-    for ( int i=0; i<x.size(); ++i )
-    {
-      temp = x(i)*(1-x(i))/v(i);
-      cout << "Scale for s" << i << " is " << temp << endl;
-      if( temp < scaleQP )
-	scaleQP = temp;
-    }
-    cout << "Dirichlet for QP scale: " << scaleQP << endl;
+  double scaleP = 100000000;
+  double temp;
+  VectorXd x = q_init.getStationaryP();
+  VectorXd v = q_init.getMcmcVarP();
+  for ( int i=0; i<x.size(); ++i )
+  {
+    temp = x(i)*(1-x(i))/v(i);
+    cout << "Scale for p" << i << " is " << temp << endl;
+    if(temp < scaleP)
+      scaleP = temp;
   }
+  cout << "Dirichlet for P scale: " << scaleP << endl;
+  double scaleQP = 100000000;
+  x = q_init.getSymmetricQP();
+  v = q_init.getMcmcVarQP();
+  for ( int i=0; i<x.size(); ++i )
+  {
+    temp = x(i)*(1-x(i))/v(i);
+    cout << "Scale for s" << i << " is " << temp << endl;
+    if( temp < scaleQP )
+      scaleQP = temp;
+  }
+  cout << "Dirichlet for QP scale: " << scaleQP << endl;
+
 
   // Initial Q, either from naive estimate or MCMC on fixed tree with MLE BL
   //QMatrix model_init(parameters.getStationaryP(),parameters.getSymmetricQP());
@@ -404,7 +402,7 @@ int main(int argc, char* argv[])
   map<string,double> topologyToWeightMap;
   map<string,double> topologyToLogLikWeightMap;
 
-// --------------------------------------- Bootstrap of topologies -----------------------
+// --------------------------------------- Bootstrap of topologies from ccdprobs -----------------------
   if( parameters.getTopology().empty() ) //only do bootstrap if not fixed topology as input
   {
     cerr << "Do boostrap with new pairwise distances"<< endl;
@@ -555,93 +553,7 @@ int main(int argc, char* argv[])
   tmap.close();
   milliseconds ms10 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-// new here
-// here we need to do mcmc on separate trees (fixit: do in multiple threads later)
-// we will choose the 10 trees with higher bootstrap frequency
-  vector< pair<string,double> > trees;
-  copy(topologyToCountMap.begin(), topologyToCountMap.end(), back_inserter(trees));
-  sort(trees.begin(), trees.end(), comparePairStringDouble);
-  int c = -1;
-  int sizeTrees = trees.size();
-  if(sizeTrees > 10)
-    sizeTrees = 10;// only do the first 10 trees
-  vector<VectorXd> avgP(sizeTrees); //just keeping the avg for now, fixit
-  vector<VectorXd> varP(sizeTrees);
-  vector<VectorXd> avgS(sizeTrees);
-  vector<VectorXd> varS(sizeTrees);
-  for (vector<pair<string,double>>::reverse_iterator i = trees.rbegin(); i != trees.rend(); ++i ) {
-    if( ++c < sizeTrees )
-    {
-      Tree newtree(i->first);
-      newtree.relabel(alignment);
-      newtree.unroot();
-      cerr << "Bootstrap tree: " << newtree.makeTopologyNumbers() << " with count " << (i->second) << endl;
-      cout << "Bootstrap tree: " << newtree.makeTopologyNumbers() << " with count " << (i->second) << endl;
-      MatrixXd jcDistanceMatrixNewCopy = jcDistanceMatrix;
-      newtree.setNJDistances(jcDistanceMatrixNewCopy,rng);
-      cerr << newtree.makeTreeNumbers() << endl;
-      cout << newtree.makeTreeNumbers() << endl;
-      cerr << "Q " << endl << model_init.getQ() << endl;
-      cout << "Q " << endl << model_init.getQ() << endl;
-      for ( int j=0; j<4; ++j )
-      {
-	double logFoo;
-	newtree.randomEdges(alignment,model_init,rng,logFoo,true);
-      }
-      cerr << "MLE Branch Lengths" << endl;
-      cerr << newtree.makeTreeNumbers() << endl;
-      cout << "MLE Branch Lengths" << endl;
-      cout << newtree.makeTreeNumbers() << endl;
-      QMatrix q_loc(convert(p_init),s_pairwise);
-      // burnin
-      cerr << "burn-in:" << endl;
-      q_loc.mcmc(alignment,newtree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-      cerr << endl << " done." << endl;
-      // mcmc to get final Q
-      cerr << "sampling:" << endl;
-      q_loc.mcmc(alignment,newtree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-      cerr << endl << " done." << endl;
-      avgP[c] = q_loc.getStationaryP();
-      varP[c] = q_loc.getMcmcVarP();
-      avgS[c] = q_loc.getSymmetricQP();
-      varS[c] = q_loc.getMcmcVarQP();
-    }
-    else
-      break;
-  }
-
-  VectorXd sumAvgP = VectorXd::Zero(4);
-  VectorXd sumVarP = VectorXd::Zero(4);
-  VectorXd sumAvgS = VectorXd::Zero(6);
-  VectorXd sumVarS = VectorXd::Zero(6);
-  for ( int c=0; c<avgP.size(); ++c )
-  {
-    sumAvgP += avgP[c];
-    sumVarP += varP[c];
-    sumAvgS += avgS[c];
-    sumVarS += varS[c];
-    cerr << "avgP[" << c << "] = " << avgP[c].transpose() << endl;
-    cerr << "varP[" << c << "] = " << varP[c].transpose() << endl;
-    cerr << "avgS[" << c << "] = " << avgS[c].transpose() << endl;
-    cerr << "varS[" << c << "] = " << varS[c].transpose() << endl;
-  }
-
-  for(int jj=0; jj<sumAvgP.size(); ++jj)
-  {
-    sumAvgP[jj] /= sumAvgP.size();
-    sumVarP[jj] /= sumVarP.size();
-  }
-  for(int jj=0; jj<sumAvgS.size(); ++jj)
-  {
-    sumAvgS[jj] /= sumAvgS.size();
-    sumVarS[jj] /= sumVarS.size();
-  }
-
-  // using average Q
-  // QMatrix model(sumAvgP,sumAvgS);
-  // model.setMcmcVarP(sumVarP);
-  // model.setMcmcVarQP(sumVarS);
-
+  // --------------------- Random sample of trees ------------------------------------
   // using the same model_init (either from initial MCMC or naive estimate)
   QMatrix model(model_init.getStationaryP(),model_init.getSymmetricQP());
   model.setMcmcVarP(model_init.getMcmcVarP());
