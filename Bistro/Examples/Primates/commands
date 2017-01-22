@@ -1,5 +1,9 @@
+## run with bmcmc
+../../Code/bistro/bmcmc -f ../../Data/primates.fasta -o mcmc1 -r 10000 -b 1000 -t "(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));" > mcmc1.log
+summaryBistro("test",besttree="(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));")
+
 ## test with bistro
-../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 100 -o test > test.log
+../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 1000 -o test > test.log
 ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 100 -o bistro1 > bistro1.log
 ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 10 -o verbose -s 2508922806 --threads 1 > verbose.log
 ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 2 -o verbose2 -s 2508922806 --threads 1 > verbose2.log

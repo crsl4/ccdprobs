@@ -5,6 +5,7 @@
 ## artiodactyl "(1,2,(3,(4,(5,6))));"
 ## cats-dogs "(1,(2,(((((3,4),5),6),7),8)),(9,((10,11),12)));"
 ## bistro writes it like this: "(1,(2,(((((7,8),9),10),12),11)),(3,((4,5),6)));"
+## primates: "(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));"
 
 summaryBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));", bmcmc="mcmc1"){
     if(mb)
