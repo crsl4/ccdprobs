@@ -1142,8 +1142,9 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
       double alpha = length*lambda;
       gamma_distribution<double> rgamma(alpha,1.0 / lambda);
       length = rgamma(rng);
-      if(isnan(length))
-	cerr << "found nan bl with alpha: " << alpha << " and lambda: " << lambda << endl;
+      // if(isnan(length))
+      // 	cerr << "found nan bl with alpha: " << alpha << " and lambda: " << lamb
+	  da << endl;
       logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length) - lambda*length;
     }
   }
@@ -1740,8 +1741,8 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
       bool converge = true;
       Vector3d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength(),z->getEdgeParent()->getLength());
-      if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
-	cerr << "found nan bl in generateBranchLengths, initial BL" << endl;
+      // if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
+      // 	cerr << "found nan bl in generateBranchLengths, initial BL" << endl;
       if(jointMLE)
 	t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge);
 
@@ -1766,8 +1767,9 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	}
       t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
       //t = multivariateNormal(mu,cov,rng, logdensity, eta);
-      if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
-	cerr << "found nan bl in generateBranchLengths, after multivariate gamma BL" << endl;
+      // if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
+      // 	cerr << "found nan bl in generateBranchLengths, after multivariate gamm
+a BL" << endl;
 
       x->getEdgeParent()->setLength( t[0] );
       y->getEdgeParent()->setLength( t[1] );
