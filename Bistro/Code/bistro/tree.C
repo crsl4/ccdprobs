@@ -1143,8 +1143,7 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
       gamma_distribution<double> rgamma(alpha,1.0 / lambda);
       length = rgamma(rng);
       // if(isnan(length))
-      // 	cerr << "found nan bl with alpha: " << alpha << " and lambda: " << lamb
-	  da << endl;
+      // 	cerr << "found nan bl with alpha: " << alpha << " and lambda: " << lambda << endl;
       logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length) - lambda*length;
     }
   }
@@ -1768,8 +1767,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
       //t = multivariateNormal(mu,cov,rng, logdensity, eta);
       // if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
-      // 	cerr << "found nan bl in generateBranchLengths, after multivariate gamm
-a BL" << endl;
+      // 	cerr << "found nan bl in generateBranchLengths, after multivariate gamma BL" << endl;
 
       x->getEdgeParent()->setLength( t[0] );
       y->getEdgeParent()->setLength( t[1] );
