@@ -1,3 +1,7 @@
+## with eta on Q
+../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 1000 -o test3 --eta 10 > test3.log
+summaryBistro("test3",besttree="(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));")
+
 ## run with bmcmc
 ../../Code/bistro/bmcmc -f ../../Data/primates.fasta -o mcmc1 -r 10000 -b 1000 -t "(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));" > mcmc1.log
 summaryBistro("test",besttree="(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));")

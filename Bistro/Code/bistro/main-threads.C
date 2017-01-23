@@ -83,7 +83,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
   ofstream treeblsort(treeBLFileSort.c_str());
    f << "tree logl logTop logBL logPrior logQ logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
 
-// calculate the scale for P and QP: fixit, this is done twice
+// calculate the scale for P and QP: fixit, this is done twice, also in main
    double scaleP = 100000000;
    double temp;
    VectorXd x = q_init.getStationaryP();
@@ -123,10 +123,10 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	 otherscale = 10000000;
        if ( VERBOSE )
 	 cout << "logQ before p_star = " << logQ << endl;
-       VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), otherscale*scaleP, logQ, rng);
+       VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), parameters.getEta()*otherscale*scaleP, logQ, rng);
        if ( VERBOSE )
 	 cout << "logQ after p_star = " << logQ << endl;
-       VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), otherscale*scaleQP, logQ, rng);
+       VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), parameters.getEta()*otherscale*scaleQP, logQ, rng);
        if ( VERBOSE )
 	 cout << "logQ after s_star = " << logQ << endl;
 
@@ -184,7 +184,8 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
       else
 	{
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), parameters.getEta(), parameters.getWeightMean());
+	  //tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), parameters.getEta(), parameters.getWeightMean());
+	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), 1.0, parameters.getWeightMean());
 	}
       if(VERBOSE)
       {
