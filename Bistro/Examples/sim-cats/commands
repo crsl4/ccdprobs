@@ -7,3 +7,12 @@ summaryBistro("bistro1", besttree="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12
 ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-long.fasta -o bistro1-long -r 1000 -b 1000 -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" > bistro1-long.log
 ../../Code/bistro/bmcmc -f ../../Data/sim-cats-dogs-long.fasta -o mcmc1-long -r 10000 -b 1000 -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" > mcmc1-long.log
 summaryBistro("bistro1-long", besttree="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);", bmcmc="mcmc1-long")
+
+## run bistro and bmcmc on fixed true tree, longer/shorter bl
+../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-long-short.fasta -o bistro1-long-short -r 1000 -b 1000 -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" > bistro1-long-short.log
+../../Code/bistro/bmcmc -f ../../Data/sim-cats-dogs-long-short.fasta -o mcmc1-long-short -r 10000 -b 1000 -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" > mcmc1-long-short.log
+summaryBistro("bistro1-long-short", besttree="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);", bmcmc="mcmc1-long-short")
+
+## run bistro and bmcmc on fixed true tree, longer/shorter bl, independent bl sampling
+../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-long-short.fasta -o bistro1-long-short-ind -r 1000 -b 1000 -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" --independent > bistro1-long-short-ind.log
+summaryBistro("bistro1-long-short-ind", besttree="(1,((((2,3),4),5),(6,(((7,(8,9)),10),11))),12);", bmcmc="mcmc1-long-short")
