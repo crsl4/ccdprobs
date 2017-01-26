@@ -2455,52 +2455,55 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
       cerr << '*';
     if ( (i+1) % (numGenerations / 10) == 0 )
       cerr << '|';
-    Vector4d x = Q.getStationaryP();
-    double logProposalRatio = 0;
-    Vector4d y = dirichletProposal(x,scale,logProposalRatio,rng);
-    QMatrix propQ(y,Q.getSymmetricQP());
-    clearProbMaps();
-    double propLogLikelihood = calculate(alignment,propQ);
-    double acceptProbability = exp(propLogLikelihood - currLogLikelihood + logProposalRatio);
-    if ( acceptProbability > 1 )
-      acceptProbability = 1;
-    sumAcceptP += acceptProbability;
-    uniform_real_distribution<double> runif(0,1);
-    if ( runif(rng) < acceptProbability )
+    for( int kk=0; kk<10; ++kk ) //we want to update Q 10 times per once for BL
     {
-      Q.resetStationaryP(y);
-      currLogLikelihood = propLogLikelihood;
-    }
-    prod1 = Q.getStationaryP() - avgPold;
-    avgP = avgPold + prod1/(i+1);
-    prod2 = Q.getStationaryP() - avgP;
-    for ( int j=0; j<4; ++j )
+      Vector4d x = Q.getStationaryP();
+      double logProposalRatio = 0;
+      Vector4d y = dirichletProposal(x,scale,logProposalRatio,rng);
+      QMatrix propQ(y,Q.getSymmetricQP());
+      clearProbMaps();
+      double propLogLikelihood = calculate(alignment,propQ);
+      double acceptProbability = exp(propLogLikelihood - currLogLikelihood + logProposalRatio);
+      if ( acceptProbability > 1 )
+	acceptProbability = 1;
+      sumAcceptP += acceptProbability;
+      uniform_real_distribution<double> runif(0,1);
+      if ( runif(rng) < acceptProbability )
+      {
+	Q.resetStationaryP(y);
+	currLogLikelihood = propLogLikelihood;
+      }
+      prod1 = Q.getStationaryP() - avgPold;
+      avgP = avgPold + prod1/(i+1);
+      prod2 = Q.getStationaryP() - avgP;
+      for ( int j=0; j<4; ++j )
 	prod12(j) = prod1(j)*prod2(j);
-    sP += prod12;
-    avgPold = avgP;
-    VectorXd xx = Q.getSymmetricQP();
-    logProposalRatio = 0;
-    VectorXd yy(6);
-    yy = dirichletProposal(xx,scale,logProposalRatio,rng);
-    propQ.reset(Q.getStationaryP(),yy);
-    clearProbMaps();
-    propLogLikelihood = calculate(alignment,propQ);
-    acceptProbability = exp(propLogLikelihood - currLogLikelihood + logProposalRatio);
-    if ( acceptProbability > 1 )
-      acceptProbability = 1;
-    sumAcceptS += acceptProbability;
-    if ( runif(rng) < acceptProbability )
-    {
-      Q.resetSymmetricQP(yy);
-      currLogLikelihood = propLogLikelihood;
-    }
-    prod3 = Q.getSymmetricQP() - avgSold;
-    avgS = avgSold + prod3/(i+1);
-    prod4 = Q.getSymmetricQP() - avgS;
-    for ( int j=0; j<6; ++j )
+      sP += prod12;
+      avgPold = avgP;
+      VectorXd xx = Q.getSymmetricQP();
+      logProposalRatio = 0;
+      VectorXd yy(6);
+      yy = dirichletProposal(xx,scale,logProposalRatio,rng);
+      propQ.reset(Q.getStationaryP(),yy);
+      clearProbMaps();
+      propLogLikelihood = calculate(alignment,propQ);
+      acceptProbability = exp(propLogLikelihood - currLogLikelihood + logProposalRatio);
+      if ( acceptProbability > 1 )
+	acceptProbability = 1;
+      sumAcceptS += acceptProbability;
+      if ( runif(rng) < acceptProbability )
+      {
+	Q.resetSymmetricQP(yy);
+	currLogLikelihood = propLogLikelihood;
+      }
+      prod3 = Q.getSymmetricQP() - avgSold;
+      avgS = avgSold + prod3/(i+1);
+      prod4 = Q.getSymmetricQP() - avgS;
+      for ( int j=0; j<6; ++j )
 	prod34(j) = prod3(j)*prod4(j);
-    sS += prod34;
-    avgSold = avgS;
+      sS += prod34;
+      avgSold = avgS;
+    }
     // now with Q, we want to sample branch lengths
     clearProbMaps();
     int j = 0;

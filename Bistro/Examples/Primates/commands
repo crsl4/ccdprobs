@@ -1,3 +1,7 @@
+## fixed tree
+../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 1000 -o test4 -t "(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));" > test4.log
+summaryBistro("test4",besttree="(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));")
+
 ## with eta on Q
 ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 1000 -r 1000 -o test3 --eta 10 > test3.log
 summaryBistro("test3",besttree="(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));")
