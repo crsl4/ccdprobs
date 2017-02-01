@@ -1,4 +1,8 @@
 ## running mcmc with q and bl
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro6 -r 1000 -b 1000 --independent > bistro6.log
+summaryBistro("bistro6", besttree="(1,2,(3,(4,(5,6))));")
+
+## running mcmc with q and bl
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro5 -r 1000 -b 1000 > bistro5.log
 
 ## first mb tree
