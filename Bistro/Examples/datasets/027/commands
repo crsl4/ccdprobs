@@ -1,3 +1,7 @@
+~/software/MrBayes/mb 027.nex
+../../../Code/bistro/bistro -f ../../../Data/datasets/027.fasta -b 1000 -r 1000 -o bistro1 > bistro1.log
+
+## find MAP tree, and run bistro (indep and dep bl)
 
 time ../../../Code/bistro/bistro -f ../../../Data/datasets/027.fasta -b 1000 -r 1000 -m 2 -o default > default.log
 time ../../../Code/bistro/bistro -f ../../../Data/datasets/027.fasta -b 1000 -r 1000 -m 2 -o fixQ --fixedQ > fixQ.log

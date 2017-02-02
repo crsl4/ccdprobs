@@ -2455,8 +2455,8 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
       cerr << '*';
     if ( (i+1) % (numGenerations / 10) == 0 )
       cerr << '|';
-    for( int kk=0; kk<10; ++kk ) //we want to update Q 10 times per once for BL
-    {
+    // for( int kk=0; kk<10; ++kk ) //we want to update Q 10 times per once for BL
+    // {
       Vector4d x = Q.getStationaryP();
       double logProposalRatio = 0;
       Vector4d y = dirichletProposal(x,scale,logProposalRatio,rng);
@@ -2503,7 +2503,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
 	prod34(j) = prod3(j)*prod4(j);
       sS += prod34;
       avgSold = avgS;
-    }
+//    }
     // now with Q, we want to sample branch lengths
     clearProbMaps();
     int j = 0;
