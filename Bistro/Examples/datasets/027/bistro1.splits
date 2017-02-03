@@ -1,0 +1,55 @@
+translate
+       1 Oryctolagus_cuniculus,
+       2 Homo_sapiens,
+       3 Rattus_norvegicus,
+       4 Mus_musculus,
+       5 Gallus_gallus,
+       6 Turdus_migratorius,
+       7 Alligator_mississippiensis,
+       8 Sceloporus_undulatus,
+       9 Heterodon_platyrhinos,
+      10 Trachemys_scripta,
+      11 Typhlonectes_natans,
+      12 Hypogeophis_rostratus,
+      13 Grandisonia_alternans,
+      14 Ichthyophis_bannanicus,
+      15 Plethodon_yonhalossee,
+      16 Ambystoma_mexicanum,
+      17 Amphiuma_tridactylum,
+      18 Siren_intermedia,
+      19 Gastrophryne_carolinensis,
+      20 Hyla_cinerea,
+      21 Bufo_valliceps,
+      22 Eleutherodactylus_cuneatus,
+      23 Nesomantis_thomasseti,
+      24 Scaphiopus_holbrooki,
+      25 Xenopus_laevis,
+      26 Discoglossus_pictus,
+      27 Latimeria_chalumnae;
+prob crudeSE(ESS=nan) clade
+       nan nan {25-27} ........................***
+       nan nan {24-27} .......................****
+       nan nan {23-27} ......................*****
+       nan nan {22-27} .....................******
+       nan nan {21-27} ....................*******
+       nan nan {20-27} ...................********
+       nan nan {19-27} ..................*********
+       nan nan {18-27} .................**********
+       nan nan {17-27} ................***********
+       nan nan {16-27} ...............************
+       nan nan {15-27} ..............*************
+       nan nan {14-27} .............**************
+       nan nan {26-27} .........................**
+       nan nan {12-27} ...........****************
+       nan nan {11-27} ..........*****************
+       nan nan {10-27} .........******************
+       nan nan {9-27} ........*******************
+       nan nan {8-27} .......********************
+       nan nan {7-27} ......*********************
+       nan nan {6-27} .....**********************
+       nan nan {5-27} ....***********************
+       nan nan {4-27} ...************************
+       nan nan {3-27} ..*************************
+       nan nan {2-27} .**************************
+       nan nan {1-27} ***************************
+       nan nan {13-27} ............***************
