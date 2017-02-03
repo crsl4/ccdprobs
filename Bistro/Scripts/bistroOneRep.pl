@@ -29,7 +29,7 @@ GetOptions( 'irep=i' => \$irep,
 my $logfile = "blOneRep.txt";
 open FHlog, ">> $logfile";
 print FHlog "============================================\n";
-print FHlog "blOneRep for replicate $irep\n";
+print FHlog "bistroOneRep for replicate $irep\n";
 close FHlog;
 system("date >> $logfile");
 system("hostname >> $logfile");
@@ -58,10 +58,13 @@ my $ntaxtree;
 my $ntaxrates;
 my $ntaxprobs;
 my $blcmd;
+my $blcmd2;
 my $start;
 my $duration;
 my $newfile;
 
+## aqui voy, falta poner los nombres de los output files, and checar q el script funcione
+## luego cambiar bistroAllRep
 # one replicate will run analysis for each ntaxa
 foreach my $ntax (3,4,5,6,7,8,9,10,11,12){ ## needs to match simulateDataStudy.r
     print FHlog "-----------------ntaxa = $ntax------------------\n";
@@ -80,7 +83,8 @@ foreach my $ntax (3,4,5,6,7,8,9,10,11,12){ ## needs to match simulateDataStudy.r
 
     $seed = $seed +($ntax-3)*int(rand(1000));
 
-    $blcmd = "../Code/test/bl -f ../Data/sim$ntax.fasta -t \"$ntaxtree\" -q $ntaxrates -p $ntaxprobs --mvnormal -s $seed >& out$ntax";
+    $blcmd = "../Code/bistro/bistro -f ../Data/sim$ntax.fasta -s $seed -o .... -r 1000 -b 1000 > ....log";
+    $blcmd2 = "../Code/bistro/bistro -f ../Data/sim$ntax.fasta -t \"$ntaxtree\" -s $seed -o .... -r 1000 -b 1000 > ...log";
     print "running bl\n";
     print FHlog "$blcmd\n";
     $start = time;
