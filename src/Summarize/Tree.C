@@ -14,7 +14,8 @@ void Tree::print(ostream& c) {
 
 void Tree::printTopology(ostream& c) {
   if(left)
-    if (num!=0)
+//    if (num!=0)
+    if (false)
       c << topologyName(clade->name,num);
     else {
       c << "(";
