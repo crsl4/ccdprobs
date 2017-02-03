@@ -1,3 +1,27 @@
+Simulation study for paper
+
+1) Initial test:
+`perl bistroAllRep.pl -from 1 -to 10`
+This will simulate sequences on trees from taxa 3,...,12 from the cats-dogs trees with branch lengths 0.1, and Q from estimated Q for artiodactyl.
+For each taxa value, it simulates 10 replicates: bistro_ntax_irep* and bistro_fixed_ntax_irep* with fixed topology.
+
+2) Create scripts to summarize these results and make plots
+
+3) `perl bistroAllRep.pl -from 1 -to 100`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 After running bistro, we have output files:
 
 *** root.topPP = weighted probability for each sampled topology
