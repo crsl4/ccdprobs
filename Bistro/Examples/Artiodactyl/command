@@ -1,3 +1,7 @@
+## test writing bootstrap trees to file
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro7 -r 1000 -b 1000 --independent > bistro7.log
+../../Code/bistro/bccd -f ../../Data/artiodactyl-6.fasta -o ccd -r 1000 -b 1000 > ccd.log
+
 ## running mcmc with q and bl
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro6 -r 1000 -b 1000 --independent > bistro6.log
 summaryBistro("bistro6", besttree="(1,2,(3,(4,(5,6))));")

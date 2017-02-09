@@ -85,6 +85,17 @@ int main(int argc, char* argv[])
 
   milliseconds ms2 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
+  // Initialize random number generator
+  cerr << "Initializing random number generator ...";
+  if ( parameters.getSeed() == 0 )
+  {
+    random_device rd;
+    parameters.setSeed(rd());
+  }
+  mt19937_64 rng(parameters.getSeed());
+  cerr << " done." << endl;
+  cout << "Seed = " << parameters.getSeed() << endl;
+
   // Find Jukes-Cantor pairwise distances
 //  cerr << alignment.getNumTaxa() << endl;
   cerr << "Finding initial Jukes-Cantor pairwise distances ...";
@@ -110,37 +121,35 @@ int main(int argc, char* argv[])
   cerr << endl << "Tree topology:" << endl;
   cerr << jctree.makeTopologyNumbers() << endl << endl;
 
-  // for ( int i=0; i<4; ++i )
-  // {
-  //   double logFoo;
-  //   jctree.randomEdges(alignment,model,rng,logFoo,true);
-  // }
+// ---------------------- Estimate Q with base frequencies and pairwise counts -----------------
+  vector<double> p_init = alignment.baseFrequencies();
+  cerr << "Estimated base frequencies: " << p_init.at(0) << "," << p_init.at(1) << "," << p_init.at(2) << "," << p_init.at(3) << endl;
 
-  milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  VectorXd s_pairwise(6);
+  s_pairwise = alignment.averagePairwiseS();
+  cerr << "Estimated rates: " << endl;
+  cerr << s_pairwise.transpose() << endl;
+  QMatrix q_init(convert(p_init),s_pairwise);
 
-  // Initialize random number generator
-  cerr << "Initializing random number generator ...";
-  if ( parameters.getSeed() == 0 )
+// ------------------------------ Put MLE branch lengths to tree -------------------------
+  for ( int i=0; i<4; ++i )
   {
-    random_device rd;
-    parameters.setSeed(rd());
+    double logFoo;
+    jctree.randomEdges(alignment,q_init,rng,logFoo,true);
   }
-  mt19937_64 rng(parameters.getSeed());
-  cerr << " done." << endl;
-  cout << "Seed = " << parameters.getSeed() << endl;
-
-  milliseconds ms5 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+  cout << "MLE Branch Lengths" << endl;
+  cout << jctree.makeTreeNumbers() << endl;
 
   cerr << "Running MCMC to estimate Q matrix ..." << endl;
   // Run MCMC on tree to estimate Q matrix parameters
   //   initial Q matrix
 
-  vector<double> p_init(4,0.25);
-  vector<double> s_init(6,0.1);
-  s_init[1] = 0.3;
-  s_init[4] = 0.3;
+  // vector<double> p_init(4,0.25);
+  // vector<double> s_init(6,0.1);
+  // s_init[1] = 0.3;
+  // s_init[4] = 0.3;
 
-  QMatrix q_init(p_init,s_init);
+  // QMatrix q_init(p_init,s_init);
 
  // burnin
   cerr << "burn-in:" << endl;
@@ -185,14 +194,14 @@ int main(int argc, char* argv[])
   cout << "GTR Tree" << endl;
   cout << gtrtree.makeTreeNumbers() << endl;
 
-  for ( int i=0; i<4; ++i )
-  {
-    double logFoo;
-    gtrtree.randomEdges(alignment,model,rng,logFoo,true);
-  }
+  // for ( int i=0; i<4; ++i )
+  // {
+  //   double logFoo;
+  //   gtrtree.randomEdges(alignment,model,rng,logFoo,true);
+  // }
 
-  cout << "MLE Branch Lengths" << endl;
-  cout << gtrtree.makeTreeNumbers() << endl;
+  // cout << "MLE Branch Lengths" << endl;
+  // cout << gtrtree.makeTreeNumbers() << endl;
 
   // Do bootstrap with new pairwise distances
   if( parameters.getNumBootstrap() == 0)
@@ -204,6 +213,8 @@ int main(int argc, char* argv[])
   MatrixXd bootDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   vector<int> weights(alignment.getNumSites());
   cerr << '|';
+  string bootstrapTreesFile = parameters.getOutFileRoot() + ".bootstrap";
+  ofstream bootstrapTrees(bootstrapTreesFile.c_str());
   for ( int b=0; b<parameters.getNumBootstrap(); ++b )
   {
     if ( (b+1) % (parameters.getNumBootstrap() / 100) == 0 )
@@ -218,6 +229,9 @@ int main(int argc, char* argv[])
     bootTree.sortCanonical();
 
     string top = bootTree.makeTopologyNumbers();
+    // write bootstrap tree to file
+    bootstrapTrees << top << endl;
+
     // add parsimony score to map if it is not already there
     // update minimum parsimony score if new minimum found
     if ( topologyToParsimonyScoreMap.find(top) == topologyToParsimonyScoreMap.end() )
@@ -229,6 +243,7 @@ int main(int argc, char* argv[])
     }
     topologyToCountMap[ top ]++;
   }
+  bootstrapTrees.close();
   cerr << endl << "done." << endl;
 
   milliseconds ms8 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );

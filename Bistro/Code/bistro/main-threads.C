@@ -418,6 +418,8 @@ int main(int argc, char* argv[])
     MatrixXd bootDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
     vector<int> weights(alignment.getNumSites());
     cerr << '|';
+    string bootstrapTreesFile = parameters.getOutFileRoot() + ".bootstrap";
+    ofstream bootstrapTrees(bootstrapTreesFile.c_str());
     for ( int b=0; b<parameters.getNumBootstrap(); ++b )
     {
       if ( (b+1) % (parameters.getNumBootstrap() / 100) == 0 )
@@ -432,6 +434,9 @@ int main(int argc, char* argv[])
       bootTree.sortCanonical();
 
       string top = bootTree.makeTopologyNumbers();
+      // write bootstrap tree to file
+      bootstrapTrees << top << endl;
+
       // add parsimony score to map if it is not already there
       // update minimum parsimony score if new minimum found
       if ( topologyToParsimonyScoreMap.find(top) == topologyToParsimonyScoreMap.end() )
@@ -459,6 +464,7 @@ int main(int argc, char* argv[])
       }
       topologyToCountMap[ top ]++;
     }
+    bootstrapTrees.close();
     cerr << endl << "done." << endl;
 
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
