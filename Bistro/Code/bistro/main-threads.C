@@ -420,6 +420,8 @@ int main(int argc, char* argv[])
     cerr << '|';
     string bootstrapTreesFile = parameters.getOutFileRoot() + ".bootstrap";
     ofstream bootstrapTrees(bootstrapTreesFile.c_str());
+    string bootstrapTreesFileBL = parameters.getOutFileRoot() + ".bootstrapBL";
+    ofstream bootstrapTreesBL(bootstrapTreesFileBL.c_str());
     for ( int b=0; b<parameters.getNumBootstrap(); ++b )
     {
       if ( (b+1) % (parameters.getNumBootstrap() / 100) == 0 )
@@ -434,8 +436,10 @@ int main(int argc, char* argv[])
       bootTree.sortCanonical();
 
       string top = bootTree.makeTopologyNumbers();
+      string topBL = bootTree.makeTreeNumbers();
       // write bootstrap tree to file
       bootstrapTrees << top << endl;
+      bootstrapTreesBL << topBL << endl;
 
       // add parsimony score to map if it is not already there
       // update minimum parsimony score if new minimum found
