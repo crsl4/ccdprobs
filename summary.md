@@ -2,6 +2,18 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- add mean code to bistro: pass a string of the bootstrap tree to their read function (don't do convert)
+- create new `readFiles` and `readFile` but to use a vector of strings, and one string (do this inside `Code/bistro/Summarize` first)
+```
+do {
+string::const_iterator top=str.begin();
+storeTopWithLen(top,str,tree,sindex,taxa,hasSemicolon,blSquared);
+allTrees.push_back(tree);
+    }
+    while(getline(f,str));
+```
+change to for loop; save the mean tree as a string (instead of writing to stream)
+
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
@@ -28,7 +40,10 @@ Bret Larget, Claudia Solis-Lemus (2016)
 ## Theoretical things for the future
 - Prove crude SE is close (smaller than) real SE with the formula
 - Study correlation matrices: For one tree, keep gamma parameters, and get a correlation matrix used to sample and compare to the one in mrbayes and the sample correlation from bistro. Keep in mind: 3 matrices: the one from the gamma that we sampled from (the observed inverse info matrix), the sample correlation from bistro and the sample correlation from mrbayes (which we are using as theoretical one, but we don’t know). One idea is to shrink the covariance matrix from the observed information matrix, in a controlled way towards a identity: divide the off diagonals by another scale. Add a column that prints the root, and save the gamma parameters to study the actual correlation that we use (I think we don’t need this anymore because we are satisfied with the idea that long branch causes correlation to neighbor branches, so we only need to study this correlation)
--
+- **Mean trees** Why minimizing geodesic to get the frechet mean instead of bret algorithm: `argmin_a \sum_t \sum_s (t(s)-a(s))^2` (s=split, t=list of input trees)?
+Bret algorithm: give a score to each split (see below), sort the splits, and
+input split into tree if they are compatible. The score of a split is the square of the parent edge of the split, and the best score for the subtree. **Question:** How are the Frechet mean and the Bret mean different?
+
 
 ## Performance improvements
 - Test if first branches to estimate are poor in comparison to deep branches: to test without randomize, we need to call sort canonical before sampling branch lengths
