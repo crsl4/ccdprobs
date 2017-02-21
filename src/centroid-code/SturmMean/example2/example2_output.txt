@@ -1,0 +1,5 @@
+Tree selection:  random permutations of the tree set.
+Convergence:  Cauchy sequence of length 5 with epsilon = 1.0E-4
+Converged after 28296 iterations.  Displaying approximate mean tree.
+Standard Deviation if tree is mean: 2.44949  Tree:
+(((a:1,b:1):1,c:1):2.5,d:1,e:1);

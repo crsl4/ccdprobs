@@ -121,10 +121,10 @@ void Trees::findNamedClades(double threshold, int maxTopologies) {
   }
 }
 
-void Trees::printMeanTree(ostream &c) {
+void Trees::printMeanTree(ostream &c) { //not only prints the mean, but computes it
   findSplits();
 
-  for(int i=0;i<maxLen;i++)
+  for(int i=0;i<maxLen;i++) // going over all leaves (external edges)
     trees[1][i]->clade->value = sqr(trees[1][i]->clade->sumBL/(double)totalTrees);
 
       
@@ -135,8 +135,8 @@ void Trees::printMeanTree(ostream &c) {
   for(int i=3;i<=maxLen;i++) {
     for(vector<CladePtr>::iterator j=clades[i].begin();j!=clades[i].end();j++) {
       double val=0;
-      for(int k=(*j)->firstSplit;k!=0;k=splitTable.nextSplit(k)) {
-	double val2 = splitTable.first(k)->value + splitTable.second(k)->value;
+      for(int k=(*j)->firstSplit;k!=0;k=splitTable.nextSplit(k)) { //finding the max value here
+	double val2 = splitTable.first(k)->value + splitTable.second(k)->value; //splitTable must keep track of the best first and second of the subtree in the clade
 	if (val2>val)
 	  val = val2;
       }
@@ -919,9 +919,9 @@ void Trees::printMeanTree2(ostream &c, CladePtr j, int topTree) {
     }
     else {
       double val=0;
-      for(int k=j->firstSplit;k!=0;k=splitTable.nextSplit(k)) {
+      for(int k=j->firstSplit;k!=0;k=splitTable.nextSplit(k)) { //going over all sub-splits of clade j
 	double val2 = splitTable.first(k)->value + splitTable.second(k)->value;
-	if (val2>val) {
+	if (val2>val) { //searching for the maximum
 	  val = val2;
 	  first = splitTable.first(k);
 	  second = splitTable.second(k);

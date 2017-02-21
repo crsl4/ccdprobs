@@ -1,5 +1,8 @@
+## summarize
+../../Code/bistro/Summarize/summarize bistro7.bootstrapBL
+
 ## computing frechet mean tree
-java -jar ../../../../centroid-code/SturmMean/SturmMean.jar bistro7.bootstrapBL
+java -jar ../../../../centroid-code/SturmMean/SturmMean.jar bistro7.bootstrapBL > Frechet-mean.tre
 
 ## test writing bootstrap trees to file
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro7 -r 1000 -b 1000 --independent > bistro7.log
