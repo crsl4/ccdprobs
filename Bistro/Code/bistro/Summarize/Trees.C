@@ -2,6 +2,54 @@ using namespace std;
 
 #include "Trees.h"
 
+void Trees::readTree(string str, vector<TreePtr>& sindex, bool& first, 
+		     vector<TreePtr>& taxa, bool& hasLength, bool& hasSemicolon, double& blSquared) {
+  cerr << "starting readTree on str=" << str << endl;
+  if(first) {
+    initializeTrees(str,taxa,hasLength,hasSemicolon);
+    first = false;
+  }
+
+  TreePtr tree;
+  if(hasLength)
+  {
+    cerr << "hasLength=true, so storeTopWithLen is called" << endl;
+    string::const_iterator top=str.begin();
+    storeTopWithLen(top,str,tree,sindex,taxa,hasSemicolon,blSquared);
+    allTrees.push_back(tree);
+  }
+  else 
+  {
+    cerr << "hasLength=false, so storeTop is called" << endl;
+    string::const_iterator top=str.begin();
+    storeTop(top,str,tree,sindex,taxa,hasSemicolon,blSquared);
+    allTrees.push_back(tree);
+  }
+}
+
+void Trees::readTrees(const vector<string>& names) {
+  // Read in tree topologies from a vector of trees
+
+  // Create hash table used to find unique trees (and subtrees).
+  int size = Prime::nextPrime(maxTrees*10/6);
+  vector<TreePtr> sindex(size,(TreePtr)NULL); 
+
+  vector<TreePtr> taxa; // Maps taxon numbers to the corresponding trees.
+
+  bool first = true;
+  bool hasSemicolon = false;
+
+  hasLength = false; //this is updated inside readTree/readFile
+  blSquared = 0.0;
+  Found = NotFound = CompFound = CompNotFound = 0;
+  cerr << "starting to read all trees in readTrees" << endl;
+  for(vector<string>::const_iterator name=names.begin();name!=names.end();name++) {
+    cerr << "tree: " << *name << endl;
+    readTree(*name,sindex,first,taxa,hasLength,hasSemicolon,blSquared);
+  }
+  totalTrees = allTrees.size();
+}
+
 void Trees::readFiles(const vector<string>& names, int skip) {
   //cerr << "sizeof(Tree) = " << sizeof(Tree) << endl;
   // Read in tree topologies from the files listed in names, skipping the first skip lines of each.
@@ -751,7 +799,7 @@ string::const_iterator Trees::storeTop(string::const_iterator top, const string&
   unsigned int lhash,rhash;
 
   blSquared += 2*maxLen - 2;
-
+  cerr << "starting storeTop on top " << *top << " and string " << str << endl;
   if(*top == '(') {
     top = store(top+1,str,ltree,lhash,llen,sindex,taxa);
     if(*top != ',')
@@ -789,8 +837,9 @@ string::const_iterator Trees::store(string::const_iterator top, const string& st
   TreePtr ltree,rtree;
   int lnew,rnew,llen,rlen;
   unsigned int lhash,rhash;
-
+  cerr << "starting store on top " << *top << " and string " << str << endl;
   if(*top == '(') {
+    cerr << "read (" << endl;
     top = store(top+1,str,ltree,lhash,llen,sindex,taxa);
     if(*top != ',')
       syntaxError("Missing comma",str,top);
@@ -808,7 +857,9 @@ string::const_iterator Trees::store(string::const_iterator top, const string& st
       hash = 10 * hash + (*top-'0');
     if(hash==0)
       syntaxError("Taxon cannot be zero",str,top);
+    cerr << "hash computed successfully" << endl;
     tree = taxa[hash];
+    cerr << "tree set to taxa[hash]" << endl;
     len = 1;
     tree->clade->sumBL += 1;
     return top;

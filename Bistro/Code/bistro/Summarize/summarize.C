@@ -47,6 +47,19 @@ void usageError(ostream& c, char *name)
   exit(1);
 }
 
+void test()
+{
+  cerr << "test starting" << endl;
+  Trees trees;
+  const char *args[] = {"(1:1,(2:1,(3:1,4:1):1):1);", "((1:1,2:1):1,(3:1,4:1):1);"};
+  vector<string> names(args, std::end(args));
+  cerr << "succesful creation of names vector" << endl;
+  trees.readTrees(names);
+  cerr << "successful reading of trees" << endl;
+  trees.printMeanTree(cout);
+  cerr << "successful mean of trees" << endl;
+}
+
 void summarize(int skip, int numTrees, double cthreshold, double nthreshold, int maxTops,
 	       const vector<string>& filenames, int argc, char *argv[])
 {
@@ -157,7 +170,8 @@ int main(int argc, char *argv[])
 
   if(filenames.size()==0)
     filenames.push_back("-");
-  summarize(skip,numTrees,cthreshold,nthreshold,maxTops,filenames,argc,argv);
+//  summarize(skip,numTrees,cthreshold,nthreshold,maxTops,filenames,argc,argv);
+  test();
   return 0;
 }
 

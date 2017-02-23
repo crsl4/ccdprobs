@@ -29,6 +29,8 @@ public:
 
   void readFiles(const vector<string>& names, int skip);
 
+  void readTrees(const vector<string>& names);
+
   void findClades(double threshold);
 
   void findNamedClades(double threshold, int maxTopologies);
@@ -74,6 +76,9 @@ private:
   void addEdge(CladePtr parent, CladePtr first, CladePtr second, int count, vector<int> offsets);
 
   void readFile(istream& f, const string& name, int skip, vector<TreePtr>& sindex, bool& first, 
+		vector<TreePtr>& taxa, bool& hasLength, bool& hasSemicolon, double& blSquared);
+
+  void readTree(string str, vector<TreePtr>& sindex, bool& first, 
 		vector<TreePtr>& taxa, bool& hasLength, bool& hasSemicolon, double& blSquared);
 
   void syntaxError(const string& msg, const string& line, string::const_iterator pos);
