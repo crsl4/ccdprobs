@@ -13,7 +13,7 @@ using namespace std;
 
 #include "CladeTable.h"
 #include "SplitTable.h"
-#include "Tree.h"
+#include "Tree-summarize.h"
 #include "CladeTree.h"
 class Trees {
 

@@ -2,7 +2,7 @@
 # To compile, type "make" or make "all"
 # To remove files, type "make clean"
 #
-OBJS = parameter.o sequence.o ccdprobs.o tree.o model.o random.o
+OBJS = parameter.o sequence.o ccdprobs.o tree.o model.o random.o CladeTable.o SplitTable.o Tree-summarize.o Trees.o Prime.o Clade.o
 TARGET = all
 
 #CC = g++-5
@@ -30,7 +30,7 @@ LDLIBS = -lpthread
 
 all: bistro bmcmc bccd
 
-bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
+bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h CladeTable.h SplitTable.h Tree-summarize.h Trees.h Prime.h Clade.h $(OBJS)
 	$(CC) $(CFLAGS) -o bistro main-threads.C $(OBJS) $(LDLIBS)
 
 bmcmc: main-mcmc.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)

@@ -32,6 +32,17 @@ using namespace std;
 using namespace std::chrono;
 using namespace Eigen;
 
+// summarize stuff:
+#include "Trees.h"
+bool debug = false;
+const char* names[]= {"skip", "trees", "cthreshold", "nthreshold", "maxtopologies"};
+const char* desc[] = {"skipped_lines", "number_of_trees_to_print", "threshold_for_clades", 
+		      "threshold_for_named_clades",
+                      "max_tree_topologies" };
+const char* defaults[] = {"0", "100", ".01", ".80", "100"};
+const int skipField=0, numTreesField=1, cthresholdField=2, nthresholdField=3, maxTopsField=4;
+
+
 bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string, double> &p2)
 {
   return p1.second < p2.second;
@@ -227,10 +238,26 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
   treebl.close();
   treeblsort.close();
 }
+void test()
+{
+  cerr << "test starting" << endl;
+  Trees trees;
+  const char *args[] = {"(1:1,(2:1,(3:1,4:1):1):1);", "((1:1,2:1):1,(3:1,4:1):1);"};
+  vector<string> names(args, std::end(args));
+  cerr << "succesful creation of names vector" << endl;
+  trees.readTrees(names);
+  cerr << "successful reading of trees" << endl;
+  ostringstream c;
+  string meanTree = trees.printMeanTree(c);
+  cerr << "successful mean of trees" << endl << meanTree << endl;
+}
 
 
 int main(int argc, char* argv[])
 {
+  cerr << "before anything, summarize test" << endl;
+  test();
+
   milliseconds ms0 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Read command line and process parameters
   cerr << "Processing command line ...";

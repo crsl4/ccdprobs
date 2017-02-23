@@ -21,6 +21,7 @@ using namespace std;
 #include <string>
 #include <vector>
 #include <assert.h>
+#include <sstream>
 
 #include "Trees.h"
 
@@ -56,8 +57,9 @@ void test()
   cerr << "succesful creation of names vector" << endl;
   trees.readTrees(names);
   cerr << "successful reading of trees" << endl;
-  trees.printMeanTree(cout);
-  cerr << "successful mean of trees" << endl;
+  ostringstream c;
+  string meanTree = trees.printMeanTree(c);
+  cerr << "successful mean of trees" << endl << meanTree << endl;
 }
 
 void summarize(int skip, int numTrees, double cthreshold, double nthreshold, int maxTops,

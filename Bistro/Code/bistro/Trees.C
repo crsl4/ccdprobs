@@ -606,7 +606,7 @@ void Trees::initializeTrees(string str, vector<TreePtr>& taxa, bool& hasLength, 
     taxa[taxaNames[i]] = trees[1][i];
     // Create singleton clades for the leaves.
     cladeSet.singleton(trees[1][i]->count,maxLen);
-    trees[1][i]->clade = new Clade(cladeSet,1,1,0,1,i);
+    trees[1][i]->clade = new Clade2(cladeSet,1,1,0,1,i);
     cladeTable[1].push_back(trees[1][i]->clade);
     clades[1].push_back(trees[1][i]->clade);
   }
@@ -648,7 +648,7 @@ string::const_iterator Trees::getTaxaTop(string::const_iterator top, const strin
       top++;
     }
     taxaNames.push_back(n);
-    trees[1].push_back(new Tree(NULL,NULL,n,n));
+    trees[1].push_back(new Tree2(NULL,NULL,n,n));
     return top;
   }
 }
@@ -675,7 +675,7 @@ string::const_iterator Trees::getTaxa(string::const_iterator top, const string& 
       syntaxError("Taxon cannot be zero",str,top);
     skipLength(top,str,hasLength);
     taxaNames.push_back(n);
-    trees[1].push_back(new Tree(NULL,NULL,n,n));
+    trees[1].push_back(new Tree2(NULL,NULL,n,n));
     return top;
   }
 }
@@ -916,7 +916,7 @@ TreePtr Trees::add(unsigned int &hash, TreePtr ltree, TreePtr rtree,
       hash1 = (hash1 + 1) % sindex.size();
 
   if(numTrees < maxTrees) {
-    tree = sindex[hash1] = new Tree(ltree,rtree,1);
+    tree = sindex[hash1] = new Tree2(ltree,rtree,1);
     trees[len].push_back(tree);
     numTrees++;
 
@@ -932,7 +932,7 @@ TreePtr Trees::add(unsigned int &hash, TreePtr ltree, TreePtr rtree,
       tree->clade->numTopologies++;
     }
     else {
-      tree->clade = new Clade(cladeSet,1,1,branchLength,len,0); // num will be set by add method.
+      tree->clade = new Clade2(cladeSet,1,1,branchLength,len,0); // num will be set by add method.
       cladeTable[len].add(k, tree->clade);
     }
     return tree;
