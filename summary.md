@@ -2,17 +2,8 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- add mean code to bistro: pass a string of the bootstrap tree to their read function (don't do convert)
-- create new `readFiles` and `readFile` but to use a vector of strings, and one string (do this inside `Code/bistro/Summarize` first)
-```
-do {
-string::const_iterator top=str.begin();
-storeTopWithLen(top,str,tree,sindex,taxa,hasSemicolon,blSquared);
-allTrees.push_back(tree);
-    }
-    while(getline(f,str));
-```
-change to for loop; save the mean tree as a string (instead of writing to stream)
+- new option to bistro
+
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -20,16 +11,18 @@ change to for loop; save the mean tree as a string (instead of writing to stream
 
 
 ## Check with Bret
-- In MCMC, Q steps done 10 times for every BL step
-- Check new code to get mean tree from strings inside bistro
+- Check new code to get mean tree from strings inside bistro: segmentation fault sometimes (always when running bccd, so removed)
+- no more bccd, new bistro option
 - How to get distance between trees to center tree?
+- In MCMC, Q steps done 10 times for every BL step
 - Sequential IS?
 
 ## Jordan
+- git pull new changes: new bistro option "--onlyBootstrap", no more bccd
 - Create bootstrap sample of trees for different datasets:
   - Compare bootstrap frequencies of trees and clades to MrBayes PP
-  - Compare Bret's mean tree to Megan's mean tree
-  - Weight trees by distance to "center tree". and compare weights to MrBayes PP
+  - Compare Bret's mean tree to Megan's mean tree (bret's mean in `bccd` already)
+  - Later: weight trees by distance to "center tree", and compare weights to MrBayes PP
 
 ## Known problems
 - Problem with long branches: only use joint BL density if there is a long branch (ESS is better with independent BL if there is not a long BL)

@@ -255,9 +255,7 @@ void test()
 
 int main(int argc, char* argv[])
 {
-  cerr << "before anything, summarize test" << endl;
   test();
-
   milliseconds ms0 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Read command line and process parameters
   cerr << "Processing command line ...";
@@ -445,10 +443,13 @@ int main(int argc, char* argv[])
     MatrixXd bootDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
     vector<int> weights(alignment.getNumSites());
     cerr << '|';
+    // output files
     string bootstrapTreesFile = parameters.getOutFileRoot() + ".bootstrap";
     ofstream bootstrapTrees(bootstrapTreesFile.c_str());
     string bootstrapTreesFileBL = parameters.getOutFileRoot() + ".bootstrapBL";
     ofstream bootstrapTreesBL(bootstrapTreesFileBL.c_str());
+    // vector of strings trees
+    vector<string> bootstrapStrings(parameters.getNumBootstrap());
     for ( int b=0; b<parameters.getNumBootstrap(); ++b )
     {
       if ( (b+1) % (parameters.getNumBootstrap() / 100) == 0 )
@@ -467,6 +468,7 @@ int main(int argc, char* argv[])
       // write bootstrap tree to file
       bootstrapTrees << top << endl;
       bootstrapTreesBL << topBL << endl;
+      bootstrapStrings[b] = topBL;
 
       // add parsimony score to map if it is not already there
       // update minimum parsimony score if new minimum found
@@ -494,9 +496,18 @@ int main(int argc, char* argv[])
 	}
       }
       topologyToCountMap[ top ]++;
-    }
+    } // end of bootstrap
     bootstrapTrees.close();
     cerr << endl << "done." << endl;
+
+    // mean tree
+    test();
+    Trees trees;
+    trees.readTrees(bootstrapStrings);
+    ostringstream c;
+    string meanTree = trees.printMeanTree(c);
+    cerr << endl << "successful mean of trees" << endl << meanTree << endl;
+    cout << endl << "successful mean of trees" << endl << meanTree << endl;
 
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
     {
