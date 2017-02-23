@@ -34,6 +34,7 @@ void usage(ostream& f)
   f << "    --eta eta                      |  scale to divide the variance of gamma r.v. for branch lengths (1)" << endl;
   f << "    --rootFix                      |  fix the root at one of the two nodes attached to longest branch (false)" << endl;
   f << "    --weightMean                   |  weight the MLE with prior mean (false)" << endl;
+  f << "    --onlyBootstrap                |  only does the bootstrap sample of trees (false)" << endl;
   exit(1);
 }
 
@@ -240,6 +241,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--weightMean") == 0 )
     {
       weightMean = true;
+    }
+    else if ( strcmp(argv[k],"--onlyBootstrap") == 0 )
+    {
+      onlyBootstrap = true;
     }
     else if ( strcmp(argv[k],"--fixedQ") == 0 )
     {

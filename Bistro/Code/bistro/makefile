@@ -28,19 +28,19 @@ LDLIBS = -lpthread
 
 .SUFFIXES: .C .o
 
-all: bistro bmcmc bccd
+all: bistro #bmcmc bccd
 
 bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h CladeTable.h SplitTable.h Tree-summarize.h Trees.h Prime.h Clade.h $(OBJS)
 	$(CC) $(CFLAGS) -o bistro main-threads.C $(OBJS) $(LDLIBS)
 
-bmcmc: main-mcmc.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
-	$(CC) $(CFLAGS) -o bmcmc main-mcmc.C $(OBJS) $(LDLIBS)
+# bmcmc: main-mcmc.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
+# 	$(CC) $(CFLAGS) -o bmcmc main-mcmc.C $(OBJS) $(LDLIBS)
 
-bccd: main-ccd.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
-	$(CC) $(CFLAGS) -o bccd main-ccd.C $(OBJS) $(LDLIBS)
+# bccd: main-ccd.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
+# 	$(CC) $(CFLAGS) -o bccd main-ccd.C $(OBJS) $(LDLIBS)
 
 .C.o:
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	-rm -f $(OBJS) bistro bmcmc bccd
+	-rm -f $(OBJS) bistro #bmcmc bccd

@@ -30,6 +30,7 @@ private:
   double eta;
   bool rootFix;
   bool weightMean;
+  bool onlyBootstrap;
 public:
   Parameter()
   {
@@ -51,6 +52,7 @@ public:
     eta = 1.0;
     rootFix = false;
     weightMean = false;
+    onlyBootstrap = false;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -91,6 +93,8 @@ public:
   void setRootFix(bool b) { rootFix = b; }
   bool getWeightMean() const { return weightMean; }
   void setWeightMean(bool b) { weightMean = b; }
+  bool getOnlyBootstrap() const { return onlyBootstrap; }
+  void setOnlyBootstrap(bool b) { onlyBootstrap = b; }
 };
 
 #endif
