@@ -2,6 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- Save mean tree to output file
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
@@ -15,10 +16,14 @@ Bret Larget, Claudia Solis-Lemus (2016)
 - Sequential IS?
 
 ## Jordan
-- git pull new changes: new bistro option "--onlyBootstrap", no more bccd
 - Create bootstrap sample of trees for different datasets:
-  - Compare bootstrap frequencies of trees and clades to MrBayes PP
-  - Compare Bret's mean tree to Megan's mean tree (bret's mean in `bccd` already)
+  - Compare bootstrap frequencies of trees and clades to MrBayes PP (with plots):
+    - artiodactyl
+    - cats dogs
+    - primates
+    - whales
+    - 024,027 (or more) in datasets
+  - Compare Bret's mean tree to Megan's mean tree, as well as with most likely tree in MrBayes
   - Later: weight trees by distance to "center tree", and compare weights to MrBayes PP
 
 ## Known problems
