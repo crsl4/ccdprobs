@@ -2584,3 +2584,76 @@ void Tree::setInitialEdgeLengths(double x)
   // getEdge(3)->setLength(0.052919);
   // getEdge(4)->setLength(0.070793);
 }
+
+void Node::distance(map<Clade,double>& cladeToLengthMap, Clade& clade, Edge* parent)
+{
+  if ( leaf )
+  {
+    clade.add(number);
+  }
+  else
+  {
+    for ( vector<Edge*>::iterator e=edges.begin(); e!= edges.end(); ++e )
+    {
+      if ( (*e) != parent )
+      {
+	Clade tempClade;
+	getNeighbor(*e)->distance(cladeToLengthMap,tempClade,*e);
+	clade.add(tempClade);
+      }
+    }
+  }
+  if ( parent != NULL )
+    cladeToLengthMap[clade] = parent->getLength();
+}
+
+// need to root both trees at the same place
+// use node adjacent to taxon 1
+// comment on what the function actually does
+
+void Tree::distance(Tree other)
+{
+  reroot(1);
+  other.reroot(1);
+  map<Clade,double> map1;
+  map<Clade,double> map2;
+  Clade clade1;
+  Clade clade2;
+  root->distance(map1,clade1,NULL);
+  other.getRoot()->distance(map2,clade2,NULL);
+  // calculate the distance from the maps
+  double dist=0;
+  map<Clade,double>::iterator p1 = map1.begin();
+  map<Clade,double>::iterator p2 = map2.begin();
+
+  while ( p1 != map1.end() && p2 != map2.end() )
+  {
+    cerr << "Clade 1: ";
+    p1->first.print(cerr);
+    cerr << " " << p1->second << endl;
+    cerr << "Clade 2: ";
+    p2->first.print(cerr);
+    cerr << " " << p2->second << endl;
+    
+    if ( p1->first == p2->first )
+    {
+      double diff = p1->second - p2->second;
+      dist += diff*diff;
+      ++p1;
+      ++p2;
+    }
+    else if ( p1->first < p2->first ) // p1 not in map2
+    {
+      double len = p1->second;
+      dist += len*len;
+      ++p1;
+    }
+    else // p2->first < p1->first
+    {
+      double len = p2->second;
+      dist += len*len;
+      ++p2;
+    }
+  }
+  cout << dist;
+}

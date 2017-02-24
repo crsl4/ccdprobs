@@ -501,13 +501,21 @@ int main(int argc, char* argv[])
     cerr << endl << "done." << endl;
 
     // mean tree
-    test();
+//    test();
     Trees trees;
     trees.readTrees(bootstrapStrings);
     ostringstream c;
     string meanTree = trees.printMeanTree(c);
     cerr << endl << "successful mean of trees" << endl << meanTree << endl;
     cout << endl << "successful mean of trees" << endl << meanTree << endl;
+
+    // calculate distance from trees to mean tree
+    Tree mtree(meanTree);
+    for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
+    {
+      Tree tree(*t);
+      mtree.distance(tree);
+    }
 
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
     {

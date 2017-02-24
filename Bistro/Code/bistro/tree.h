@@ -22,6 +22,7 @@
 
 #include "sequence.h"
 #include "model.h"
+#include "ccdprobs.h"
 
 using namespace std;
 using namespace Eigen;
@@ -150,6 +151,7 @@ public:
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&,bool);
   void parsimonyScore(Alignment&,Edge*,int,int&,int&);
   void clearMapParent();
+  void distance(map<Clade,double>&,Clade&,Edge*);
 };
 
 class Tree
@@ -178,6 +180,7 @@ public:
   Edge* getEdge(int n) { return edges[n]; }
   string getTreeString() { return treeString; }
   vector<Edge*> getEdges() {return edges; }
+  Node* getRoot() { return root; }
   void readSubtree(istringstream&,Node*,int);
   void setNumbers(Node*);
   void print(ostream&);
@@ -230,6 +233,7 @@ public:
   void mcmc(QMatrix&, Alignment& ,int ,double , mt19937_64&, ofstream&, ofstream&, bool);
   void mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool, bool);
   void setInitialEdgeLengths(double); // set all edge lengths to x
+  void distance(Tree);
 };
 
 #endif
