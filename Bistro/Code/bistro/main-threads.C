@@ -565,8 +565,6 @@ int main(int argc, char* argv[])
     topologyToLogLikWeightMap[ t ] = 1.0;
   }
 
-  if(parameters.getOnlyBootstrap())
-    return 0;
 
   milliseconds ms8 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   vector<int> taxaNumbers;
@@ -604,6 +602,9 @@ int main(int argc, char* argv[])
   ccdLogLik.writePairCount(tmap);
   tmap.close();
   milliseconds ms10 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
+  if(parameters.getOnlyBootstrap())
+    return 0;
 
   // --------------------- Random sample of trees ------------------------------------
   // using the same model_init (either from initial MCMC or naive estimate)
