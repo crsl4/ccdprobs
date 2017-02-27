@@ -195,7 +195,7 @@ void Tree::readSubtree(istringstream& s,Node* parent,vector<Node*>& leafNodes,ve
     numTaxa++;
   }
   c = s.peek();
-  double length = 1.0;
+  double length = 0.0;
   if(c == ':') {
     s >> c;
     s >> length;
@@ -270,7 +270,7 @@ Tree::Tree(string line)
   for ( int i=0; i<edges.size(); ++i )
   {
     edges[i]->setNumber(i+1);
-    edges[i]->setLength(0);
+    //edges[i]->setLength(0); //now setLength in readSubTree
   }
 
   setNodeLevels();
@@ -2621,6 +2621,7 @@ void Tree::setInitialEdgeLengths(double x)
 
 void Node::distance(map<Clade,double>& cladeToLengthMap, Clade& clade, Edge* parent)
 {
+  cerr << "calling distance on node: " << getNumber() << endl;
   if ( leaf )
   {
     clade.add(number);
@@ -2649,6 +2650,8 @@ void Tree::distance(Tree other)
 {
   reroot(1);
   other.reroot(1);
+  cerr << "successful rooting: " << makeTreeNumbers() << endl;
+  cerr << other.makeTreeNumbers() << endl;
   map<Clade,double> map1;
   map<Clade,double> map2;
   Clade clade1;

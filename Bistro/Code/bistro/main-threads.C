@@ -524,7 +524,8 @@ int main(int argc, char* argv[])
     {
       cerr << "bootstrap tree: " << (*t) << endl;
       Tree boottree(*t);
-      //mtree.distance(boottree);
+      cerr << "after constructed: " << boottree.makeTreeNumbers() << endl;
+      mtree.distance(boottree);
     }
 
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
