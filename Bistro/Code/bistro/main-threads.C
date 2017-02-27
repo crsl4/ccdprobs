@@ -36,7 +36,7 @@ using namespace Eigen;
 #include "Trees.h"
 bool debug = false;
 const char* names[]= {"skip", "trees", "cthreshold", "nthreshold", "maxtopologies"};
-const char* desc[] = {"skipped_lines", "number_of_trees_to_print", "threshold_for_clades", 
+const char* desc[] = {"skipped_lines", "number_of_trees_to_print", "threshold_for_clades",
 		      "threshold_for_named_clades",
                       "max_tree_topologies" };
 const char* defaults[] = {"0", "100", ".01", ".80", "100"};
@@ -354,7 +354,7 @@ int main(int argc, char* argv[])
 // ------------------------------ MCMC for Q on fixed tree with MLE branch lengths -------------
   cerr << "Running MCMC to estimate Q matrix ..." << endl;
   // Run MCMC on tree to estimate Q matrix parameters
-  
+
   // burnin
   cerr << "burn-in:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
@@ -363,7 +363,7 @@ int main(int argc, char* argv[])
   cerr << endl << " done." << endl;
   // cout << "Start tree after MCMC burnin: " << endl;
   // cout << starttree.makeTreeNumbers() << endl;
-  
+
   // mcmc to get final Q
   cerr << "sampling:" << endl;
   //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
@@ -372,7 +372,7 @@ int main(int argc, char* argv[])
   cerr << endl << " done." << endl;
   // cout << "Start tree after MCMC: " << endl;
   // cout << starttree.makeTreeNumbers() << endl;
-  
+
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
 // save to file)
   double scaleP = 100000000;
@@ -452,9 +452,9 @@ int main(int argc, char* argv[])
     vector<string> bootstrapStrings(parameters.getNumBootstrap());
     for ( int b=0; b<parameters.getNumBootstrap(); ++b )
     {
-      if ( (b+1) % (parameters.getNumBootstrap() / 100) == 0 )
+      if ( parameters.getNumBootstrap() > 99 && (b+1) % (parameters.getNumBootstrap() / 100) == 0 )
 	cerr << '*';
-      if ( (b+1) % (parameters.getNumBootstrap() / 10) == 0 )
+      if ( parameters.getNumBootstrap() > 9 && (b+1) % (parameters.getNumBootstrap() / 10) == 0 )
 	cerr << '|';
       alignment.setBootstrapWeights(weights,rng);
       alignment.calculateGTRDistancesUsingWeights(weights,model_init,gtrDistanceMatrix,bootDistanceMatrix);
@@ -503,18 +503,28 @@ int main(int argc, char* argv[])
     // mean tree
 //    test();
     Trees trees;
+    cerr << "defined trees ok" << endl;
     trees.readTrees(bootstrapStrings);
+    cerr << "read trees ok" << endl;
     ostringstream c;
     string meanTree = trees.printMeanTree(c);
+    cerr << "compute mean tree ok" << endl;
     cerr << endl << "successful mean of trees" << endl << meanTree << endl;
     cout << endl << "successful mean of trees" << endl << meanTree << endl;
+    string meanTreeFile = parameters.getOutFileRoot() + ".meanTree";
+    ofstream meanTreeFileStream(meanTreeFile.c_str());
+    meanTreeFileStream << meanTree << endl;
+    meanTreeFileStream.close();
+    cerr << "written mean tree to a file ok" << endl;
 
     // calculate distance from trees to mean tree
     Tree mtree(meanTree);
+    cerr << "read mean tree correctly" << endl;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
     {
-      Tree tree(*t);
-      mtree.distance(tree);
+      cerr << "bootstrap tree: " << (*t) << endl;
+      Tree boottree(*t);
+      //mtree.distance(boottree);
     }
 
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )

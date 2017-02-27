@@ -91,6 +91,26 @@ string readName(istringstream& s) {
   return(name);
 }
 
+double readLength(istringstream& s) {
+  double length;
+  while ( !s.fail() )
+  {
+    char c = s.peek();
+    if ( (c==',') || (c==':') || (c==')') || (c==';') )
+      break;
+    s >> c;
+    if ( s.fail() )
+    {
+      cerr << "Error while reading length." << endl;
+      cerr << "Failed when reading " << c << endl;
+      cerr << "length = " << length << endl;
+      exit(1);
+    }
+    length += c;
+  }
+  return(length);
+}
+
 double readNumber(istringstream& s)
 {
   double x;
@@ -174,6 +194,20 @@ void Tree::readSubtree(istringstream& s,Node* parent,vector<Node*>& leafNodes,ve
     n->setName(name);
     numTaxa++;
   }
+  c = s.peek();
+  double length = 1.0;
+  if(c == ':') {
+    s >> c;
+    s >> length;
+    if(s.fail()) {
+      cerr << "Error: expected an edge length after reading colon." << endl;
+      string a;
+      s >> a;
+      cerr << "Remainder of line is /" << a << "/." << endl;
+      exit(1);
+    }
+  }
+  e->setLength(length);
   return;
 }
 
@@ -926,7 +960,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   // trying to avoid really bad large initial values
   if ( curr > 1 )
     curr = 1.0;
-  
+
 //  cerr << "Edge::mleLength, initial length = " << length << endl;;
 
   /*
@@ -1061,7 +1095,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
     cerr << "prop and dlogl: " << prop << ", " << prop_dlogl << endl;
     cerr << "curr and dlogl: " << curr << ", " << curr_dlogl << endl;
   }
-  
+
   // switch to protected Newton-Raphson
 //  cerr << "protected" << endl;
 // keep the positive and negative points as limits for the NR, change these limits as NR goes, with the previous point (if the new point is bigger than the previous point, then set the lower limit to be the previous point, and viceversa)
@@ -2634,7 +2668,7 @@ void Tree::distance(Tree other)
     cerr << "Clade 2: ";
     p2->first.print(cerr);
     cerr << " " << p2->second << endl;
-    
+
     if ( p1->first == p2->first )
     {
       double diff = p1->second - p2->second;

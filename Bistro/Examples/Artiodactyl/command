@@ -1,3 +1,6 @@
+## test mean distances:
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --onlyBootstrap > tmp.log
+
 ## test after adding summarize to bistro
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro8 -r 1000 -b 1000 --independent > bistro8.log
 ../../Code/bistro/bccd -f ../../Data/artiodactyl-6.fasta -o ccd2 -r 1000 -b 1000 > ccd2.log

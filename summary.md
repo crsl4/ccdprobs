@@ -2,16 +2,17 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- Save mean tree to output file
+- change Tree::tree to read tree with BL
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 
 ## Check with Bret
-- Check new code to get mean tree from strings inside bistro: segmentation fault sometimes (always when running bccd, so removed)
-- no more bccd, new bistro option
-- How to get distance between trees to center tree?
+- sometimes segmentation fault still! `-b 10` ok, `-b 100` ok, `-b 1000` not ok
+- cannot compile because ccdprobs.h needs tree.h, and tree.h needs ccdprobs.h. remove tree.h from ccdprobs.h
+- Tree constructor reads BL now
+- change distance(other) to be a pointer
 - In MCMC, Q steps done 10 times for every BL step
 - Sequential IS?
 

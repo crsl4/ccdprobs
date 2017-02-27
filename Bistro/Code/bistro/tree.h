@@ -27,6 +27,8 @@
 using namespace std;
 using namespace Eigen;
 
+class Clade;
+
 class Node;
 
 class Edge

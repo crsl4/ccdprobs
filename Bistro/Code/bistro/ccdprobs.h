@@ -24,7 +24,7 @@
 #include <cmath>
 #include <ctime>
 #include <random>
-#include <algorithm> 
+#include <algorithm>
 
 #include "alias.h"
 #include "tree.h"
@@ -331,8 +331,8 @@ void CCDProbs<T>::writeCladeCountOrdered(ostream& f, double essInverse)
   sort(v.begin(), v.end(), comparePairCladeT<T>);
   double prob;
   double se;
-  f << "prob crudeSE(ESS=" << fixed << setprecision(2) << 1.0/essInverse << ") clade" << endl; 
-  for (typename vector<pair<Clade,T>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i ) { 
+  f << "prob crudeSE(ESS=" << fixed << setprecision(2) << 1.0/essInverse << ") clade" << endl;
+  for (typename vector<pair<Clade,T>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i ) {
     prob = i->second / (double) sampleSize;
     se = sqrt(prob * (1-prob) * essInverse);
     f << setw(10) << setprecision(8) << prob << " " << se << " ";

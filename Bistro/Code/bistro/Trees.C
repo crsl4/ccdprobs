@@ -2,7 +2,7 @@ using namespace std;
 
 #include "Trees.h"
 
-void Trees::readTree(string str, vector<TreePtr>& sindex, bool& first, 
+void Trees::readTree(string str, vector<TreePtr>& sindex, bool& first,
 		     vector<TreePtr>& taxa, bool& hasLength, bool& hasSemicolon, double& blSquared) {
   //cerr << "starting readTree on str=" << str << endl;
   if(first) {
@@ -18,7 +18,7 @@ void Trees::readTree(string str, vector<TreePtr>& sindex, bool& first,
     storeTopWithLen(top,str,tree,sindex,taxa,hasSemicolon,blSquared);
     allTrees.push_back(tree);
   }
-  else 
+  else
   {
     //cerr << "hasLength=false, so storeTop is called" << endl;
     string::const_iterator top=str.begin();
@@ -29,25 +29,29 @@ void Trees::readTree(string str, vector<TreePtr>& sindex, bool& first,
 
 void Trees::readTrees(const vector<string>& names) {
   // Read in tree topologies from a vector of trees
-
+  cerr << "entering readTrees------------------" << endl;
   // Create hash table used to find unique trees (and subtrees).
   int size = Prime::nextPrime(maxTrees*10/6);
-  vector<TreePtr> sindex(size,(TreePtr)NULL); 
-
+  cerr << "line 1" << endl;
+  vector<TreePtr> sindex(size,(TreePtr)NULL);
+  cerr << "line 2" << endl;
   vector<TreePtr> taxa; // Maps taxon numbers to the corresponding trees.
-
+  cerr << "line 3" << endl;
   bool first = true;
   bool hasSemicolon = false;
-
+  cerr << "line 4" << endl;
   hasLength = false; //this is updated inside readTree/readFile
   blSquared = 0.0;
   Found = NotFound = CompFound = CompNotFound = 0;
+  cerr << "line 5" << endl;
   //cerr << "starting to read all trees in readTrees" << endl;
   for(vector<string>::const_iterator name=names.begin();name!=names.end();name++) {
     //cerr << "tree: " << *name << endl;
     readTree(*name,sindex,first,taxa,hasLength,hasSemicolon,blSquared);
   }
+  cerr << "after for readTree" << endl;
   totalTrees = allTrees.size();
+  cerr << "line 1" << endl;
 }
 
 void Trees::readFiles(const vector<string>& names, int skip) {
@@ -56,7 +60,7 @@ void Trees::readFiles(const vector<string>& names, int skip) {
 
   // Create hash table used to find unique trees (and subtrees).
   int size = Prime::nextPrime(maxTrees*10/6);
-  vector<TreePtr> sindex(size,(TreePtr)NULL); 
+  vector<TreePtr> sindex(size,(TreePtr)NULL);
 
   vector<TreePtr> taxa; // Maps taxon numbers to the corresponding trees.
 
@@ -85,7 +89,7 @@ void Trees::readFiles(const vector<string>& names, int skip) {
 
 void Trees::findClades(double threshold) {
   // Find all the sets that occur in at least threshold (in (0,1]) fraction of the trees.
-  // threshold should be the minimum of the threshold for clades to print and the threshold 
+  // threshold should be the minimum of the threshold for clades to print and the threshold
   // for named clades.
 
   // Collect the clades with sufficent votes.
@@ -95,8 +99,8 @@ void Trees::findClades(double threshold) {
     //cerr << "Number of clades of size " << i << " = " << cladeTable[i].size()-1 << endl;
     totalClades += cladeTable[i].size()-1;
     clades[i].clear();
-    for(vector<CladePtr>::iterator p=cladeTable[i].getElements().begin()+1; 
-	p!=cladeTable[i].getElements().end(); 
+    for(vector<CladePtr>::iterator p=cladeTable[i].getElements().begin()+1;
+	p!=cladeTable[i].getElements().end();
 	p++)
       if((*p)->count >= votesNeeded)
 	clades[i].push_back(*p);
@@ -108,7 +112,7 @@ bool cladeLt(CladePtr c1, CladePtr c2) { return c1->getCount() > c2->getCount();
 
 bool namedCladeLt(CladePtr c1, CladePtr c2) { return c1->getSet() > c2->getSet(); }
 
-bool treeLt(const TreePtr& a, const TreePtr& b)  { 
+bool treeLt(const TreePtr& a, const TreePtr& b)  {
   int c=b->getCount() - a->getCount();
   if(c==0)
     c = cmpTrees(a,b);
@@ -126,8 +130,8 @@ void Trees::findNamedClades(double threshold, int maxTopologies) {
   int votesNeeded=(int)(ceil(threshold*totalTrees));
   for(int i=2;i<=maxLen;i++) {
     clades2[i].clear();
-    for(vector<CladePtr>::iterator p=cladeTable[i].getElements().begin()+1; 
-	p!=cladeTable[i].getElements().end(); 
+    for(vector<CladePtr>::iterator p=cladeTable[i].getElements().begin()+1;
+	p!=cladeTable[i].getElements().end();
 	p++)
       if((*p)->count >= votesNeeded && (*p)->numTopologies <= maxTopologies) {
 	(*p)->name = 1;
@@ -147,7 +151,7 @@ void Trees::findNamedClades(double threshold, int maxTopologies) {
 	}
       }
     }
-    
+
   // Reset tree nums to 0 and collect topologies for each clade.
   for(int i=2;i<=maxLen;i++) {
     for(vector<TreePtr>::iterator p=trees[i].begin();p!=trees[i].end();p++) {
@@ -164,22 +168,23 @@ void Trees::findNamedClades(double threshold, int maxTopologies) {
     (*p)->name = name;
     sort((*p)->topologies.begin(),(*p)->topologies.end(),treeLt);
     int k=1;
-    for(vector<TreePtr>::iterator q=(*p)->topologies.begin();q!=(*p)->topologies.end();q++,k++) 
+    for(vector<TreePtr>::iterator q=(*p)->topologies.begin();q!=(*p)->topologies.end();q++,k++)
       (*q)->num = k;
   }
 }
 
 string Trees::printMeanTree(ostringstream &c) { //not only prints the mean, but computes it
+  cerr << "entering printMeanTree--------------" << endl;
   findSplits();
-
+  cerr << "after find splits" << endl;
   for(int i=0;i<maxLen;i++) // going over all leaves (external edges)
     trees[1][i]->clade->value = sqr(trees[1][i]->clade->sumBL/(double)totalTrees);
+  cerr << "after going over leaves" << endl;
 
-      
   for(vector<CladePtr>::iterator j=clades[2].begin();j!=clades[2].end();j++)
-    (*j)->value = sqr((*j)->sumBL/(double)totalTrees) + splitTable.first((*j)->firstSplit)->value 
+    (*j)->value = sqr((*j)->sumBL/(double)totalTrees) + splitTable.first((*j)->firstSplit)->value
       + splitTable.second((*j)->firstSplit)->value;
-
+  cerr << "after going over clades of size 2" << endl;
   for(int i=3;i<=maxLen;i++) {
     for(vector<CladePtr>::iterator j=clades[i].begin();j!=clades[i].end();j++) {
       double val=0;
@@ -191,6 +196,7 @@ string Trees::printMeanTree(ostringstream &c) { //not only prints the mean, but 
       (*j)->value = sqr((*j)->sumBL/(double)totalTrees) + val;
     }
   }
+  cerr << "after going all other clades" << endl;
 
 //  printTotalDist(c,trees[maxLen][0]->clade);
   printMeanTree2(c,trees[maxLen][0]->clade,1);
@@ -205,9 +211,9 @@ void Trees::printMeanTree(ostream &c) { //not only prints the mean, but computes
   for(int i=0;i<maxLen;i++) // going over all leaves (external edges)
     trees[1][i]->clade->value = sqr(trees[1][i]->clade->sumBL/(double)totalTrees);
 
-      
+
   for(vector<CladePtr>::iterator j=clades[2].begin();j!=clades[2].end();j++)
-    (*j)->value = sqr((*j)->sumBL/(double)totalTrees) + splitTable.first((*j)->firstSplit)->value 
+    (*j)->value = sqr((*j)->sumBL/(double)totalTrees) + splitTable.first((*j)->firstSplit)->value
       + splitTable.second((*j)->firstSplit)->value;
 
   for(int i=3;i<=maxLen;i++) {
@@ -240,7 +246,7 @@ void Trees::printNamedClades(ostream& c) {
     (*p)->set.print(c);
     c << endl;
     for(vector<TreePtr>::iterator q=(*p)->topologies.begin();q!=(*p)->topologies.end();q++) {
-      c << setw(8) << (*q)->count << "  " << setw(4) << left << topologyName((*p)->name,1) 
+      c << setw(8) << (*q)->count << "  " << setw(4) << left << topologyName((*p)->name,1)
 	<< right << " ";
       (*q)->print(c);
       c << endl;
@@ -256,7 +262,7 @@ void Trees::printClades(ostream& c, double threshold) {
   int votesNeeded = (int)(ceil(threshold*totalTrees));
   vector<CladePtr> pclades;
   for(int i=2;i<=maxLen;i++)
-    for(vector<CladePtr>::iterator j=clades[i].begin();j!=clades[i].end();j++) 
+    for(vector<CladePtr>::iterator j=clades[i].begin();j!=clades[i].end();j++)
       if((*j)->count>=votesNeeded)
 	pclades.push_back(*j);
   sort(pclades.begin(),pclades.end(),namedCladeLt);
@@ -283,7 +289,7 @@ void Trees::printTreeTopologies(ostream& c, int m) {
     m = trees[maxLen].size();
   else
     nth_element(trees[maxLen].begin(),trees[maxLen].begin()+m,trees[maxLen].end(),treeLt);
-  sort(trees[maxLen].begin(),trees[maxLen].begin()+m,treeLt); 
+  sort(trees[maxLen].begin(),trees[maxLen].begin()+m,treeLt);
 
   // Print out the top m trees.
   int sum=0;
@@ -300,7 +306,7 @@ void Trees::printTreeTopologies(ostream& c, int m) {
 
 
 int cmpCladeTree(const TreePtr a, const TreePtr b) {
-  if(a==b) 
+  if(a==b)
     return 0;
   if(a->left==NULL)
     if(b->left==NULL)
@@ -312,7 +318,7 @@ int cmpCladeTree(const TreePtr a, const TreePtr b) {
   else if (a->num!=0)
     if(b->num!=0)
       return (a->clade->name - b->clade->name);
-    else 
+    else
       return -1;
   else if(b->num!=0)
     return 1;
@@ -323,10 +329,10 @@ int cmpCladeTree(const TreePtr a, const TreePtr b) {
 }
 
 bool cladeTreeLt(const CladeTree& a, const CladeTree& b) { return cmpCladeTree(a.getTree(),b.getTree())<0; }
-  
+
 bool cladeTreeEq(const CladeTree& a, const CladeTree& b) { return cmpCladeTree(a.getTree(),b.getTree())==0; }
 
-bool cladeTreeLess(const CladeTree& a, const CladeTree& b) { 
+bool cladeTreeLess(const CladeTree& a, const CladeTree& b) {
   int c=b.getCount()-a.getCount();
   if(c==0)
     c = cmpTrees(a.getTree(),b.getTree());
@@ -341,7 +347,7 @@ void Trees::printCladeTreeTopologies(ostream& c, int m) {
   c << "******************** Clade tree topologies " << "********************" << endl << endl;
   c << "Count  Prob.  Cum.  Tree topology" << endl;
 
-  // Find the counts of all trees with the same topology when named clades are considered 
+  // Find the counts of all trees with the same topology when named clades are considered
   // the same despite topology.
   vector<CladeTree> cladeTrees;
   for(vector<TreePtr>::iterator q=trees[maxLen].begin();q!=trees[maxLen].end();q++)
@@ -353,7 +359,7 @@ void Trees::printCladeTreeTopologies(ostream& c, int m) {
   for(vector<CladeTree>::iterator q=last+1;q!=cladeTrees.end();q++) {
     if(cladeTreeEq(*last,*q))
       last->setCount(last->getCount()+q->getCount());
-    else 
+    else
       *(++last) = *q;
   }
   last++;
@@ -364,7 +370,7 @@ void Trees::printCladeTreeTopologies(ostream& c, int m) {
     m = size;
   else
     nth_element(cladeTrees.begin(),cladeTrees.begin()+m,last,cladeTreeLess);
-  sort(cladeTrees.begin(),cladeTrees.begin()+m,cladeTreeLess); 
+  sort(cladeTrees.begin(),cladeTrees.begin()+m,cladeTreeLess);
 
   // Print out the top m trees.
   int sum=0;
@@ -386,13 +392,13 @@ void Trees::printTrans(ostream& c, int maxTopologies) {
   c << "******************** Clade transition matrices ********************" << endl << endl;
 
   // Set time of last transition for each clade and create transition matrices.
-  vector<int> lastTime(namedClades.size()+1,-1); // last time (number of tree in the input) that 
+  vector<int> lastTime(namedClades.size()+1,-1); // last time (number of tree in the input) that
   // named clade i was present.
-  vector<int> lastTopNum(namedClades.size()+1);  // number of the topology of clade i last time 
+  vector<int> lastTopNum(namedClades.size()+1);  // number of the topology of clade i last time
   // it was present.
-  vector< vector< vector<int> > > trans(namedClades.size()+1); // trans[i][j][k] is the number of 
+  vector< vector< vector<int> > > trans(namedClades.size()+1); // trans[i][j][k] is the number of
   // transitions for clade i from
-  // topology j to topology k, 
+  // topology j to topology k,
   // with 0 meaning not present.
 
   for(vector<CladePtr>::iterator p=namedClades.begin();p!=namedClades.end();p++) {
@@ -469,7 +475,7 @@ void Trees::printProbableTreeClades(ostream& c, double threshold) {
   collectClades(tree,votesNeeded,treeClades);
   sort(treeClades.begin(),treeClades.end(),cladeLt);
   for(vector<CladePtr>::iterator j=treeClades.begin();j!=treeClades.end();j++) {
-    c << setw(10) << (*j)->count << " " << setw(6) << setprecision(3) 
+    c << setw(10) << (*j)->count << " " << setw(6) << setprecision(3)
       << (double)(*j)->count/(double)totalTrees << " ";
     (*j)->set.print(c);
     c << endl;
@@ -482,17 +488,17 @@ void Trees::printDistanceMatrices(ostream &c) {
     c << "*********************** Distance Mean ";
     c << "***********************" << endl << endl;
     for(int i1=0;i1<maxLen;i1++) {
-      for(int i2=0;i2<maxLen;i2++) 
+      for(int i2=0;i2<maxLen;i2++)
 	c << setprecision(6) << setw(12) << leafDist[i1][i2]/totalTrees << " ";
       c << endl;
     }
     c << endl;
-      
+
     c << "************************ Variance ";
     c << "************************" << endl << endl;
     for(int i1=0;i1<maxLen;i1++) {
-      for(int i2=0;i2<maxLen;i2++) 
-	c << setprecision(6) << setw(12) 
+      for(int i2=0;i2<maxLen;i2++)
+	c << setprecision(6) << setw(12)
 	  << leafDistSqr[i1][i2]/totalTrees - leafDist[i1][i2]/sqr(totalTrees) << " ";
       c << endl;
     }
@@ -530,16 +536,16 @@ void Trees::addEdge(CladePtr parent, CladePtr first, CladePtr second, int count,
 
   if(splitTable.find(first, second, t, k, offsets))
     splitTable.addCount(t,count);
-  else 
+  else
     splitTable.add(k, first, second, count, parent, offsets);
 }
 
-void Trees::readFile(istream& f, const string& name, int skip, vector<TreePtr>& sindex, bool& first, 
+void Trees::readFile(istream& f, const string& name, int skip, vector<TreePtr>& sindex, bool& first,
 		     vector<TreePtr>& taxa, bool& hasLength, bool& hasSemicolon, double& blSquared) {
   string str;
   for(int i=0;i<skip;i++)
     if(!getline(f,str)) {
-      cerr << "Error: " << (name=="-" ? "Standard input" : ("Input file " + name)) 
+      cerr << "Error: " << (name=="-" ? "Standard input" : ("Input file " + name))
 	   << " contains " << (i==skip-1 ? "exactly" : "fewer than ") << skip << " lines." << endl;
       exit(1);
     }
@@ -558,13 +564,13 @@ void Trees::readFile(istream& f, const string& name, int skip, vector<TreePtr>& 
 	allTrees.push_back(tree);
       }
       while(getline(f,str));
-    else 
+    else
       do {
 	//if(++count % 1000 == 0)
 	//cerr << ".";
 	if(++count % 10000 == 0)
-	  cerr << setw(10) << count << " (" << setw(15) << numTrees << "): ave. # probes (found) = " 
-	       << setw(8) << setprecision(6) << CompFound/Found << ", Ave. # probes (not found) = " 
+	  cerr << setw(10) << count << " (" << setw(15) << numTrees << "): ave. # probes (found) = "
+	       << setw(8) << setprecision(6) << CompFound/Found << ", Ave. # probes (not found) = "
 	       << setw(8) << setprecision(6) << CompNotFound/NotFound << endl;
 	string::const_iterator top=str.begin();
 	storeTop(top,str,tree,sindex,taxa,hasSemicolon,blSquared);
@@ -577,7 +583,7 @@ void Trees::readFile(istream& f, const string& name, int skip, vector<TreePtr>& 
 }
 
 void Trees::syntaxError(const string& msg, const string& line, string::const_iterator pos) {
-  cerr << "Error: " << msg << " - /" << string(line.begin(),pos) << "** " 
+  cerr << "Error: " << msg << " - /" << string(line.begin(),pos) << "** "
        << *pos << " **" << string(pos+1,line.end()) << "/" << endl;
   exit(1);
 }
@@ -593,7 +599,7 @@ void Trees::initializeTrees(string str, vector<TreePtr>& taxa, bool& hasLength, 
   clades.resize(maxLen+1);
   int maxTaxa = *(max_element(taxaNames.begin(),taxaNames.end()));
   taxa.resize(maxTaxa+1);
-  cladeSet.init(maxLen); 
+  cladeSet.init(maxLen);
   cladeTable.resize(maxLen+1);
   leafDist.resize(maxLen);
   leafDistSqr.resize(maxLen);
@@ -628,7 +634,7 @@ string::const_iterator Trees::getTaxaTop(string::const_iterator top, const strin
     if(*top != ',')
       syntaxError("Missing comma",str,top);
     top = getTaxa(top+1,str,taxaNames,hasLength);
-    if(*top != ')') 
+    if(*top != ')')
       syntaxError("Missing right parenthesis",str,top);
     top++;
     if(top != str.end() && *top == ';') {
@@ -660,7 +666,7 @@ string::const_iterator Trees::getTaxa(string::const_iterator top, const string& 
     if(*top != ',')
       syntaxError("Missing comma",str,top);
     top = getTaxa(top+1,str,taxaNames,hasLength);
-    if(*top != ')') 
+    if(*top != ')')
       syntaxError("Missing right parenthesis",str,top);
     top++;
     skipLength(top,str,hasLength);
@@ -682,7 +688,7 @@ string::const_iterator Trees::getTaxa(string::const_iterator top, const string& 
 
 bool Trees::isNumeric(char ch) {
   switch(ch) {
-  case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': 
+  case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
   case '.': case '+': case '-': case 'E': case 'e': return true;
   default: return false;
   }
@@ -703,9 +709,9 @@ void Trees::readLength(string::const_iterator& top, const string& str, double& b
     syntaxError("Ill-formed branch length",str,top0);
 }
 
-string::const_iterator Trees::storeTopWithLen(string::const_iterator top, const string& str, 
-					      TreePtr& tree, vector<TreePtr>& sindex, 
-					      const vector<TreePtr>& taxa, bool hasSemicolon, 
+string::const_iterator Trees::storeTopWithLen(string::const_iterator top, const string& str,
+					      TreePtr& tree, vector<TreePtr>& sindex,
+					      const vector<TreePtr>& taxa, bool hasSemicolon,
 					      double& blSquared) {
   int len;
   unsigned int hash;
@@ -721,7 +727,7 @@ string::const_iterator Trees::storeTopWithLen(string::const_iterator top, const 
     if(*top != ',')
       syntaxError("Missing comma",str,top);
     top = storeWithLen(top+1,str,rtree,rhash,sindex,taxa,bl2,blSquared,rdist,rleaves);
-    if(*top != ')') 
+    if(*top != ')')
       syntaxError("Missing right parenthesis",str,top);
     len = llen + rlen;
     blSquared += sqr(bl1+bl2);
@@ -762,8 +768,8 @@ string::const_iterator Trees::storeTopWithLen(string::const_iterator top, const 
   }
 }
 
-string::const_iterator Trees::storeWithLen(string::const_iterator top, const string& str, 
-					   TreePtr& tree, unsigned int& hash, 
+string::const_iterator Trees::storeWithLen(string::const_iterator top, const string& str,
+					   TreePtr& tree, unsigned int& hash,
 					   vector<TreePtr>& sindex, const vector<TreePtr>& taxa,
 					   double &bl, double& blSquared,
 					   vector<double> &dist, vector<int> &leaves) {
@@ -778,7 +784,7 @@ string::const_iterator Trees::storeWithLen(string::const_iterator top, const str
     if(*top != ',')
       syntaxError("Missing comma",str,top);
     top = storeWithLen(top+1,str,rtree,rhash,sindex,taxa,bl2,blSquared,rdist,rleaves);
-    if(*top != ')') 
+    if(*top != ')')
       syntaxError("Missing right parenthesis",str,top);
     top++;
     readLength(top,str,bl);
@@ -819,8 +825,8 @@ string::const_iterator Trees::storeWithLen(string::const_iterator top, const str
   }
 }
 
-string::const_iterator Trees::storeTop(string::const_iterator top, const string& str, 
-				       TreePtr& tree, vector<TreePtr>& sindex, 
+string::const_iterator Trees::storeTop(string::const_iterator top, const string& str,
+				       TreePtr& tree, vector<TreePtr>& sindex,
 				       const vector<TreePtr>& taxa, bool hasSemicolon, double& blSquared) {
   int len;
   unsigned int hash;
@@ -835,7 +841,7 @@ string::const_iterator Trees::storeTop(string::const_iterator top, const string&
     if(*top != ',')
       syntaxError("Missing comma",str,top);
     top = store(top+1,str,rtree,rhash,rlen,sindex,taxa);
-    if(*top != ')') 
+    if(*top != ')')
       syntaxError("Missing right parenthesis",str,top);
     len = llen + rlen;
     hash = hashfn(lhash,rhash,sindex.size());
@@ -861,7 +867,7 @@ string::const_iterator Trees::storeTop(string::const_iterator top, const string&
   }
 }
 
-string::const_iterator Trees::store(string::const_iterator top, const string& str, 
+string::const_iterator Trees::store(string::const_iterator top, const string& str,
 				    TreePtr& tree, unsigned int& hash, int& len,
 				    vector<TreePtr>& sindex, const vector<TreePtr>& taxa) {
   TreePtr ltree,rtree;
@@ -874,7 +880,7 @@ string::const_iterator Trees::store(string::const_iterator top, const string& st
     if(*top != ',')
       syntaxError("Missing comma",str,top);
     top = store(top+1,str,rtree,rhash,rlen,sindex,taxa);
-    if(*top != ')') 
+    if(*top != ')')
       syntaxError("Missing right parenthesis",str,top);
     len = llen + rlen;
     hash = hashfn(lhash,rhash,sindex.size());
@@ -896,7 +902,7 @@ string::const_iterator Trees::store(string::const_iterator top, const string& st
   }
 }
 
-TreePtr Trees::add(unsigned int &hash, TreePtr ltree, TreePtr rtree, 
+TreePtr Trees::add(unsigned int &hash, TreePtr ltree, TreePtr rtree,
 		   vector<TreePtr>& sindex, int llen, int rlen, double branchLength) {
   TreePtr tree;
   int hash1 = hash;
@@ -941,7 +947,7 @@ TreePtr Trees::add(unsigned int &hash, TreePtr ltree, TreePtr rtree,
     maxTrees *=2;
     sindex.clear();
     sindex.resize(Prime::nextPrime(maxTrees*10/6),NULL);
-    cerr << "Re-hashing trees, new size = " << sindex.size() << ", space = " 
+    cerr << "Re-hashing trees, new size = " << sindex.size() << ", space = "
 	 << sizeof(TreePtr)*sindex.size() << endl;
 
     for(int i=2;i<=maxLen;i++) {
@@ -980,8 +986,8 @@ void Trees::printTotalDist(ostream& c, CladePtr j) {
   double firstBL,secondBL;
   firstBL = first->sumBL/double(totalTrees);
   secondBL = second->sumBL/double(totalTrees);
-  c << "Total Distance = " 
-    << blSquared 
+  c << "Total Distance = "
+    << blSquared
     - (totalTrees * j->value - sqr(firstBL) - sqr(secondBL) + sqr(firstBL + secondBL)) << endl;
 }
 
@@ -1027,7 +1033,7 @@ void Trees::printMeanTree2(ostream &c, CladePtr j, int topTree) {
     }
   }
 }
-	
+
 void Trees::prettyPrintMeanTree(ostream &c, CladePtr j, int topTree, int indent, int stayOnLine) {
   for(int i=0;i<indent;i++)
     c << " ";
@@ -1083,8 +1089,8 @@ void Trees::prettyPrintMeanTree(ostream &c, CladePtr j, int topTree, int indent,
     }
   }
 }
-	    
-void Trees::addTrans(TreePtr tree, int time, vector<int>& lastTime, vector<int>& lastTopNum, 
+
+void Trees::addTrans(TreePtr tree, int time, vector<int>& lastTime, vector<int>& lastTopNum,
 		    vector< vector< vector<int> > >& trans) {
   int name;
   if(tree->left) {
