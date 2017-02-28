@@ -2619,9 +2619,9 @@ void Tree::setInitialEdgeLengths(double x)
   // getEdge(4)->setLength(0.070793);
 }
 
-void Node::distance(map<Clade,double>& cladeToLengthMap, Clade& clade, Edge* parent)
+void Node::distance(map<dynamic_bitset<unsigned char>,double>& cladeToLengthMap, Clade& clade, Edge* parent)
 {
-  cerr << "calling distance on node: " << getNumber() << endl;
+//  cerr << "calling distance on node: " << getNumber() << endl;
   if ( leaf )
   {
     clade.add(number);
@@ -2639,38 +2639,42 @@ void Node::distance(map<Clade,double>& cladeToLengthMap, Clade& clade, Edge* par
     }
   }
   if ( parent != NULL )
-    cladeToLengthMap[clade] = parent->getLength();
+    cladeToLengthMap[clade.get()] = parent->getLength();
 }
 
 // need to root both trees at the same place
 // use node adjacent to taxon 1
 // comment on what the function actually does
 
-void Tree::distance(Tree other)
+void Tree::distance(Tree* other)
 {
+//  cerr << "starting distance" << endl;
   reroot(1);
-  other.reroot(1);
-  cerr << "successful rooting: " << makeTreeNumbers() << endl;
-  cerr << other.makeTreeNumbers() << endl;
-  map<Clade,double> map1;
-  map<Clade,double> map2;
+  other->reroot(1);
+//  cerr << "successful rooting: " << makeTreeNumbers() << endl;
+//  cerr << other->makeTreeNumbers() << endl;
+  map<dynamic_bitset<unsigned char>,double> map1;
+  map<dynamic_bitset<unsigned char>,double> map2;
   Clade clade1(numTaxa);
   Clade clade2(numTaxa);
   root->distance(map1,clade1,NULL);
-  other.getRoot()->distance(map2,clade2,NULL);
+  other->getRoot()->distance(map2,clade2,NULL);
   // calculate the distance from the maps
   double dist=0;
-  map<Clade,double>::iterator p1 = map1.begin();
-  map<Clade,double>::iterator p2 = map2.begin();
-
+  map<dynamic_bitset<unsigned char>,double>::iterator p1 = map1.begin();
+  map<dynamic_bitset<unsigned char>,double>::iterator p2 = map2.begin();
+// Print the maps as a check
+  // for ( ; p1 != map1.end(); ++p1 )
+  //   cerr << p1->first << " --> " << p1->second << endl;
+  // p1 = map1.begin();
+  // for ( ; p2 != map2.end(); ++p2 )
+  //   cerr << p2->first << " --> " << p2->second << endl;
+  // p2 = map2.begin();
+  
   while ( p1 != map1.end() && p2 != map2.end() )
   {
-    cerr << "Clade 1: ";
-    p1->first.print(cerr);
-    cerr << " " << p1->second << endl;
-    cerr << "Clade 2: ";
-    p2->first.print(cerr);
-    cerr << " " << p2->second << endl;
+//    cerr << "Clade 1: " << p1->first << " " << p1->second << endl;
+//    cerr << "Clade 2: " << p2->first << " " << p2->second << endl;
 
     if ( p1->first == p2->first )
     {
@@ -2678,19 +2682,33 @@ void Tree::distance(Tree other)
       dist += diff*diff;
       ++p1;
       ++p2;
+//      cerr << "increment both" << endl;
     }
     else if ( p1->first < p2->first ) // p1 not in map2
     {
       double len = p1->second;
       dist += len*len;
       ++p1;
+//      cerr << "increment clade1" << endl;
     }
     else // p2->first < p1->first
     {
       double len = p2->second;
       dist += len*len;
       ++p2;
+//      cerr << "increment clade2" << endl;
     }
   }
-  cout << dist;
+
+  cout << dist << endl;
+
+//  map1.erase(map1.begin(),map1.end());
+//  map2.erase(map2.begin(),map2.end());
+  
+  // Now, we need to go through the maps to clear all of the dynamic_bitset<>s
+//  for (p1 = map1.begin(); p1 != map1.end(); ++p1 )
+//    p1->first.clear();
+//  for (p2 = map2.begin(); p2 != map2.end(); ++p2 )
+//    p2->first.clear();
+  
 }

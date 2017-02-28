@@ -153,7 +153,7 @@ public:
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&,bool);
   void parsimonyScore(Alignment&,Edge*,int,int&,int&);
   void clearMapParent();
-  void distance(map<Clade,double>&,Clade&,Edge*);
+  void distance(map<dynamic_bitset<unsigned char>,double>&,Clade&,Edge*);
 };
 
 class Tree
@@ -235,7 +235,7 @@ public:
   void mcmc(QMatrix&, Alignment& ,int ,double , mt19937_64&, ofstream&, ofstream&, bool);
   void mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool, bool);
   void setInitialEdgeLengths(double); // set all edge lengths to x
-  void distance(Tree);
+  void distance(Tree*);
 };
 
 #endif

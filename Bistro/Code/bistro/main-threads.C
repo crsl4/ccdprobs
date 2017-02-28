@@ -522,12 +522,15 @@ int main(int argc, char* argv[])
     cerr << "read mean tree correctly" << endl;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
     {
-      cerr << "bootstrap tree: " << (*t) << endl;
-      Tree boottree(*t);
-      cerr << "after constructed: " << boottree.makeTreeNumbers() << endl;
+//      cerr << "bootstrap tree: " << (*t) << endl;
+      Tree* boottree = new Tree(*t);
+//      cerr << "after constructed: " << boottree->makeTreeNumbers() << endl;
       mtree.distance(boottree);
+      delete boottree;
+//      cerr << "Here!!!" << endl;
     }
 
+    
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
     {
       topologyToWeightMap[ (*m).first ] =
