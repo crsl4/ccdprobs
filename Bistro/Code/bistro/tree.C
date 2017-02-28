@@ -2632,7 +2632,7 @@ void Node::distance(map<Clade,double>& cladeToLengthMap, Clade& clade, Edge* par
     {
       if ( (*e) != parent )
       {
-	Clade tempClade;
+	Clade tempClade(clade.size());
 	getNeighbor(*e)->distance(cladeToLengthMap,tempClade,*e);
 	clade.add(tempClade);
       }
@@ -2654,8 +2654,8 @@ void Tree::distance(Tree other)
   cerr << other.makeTreeNumbers() << endl;
   map<Clade,double> map1;
   map<Clade,double> map2;
-  Clade clade1;
-  Clade clade2;
+  Clade clade1(numTaxa);
+  Clade clade2(numTaxa);
   root->distance(map1,clade1,NULL);
   other.getRoot()->distance(map2,clade2,NULL);
   // calculate the distance from the maps
