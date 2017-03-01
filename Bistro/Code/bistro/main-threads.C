@@ -524,7 +524,7 @@ int main(int argc, char* argv[])
     {
 //      cerr << "bootstrap tree: " << (*t) << endl;
       Tree* boottree = new Tree(*t);
-//      cerr << "after constructed: " << boottree->makeTreeNumbers() << endl;
+      cerr << "after constructed: " << boottree->makeTreeNumbers() << endl;
       mtree.distance(boottree);
       delete boottree;
 //      cerr << "Here!!!" << endl;

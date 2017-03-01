@@ -2701,6 +2701,7 @@ void Tree::distance(Tree* other)
   }
 
   cout << dist << endl;
+  cerr << dist << endl;
 
 //  map1.erase(map1.begin(),map1.end());
 //  map2.erase(map2.begin(),map2.end());
