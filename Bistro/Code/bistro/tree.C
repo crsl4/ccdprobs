@@ -2653,11 +2653,16 @@ void Tree::distance(Tree* other)
   other->reroot(1);
 //  cerr << "successful rooting: " << makeTreeNumbers() << endl;
 //  cerr << other->makeTreeNumbers() << endl;
-  map<dynamic_bitset<unsigned char>,double> map1;
+  if( cladeToLengthMap.empty() )
+  {
+    map<dynamic_bitset<unsigned char>,double> map1;
+    Clade clade1(numTaxa);
+    root->distance(map1,clade1,NULL);
+    setCladeToLengthMap(map1);
+  }
+  map<dynamic_bitset<unsigned char>,double> map1 = getCladeToLengthMap();
   map<dynamic_bitset<unsigned char>,double> map2;
-  Clade clade1(numTaxa);
   Clade clade2(numTaxa);
-  root->distance(map1,clade1,NULL);
   other->getRoot()->distance(map2,clade2,NULL);
   // calculate the distance from the maps
   double dist=0;

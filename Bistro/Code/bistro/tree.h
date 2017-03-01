@@ -164,6 +164,7 @@ private:
   vector<Node*> nodes;
   vector<Edge*> edges;
   Node* root;
+  map<dynamic_bitset<unsigned char>,double> cladeToLengthMap;
 public:
   Tree(string);
   Tree(MatrixXd&);
@@ -188,6 +189,8 @@ public:
   void print(ostream&);
   void readSubtree(istringstream&,Node*,vector<Node*>&,vector<Node*>&);
   void relabel(Alignment&);
+  map<dynamic_bitset<unsigned char>,double> getCladeToLengthMap() {return cladeToLengthMap;}
+  void setCladeToLengthMap( map<dynamic_bitset<unsigned char>,double> c ){ cladeToLengthMap = c;}
   string makeTopology(bool);
   string makeTopologyNames() { return makeTopology(true); }
   string makeTopologyNumbers() { return makeTopology(false); }

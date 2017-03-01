@@ -1,4 +1,5 @@
 ## test mean distances:
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --onlyBootstrap -s 3110090550 > tmp.log 
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --onlyBootstrap > tmp.log
 
 ## test after adding summarize to bistro
