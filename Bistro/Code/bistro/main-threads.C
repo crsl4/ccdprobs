@@ -247,8 +247,7 @@ void test()
   cerr << "succesful creation of names vector" << endl;
   trees.readTrees(names);
   cerr << "successful reading of trees" << endl;
-  ostringstream c;
-  string meanTree = trees.printMeanTree(c);
+  string meanTree = trees.printMeanTree();
   cerr << "successful mean of trees" << endl << meanTree << endl;
 }
 
@@ -419,7 +418,8 @@ int main(int argc, char* argv[])
     cout << "Dirichlet for QP scale: " << scaleQP << endl;
   }
 
-
+  cerr << "After MCMC block" << endl;
+  
   // Initial Q, either from naive estimate or MCMC on fixed tree with MLE BL
   //QMatrix model_init(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model_init(q_init.getStationaryP(),q_init.getSymmetricQP());
@@ -527,20 +527,25 @@ int main(int argc, char* argv[])
 	}
 	topologyToCountMap[ top ]++;
       } // end of bootstrap
+      cerr << endl;
       if ( badTrees > 0 )
 	cerr << "Warning: found " << badTrees << " bootstrap tree" << (badTrees > 1 ? "s" : "") << "with nan edge lengths." << endl;
     }
     bootstrapTrees.close();
-    cerr << endl << "done." << endl;
+    cerr << endl << "    ... done." << endl;
 
     // mean tree
 //    test();
     Trees trees;
     cerr << "defined trees ok" << endl;
+    cerr << "bootstrapStrings.size() = " << bootstrapStrings.size() << endl;
+    if ( bootstrapStrings.size() > 0 )
+      cerr << "First tree: " << bootstrapStrings[0] << endl;
     trees.readTrees(bootstrapStrings);
     cerr << "read trees ok" << endl;
-    ostringstream c;
-    string meanTree = trees.printMeanTree(c);
+//    stringstream c;
+    string meanTree = trees.printMeanTree();
+    cerr << "after printMeanTree" << endl;
 //    cerr << "compute mean tree ok" << endl;
 //    cerr << endl << "successful mean of trees" << endl << meanTree << endl;
     cout << endl << "successful mean of trees" << endl << meanTree << endl;
@@ -559,7 +564,7 @@ int main(int argc, char* argv[])
 //      cerr << "bootstrap tree: " << (*t) << endl;
       // check if tree string contains nan
       string foo = *t;
-      if ( foo.find("nan") != std::string::npos )
+      if ( foo.find("nan") != string::npos )
       {
 	++badTrees;
 	continue;

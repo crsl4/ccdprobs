@@ -38,7 +38,7 @@ public:
 
   void printMeanTree(ostream &c);
 
-  string printMeanTree(ostringstream &c);
+  string printMeanTree();
 
   void printNamedClades(ostream& c);
 
@@ -126,7 +126,7 @@ private:
 
   void printTotalDist(ostream& c, CladePtr j);
 
-  void printMeanTree2(ostream &c, CladePtr j, int topTree);
+  void printMeanTree2(stringstream &c, CladePtr j, int topTree);
 	
   void prettyPrintMeanTree(ostream &c, CladePtr j, int topTree, int indent, int stayOnLine);
 	    

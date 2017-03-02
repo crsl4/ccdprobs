@@ -1,3 +1,6 @@
+## short example that causes a segmentation fault
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o test1 -r 1000 -b 100 --onlyBootstrap -p 0.241304,0.23434,0.204346,0.32001 -q 0.0472446,0.293237,0.0682563,0.0137919,0.566251,0.0112188 --no-MCMC -s 2460409026 > test1.log
+  
 ## test distance
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o test1 -r 1000 -b 1000 --onlyBootstrap -p 0.241304,0.23434,0.204346,0.32001 -q 0.0472446,0.293237,0.0682563,0.0137919,0.566251,0.0112188 --no-MCMC > test1.log
 

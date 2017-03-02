@@ -175,7 +175,7 @@ void Trees::findNamedClades(double threshold, int maxTopologies) {
   }
 }
 
-string Trees::printMeanTree(ostringstream &c) { //not only prints the mean, but computes it
+string Trees::printMeanTree() { //not only prints the mean, but computes it
   cerr << "entering printMeanTree--------------" << endl;
   findSplits();
   cerr << "after find splits" << endl;
@@ -203,14 +203,21 @@ string Trees::printMeanTree(ostringstream &c) { //not only prints the mean, but 
 //  printTotalDist(c,trees[maxLen][0]->clade);
   cerr << "maxLen = " << maxLen << endl;
   cerr << "trees.size() = " << trees.size() << endl;
+  for ( int k=0; k<=maxLen; ++k )
+    cerr << k << ": trees[k].size() = " << trees[k].size() << endl;
   trees[maxLen][0]->clade->getSet().print(cerr);
   cerr << endl;
+  stringstream c;
   printMeanTree2(c,trees[maxLen][0]->clade,1);
-  return c.str();
+  string mtree;
+  c >> mtree;
+  cerr << mtree << endl;
+  return mtree;
   //prettyPrintMeanTree(c,trees[maxLen][0]->clade,1,0,0);
   //c << endl << endl;
 }
 
+/*
 void Trees::printMeanTree(ostream &c) { //not only prints the mean, but computes it
   findSplits();
 
@@ -242,6 +249,7 @@ void Trees::printMeanTree(ostream &c) { //not only prints the mean, but computes
   //prettyPrintMeanTree(c,trees[maxLen][0]->clade,1,0,0);
   //c << endl << endl;
 }
+*/
 
 void Trees::printNamedClades(ostream& c) {
   c << "******************** Named clades ********************" << endl << endl;
@@ -998,7 +1006,11 @@ void Trees::printTotalDist(ostream& c, CladePtr j) {
 }
 
 
-void Trees::printMeanTree2(ostream &c, CladePtr j, int topTree) {
+void Trees::printMeanTree2(stringstream &c, CladePtr j, int topTree) {
+//  string temp;
+//  c >> temp;
+//  c << temp;
+//  cerr << "+++/" << temp << "/" << endl;
   if(j->len == 1)
     c << trees[1][j->num]->count << ":" << j->sumBL/(double)totalTrees;
   else {
