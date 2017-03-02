@@ -348,7 +348,7 @@ VectorXd Alignment::averagePairwiseS()
       foo /= foo.sum();
       ++total;
       s += foo;
-      cerr <<  i << " " << j << ": " << foo.transpose() << endl;
+      cerr <<  setw(3) << i << " " << setw(3) << j << ": " << fixed << setprecision(6) << setw(9) << foo.transpose() << endl;
     }
   }
   s /= total;

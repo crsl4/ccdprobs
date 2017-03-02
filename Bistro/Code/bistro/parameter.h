@@ -31,6 +31,9 @@ private:
   bool rootFix;
   bool weightMean;
   bool onlyBootstrap;
+  bool enteredP;
+  bool enteredS;
+  bool doMCMC;
 public:
   Parameter()
   {
@@ -53,6 +56,9 @@ public:
     rootFix = false;
     weightMean = false;
     onlyBootstrap = false;
+    enteredP = false;
+    enteredS = false;
+    doMCMC = true;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -95,6 +101,12 @@ public:
   void setWeightMean(bool b) { weightMean = b; }
   bool getOnlyBootstrap() const { return onlyBootstrap; }
   void setOnlyBootstrap(bool b) { onlyBootstrap = b; }
+  bool getEnteredP() const { return enteredP; }
+  void setEnteredP(bool b) { enteredP = b; }
+  bool getEnteredS() const { return enteredS; }
+  void setEnteredS(bool b) { enteredS = b; }
+  bool getDoMCMC() const { return doMCMC; }
+  void setDoMCMC(bool b) { doMCMC = b; }
 };
 
 #endif

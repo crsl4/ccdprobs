@@ -35,6 +35,7 @@ void usage(ostream& f)
   f << "    --rootFix                      |  fix the root at one of the two nodes attached to longest branch (false)" << endl;
   f << "    --weightMean                   |  weight the MLE with prior mean (false)" << endl;
   f << "    --onlyBootstrap                |  only does the bootstrap sample of trees (false)" << endl;
+  f << "    --no-MCMC                      |  do not use MCMC to estimate Q" << endl;
   exit(1);
 }
 
@@ -200,6 +201,7 @@ void Parameter::processCommandLine(int argc,char* argv[])
         cerr << "Error: flag `-p' not followed by comma-separated no-space list of four (relative) probabilities" << endl;
         usage(cerr);
       }
+      enteredP = true;
     }
     else if ( strcmp(argv[k],"-q") == 0 )
     {
@@ -229,6 +231,7 @@ void Parameter::processCommandLine(int argc,char* argv[])
         cerr << "Error: flag `-q' not followed by comma-separated no-space list of six (unweighted) values" << endl;
         usage(cerr);
       }
+      enteredS = true;
     }
     else if ( strcmp(argv[k],"--independent") == 0 )
     {
@@ -249,6 +252,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--fixedQ") == 0 )
     {
       fixedQ = true;
+    }
+    else if ( strcmp(argv[k],"--no-MCMC") == 0 )
+    {
+      doMCMC = false;
     }
     else if ( strcmp(argv[k],"--jointMLE") == 0 )
     {

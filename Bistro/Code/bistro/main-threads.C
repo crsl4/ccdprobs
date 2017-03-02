@@ -39,9 +39,9 @@ const char* names[]= {"skip", "trees", "cthreshold", "nthreshold", "maxtopologie
 const char* desc[] = {"skipped_lines", "number_of_trees_to_print", "threshold_for_clades",
 		      "threshold_for_named_clades",
                       "max_tree_topologies" };
-const char* defaults[] = {"0", "100", ".01", ".80", "100"};
+// changing default values for tree, cthreshold, and maxtopologies
+const char* defaults[] = {"0", "10000", "0.00001", ".80", "10000"};
 const int skipField=0, numTreesField=1, cthresholdField=2, nthresholdField=3, maxTopsField=4;
-
 
 bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string, double> &p2)
 {
@@ -333,7 +333,24 @@ int main(int argc, char* argv[])
   s_pairwise = alignment.averagePairwiseS();
   cerr << "Estimated rates: " << endl;
   cerr << s_pairwise.transpose() << endl;
-  QMatrix q_init(convert(p_init),s_pairwise);
+
+  // checking to see if p and s were initialized at command line
+
+  Vector4d p0;
+  VectorXd s0(6);
+
+  if ( parameters.getEnteredP() )
+    p0 = convert(parameters.getStationaryP());
+  else
+    p0 = convert(p_init);
+  if ( parameters.getEnteredS() )
+    s0 = convert(parameters.getSymmetricQP());
+  else
+    s0 = s_pairwise;
+
+  QMatrix q_init(p0,s0);
+
+//  parameters.setFixedQ(enteredPorS);
 
 // old initialization of Q:
 //  vector<double> p_init(4,0.25);
@@ -352,52 +369,55 @@ int main(int argc, char* argv[])
   cout << starttree.makeTreeNumbers() << endl;
 
 // ------------------------------ MCMC for Q on fixed tree with MLE branch lengths -------------
-  cerr << "Running MCMC to estimate Q matrix ..." << endl;
-  // Run MCMC on tree to estimate Q matrix parameters
+  if ( parameters.getDoMCMC() )
+  {
+    cerr << "Running MCMC to estimate Q matrix ..." << endl;
+    // Run MCMC on tree to estimate Q matrix parameters
 
-  // burnin
-  cerr << "burn-in:" << endl;
-  //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-  starttree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
+    // burnin
+    cerr << "burn-in:" << endl;
+    //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+    starttree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
 //    q_init.mcmc(alignment,starttree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
-  cerr << endl << " done." << endl;
-  // cout << "Start tree after MCMC burnin: " << endl;
-  // cout << starttree.makeTreeNumbers() << endl;
+    cerr << endl << " done." << endl;
+    // cout << "Start tree after MCMC burnin: " << endl;
+    // cout << starttree.makeTreeNumbers() << endl;
 
-  // mcmc to get final Q
-  cerr << "sampling:" << endl;
-  //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
+    // mcmc to get final Q
+    cerr << "sampling:" << endl;
+    //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+    starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
 //    q_init.mcmc(alignment,starttree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
-  cerr << endl << " done." << endl;
-  // cout << "Start tree after MCMC: " << endl;
-  // cout << starttree.makeTreeNumbers() << endl;
+    cerr << endl << " done." << endl;
+    // cout << "Start tree after MCMC: " << endl;
+    // cout << starttree.makeTreeNumbers() << endl;
 
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
 // save to file)
-  double scaleP = 100000000;
-  double temp;
-  VectorXd x = q_init.getStationaryP();
-  VectorXd v = q_init.getMcmcVarP();
-  for ( int i=0; i<x.size(); ++i )
-  {
-    temp = x(i)*(1-x(i))/v(i);
-    cout << "Scale for p" << i << " is " << temp << endl;
-    if(temp < scaleP)
-      scaleP = temp;
+    double scaleP = 100000000;
+    double temp;
+    VectorXd x = q_init.getStationaryP();
+    VectorXd v = q_init.getMcmcVarP();
+    for ( int i=0; i<x.size(); ++i )
+    {
+      temp = x(i)*(1-x(i))/v(i);
+      cout << "Scale for p" << i << " is " << temp << endl;
+      if(temp < scaleP)
+	scaleP = temp;
+    }
+    cout << "Dirichlet for P scale: " << scaleP << endl;
+    double scaleQP = 100000000;
+    x = q_init.getSymmetricQP();
+    v = q_init.getMcmcVarQP();
+    for ( int i=0; i<x.size(); ++i )
+    {
+      temp = x(i)*(1-x(i))/v(i);
+      cout << "Scale for s" << i << " is " << temp << endl;
+      if( temp < scaleQP )
+	scaleQP = temp;
+    }
+    cout << "Dirichlet for QP scale: " << scaleQP << endl;
   }
-  cout << "Dirichlet for P scale: " << scaleP << endl;
-  double scaleQP = 100000000;
-  x = q_init.getSymmetricQP();
-  v = q_init.getMcmcVarQP();
-  for ( int i=0; i<x.size(); ++i )
-  {
-    temp = x(i)*(1-x(i))/v(i);
-    cout << "Scale for s" << i << " is " << temp << endl;
-    if( temp < scaleQP )
-      scaleQP = temp;
-  }
-  cout << "Dirichlet for QP scale: " << scaleQP << endl;
 
 
   // Initial Q, either from naive estimate or MCMC on fixed tree with MLE BL
@@ -523,7 +543,7 @@ int main(int argc, char* argv[])
     int badTrees = 0;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
     {
-//      cerr << "bootstrap tree: " << (*t) << endl;
+      cerr << "bootstrap tree: " << (*t) << endl;
       // check if tree string contains nan
       if ( (*t).find("nan") != string::npos )
       {
