@@ -45,8 +45,10 @@ void Trees::readTrees(const vector<string>& names) {
   Found = NotFound = CompFound = CompNotFound = 0;
   cerr << "line 5" << endl;
   //cerr << "starting to read all trees in readTrees" << endl;
-  for(vector<string>::const_iterator name=names.begin();name!=names.end();name++) {
+  for(vector<string>::const_iterator name=names.begin();name!=names.end();name++)
+  {
     //cerr << "tree: " << *name << endl;
+    
     readTree(*name,sindex,first,taxa,hasLength,hasSemicolon,blSquared);
   }
   cerr << "after for readTree" << endl;

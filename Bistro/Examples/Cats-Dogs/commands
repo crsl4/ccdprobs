@@ -1,6 +1,5 @@
 ## test distance
-../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o test1 -r 1000 -b 500 --onlyBootstrap -p 0.801294,0.704045,0.544498,0.950162 -q 0.076950,0.271456,0.111628,0.028451,0.483571,0.027945 --no-MCMC > test1.log
-
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o test1 -r 1000 -b 1000 --onlyBootstrap -p 0.241304,0.23434,0.204346,0.32001 -q 0.0472446,0.293237,0.0682563,0.0137919,0.566251,0.0112188 --no-MCMC > test1.log
 
 ## run bmcmc
 ../../Code/bistro/bmcmc -f ../../Data/cats-dogs.fasta -o mcmc1 -r 10000 -b 1000 -t "(Felis_catus___domestic_cat,(Acinonyx_jubatus___cheetah,(((((Canis_lupus_familiaris___domestic_dog,Canis_lupus___gray_wolf),Canis_latrans___coyote),Cuon_alpinus___dhole),Nyctereutes_procyonoides___raccoon_dog),Vulpes_vulpes___red_fox)),(Neofelis_nebulosa___clouded_leopard,((Uncia_uncia___snow_leopard,Panthera_pardus___leopard),Panthera_tigris___tiger)));" > mcmc1.log

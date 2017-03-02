@@ -469,54 +469,67 @@ int main(int argc, char* argv[])
     string bootstrapTreesFileBL = parameters.getOutFileRoot() + ".bootstrapBL";
     ofstream bootstrapTreesBL(bootstrapTreesFileBL.c_str());
     // vector of strings trees
-    vector<string> bootstrapStrings(parameters.getNumBootstrap());
-    for ( int b=0; b<parameters.getNumBootstrap(); ++b )
-    {
-      if ( parameters.getNumBootstrap() > 99 && (b+1) % (parameters.getNumBootstrap() / 100) == 0 )
-	cerr << '*';
-      if ( parameters.getNumBootstrap() > 9 && (b+1) % (parameters.getNumBootstrap() / 10) == 0 )
-	cerr << '|';
-      alignment.setBootstrapWeights(weights,rng);
-      alignment.calculateGTRDistancesUsingWeights(weights,model_init,gtrDistanceMatrix,bootDistanceMatrix);
-      Tree bootTree(bootDistanceMatrix);
-      bootTree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
-      bootTree.makeBinary();
-      bootTree.sortCanonical();
-
-      string top = bootTree.makeTopologyNumbers();
-      string topBL = bootTree.makeTreeNumbers();
-      // write bootstrap tree to file
-      bootstrapTrees << top << endl;
-      bootstrapTreesBL << topBL << endl;
-      bootstrapStrings[b] = topBL;
-
-      // add parsimony score to map if it is not already there
-      // update minimum parsimony score if new minimum found
-      if ( topologyToParsimonyScoreMap.find(top) == topologyToParsimonyScoreMap.end() )
+    // change to using push_back() to avoid keeping bad trees
+    vector<string> bootstrapStrings;
+    { // block to contain badTrees
+      int badTrees=0;
+      for ( int b=0; b<parameters.getNumBootstrap(); ++b )
       {
-	int score = bootTree.parsimonyScore(alignment);
-	topologyToParsimonyScoreMap[ top ] = score;
-	if ( score < minimumParsimonyScore || b==0 )
-	  minimumParsimonyScore = score;
-      }
-      if( parameters.getLoglikWt() )
-      {
-	// add likelihood score to map if not there already
-	// update minimum loglik
-	if ( topologyToLogLikScoreMap.find(top) == topologyToLogLikScoreMap.end() )
+	if ( parameters.getNumBootstrap() > 99 && (b+1) % (parameters.getNumBootstrap() / 100) == 0 )
+	  cerr << '*';
+	if ( parameters.getNumBootstrap() > 9 && (b+1) % (parameters.getNumBootstrap() / 10) == 0 )
+	  cerr << '|';
+	alignment.setBootstrapWeights(weights,rng);
+	alignment.calculateGTRDistancesUsingWeights(weights,model_init,gtrDistanceMatrix,bootDistanceMatrix);
+	Tree bootTree(bootDistanceMatrix);
+	bootTree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
+	bootTree.makeBinary();
+	bootTree.sortCanonical();
+
+	string top = bootTree.makeTopologyNumbers();
+	string topBL = bootTree.makeTreeNumbers();
+	// write bootstrap tree to file
+	if ( topBL.find("nan") != string::npos )
 	{
-	  bootTree.unroot();
-	  MatrixXd gtrDistanceMatrixCopy2(alignment.getNumTaxa(),alignment.getNumTaxa());
-	  gtrDistanceMatrixCopy2 = gtrDistanceMatrix;
-	  bootTree.setNJDistances(gtrDistanceMatrixCopy2,rng);
-	  int score = bootTree.logLikelihoodScore(alignment, model_init);
-	  topologyToLogLikScoreMap[ top ] = score;
-	  if ( score > maximumLogLikScore || b==0 )
-	    maximumLogLikScore = score;
+	  ++badTrees;
 	}
-      }
-      topologyToCountMap[ top ]++;
-    } // end of bootstrap
+	else
+	{
+	  bootstrapTrees << top << endl;
+	  bootstrapTreesBL << topBL << endl;
+	  bootstrapStrings.push_back(topBL);
+	}
+
+	// add parsimony score to map if it is not already there
+	// update minimum parsimony score if new minimum found
+	if ( topologyToParsimonyScoreMap.find(top) == topologyToParsimonyScoreMap.end() )
+	{
+	  int score = bootTree.parsimonyScore(alignment);
+	  topologyToParsimonyScoreMap[ top ] = score;
+	  if ( score < minimumParsimonyScore || b==0 )
+	    minimumParsimonyScore = score;
+	}
+	if( parameters.getLoglikWt() )
+	{
+	  // add likelihood score to map if not there already
+	  // update minimum loglik
+	  if ( topologyToLogLikScoreMap.find(top) == topologyToLogLikScoreMap.end() )
+	  {
+	    bootTree.unroot();
+	    MatrixXd gtrDistanceMatrixCopy2(alignment.getNumTaxa(),alignment.getNumTaxa());
+	    gtrDistanceMatrixCopy2 = gtrDistanceMatrix;
+	    bootTree.setNJDistances(gtrDistanceMatrixCopy2,rng);
+	    int score = bootTree.logLikelihoodScore(alignment, model_init);
+	    topologyToLogLikScoreMap[ top ] = score;
+	    if ( score > maximumLogLikScore || b==0 )
+	      maximumLogLikScore = score;
+	  }
+	}
+	topologyToCountMap[ top ]++;
+      } // end of bootstrap
+      if ( badTrees > 0 )
+	cerr << "Warning: found " << badTrees << " bootstrap tree" << (badTrees > 1 ? "s" : "") << "with nan edge lengths." << endl;
+    }
     bootstrapTrees.close();
     cerr << endl << "done." << endl;
 
@@ -543,9 +556,10 @@ int main(int argc, char* argv[])
     int badTrees = 0;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
     {
-      cerr << "bootstrap tree: " << (*t) << endl;
+//      cerr << "bootstrap tree: " << (*t) << endl;
       // check if tree string contains nan
-      if ( (*t).find("nan") != string::npos )
+      string foo = *t;
+      if ( foo.find("nan") != std::string::npos )
       {
 	++badTrees;
 	continue;
