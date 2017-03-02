@@ -2646,7 +2646,7 @@ void Node::distance(map<dynamic_bitset<unsigned char>,double>& cladeToLengthMap,
 // use node adjacent to taxon 1
 // comment on what the function actually does
 
-void Tree::distance(Tree* other)
+double Tree::distance(Tree* other)
 {
 //  cerr << "starting distance" << endl;
   unroot();
@@ -2709,6 +2709,6 @@ void Tree::distance(Tree* other)
     }
   }
 
-  cout << sqrt(dist) << endl;
+  return sqrt(dist);
 //  cerr << dist << endl;
 }

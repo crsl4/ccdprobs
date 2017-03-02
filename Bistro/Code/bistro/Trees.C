@@ -199,6 +199,10 @@ string Trees::printMeanTree(ostringstream &c) { //not only prints the mean, but 
   cerr << "after going all other clades" << endl;
 
 //  printTotalDist(c,trees[maxLen][0]->clade);
+  cerr << "maxLen = " << maxLen << endl;
+  cerr << "trees.size() = " << trees.size() << endl;
+  trees[maxLen][0]->clade->getSet().print(cerr);
+  cerr << endl;
   printMeanTree2(c,trees[maxLen][0]->clade,1);
   return c.str();
   //prettyPrintMeanTree(c,trees[maxLen][0]->clade,1,0,0);

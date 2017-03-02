@@ -525,14 +525,15 @@ int main(int argc, char* argv[])
     {
 //      cerr << "bootstrap tree: " << (*t) << endl;
       // check if tree string contains nan
-      if ( (*t).find("nan") )
+      if ( (*t).find("nan") != string::npos )
       {
 	++badTrees;
 	continue;
       }
       Tree* boottree = new Tree(*t);
 //      cerr << "after constructed: " << boottree->makeTreeNumbers() << endl;
-      mtree.distance(boottree);
+      double d = mtree.distance(boottree);
+      cout << d << endl;
       delete boottree;
 //      cerr << "Here!!!" << endl;
     }

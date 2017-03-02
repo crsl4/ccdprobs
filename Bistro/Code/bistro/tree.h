@@ -238,7 +238,7 @@ public:
   void mcmc(QMatrix&, Alignment& ,int ,double , mt19937_64&, ofstream&, ofstream&, bool);
   void mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool, bool);
   void setInitialEdgeLengths(double); // set all edge lengths to x
-  void distance(Tree*);
+  double distance(Tree*);
 };
 
 #endif
