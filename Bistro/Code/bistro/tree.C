@@ -2649,6 +2649,8 @@ void Node::distance(map<dynamic_bitset<unsigned char>,double>& cladeToLengthMap,
 void Tree::distance(Tree* other)
 {
 //  cerr << "starting distance" << endl;
+  unroot();
+  other->unroot();
   reroot(1);
   other->reroot(1);
 //  cerr << "successful rooting: " << makeTreeNumbers() << endl;
@@ -2673,12 +2675,12 @@ void Tree::distance(Tree* other)
   //   cerr << p2->first << " --> " << p2->second << endl;
   // p2 = map2.begin();
   
-  while ( p1 != map1.end() && p2 != map2.end() )
+  while ( p1 != map1.end() || p2 != map2.end() )
   {
 //    cerr << "Clade 1: " << p1->first << " " << p1->second << endl;
 //    cerr << "Clade 2: " << p2->first << " " << p2->second << endl;
 
-    if ( p1->first == p2->first )
+    if ( p1 != map1.end() && p2 != map2.end() && p1->first == p2->first )
     {
       double diff = p1->second - p2->second;
       cerr << p1->first << "\t" << p1->second << "\t" << p2->second << endl;
@@ -2687,7 +2689,7 @@ void Tree::distance(Tree* other)
       ++p2;
 //      cerr << "increment both" << endl;
     }
-    else if ( p1->first < p2->first ) // p1 not in map2
+    else if ( p2 == map2.end() || (p1 != map1.end() && p2 != map2.end() && p1->first < p2->first) ) // p1 not in map2
     {
       double len = p1->second;
       cerr << p1->first << "\t" << p1->second << "\t" << 0 << endl;
