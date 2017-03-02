@@ -2655,8 +2655,8 @@ void Tree::distance(Tree* other)
   other->reroot(1);
 //  cerr << "successful rooting: " << makeTreeNumbers() << endl;
 //  cerr << other->makeTreeNumbers() << endl;
-  cerr << "Tree 1: " << makeTreeNumbers() << endl;
-  cerr << "Tree 2: " << other->makeTreeNumbers() << endl;
+//  cerr << "Tree 1: " << makeTreeNumbers() << endl;
+//  cerr << "Tree 2: " << other->makeTreeNumbers() << endl;
   if( cladeToLengthMap.empty() )
   {
     map<dynamic_bitset<unsigned char>,double> map1;
@@ -2688,40 +2688,27 @@ void Tree::distance(Tree* other)
     if ( p1 != map1.end() && p2 != map2.end() && p1->first == p2->first )
     {
       double diff = p1->second - p2->second;
-      cerr << p1->first << "\t" << p1->second << "\t" << p2->second << endl;
+//      cerr << p1->first << "\t" << p1->second << "\t" << p2->second << endl;
       dist += diff*diff;
       ++p1;
       ++p2;
-//      cerr << "increment both" << endl;
     }
     else if ( p2 == map2.end() || (p1 != map1.end() && p2 != map2.end() && p1->first < p2->first) ) // p1 not in map2
     {
       double len = p1->second;
-      cerr << p1->first << "\t" << p1->second << "\t" << 0 << endl;
+//      cerr << p1->first << "\t" << p1->second << "\t" << 0 << endl;
       dist += len*len;
       ++p1;
-//      cerr << "increment clade1" << endl;
     }
     else // p2->first < p1->first
     {
       double len = p2->second;
-      cerr << p2->first << "\t" << 0 << "\t" << p2->second << endl;
+//      cerr << p2->first << "\t" << 0 << "\t" << p2->second << endl;
       dist += len*len;
       ++p2;
-//      cerr << "increment clade2" << endl;
     }
   }
 
-  cout << dist << endl;
-  cerr << dist << endl;
-
-//  map1.erase(map1.begin(),map1.end());
-//  map2.erase(map2.begin(),map2.end());
-  
-  // Now, we need to go through the maps to clear all of the dynamic_bitset<>s
-//  for (p1 = map1.begin(); p1 != map1.end(); ++p1 )
-//    p1->first.clear();
-//  for (p2 = map2.begin(); p2 != map2.end(); ++p2 )
-//    p2->first.clear();
-  
+  cout << sqrt(dist) << endl;
+//  cerr << dist << endl;
 }

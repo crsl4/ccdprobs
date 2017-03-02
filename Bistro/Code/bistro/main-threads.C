@@ -508,27 +508,36 @@ int main(int argc, char* argv[])
     cerr << "read trees ok" << endl;
     ostringstream c;
     string meanTree = trees.printMeanTree(c);
-    cerr << "compute mean tree ok" << endl;
-    cerr << endl << "successful mean of trees" << endl << meanTree << endl;
+//    cerr << "compute mean tree ok" << endl;
+//    cerr << endl << "successful mean of trees" << endl << meanTree << endl;
     cout << endl << "successful mean of trees" << endl << meanTree << endl;
     string meanTreeFile = parameters.getOutFileRoot() + ".meanTree";
     ofstream meanTreeFileStream(meanTreeFile.c_str());
     meanTreeFileStream << meanTree << endl;
     meanTreeFileStream.close();
-    cerr << "written mean tree to a file ok" << endl;
+//    cerr << "written mean tree to a file ok" << endl;
 
     // calculate distance from trees to mean tree
     Tree mtree(meanTree);
-    cerr << "read mean tree correctly" << endl;
+//    cerr << "read mean tree correctly" << endl;
+    int badTrees = 0;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
     {
 //      cerr << "bootstrap tree: " << (*t) << endl;
+      // check if tree string contains nan
+      if ( (*t).find("nan") )
+      {
+	++badTrees;
+	continue;
+      }
       Tree* boottree = new Tree(*t);
-      cerr << "after constructed: " << boottree->makeTreeNumbers() << endl;
+//      cerr << "after constructed: " << boottree->makeTreeNumbers() << endl;
       mtree.distance(boottree);
       delete boottree;
 //      cerr << "Here!!!" << endl;
     }
+    if ( badTrees > 0 )
+      cerr << "Warning: found " << badTrees << " bootstrap trees with nan edge lengths." << endl;
 
     
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
