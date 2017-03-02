@@ -2657,16 +2657,11 @@ void Tree::distance(Tree* other)
 //  cerr << other->makeTreeNumbers() << endl;
   cerr << "Tree 1: " << makeTreeNumbers() << endl;
   cerr << "Tree 2: " << other->makeTreeNumbers() << endl;
-  if( cladeToLengthMap.empty() )
-  {
-    map<dynamic_bitset<unsigned char>,double> map1;
-    Clade clade1(numTaxa);
-    root->distance(map1,clade1,NULL);
-    setCladeToLengthMap(map1);
-  }
-  map<dynamic_bitset<unsigned char>,double> map1 = getCladeToLengthMap();
+  map<dynamic_bitset<unsigned char>,double> map1;
   map<dynamic_bitset<unsigned char>,double> map2;
+  Clade clade1(numTaxa);
   Clade clade2(numTaxa);
+  root->distance(map1,clade1,NULL);
   other->getRoot()->distance(map2,clade2,NULL);
   // calculate the distance from the maps
   double dist=0;
@@ -2713,7 +2708,6 @@ void Tree::distance(Tree* other)
   }
 
   cout << dist << endl;
-  cerr << dist << endl;
 
 //  map1.erase(map1.begin(),map1.end());
 //  map2.erase(map2.begin(),map2.end());
