@@ -1,8 +1,6 @@
 #ifndef TREESH
 #define TREESH
 
-using namespace std;
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -15,6 +13,9 @@ using namespace std;
 #include "SplitTable.h"
 #include "Tree-summarize.h"
 #include "CladeTree.h"
+
+using namespace std;
+
 class Trees {
 
 public:

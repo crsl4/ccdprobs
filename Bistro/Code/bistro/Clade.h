@@ -1,8 +1,6 @@
 #ifndef CLADEH
 #define CLADEH
 
-using namespace std;
-
 #include <vector>
 #include "Set.h"
 
@@ -15,6 +13,8 @@ using namespace std;
 #define ISTRSTREAM istrstream
 #define OSTRSTREAM ostrstream
 #endif
+
+using namespace std;
 
 class Tree2;
 typedef Tree2* TreePtr;

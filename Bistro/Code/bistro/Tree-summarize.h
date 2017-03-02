@@ -1,8 +1,6 @@
 #ifndef TREEH
 #define TREEH
 
-using namespace std;
-
 #include <iostream>
 #include <iomanip>
 
@@ -17,6 +15,8 @@ using namespace std;
 #define ISTRSTREAM istrstream
 #define OSTRSTREAM ostrstream
 #endif
+
+using namespace std;
 
 class Tree2;
 

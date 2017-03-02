@@ -1,6 +1,6 @@
-using namespace std;
-
 #include "Trees.h"
+
+using namespace std;
 
 void Trees::readTree(string str, vector<TreePtr>& sindex, bool& first,
 		     vector<TreePtr>& taxa, bool& hasLength, bool& hasSemicolon, double& blSquared) {
@@ -909,7 +909,7 @@ TreePtr Trees::add(unsigned int &hash, TreePtr ltree, TreePtr rtree,
   int comps = 0;
   int len = llen + rlen;
 
-  while(tree=sindex[hash1])
+  while((tree=sindex[hash1]))
     if((comps++, tree->left == ltree && tree->right == rtree)) {
       tree->count++;
       tree->clade->count++;

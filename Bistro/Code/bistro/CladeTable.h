@@ -1,11 +1,11 @@
 #ifndef CLADETABLEH
 #define CLADETABLEH
 
-using namespace std;
-
 #include <vector>
 #include "Prime.h"
 #include "Clade.h"
+
+using namespace std;
 
 class CladeTable {
   int maxClades;

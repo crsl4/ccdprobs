@@ -1,11 +1,11 @@
 #ifndef SPLITTABLEH
 #define SPLITTABLEH
 
-using namespace std;
-
 #include <vector>
 #include "Prime.h"
 #include "Clade.h"
+
+using namespace std;
 
 class SplitTable {
 
