@@ -1,12 +1,12 @@
-Num. trees = 1000
-Star tree is (1:0.1418633519,2:0.1231528763,3:0.1049619448,4:0.0859836197,5:0.086591845,6:0.0741215027);
-Standard deviation if star tree is mean: 0.039388277774261335
+Num. trees = 10
+Star tree is (1:0.14465795,2:0.12149486,3:0.10907715,4:0.08585771,5:0.09007573,6:0.07699619);
+Standard deviation if star tree is mean: 0.04444635790326107
 Calculating epsilon...
-Test mean tree is ((((5:0.086591845,6:0.0741215027):0.0014639354,4:0.0859836197):0.0269545028,2:0.1231528763):0.0000010458,1:0.1418633519,3:0.1049619448);
-Test standard deviation is 0.028671037726583734
-epsilon is 5.734207545316747E-6
+Test mean tree is ((((4:0.08585771,6:0.07699619):0.00595517,5:0.09007573):0.02673652,2:0.12149486):0.000103136,1:0.14465795,3:0.10907715);
+Test standard deviation is 0.033804476333351936
+epsilon is 6.760895266670388E-6
 Tree selection:  random permutations of the tree set.
-Convergence:  Cauchy sequence of length 5 with epsilon = 5.734207545316747E-6
-Converged after 5462 iterations.  Displaying approximate mean tree.
-Standard Deviation if tree is mean: 0.028671  Tree:
-((((5:0.0865754277,6:0.0741320766):0.0014430456,4:0.0859698577):0.0269534989,2:0.1231436344):0.0000018393,1:0.1419201738,3:0.1049559445);
+Convergence:  Cauchy sequence of length 5 with epsilon = 6.760895266670388E-6
+Converged after 5920 iterations.  Displaying approximate mean tree.
+Standard Deviation if tree is mean: 0.033791  Tree:
+((((4:0.08585771,6:0.07699619):0.00595517,5:0.09007573):0.02673652,2:0.12149486):0.0000005301,1:0.14465795,3:0.10907715);
