@@ -40,7 +40,7 @@ const char* desc[] = {"skipped_lines", "number_of_trees_to_print", "threshold_fo
 		      "threshold_for_named_clades",
                       "max_tree_topologies" };
 // changing default values for tree, cthreshold, and maxtopologies
-const char* defaults[] = {"0", "10000", "0.00001", ".80", "10000"};
+const char* defaults[] = {"0", "100", "0.00001", ".80", "100"};
 const int skipField=0, numTreesField=1, cthresholdField=2, nthresholdField=3, maxTopsField=4;
 
 bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string, double> &p2)
@@ -147,8 +147,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 
       double logTopologyProbability=0;
       string treeString = ccd.randomTree(rng,logTopologyProbability);
-      Tree tree(treeString);
-      tree.relabel(alignment);
+      Tree tree(treeString,alignment);
       tree.unroot();
       MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
       gtrDistanceMatrixCopy = gtrDistanceMatrix;
@@ -313,8 +312,7 @@ int main(int argc, char* argv[])
   else
     treetext = jctree.makeTopologyNumbers();
   cerr << "treetext: " << treetext << endl;
-  Tree starttree(treetext);
-  starttree.relabel(alignment);
+  Tree starttree(treetext,alignment);
   starttree.unroot();
   cerr << "Start tree: " << starttree.makeTopologyNumbers() << endl;
   jcDistanceMatrixCopy = jcDistanceMatrix;
@@ -556,7 +554,7 @@ int main(int argc, char* argv[])
 //    cerr << "written mean tree to a file ok" << endl;
 
     // calculate distance from trees to mean tree
-    Tree mtree(meanTree);
+    Tree mtree(meanTree,alignment);
 //    cerr << "read mean tree correctly" << endl;
     int badTrees = 0;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
@@ -570,6 +568,7 @@ int main(int argc, char* argv[])
 	continue;
       }
       Tree* boottree = new Tree(*t);
+      boottree->relabel(alignment);
 //      cerr << "after constructed: " << boottree->makeTreeNumbers() << endl;
       double d = mtree.distance(boottree);
       cout << d << endl;
@@ -602,8 +601,7 @@ int main(int argc, char* argv[])
       topCounts << "tree count parsimonyWt parsimonyScore parsimonyDiff loglikWt loglikScore loglikDiff" << endl;
       for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
       {
-	Tree t((*cm).first);
-	t.relabel(alignment);
+	Tree t((*cm).first,alignment);
 	t.unroot();
 	t.reroot(1);
 	t.sortCanonical();
@@ -628,7 +626,7 @@ int main(int argc, char* argv[])
   else // topology input, so only one tree in the map
   {
 
-    Tree tree(parameters.getTopology());
+    Tree tree(parameters.getTopology(),alignment);
     string t = tree.makeTopologyNumbers();
     cerr << "Will not do bootstrap, using input tree instead: " << t << endl;
     topologyToCountMap[ t ]++;

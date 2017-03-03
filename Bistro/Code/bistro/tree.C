@@ -215,9 +215,9 @@ void Tree::readSubtree(istringstream& s,Node* parent,vector<Node*>& leafNodes,ve
 // Names are treated as strings.
 // The function relabel() will change node numbers and names to match the sequences.
 
-Tree::Tree(string line)
+void Tree::treeInit(string line)
 {
-  // Create the tree from parenthetic representation in line.
+    // Create the tree from parenthetic representation in line.
   // Create new nodes and edges on the fly.
   // Leaf node and internal node pointers placed in separate vectors.  Combine to vector nodes at end.
 
@@ -277,6 +277,17 @@ Tree::Tree(string line)
 
   leafNodes.resize(0);
   internalNodes.resize(0);
+}
+
+Tree::Tree(string line)
+{
+  treeInit(line);
+}
+
+Tree::Tree(string line, Alignment alignment)
+{
+  treeInit(line);
+  relabel(alignment);
 }
 
 // The tree constructor numbers leafs in the order they appear with the topology

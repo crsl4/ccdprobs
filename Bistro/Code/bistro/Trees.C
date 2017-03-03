@@ -32,18 +32,13 @@ void Trees::readTrees(const vector<string>& names) {
   cerr << "entering readTrees------------------" << endl;
   // Create hash table used to find unique trees (and subtrees).
   int size = Prime::nextPrime(maxTrees*10/6);
-  cerr << "line 1" << endl;
   vector<TreePtr> sindex(size,(TreePtr)NULL);
-  cerr << "line 2" << endl;
   vector<TreePtr> taxa; // Maps taxon numbers to the corresponding trees.
-  cerr << "line 3" << endl;
   bool first = true;
   bool hasSemicolon = false;
-  cerr << "line 4" << endl;
   hasLength = false; //this is updated inside readTree/readFile
   blSquared = 0.0;
   Found = NotFound = CompFound = CompNotFound = 0;
-  cerr << "line 5" << endl;
   //cerr << "starting to read all trees in readTrees" << endl;
   for(vector<string>::const_iterator name=names.begin();name!=names.end();name++)
   {
@@ -53,7 +48,6 @@ void Trees::readTrees(const vector<string>& names) {
   }
   cerr << "after for readTree" << endl;
   totalTrees = allTrees.size();
-  cerr << "line 1" << endl;
 }
 
 void Trees::readFiles(const vector<string>& names, int skip) {
@@ -178,15 +172,12 @@ void Trees::findNamedClades(double threshold, int maxTopologies) {
 string Trees::printMeanTree() { //not only prints the mean, but computes it
   cerr << "entering printMeanTree--------------" << endl;
   findSplits();
-  cerr << "after find splits" << endl;
   for(int i=0;i<maxLen;i++) // going over all leaves (external edges)
     trees[1][i]->clade->value = sqr(trees[1][i]->clade->sumBL/(double)totalTrees);
-  cerr << "after going over leaves" << endl;
 
   for(vector<CladePtr>::iterator j=clades[2].begin();j!=clades[2].end();j++)
     (*j)->value = sqr((*j)->sumBL/(double)totalTrees) + splitTable.first((*j)->firstSplit)->value
       + splitTable.second((*j)->firstSplit)->value;
-  cerr << "after going over clades of size 2" << endl;
   for(int i=3;i<=maxLen;i++) {
     for(vector<CladePtr>::iterator j=clades[i].begin();j!=clades[i].end();j++) {
       double val=0;
@@ -198,7 +189,6 @@ string Trees::printMeanTree() { //not only prints the mean, but computes it
       (*j)->value = sqr((*j)->sumBL/(double)totalTrees) + val;
     }
   }
-  cerr << "after going all other clades" << endl;
 
 //  printTotalDist(c,trees[maxLen][0]->clade);
   cerr << "maxLen = " << maxLen << endl;
@@ -1007,6 +997,7 @@ void Trees::printTotalDist(ostream& c, CladePtr j) {
 
 
 void Trees::printMeanTree2(stringstream &c, CladePtr j, int topTree) {
+  cerr << "+";
 //  string temp;
 //  c >> temp;
 //  c << temp;

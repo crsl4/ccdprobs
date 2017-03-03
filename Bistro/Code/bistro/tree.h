@@ -167,6 +167,7 @@ private:
   map<dynamic_bitset<unsigned char>,double> cladeToLengthMap;
 public:
   Tree(string);
+  Tree(string,Alignment);
   Tree(MatrixXd&);
   ~Tree() {
     for(vector<Edge*>::iterator e=edges.begin();e!=edges.end();e++)
@@ -176,6 +177,7 @@ public:
     nodes.clear();
     edges.clear();
   }
+  void treeInit(string);
   int getNumTaxa() { return numTaxa; }
   int getNumNodes() { return nodes.size(); }
   int getNumEdges() { return edges.size(); }
