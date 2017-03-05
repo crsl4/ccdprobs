@@ -4,22 +4,16 @@ Bret Larget, Claudia Solis-Lemus (2016)
 ## To do now
 - use the distances to weight the bootstrap trees (how did we do this with parsimony?)
 - comment difference between fixedQ and no-mcmc
-- problem with nan BL still, and segmentation fault
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 
 ## Check with Bret
-((((4:0.08585771,6:0.07699619):0.00595517,5:0.09007573):0.02673652,2:0.12149486):0.0000005301,1:0.14465795,3:0.10907715);
-(1:0.144658,(2:0.121495,(3:0.109077,((4:0.0858577,6:0.0769962):0.00654767,5:0.0900757):0.0267365):0.0027167):0);
-(((((4:0.0392128605,5:0.0373733122):0.0122632095,6:0.0568801848):0.0063366591,3:0.0733253558):0.0160691288,(((((7:0.0039039279,8:0.0006979979):0.0219026842,9:0.020327464):0.024927408,10:0.0529682607):0.0428064933,11:0.084711896):0.0000023422,12:0.090412653):0.0848122513):0.0091333775,1:0.0543669063,2:0.0695139768);
-(1:0.0543769,(2:0.0695371,(((3:0.0733224,(4:0.039213,5:0.0373848):0.0122876):0.000221423,6:0.0568845):0.0160838,(((((7:0.00390656,8:0.000697391):0.0219196,9:0.0203385):0.0249187,10:0.0529895):0.0428044,11:0.0847242):0.00237675,12:0.0904122):0.0848249):0.0102357):0);
 - one seed in cats and dogs always segmentation fault
 - In MCMC, Q steps done 10 times for every BL step
 - make MCMC more efficient
 - Sequential IS?
-- BL nan in bootstrap
 
 ## Jordan
 - Create bootstrap sample of trees for different datasets:
@@ -122,6 +116,20 @@ Presentations at Undergraduate symposium (end of spring), final research report 
 - Run a small example in MrBayes to explain input and output
 - Perl script to compare these two outputs? What do we try to compare?
 - Design simulations/real-life dataset examples to compare MrBayes and bistro
+
+### Written report
+Goal: identify a proposal density for the posterior distribution of trees
+
+- introduction of importance sampling
+- known difficulties of importance sampling: bias (recall R tests). Basically, we need good proposals
+- introduction of phylogenetic trees
+  - what is a phylogenetic tree
+  - how do we estimate it with bayesian inference (mcmc)
+  - downside of mcmc (slow)
+  - importance sampling for trees: we need a good proposal density for topologies that matches the posterior probabilites (PP) from mrbayes. Some ideas:
+    - bootstrap sample of trees (frequency does not match PP, bias)
+    - weight based on distance to mean tree (frequency matches PP?)
+
 
 -------------------------
 ## Previously in BranchLengths/Code/test

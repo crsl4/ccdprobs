@@ -1,4 +1,14 @@
-\begin{thebibliography}{0}
-\providecommand{\natexlab}[1]{#1}
+\begin{thebibliography}{2}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{Larget(2013)}]{Larget2013}
+\textsc{Larget, B.} 2013.
+\newblock {The estimation of tree posterior probabilities using conditional
+  clade probability distributions}.
+\newblock Systematic Biology \textbf{62}:501--511.
+
+\bibitem[{Owen(2013)}]{Owen2013}
+\textsc{Owen, A.~B.} 2013.
+\newblock \emph{{Monte Carlo theory, methods and examples}}.
 
 \end{thebibliography}
