@@ -25,6 +25,7 @@ private:
   set<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> > > subclades; // list of all subclade pairs
   CladeNode* left; // the best left subclade
   CladeNode* right; // the other clade to the best left subclade
+  CladeNode* one; // only used by the root for pointer to taxon 1
   string subtree; // string of subtree with branch lengths
   double value; // for a leaf, meanLength^2; otherwise, sum of meanLength^2 + values of left and right
   double sumOfLengths; // sum of all split lengths from input trees
@@ -41,11 +42,12 @@ public:
   string getSubtree() { return subtree; }
   void setSubtree(bool);
   double getValue() { return value; }
-  void setValue(map<dynamic_bitset<unsigned char>,CladeNode*>);
+  void setValue(map<dynamic_bitset<unsigned char>,CladeNode*>&);
   double getSumOfLengths() { return sumOfLengths; }
   void addLength(double x) { sumOfLengths += x; }
   double getMeanLength() { return meanLength; }
   void setMeanLength(double denom) { meanLength = sumOfLengths / denom; }
+  void addPairToSet(dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char>);
 };
 
 class CladeGraph
@@ -65,6 +67,10 @@ public:
   void setValues();
   string getMeanTree() { return meanTree; }
   void findMeanTree(vector<string>);
+  void addCladeToMaps(dynamic_bitset<unsigned char>);
+  void addPairToCladeNodeSet(dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char>);
+  void addLength(dynamic_bitset<unsigned char>,double);
+    
 };
 
 #endif

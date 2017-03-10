@@ -23,6 +23,7 @@
 #include "model.h"
 #include "ccdprobs.h"
 #include "random.h"
+#include "cladegraph.h"
 
 #include "Eigen/Core"
 #include "Eigen/Eigenvalues"
@@ -33,15 +34,15 @@ using namespace std::chrono;
 using namespace Eigen;
 
 // summarize stuff:
-#include "Trees.h"
-bool debug = false;
-const char* names[]= {"skip", "trees", "cthreshold", "nthreshold", "maxtopologies"};
-const char* desc[] = {"skipped_lines", "number_of_trees_to_print", "threshold_for_clades",
-		      "threshold_for_named_clades",
-                      "max_tree_topologies" };
-// changing default values for tree, cthreshold, and maxtopologies
-const char* defaults[] = {"0", "100", "0.00001", ".80", "100"};
-const int skipField=0, numTreesField=1, cthresholdField=2, nthresholdField=3, maxTopsField=4;
+//#include "Trees.h"
+//bool debug = false;
+//const char* names[]= {"skip", "trees", "cthreshold", "nthreshold", "maxtopologies"};
+//const char* desc[] = {"skipped_lines", "number_of_trees_to_print", "threshold_for_clades",
+//		      "threshold_for_named_clades",
+//                      "max_tree_topologies" };
+//// changing default values for tree, cthreshold, and maxtopologies
+//const char* defaults[] = {"0", "100", "0.00001", ".80", "100"};
+//const int skipField=0, numTreesField=1, cthresholdField=2, nthresholdField=3, maxTopsField=4;
 
 bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string, double> &p2)
 {
@@ -237,23 +238,9 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
   treebl.close();
   treeblsort.close();
 }
-void test()
-{
-  cerr << "test starting" << endl;
-  Trees trees;
-  const char *args[] = {"(1:1,(2:1,(3:1,4:1):1):1);", "((1:1,2:1):1,(3:1,4:1):1);"};
-  vector<string> names(args, std::end(args));
-  cerr << "succesful creation of names vector" << endl;
-  trees.readTrees(names);
-  cerr << "successful reading of trees" << endl;
-  string meanTree = trees.printMeanTree();
-  cerr << "successful mean of trees" << endl << meanTree << endl;
-}
-
 
 int main(int argc, char* argv[])
 {
-  test();
   milliseconds ms0 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   // Read command line and process parameters
   cerr << "Processing command line ...";
@@ -481,6 +468,8 @@ int main(int argc, char* argv[])
 	alignment.calculateGTRDistancesUsingWeights(weights,model_init,gtrDistanceMatrix,bootDistanceMatrix);
 	Tree bootTree(bootDistanceMatrix);
 	bootTree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
+	bootTree.sortCanonical();
+	string unrootedTreeString = bootTree.makeTreeNumbers(); // for the new distance method
 	bootTree.makeBinary();
 	bootTree.sortCanonical();
 
@@ -495,7 +484,7 @@ int main(int argc, char* argv[])
 	{
 	  bootstrapTrees << top << endl;
 	  bootstrapTreesBL << topBL << endl;
-	  bootstrapStrings.push_back(topBL);
+	  bootstrapStrings.push_back(unrootedTreeString);
 	}
 
 	// add parsimony score to map if it is not already there
@@ -534,19 +523,24 @@ int main(int argc, char* argv[])
 
     // mean tree
 //    test();
-    Trees trees;
-    cerr << "defined trees ok" << endl;
-    cerr << "bootstrapStrings.size() = " << bootstrapStrings.size() << endl;
-    if ( bootstrapStrings.size() > 0 )
-      cerr << "First tree: " << bootstrapStrings[0] << endl;
-    trees.readTrees(bootstrapStrings);
-    cerr << "read trees ok" << endl;
+//    Trees trees;
+//    cerr << "defined trees ok" << endl;
+//    cerr << "bootstrapStrings.size() = " << bootstrapStrings.size() << endl;
+//    if ( bootstrapStrings.size() > 0 )
+//      cerr << "First tree: " << bootstrapStrings[0] << endl;
+//    trees.readTrees(bootstrapStrings);
+//    cerr << "read trees ok" << endl;
 //    stringstream c;
-    string meanTree = trees.printMeanTree();
-    cerr << "after printMeanTree" << endl;
+//    string meanTree = trees.printMeanTree();
+//    cerr << "after printMeanTree" << endl;
 //    cerr << "compute mean tree ok" << endl;
 //    cerr << endl << "successful mean of trees" << endl << meanTree << endl;
-    cout << endl << "successful mean of trees" << endl << meanTree << endl;
+//    cout << endl << "successful mean of trees" << endl << meanTree << endl;
+    CladeGraph cladeGraph;
+    cladeGraph.findMeanTree(bootstrapStrings);
+    string meanTree = cladeGraph.getMeanTree();
+    cerr << "meanTree = " << meanTree << endl;
+
     string meanTreeFile = parameters.getOutFileRoot() + ".meanTree";
     ofstream meanTreeFileStream(meanTreeFile.c_str());
     meanTreeFileStream << meanTree << endl;
@@ -571,7 +565,7 @@ int main(int argc, char* argv[])
       boottree->relabel(alignment);
 //      cerr << "after constructed: " << boottree->makeTreeNumbers() << endl;
       double d = mtree.distance(boottree);
-      cout << d << endl;
+      cout << boottree->makeTopologyNumbers() << " " << d << endl;
       delete boottree;
 //      cerr << "Here!!!" << endl;
     }

@@ -27,6 +27,8 @@
 using namespace std;
 using namespace Eigen;
 
+class CladeGraph;
+
 class Clade;
 
 class Node;
@@ -154,6 +156,7 @@ public:
   void parsimonyScore(Alignment&,Edge*,int,int&,int&);
   void clearMapParent();
   void distance(map<dynamic_bitset<unsigned char>,double>&,Clade&,Edge*);
+  void processTree(CladeGraph*,dynamic_bitset<unsigned char>&,Edge* parent);
 };
 
 class Tree
@@ -241,6 +244,7 @@ public:
   void mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool, bool);
   void setInitialEdgeLengths(double); // set all edge lengths to x
   double distance(Tree*);
+  void processTree(CladeGraph*);
 };
 
 #endif
