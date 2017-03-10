@@ -9,6 +9,7 @@ using namespace std;
 CladeNode::CladeNode(dynamic_bitset<unsigned char> taxa)
 {
   clade = taxa;
+  sumOfLengths = 0;
   if ( clade.count() == 1 )
     leaf = true;
 }
@@ -48,21 +49,23 @@ void CladeNode::setValue(map<dynamic_bitset<unsigned char>,CladeNode*>& cladeMap
   // find best subclades
   value = 0;
 
-  cerr << "setValue(): " << clade << ", size = " << subclades.size() << endl;
+  cerr << "CladeNode::setValue: clade = " << clade << endl;
   for( set<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> > >::iterator p=subclades.begin(); p!= subclades.end(); ++p )
   {
-    CladeNode* n1 = cladeMap[ (*p).first ];
-    CladeNode* n2 = cladeMap[ (*p).second ];
+    CladeNode* n1 = cladeMap[ p->first ];
+    CladeNode* n2 = cladeMap[ p->second ];
     double valueSum = n1->getValue() + n2->getValue();
+    cerr << "<" << p->first << ": " << n1->getValue() << ", " << p->second << ": " << n2->getValue() << endl;
     if ( valueSum > value )
     {
       left = n1;
       right = n2;
       value = valueSum;
+      cerr << "changed left and right" << endl;
     }
   }
   value += meanLength*meanLength;
-//  cerr << "setValue() clade = " << clade << ", value = " << value << endl;
+  cerr << "setValue() clade = " << clade << ", value = " << value << endl;
 }
 
 void CladeNode::addPairToSet(dynamic_bitset<unsigned char> clade1,dynamic_bitset<unsigned char> clade2)
@@ -164,9 +167,11 @@ void CladeGraph::processTrees(vector<string> trees)
 
 void CladeGraph::setMeanLengths()
 {
+  cerr << "setMeanLengths(), numTrees = " << numTrees << endl;
   for ( map<dynamic_bitset<unsigned char>,CladeNode*>::iterator p=cladeMap.begin(); p!=cladeMap.end(); ++p )
   {
     p->second->setMeanLength( (double)(numTrees) );
+    cerr << p->first << " " << p->second->getSumOfLengths() << " " << p->second->getMeanLength() << endl;
   }
 }
 
@@ -215,5 +220,6 @@ void CladeGraph::addPairToCladeNodeSet(dynamic_bitset<unsigned char> clade,
 
 void CladeGraph::addLength(dynamic_bitset<unsigned char> clade,double x)
 {
+  cerr << "adding " << x << " to " << clade << endl;
   cladeMap[clade]->addLength(x);
 }
