@@ -146,7 +146,6 @@ void CladeGraph::processTrees(vector<string> trees,Alignment& alignment)
   for ( vector<string>::iterator p=trees.begin(); p!=trees.end(); ++p )
   {
     Tree* t = new Tree(*p,alignment);
-    cerr << "--- " << *p << endl;
     t->reroot(1);
     t->processTree(this);
     delete t;
@@ -235,6 +234,5 @@ void CladeGraph::addPairToCladeNodeSet(dynamic_bitset<unsigned char> clade,
 
 void CladeGraph::addLength(dynamic_bitset<unsigned char> clade,double x)
 {
-  cerr << "+++ " << clade << " " << x << endl;
   cladeMap[clade]->addLength(x);
 }
