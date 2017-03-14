@@ -2,13 +2,10 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- do git add, and git pull code from bret
-- finish new mean tree, check no more segmentation fault
 - create distance function with the new stuff
 - compare new distance to old distance (new main threads does not have the old distance anymore, need to check to written files)
 - bring back main-threads stuff with the map, but maybe we now need a multimap (same topology has many distances for different BLs); and we need to decide on a weight function based on distance; compare distance weight to parsimony weight
 
-- check if we really need the rooted stuff for bootstrap tree (I think not)
 - change ccd to be run with distance weights, and run artiodactyl and compare to previous ESS
 
 - comment difference between fixedQ and no-mcmc
