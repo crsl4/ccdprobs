@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <sstream>
 
+#include "sequence.h"
 #include "tree.h"
 
 #include <boost/dynamic_bitset.hpp>
@@ -42,7 +43,7 @@ public:
   string getSubtree() { return subtree; }
   void setSubtree(bool);
   double getValue() { return value; }
-  void setValue(map<dynamic_bitset<unsigned char>,CladeNode*>&);
+  void setValue(map<dynamic_bitset<unsigned char>,CladeNode*>&,bool);
   double getSumOfLengths() { return sumOfLengths; }
   void addLength(double x) { sumOfLengths += x; }
   double getMeanLength() { return meanLength; }
@@ -61,16 +62,18 @@ private:
   string meanTree;
 public:
   CladeGraph() {};
-  void processTrees(vector<string>);
+  void processTrees(vector<string>,Alignment&);
   void processTree(Tree*,map<dynamic_bitset<unsigned char>,CladeNode*>&,multimap<int,CladeNode*>&);
   void setMeanLengths();
   void setValues();
   string getMeanTree() { return meanTree; }
-  void findMeanTree(vector<string>);
+  void findMeanTree(vector<string>,Alignment&);
   void addCladeToMaps(dynamic_bitset<unsigned char>);
   void addPairToCladeNodeSet(dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char>);
   void addLength(dynamic_bitset<unsigned char>,double);
-    
+  void printCladeMap(ostream&);
+  void printSizeMap(ostream&);
+  void printMaps(ostream&);
 };
 
 #endif

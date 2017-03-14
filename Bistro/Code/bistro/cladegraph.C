@@ -12,6 +12,8 @@ CladeNode::CladeNode(dynamic_bitset<unsigned char> taxa)
   sumOfLengths = 0;
   if ( clade.count() == 1 )
     leaf = true;
+  else
+    leaf = false;
 }
 
 void CladeNode::setSubtree(bool isRoot) // set the string
@@ -39,8 +41,15 @@ void CladeNode::setSubtree(bool isRoot) // set the string
   s >> subtree;
 }
 
-void CladeNode::setValue(map<dynamic_bitset<unsigned char>,CladeNode*>& cladeMap)
+void CladeNode::setValue(map<dynamic_bitset<unsigned char>,CladeNode*>& cladeMap,bool isRoot)
 {
+  if ( isRoot)
+  {
+    dynamic_bitset<unsigned char> taxonOne(clade.size());
+    taxonOne[0] = 1;
+    one = cladeMap[ taxonOne ];
+  }
+  
   if ( leaf )
   {
     value = meanLength*meanLength;
@@ -49,47 +58,32 @@ void CladeNode::setValue(map<dynamic_bitset<unsigned char>,CladeNode*>& cladeMap
   // find best subclades
   value = 0;
 
-  cerr << "CladeNode::setValue: clade = " << clade << endl;
   for( set<pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> > >::iterator p=subclades.begin(); p!= subclades.end(); ++p )
   {
     CladeNode* n1 = cladeMap[ p->first ];
     CladeNode* n2 = cladeMap[ p->second ];
     double valueSum = n1->getValue() + n2->getValue();
-    cerr << "<" << p->first << ": " << n1->getValue() << ", " << p->second << ": " << n2->getValue() << endl;
     if ( valueSum > value )
     {
       left = n1;
       right = n2;
       value = valueSum;
-      cerr << "changed left and right" << endl;
     }
   }
   value += meanLength*meanLength;
-  cerr << "setValue() clade = " << clade << ", value = " << value << endl;
 }
 
 void CladeNode::addPairToSet(dynamic_bitset<unsigned char> clade1,dynamic_bitset<unsigned char> clade2)
 {
-  cerr << "adding <" << clade1 << "," << clade2 << "> to set for clade " << clade << endl;
   subclades.insert( pair<dynamic_bitset<unsigned char>,dynamic_bitset<unsigned char> >(clade1,clade2) );
 }
 
 void Node::processTree(CladeGraph* graph,dynamic_bitset<unsigned char>& clade,Edge* parent)
 {
-  if ( parent != NULL )
-    cerr << parent->getLength() << endl;
-  else
-    cerr << "root" << endl;
-
-  cerr << "Node::processTree clade.size() = " << clade.size() << endl;
-  cerr << "number = " << number << endl;
-  
   if ( leaf )
     clade[number-1] = 1;
 
-  cerr << clade << endl;
-
-  bool left = true;
+  bool leftIsNext = true;
   dynamic_bitset<unsigned char> leftClade(clade.size());
   dynamic_bitset<unsigned char> rightClade(clade.size());
   dynamic_bitset<unsigned char> oneClade(clade.size());
@@ -111,11 +105,11 @@ void Node::processTree(CladeGraph* graph,dynamic_bitset<unsigned char>& clade,Ed
 	}
       }
 	
-      if ( left )
+      if ( leftIsNext )
       {
 	getNeighbor(*e)->processTree(graph,leftClade,*e);
 	clade |= leftClade;
-	left = false;
+	leftIsNext = false;
       }
       else
       {
@@ -140,20 +134,19 @@ void Tree::processTree(CladeGraph* graph)
   root->processTree(graph,clade,NULL);
 }
 
-void CladeGraph::processTrees(vector<string> trees)
+void CladeGraph::processTrees(vector<string> trees,Alignment& alignment)
 {
   numTrees = trees.size();
-  cerr << "numTrees = " << numTrees << endl;
   if ( numTrees == 0 )
     return;
-  Tree* firstTree = new Tree(trees[0]);
+  Tree* firstTree = new Tree(trees[0],alignment);
   numTaxa = firstTree->getNumTaxa();
   delete firstTree;
   
   for ( vector<string>::iterator p=trees.begin(); p!=trees.end(); ++p )
   {
-    cerr << *p << endl;
-    Tree* t = new Tree(*p);
+    Tree* t = new Tree(*p,alignment);
+    cerr << "--- " << *p << endl;
     t->reroot(1);
     t->processTree(this);
     delete t;
@@ -167,11 +160,9 @@ void CladeGraph::processTrees(vector<string> trees)
 
 void CladeGraph::setMeanLengths()
 {
-  cerr << "setMeanLengths(), numTrees = " << numTrees << endl;
   for ( map<dynamic_bitset<unsigned char>,CladeNode*>::iterator p=cladeMap.begin(); p!=cladeMap.end(); ++p )
   {
     p->second->setMeanLength( (double)(numTrees) );
-    cerr << p->first << " " << p->second->getSumOfLengths() << " " << p->second->getMeanLength() << endl;
   }
 }
 
@@ -180,25 +171,49 @@ void CladeGraph::setValues()
 {
   for ( multimap<int,CladeNode*>::iterator p=sizeMap.begin(); p!=sizeMap.end(); ++p )
   {
-    p->second->setValue(cladeMap);
-//    cerr << "size = " << p->first << ", clade = " << p->second->getClade() << ", value = " << p->second->getValue() << endl;
+    if ( p->first == numTaxa )
+      p->second->setValue(cladeMap,true);
+    else
+      p->second->setValue(cladeMap,false);
   }
 }
 
-void CladeGraph::findMeanTree(vector<string> trees)
+void CladeGraph::printCladeMap(ostream& f)
+{
+    for ( map<dynamic_bitset<unsigned char>,CladeNode*>::iterator p=cladeMap.begin(); p!=cladeMap.end(); ++p )
+    {
+      f << p->first;
+      if ( !p->second->getLeaf() )
+	f << " " << p->second->getLeft()->getClade() << " " << p->second->getRight()->getClade();
+      f << " " << p->second->getValue() << endl;
+    }
+}
+
+void CladeGraph::printSizeMap(ostream& f)
+{
+    for ( multimap<int,CladeNode*>::iterator p=sizeMap.begin(); p!=sizeMap.end(); ++p )
+      f << setw(2) << p->first << " " << p->second->getClade() << endl;
+}
+
+void CladeGraph::printMaps(ostream& f)
+{
+  f << "Clade Map:" << endl;
+  printCladeMap(f);
+  f << endl;
+  f << "Size Map:" << endl;
+  printSizeMap(f);
+  f << endl;
+}
+
+void CladeGraph::findMeanTree(vector<string> trees,Alignment& alignment)
 {
   int foo = 0;
-  cerr << "Checkpoint " << ++foo << endl;
-  processTrees(trees);
-  cerr << "Checkpoint " << ++foo << endl;
+  processTrees(trees,alignment);
   setMeanLengths();
-  cerr << "Checkpoint " << ++foo << endl;
   setValues();
-  cerr << "Checkpoint " << ++foo << endl;
+  printMaps(cerr);
   root->setSubtree(true);
-  cerr << "Checkpoint " << ++foo << endl;
   meanTree = root->getSubtree();
-  cerr << "Checkpoint " << ++foo << endl;
 }
 
 void CladeGraph::addCladeToMaps(dynamic_bitset<unsigned char> clade)
@@ -220,6 +235,6 @@ void CladeGraph::addPairToCladeNodeSet(dynamic_bitset<unsigned char> clade,
 
 void CladeGraph::addLength(dynamic_bitset<unsigned char> clade,double x)
 {
-  cerr << "adding " << x << " to " << clade << endl;
+  cerr << "+++ " << clade << " " << x << endl;
   cladeMap[clade]->addLength(x);
 }

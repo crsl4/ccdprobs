@@ -537,7 +537,7 @@ int main(int argc, char* argv[])
 //    cerr << endl << "successful mean of trees" << endl << meanTree << endl;
 //    cout << endl << "successful mean of trees" << endl << meanTree << endl;
     CladeGraph cladeGraph;
-    cladeGraph.findMeanTree(bootstrapStrings);
+    cladeGraph.findMeanTree(bootstrapStrings,alignment);
     string meanTree = cladeGraph.getMeanTree();
     cerr << "meanTree = " << meanTree << endl;
 
