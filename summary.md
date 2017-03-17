@@ -2,6 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- do map with tree+BL, but we need one weight per tree topology for topCounts
 - bring back main-threads stuff with the map, but maybe we now need a multimap (same topology has many distances for different BLs); and we need to decide on a weight function based on distance; compare distance weight to parsimony weight
 
 - change ccd to be run with distance weights, and run artiodactyl and compare to previous ESS

@@ -1,3 +1,6 @@
+## check if distance weights are computed correctly
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o dist -r 1000 -b 1000 --onlyBootstrap -s 875220241 > dist.log 
+
 ## test mean distances:
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --onlyBootstrap -s 3110090550 > tmp.log 
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --onlyBootstrap > tmp.log
