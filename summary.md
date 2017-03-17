@@ -2,8 +2,6 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- create distance function with the new stuff
-- compare new distance to old distance (new main threads does not have the old distance anymore, need to check to written files)
 - bring back main-threads stuff with the map, but maybe we now need a multimap (same topology has many distances for different BLs); and we need to decide on a weight function based on distance; compare distance weight to parsimony weight
 
 - change ccd to be run with distance weights, and run artiodactyl and compare to previous ESS
@@ -15,9 +13,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- need to git pull his changes, later add my stuff
-- had to add "continue" to the bootstrap so that the maps have the same topologies
-- sometimes segmentation fault: sometimes + printed (few/many), sometimes not!
+- multimap for weights
 - distance weight, how to compute? as parsimony including bootstrap counts? when doing this, too similar to what we had already: artiodactyl and cats-dogs: also, maybe we don't want to do what I am doing, because the weight is for topology only, but distance has BL, so now I am using the first one! I think that we need a multimap
 
 - In MCMC, Q steps done 10 times for every BL step
