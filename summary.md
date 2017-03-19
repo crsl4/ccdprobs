@@ -2,12 +2,10 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- do map with tree+BL, but we need one weight per tree topology for topCounts
-- bring back main-threads stuff with the map, but maybe we now need a multimap (same topology has many distances for different BLs); and we need to decide on a weight function based on distance; compare distance weight to parsimony weight
-
 - change ccd to be run with distance weights, and run artiodactyl and compare to previous ESS
 
 - comment difference between fixedQ and no-mcmc
+- get rid of liglik weights
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots

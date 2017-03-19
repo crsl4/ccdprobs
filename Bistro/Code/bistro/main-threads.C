@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
     cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
     map<string,int> topologyToParsimonyScoreMap;
     map<string,double> topologyToLogLikScoreMap;
-    map<string,double> topologyToDistanceMap;
+//    map<string,double> topologyToDistanceMap;
     int minimumParsimonyScore = -1;
     double maximumLogLikScore = -1.0;
     MatrixXd bootDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -455,6 +455,8 @@ int main(int argc, char* argv[])
     ofstream bootstrapTrees(bootstrapTreesFile.c_str());
     string bootstrapTreesFileBL = parameters.getOutFileRoot() + ".bootstrapBL";
     ofstream bootstrapTreesBL(bootstrapTreesFileBL.c_str());
+    string bootstrapTreesDistances = parameters.getOutFileRoot() + ".distances";
+    ofstream bootstrapTreesDist(bootstrapTreesDistances.c_str());
     // vector of strings trees
     // change to using push_back() to avoid keeping bad trees
     vector<string> bootstrapStrings;
@@ -519,6 +521,8 @@ int main(int argc, char* argv[])
 	cerr << "Warning: found " << badTrees << " bootstrap tree" << (badTrees > 1 ? "s" : "") << "with nan edge lengths." << endl;
     }
     bootstrapTrees.close();
+    bootstrapTreesBL.close();
+
     cerr << endl << "    ... done." << endl;
 
     // mean tree
@@ -551,7 +555,7 @@ int main(int argc, char* argv[])
     Tree mtree(meanTree,alignment);
 //    cerr << "read mean tree correctly" << endl;
     int badTrees = 0;
-    double maximumDistance = -1.0;
+//    double maximumDistance = -1.0;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
     {
 //      cerr << "bootstrap tree: " << (*t) << endl;
@@ -569,20 +573,15 @@ int main(int argc, char* argv[])
       boottree->makeBinary();
       boottree->sortCanonical();
       string topDist = boottree->makeTopologyNumbers();
-      if ( topologyToDistanceMap.find(topDist) == topologyToDistanceMap.end() )
-      {
-	topologyToDistanceMap[ topDist ] = d;
-	if ( d > maximumDistance )
-	{
-	  cerr << "maximum distance: " << maximumDistance << endl;
-	  maximumDistance = d;
-	}
-      }
+      bootstrapTreesDist << topDist << " " << d << endl;
+      if ( topologyToDistanceWeightMap.find(topDist) == topologyToDistanceWeightMap.end() )
+	topologyToDistanceWeightMap[ topDist ] += exp(-parameters.getParsimonyScale() * d);
       delete boottree;
     }
-    cerr << "maximum distance: " << maximumDistance << endl;
-    for ( map<string,double>::iterator m=topologyToDistanceMap.begin(); m != topologyToDistanceMap.end(); ++m )
-      cerr << "topology to distance weight, tree: " << (*m).first << " distance: " << (*m).second << endl;
+    bootstrapTreesDist.close();
+
+    for ( map<string,double>::iterator m=topologyToDistanceWeightMap.begin(); m != topologyToDistanceWeightMap.end(); ++m )
+      cerr << "topology to distance weight, tree: " << (*m).first << " distance weight: " << (*m).second << endl;
 
     if ( badTrees > 0 )
       cerr << "Warning: found " << badTrees << " bootstrap trees with nan edge lengths." << endl;
@@ -592,9 +591,6 @@ int main(int argc, char* argv[])
       topologyToWeightMap[ (*m).first ] =
 	(*m).second * exp( parameters.getParsimonyScale() *
 			   (minimumParsimonyScore - topologyToParsimonyScoreMap[ (*m).first ]) );
-      topologyToDistanceWeightMap[ (*m).first ] =
-	(*m).second * exp( parameters.getParsimonyScale() *
-			   (topologyToDistanceMap[ (*m).first ] - maximumDistance) );
       if( parameters.getLoglikWt() )
       {
 	topologyToLogLikWeightMap[ (*m).first ] =
@@ -602,7 +598,6 @@ int main(int argc, char* argv[])
 			     (topologyToLogLikScoreMap[ (*m).first ] - maximumLogLikScore) );
       }
     }
-
     cout << endl << "Topology counts to file" << endl;
     cerr << endl << "Topology counts to file" << endl;
     {
@@ -614,7 +609,7 @@ int main(int argc, char* argv[])
       topCounts << "tree count parsimonyWt parsimonyScore parsimonyDiff";
       if( parameters.getLoglikWt() )
 	topCounts << " loglikWt loglikScore loglikDiff";
-      topCounts << " distanceWt distance distDiff" << endl;
+      topCounts << " distanceWt" << endl;
       for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
       {
 	cerr << "inside for" << endl;
@@ -634,7 +629,6 @@ int main(int argc, char* argv[])
 	  ++loglwm;
 	}
 	topCounts << setw(10) << setprecision(4) << fixed << (*distwm).second << flush;
-	topCounts << " " << setw(5) << topologyToDistanceMap[ (*cm).first ] << " " << setw(4) << topologyToDistanceMap[ (*cm).first ] - maximumDistance << flush;
 	++distwm;
 	topCounts << endl;
 	++wm;
@@ -653,6 +647,7 @@ int main(int argc, char* argv[])
     topologyToCountMap[ t ]++;
     topologyToWeightMap[ t ] = 1.0;
     topologyToLogLikWeightMap[ t ] = 1.0;
+    topologyToDistanceWeightMap[ t ] = 1.0;
   }
 
 
