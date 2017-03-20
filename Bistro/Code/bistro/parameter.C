@@ -26,11 +26,10 @@ void usage(ostream& f)
   f << "    -p stationary-distribution     |  [ not used ] four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
   f << "    -q symmetric-q-parameters      |  [ not used ] six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
-  f << "    --no-reweight                  |  do *not* reweight bootstrap sample with weight proportional to exp(-parsimony/loglik score)" << endl;
-  f << "    --parsimony-scale scale        |  scale to compute the weights from counts, positive number (0.5)" << endl;
+  f << "    --no-reweight                  |  do *not* reweight bootstrap sample with weight proportional to exp(-distance)" << endl;
+  f << "    --weight-scale scale           |  scale to compute the distance weights from counts, positive number (200)" << endl;
   f << "    --threads num                  |  number of threads for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;
   f << "    --fixedQ                       |  multiply dirichlet scale by 10million, and artificially set logQ=0" << endl;
-  f << "    --loglikweight                 |  use loglik to weight bootstrap counts instead of parsimony" << endl;
   f << "    --eta eta                      |  scale to divide the variance of gamma r.v. for branch lengths (1)" << endl;
   f << "    --rootFix                      |  fix the root at one of the two nodes attached to longest branch (false)" << endl;
   f << "    --weightMean                   |  weight the MLE with prior mean (false)" << endl;
@@ -265,21 +264,17 @@ void Parameter::processCommandLine(int argc,char* argv[])
     {
       reweight = false;
     }
-    else if ( strcmp(argv[k],"--loglikweight") == 0 )
-    {
-      loglikwt = true;
-    }
-    else if ( strcmp(argv[k],"--parsimony-scale") == 0 )
+    else if ( strcmp(argv[k],"--weight-scale") == 0 )
     {
       if ( ++k < argc )
       {
         stringstream s;
         s << argv[k];
-        s >> parsimonyScale;
+        s >> weightScale;
       }
       else
       {
-        cerr << "Error: flag `--parsimony-scale' not followed by a postive value" << endl;
+        cerr << "Error: flag `--weight-scale' not followed by a postive value" << endl;
         usage(cerr);
       }
     }

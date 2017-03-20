@@ -23,10 +23,9 @@ private:
   bool independent;
   bool jointMLE;
   bool reweight;
-  double parsimonyScale;
+  double weightScale;
   unsigned int numThreads;
   bool fixedQ;
-  bool loglikwt;
   double eta;
   bool rootFix;
   bool weightMean;
@@ -48,10 +47,9 @@ public:
     independent = false;
     jointMLE = false;
     reweight = true;
-    parsimonyScale = 0.5;
+    weightScale = 200;
     numThreads = 0;
     fixedQ = false;
-    loglikwt = false;
     eta = 1.0;
     rootFix = false;
     weightMean = false;
@@ -84,15 +82,13 @@ public:
   void setOutFileRoot(string name) { outFileRoot = name; }
   bool getReweight() const { return reweight; }
   void setReweight(bool b) { reweight = b; }
-  double getParsimonyScale() const { return parsimonyScale; }
-  void setParsimonyScale(double x) { parsimonyScale = x; }
+  double getWeightScale() const { return weightScale; }
+  void setWeightScale(double x) { weightScale = x; }
   void processCommandLine(int,char* []);
   void setNumThreads(unsigned int b) { numThreads = b; }
   unsigned int getNumThreads() const { return numThreads; }
   bool getFixedQ() const { return fixedQ; }
   void setFixedQ(bool b) { fixedQ = b; }
-  bool getLoglikWt() const { return loglikwt; }
-  void setLoglikWt(bool b) { loglikwt = b; }
   double getEta() const { return eta; }
   void setEta(double x) { eta = x; }
   bool getRootFix() const { return rootFix; }

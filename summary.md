@@ -2,21 +2,17 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- change ccd to be run with distance weights, and run artiodactyl and compare to previous ESS
+- check all the places were parsimonyScale is being used, change to have another parameter for distance weights?
+- get rid of loglik weights
+- comment difference between fixedQ and no-mcmc, what is the variance if no fixedQ is specified but no-mcmc is?
+- rerun cats dogs mrbayes, compare to bistro with the new distance weights now
 
-- comment difference between fixedQ and no-mcmc
-- get rid of liglik weights
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 
 ## Check with Bret
-- multimap for weights
-- distance weight, how to compute? as parsimony including bootstrap counts? when doing this, too similar to what we had already: artiodactyl and cats-dogs: also, maybe we don't want to do what I am doing, because the weight is for topology only, but distance has BL, so now I am using the first one! I think that we need a multimap
-
-- In MCMC, Q steps done 10 times for every BL step
-- make MCMC more efficient
 - Sequential IS?
 
 ## Jordan
