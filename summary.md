@@ -2,8 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- check all the places were parsimonyScale is being used, change to have another parameter for distance weights?
-- get rid of loglik weights
+
 - comment difference between fixedQ and no-mcmc, what is the variance if no fixedQ is specified but no-mcmc is?
 - rerun cats dogs mrbayes, compare to bistro with the new distance weights now
 

@@ -332,15 +332,23 @@ int main(int argc, char* argv[])
     s0 = s_pairwise;
 
   QMatrix q_init(p0,s0);
+// initial mcmc var (just so that there are not zeros)
+  Vector4d vp0;
+  for ( int j=0; j<4; ++j )
+    vp0(j) = p0(j)*(1-p0(j));
 
-//  parameters.setFixedQ(enteredPorS);
+  VectorXd vs0(6);
+  for ( int j=0; j<6; ++j )
+    vs0(j) = s0(j)*(1-s0(j));
 
-// old initialization of Q:
-//  vector<double> p_init(4,0.25);
-  // vector<double> s_init(6,0.1);
-  // s_init[1] = 0.3;
-  // s_init[4] = 0.3;
-//  QMatrix q_init(p_init,s_init);
+  q_init.setMcmcVarP(vp0);
+  q_init.setMcmcVarQP(vs0);
+
+  cerr << "initial Q: "<< endl;  
+  cerr << q_init.getStationaryP() << endl;
+  cerr <<  q_init.getSymmetricQP() << endl;
+  cerr << q_init.getMcmcVarP() << endl;
+  cerr << q_init.getMcmcVarQP() << endl;
 
 // ------------------------------ Put MLE branch lengths to tree -------------------------
   for ( int i=0; i<4; ++i )
@@ -359,21 +367,13 @@ int main(int argc, char* argv[])
 
     // burnin
     cerr << "burn-in:" << endl;
-    //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
     starttree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
-//    q_init.mcmc(alignment,starttree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
     cerr << endl << " done." << endl;
-    // cout << "Start tree after MCMC burnin: " << endl;
-    // cout << starttree.makeTreeNumbers() << endl;
 
     // mcmc to get final Q
     cerr << "sampling:" << endl;
-    //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
     starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
-//    q_init.mcmc(alignment,starttree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
     cerr << endl << " done." << endl;
-    // cout << "Start tree after MCMC: " << endl;
-    // cout << starttree.makeTreeNumbers() << endl;
 
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
 // save to file)

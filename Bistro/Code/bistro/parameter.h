@@ -47,7 +47,7 @@ public:
     independent = false;
     jointMLE = false;
     reweight = true;
-    weightScale = 200;
+    weightScale = 20;
     numThreads = 0;
     fixedQ = false;
     eta = 1.0;
