@@ -6,7 +6,6 @@
 #define MCMC_Q_BURN 100
 #define MCMC_Q_SAMPLE 1000
 
-
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -553,7 +552,7 @@ int main(int argc, char* argv[])
 
     // calculate distance from trees to mean tree
     Tree mtree(meanTree,alignment);
-//    cerr << "read mean tree correctly" << endl;
+    cerr << "mean tree topology = " << mtree.makeTreeNumbers() << endl;
     int badTrees = 0;
 //    double maximumDistance = -1.0;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
@@ -575,13 +574,15 @@ int main(int argc, char* argv[])
       string topDist = boottree->makeTopologyNumbers();
       bootstrapTreesDist << topDist << " " << d << endl;
       if ( topologyToDistanceWeightMap.find(topDist) == topologyToDistanceWeightMap.end() )
+	topologyToDistanceWeightMap[ topDist ] = exp(-parameters.getParsimonyScale() * d);
+      else
 	topologyToDistanceWeightMap[ topDist ] += exp(-parameters.getParsimonyScale() * d);
       delete boottree;
     }
     bootstrapTreesDist.close();
 
-    for ( map<string,double>::iterator m=topologyToDistanceWeightMap.begin(); m != topologyToDistanceWeightMap.end(); ++m )
-      cerr << "topology to distance weight, tree: " << (*m).first << " distance weight: " << (*m).second << endl;
+//    for ( map<string,double>::iterator m=topologyToDistanceWeightMap.begin(); m != topologyToDistanceWeightMap.end(); ++m )
+//      cerr << "topology to distance weight, tree: " << (*m).first << " distance weight: " << (*m).second << endl;
 
     if ( badTrees > 0 )
       cerr << "Warning: found " << badTrees << " bootstrap trees with nan edge lengths." << endl;
@@ -612,7 +613,6 @@ int main(int argc, char* argv[])
       topCounts << " distanceWt" << endl;
       for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
       {
-	cerr << "inside for" << endl;
 	Tree t((*cm).first,alignment);
 	t.unroot();
 	t.reroot(1);
@@ -659,8 +659,8 @@ int main(int argc, char* argv[])
 
 // --------------------- Clade distribution from bootstrap sample ------------------------------------
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
-  CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
-  CCDProbs<double> ccdLogLik(topologyToLogLikWeightMap,taxaNumbers,taxaNames);
+//  CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
+//  CCDProbs<double> ccdLogLik(topologyToLogLikWeightMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdDist(topologyToDistanceWeightMap,taxaNumbers,taxaNames);
   // write map out to temp files to check
   string originalSmapFile = parameters.getOutFileRoot() + "-nopars.smap";
@@ -677,18 +677,18 @@ int main(int argc, char* argv[])
   ofstream tmap(originalTmapFile.c_str());
   ccd.writePairCount(tmap);
   tmap.close();
-  smap.open(parsimonySmapFile);
-  ccdParsimony.writeCladeCount(smap);
-  smap.close();
-  tmap.open(parsimonyTmapFile);
-  ccdParsimony.writePairCount(tmap);
-  tmap.close();
-  smap.open(loglikSmapFile);
-  ccdLogLik.writeCladeCount(smap);
-  smap.close();
-  tmap.open(loglikTmapFile);
-  ccdLogLik.writePairCount(tmap);
-  tmap.close();
+  // smap.open(parsimonySmapFile);
+  // ccdParsimony.writeCladeCount(smap);
+  // smap.close();
+  // tmap.open(parsimonyTmapFile);
+  // ccdParsimony.writePairCount(tmap);
+  // tmap.close();
+  // smap.open(loglikSmapFile);
+  // ccdLogLik.writeCladeCount(smap);
+  // smap.close();
+  // tmap.open(loglikTmapFile);
+  // ccdLogLik.writePairCount(tmap);
+  // tmap.close();
   smap.open(distSmapFile);
   ccdDist.writeCladeCount(smap);
   smap.close();
@@ -762,10 +762,11 @@ int main(int argc, char* argv[])
       if ( !parameters.getReweight() )
 	threads.push_back(thread(randomTrees<int>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       else
-	if( parameters.getLoglikWt() )
-	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdLogLik, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
-	else
-	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+//	if( parameters.getLoglikWt() )
+//	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdLogLik, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+//	else
+//	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdDist, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
 
     for(auto &t : threads){

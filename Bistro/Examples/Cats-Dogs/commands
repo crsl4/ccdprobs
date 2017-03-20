@@ -1,3 +1,6 @@
+## sed command to get mean tree topology from the file
+sed -E "s/:0\.[0-9]+//g;" test2.meanTree
+
 ## check distance weight output files
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist -r 1000 -b 1000 --onlyBootstrap -p 0.241304,0.23434,0.204346,0.32001 -q 0.0472446,0.293237,0.0682563,0.0137919,0.566251,0.0112188 --no-MCMC > dist.log
 

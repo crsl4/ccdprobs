@@ -210,7 +210,7 @@ void CladeGraph::findMeanTree(vector<string> trees,Alignment& alignment)
   processTrees(trees,alignment);
   setMeanLengths();
   setValues();
-  printMaps(cerr);
+//  printMaps(cerr);
   root->setSubtree(true);
   meanTree = root->getSubtree();
 }

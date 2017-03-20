@@ -2561,7 +2561,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,
       double r = exp(LAMBDA*(runif(rng)-0.5));
       double yyy = xxx * r;
       (*e)->setLength(yyy);
-      clearProbMaps();
+//      clearProbMaps();
       propLogLikelihood = calculate(alignment,Q); //make faster later
       acceptProbability = exp(propLogLikelihood - currLogLikelihood + log(r));
       if ( acceptProbability > 1 )

@@ -88,6 +88,37 @@ plotBistro = function(bistro) {
     return(invisible(my.plot))
 }
 
+plotBistro2 = function(bistro) {
+  require(ggplot2)
+  require(viridis)
+  temp.tree = as.character(bistro$tree)
+  tab = with(bistro, rev(sort(table(tree))))
+  if ( length(levels(bistro$tree)) > 6 ) {
+    ##        tab = with(bistro, rev(sort(table(tree))))
+    top.trees = names(tab)[1:5]
+    temp.tree[ !(bistro$tree %in% top.trees) ] = "other"
+  }
+  bistro$Tree = factor(temp.tree)
+  rm(temp.tree)
+  bistro$Rank = 6
+  n = length(names(tab))
+  for ( i in 1:6 )
+  {
+    if ( i < n )
+      bistro$Rank[bistro$Tree==names(tab)[i]] = i
+  }
+  bistro$Tree = with( bistro, reorder(Tree,Rank) )
+  ##    viridis.scale = viridis(n=length(levels(bistro$Tree)))
+  bistro = bistro %>% mutate(logTarget = logl + logPrior, logProposal = logBL + logTop + logQ)
+  my.plot = ggplot(bistro,aes(x=logProposal,y=logTarget-logProposal,color=w,shape=Tree)) +
+    geom_point() +
+    scale_color_viridis() +
+    ##coord_fixed() +
+    theme(legend.position="top")
+  plot(my.plot)
+  return(invisible(my.plot))
+}
+
 plotProb = function(data){
     require(ggplot2)
     p2 <- ggplot(aes(x=tree,y=prob), data=data) +
