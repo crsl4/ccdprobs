@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
   cout << endl;
 
 // Read in initial tree topology
-  Tree tree(parameters.getTopology());
+  Tree tree(parameters.getTopology(), alignment);
   tree.setInitialEdgeLengths(0.1);
   
   milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );

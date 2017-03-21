@@ -16,18 +16,18 @@ summaryBistro = function(stem, besttree=NULL)
   pdf(paste0(stem,"-cloud.pdf"))
   plotBistro(bistro)
   dev.off()
-  
+
   keep = which(bistro$tree==besttree)
   tre.bistro = data$V1[keep]
   tree=read.tree(text=as.character(tre.bistro[1]))
-  
+
   N.bistro = length(tre.bistro)
   ## get number of edges
   m.bistro = matrix(0,N.bistro,length(tree$edge[,1]))
   colnames(m.bistro) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
-  
- 
-  
+
+
+
   for ( i in 1:N.bistro )
   {
     tree = read.tree(text=as.character(tre.bistro[i]))
@@ -37,11 +37,11 @@ summaryBistro = function(stem, besttree=NULL)
   df = data.frame(m.bistro)
   df$set = factor(rep("Bistro",N.bistro))
   adjEdges = getAdjacentEdges(tree)
-  
+
   require(viridis)
   require(ggplot2)
   require(dplyr)
-  
+
   pdf(paste0(stem,"-scatter.pdf"))
   vpal = viridis(2,end=0.8)
   for( i in 1:nrow(adjEdges))
@@ -50,7 +50,7 @@ summaryBistro = function(stem, besttree=NULL)
     i2 = adjEdges[i,2]
     median.bistro.1 = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i1))) )
     median.bistro.2 = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i2))) )
-    
+
     plot(
       ggplot(df,aes(x=df[,adjEdges[i,1]],
                     y=df[,adjEdges[i,2]],
@@ -66,25 +66,25 @@ summaryBistro = function(stem, besttree=NULL)
     )
   }
   dev.off()
-  
+
   pdf(paste0(stem,"-density.pdf"))
   vpal = viridis(2,end=0.8)
   for(i in 1:ncol(m.bistro))
   {
     median.bistro = mean( drop(as.matrix(filter(df,set=="Bistro") %>% select(i))) )
-    
+
     plot(ggplot(df,aes(x=df[,i],col=set))+geom_density() +
            scale_color_manual(values=vpal) +
            geom_vline(xintercept=median.bistro,color=vpal[1]) +
            ggtitle(paste(names(df)[i])) +
            theme_bw())
-    
+
   }
   dev.off()
-  
+
 ##  df2 = rbind(bistro)
 ##  df2$set = factor( rep("Bistro",nrow(bistro)) )
-  
+
 ##pdf(paste0(stem,"-rates-density.pdf"))
 ##  vpal = viridis(2,end=0.8)
 ##  if(length(q) != 10)

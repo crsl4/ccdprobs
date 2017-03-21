@@ -2,16 +2,15 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-
-- comment difference between fixedQ and no-mcmc, what is the variance if no fixedQ is specified but no-mcmc is?
-- rerun cats dogs mrbayes, compare to bistro with the new distance weights now
-
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 
 ## Check with Bret
+- same results with cats-dogs in mrbayes, does he have another nexus file that he used for the paper?
+- we have bad results now with bistro because of the random root thing (cats dogs need a good root): although rootFix did not solve this
+- we cannot compare bistro (dist2) with bmcmc (mcmc2) because in mcmc2 it is not written as sort canonical, don't know why!
 - Sequential IS?
 
 ## Jordan
