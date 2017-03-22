@@ -345,12 +345,6 @@ int main(int argc, char* argv[])
   q_init.setMcmcVarP(vp0);
   q_init.setMcmcVarQP(vs0);
 
-  cerr << "initial Q: "<< endl;  
-  cerr << q_init.getStationaryP() << endl;
-  cerr <<  q_init.getSymmetricQP() << endl;
-  cerr << q_init.getMcmcVarP() << endl;
-  cerr << q_init.getMcmcVarQP() << endl;
-
 // ------------------------------ Put MLE branch lengths to tree -------------------------
   for ( int i=0; i<4; ++i )
   {

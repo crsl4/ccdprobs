@@ -1,0 +1,32 @@
+#NEXUS
+[ID: 6592118272]
+[This file contains the trees that were found during the MCMC
+search, sorted by posterior probability. "p" indicates the
+posterior probability of the tree whereas "P" indicates the
+cumulative posterior probability.]
+
+begin trees;
+   translate
+    1 Felis_catus___domestic_cat,
+    2 Acinonyx_jubatus___cheetah,
+    3 Neofelis_nebulosa___clouded_leopard,
+    4 Uncia_uncia___snow_leopard,
+    5 Panthera_pardus___leopard,
+    6 Panthera_tigris___tiger,
+    7 Canis_lupus_familiaris___domestic_dog,
+    8 Canis_lupus___gray_wolf,
+    9 Canis_latrans___coyote,
+   10 Cuon_alpinus___dhole,
+   11 Vulpes_vulpes___red_fox,
+   12 Nyctereutes_procyonoides___raccoon_dog;
+   tree tree_1 [p = 0.787, P = 0.787] = [&W 0.786589] (((11,(12,(10,(9,(8,7))))),2),((6,(5,4)),3),1);
+   tree tree_2 [p = 0.141, P = 0.928] = [&W 0.140961] (2,((11,(12,(10,(9,(8,7))))),((6,(5,4)),3)),1);
+   tree tree_3 [p = 0.035, P = 0.962] = [&W 0.034816] (((11,(12,(10,(9,(8,7))))),2),((5,4),(6,3)),1);
+   tree tree_4 [p = 0.022, P = 0.984] = [&W 0.021726] ((((12,11),(10,(9,(8,7)))),2),((6,(5,4)),3),1);
+   tree tree_5 [p = 0.015, P = 0.999] = [&W 0.014848] (2,((11,(12,(10,(9,(8,7))))),((5,4),(6,3))),1);
+   tree tree_6 [p = 0.001, P = 0.999] = [&W 0.000515] ((((12,11),(10,(9,(8,7)))),2),((5,4),(6,3)),1);
+   tree tree_7 [p = 0.000, P = 1.000] = [&W 0.000273] (2,(((12,11),(10,(9,(8,7)))),((6,(5,4)),3)),1);
+   tree tree_8 [p = 0.000, P = 1.000] = [&W 0.000152] (((11,(12,(10,(9,(8,7))))),2),(6,((5,4),3)),1);
+   tree tree_9 [p = 0.000, P = 1.000] = [&W 0.000061] (2,(((12,11),(10,(9,(8,7)))),((5,4),(6,3))),1);
+   tree tree_10 [p = 0.000, P = 1.000] = [&W 0.000061] (2,((11,(12,(10,(9,(8,7))))),(6,((5,4),3))),1);
+end;

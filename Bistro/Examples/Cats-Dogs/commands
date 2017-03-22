@@ -1,3 +1,9 @@
+## compare the distance weights
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist2 -r 1000 -b 1000 > dist2.log
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist-fix -r 1000 -b 1000 --fixedQ > dist-fix.log
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist-root -r 1000 -b 1000 --rootFix > dist-root.log
+../../Code/bistro/bmcmc -f ../../Data/cats-dogs.fasta -o mcmc2 -r 10000 -b 1000 -t "(Felis_catus___domestic_cat,(Acinonyx_jubatus___cheetah,(((((Canis_lupus_familiaris___domestic_dog,Canis_lupus___gray_wolf),Canis_latrans___coyote),Cuon_alpinus___dhole),Vulpes_vulpes___red_fox),Nyctereutes_procyonoides___raccoon_dog)),(Neofelis_nebulosa___clouded_leopard,((Uncia_uncia___snow_leopard,Panthera_pardus___leopard),Panthera_tigris___tiger)));" > mcmc2.log
+
 ## sed command to get mean tree topology from the file
 sed -E "s/:0\.[0-9]+//g;" test2.meanTree
 
@@ -9,7 +15,7 @@ java -jar ../../../src/centroid-code/SturmMean/SturmMean.jar test2.bootstrapBL >
 
 ## short example that causes a segmentation fault
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o test1 -r 1000 -b 100 --onlyBootstrap -p 0.241304,0.23434,0.204346,0.32001 -q 0.0472446,0.293237,0.0682563,0.0137919,0.566251,0.0112188 --no-MCMC -s 2460409026 > test1.log
-  
+
 ## test distance
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o test1 -r 1000 -b 1000 --onlyBootstrap -p 0.241304,0.23434,0.204346,0.32001 -q 0.0472446,0.293237,0.0682563,0.0137919,0.566251,0.0112188 --no-MCMC > test1.log
 
