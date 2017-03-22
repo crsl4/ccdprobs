@@ -37,7 +37,7 @@ void Edge::print(ostream& f)
 {
   f << setw(3) << number << ":";
   f << " n[" << (nodes[0])->getNumber() << "] <-> " << "n[" << (nodes[1])->getNumber() << "]";
-  f << " length = " << setprecision(8) << length[current] << endl;
+  f << " length = " << setprecision(8) << length << endl;
 }
 
 void Tree::print(ostream& f)
@@ -488,8 +488,8 @@ Vector4d translate(char base)
 
 pair<double,Vector4d> Node::getProb() // pattern must be set
 {
-  map<string,pair<double,Vector4d> >::iterator m=patternToProbMap[current].find(pattern);
-  if ( m != patternToProbMap[current].end() )
+  map<string,pair<double,Vector4d> >::iterator m=patternToProbMap.find(pattern);
+  if ( m != patternToProbMap.end() )
     return m->second;
   else
   {
@@ -538,10 +538,10 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
   {
     char base = alignment.getBase(number,site);
     base = tolower(base);
-    m = patternToProbMap[current].find(pattern);
-    if ( m == patternToProbMap[current].end() ) // first time this pattern calculated
+    m = patternToProbMap.find(pattern);
+    if ( m == patternToProbMap.end() ) // first time this pattern calculated
     {
-      patternToProbMap[current][ pattern ] = pair<double,Vector4d> (0,translate( base ));
+      patternToProbMap[ pattern ] = pair<double,Vector4d> (0,translate( base ));
 //      cerr << "  " << pattern << " --> " << 0 << "," << translate(base).transpose() << endl;
     }
     return;
@@ -558,8 +558,8 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
   }
   // if( VERBOSE)
   //   cout << "Calculate after pattern for node: " << number << " for site " << site << endl << flush;
-  m = patternToProbMap[current].find(pattern);
-  if ( m == patternToProbMap[current].end() ) // first time this pattern calculated
+  m = patternToProbMap.find(pattern);
+  if ( m == patternToProbMap.end() ) // first time this pattern calculated
   {
     double scale=0;
     Vector4d tempProb(1,1,1,1);
@@ -584,7 +584,7 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
     double vmax = tempProb.maxCoeff();
     scale += log( vmax );
     tempProb /= vmax;
-    patternToProbMap[current][ pattern ] = pair<double,Vector4d> (scale,tempProb);
+    patternToProbMap[ pattern ] = pair<double,Vector4d> (scale,tempProb);
     // if(VERBOSE)
     //   cout << "  " << pattern << " --> " << scale << "," << tempProb.transpose() << endl;
   }
@@ -647,7 +647,7 @@ void Node::clearProbMaps(Edge* parent)
 	getNeighbor(*e)->clearProbMaps(*e);
     }
 //  cout << "clearing prob maps and mapParent for node: " << number << endl << flush;
-  patternToProbMap[current].clear();
+  patternToProbMap.clear();
   mapParent = NULL;
 }
 
@@ -672,7 +672,7 @@ void Node::clearProbMapsSmart(Edge* parent)
   if( mapParent != parent)
     {
 //      cout << "clearing prob maps and mapParent for node: " << number << endl << flush;
-      patternToProbMap[current].clear();
+      patternToProbMap.clear();
       mapParent = NULL;
     }
 }
@@ -740,7 +740,7 @@ void Tree::randomizeBL(mt19937_64& rng)
 	root = maxEdge->getNode(1);
     }
   root->randomize(rng,NULL);
-//  setNodeLevels();
+  setNodeLevels();
 }
 
 Edge* Tree::whichMaxBranch()
@@ -938,8 +938,8 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
 	// cout << nodes[0]->getPattern() << endl;
 	// cout << nodes[1]->getPattern() << endl;
       }
-    pair<double,Vector4d> pa = nodes[0]->getProb(); //patternToProbMap[current][nodes[0]->getPattern()];
-    pair<double,Vector4d> pb = nodes[1]->getProb(); //patternToProbMap[current][nodes[1]->getPattern()];
+    pair<double,Vector4d> pa = nodes[0]->patternToProbMap[nodes[0]->getPattern()];
+    pair<double,Vector4d> pb = nodes[1]->patternToProbMap[nodes[1]->getPattern()];
     if(false)
       cout << pa.second.transpose() << " // " << pb.second.transpose() << endl;
     Vector4d va = pa.second;
@@ -967,7 +967,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   if(VERBOSE)
     cout << "starting mleLength" << endl;
   int iter=0;
-  double curr = length[current];
+  double curr = length;
   // trying to avoid really bad large initial values
   if ( curr > 1 )
     curr = 1.0;
@@ -1122,7 +1122,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
     if ( ++iter > 100 )
     {
       cerr << "Warning: too many iterations in protected Newton-Raphson";
-      length[current] = curr;
+      length = curr;
       mleError(converge);
     }
     double delta = -curr_dlogl / curr_ddlogl;
@@ -1168,28 +1168,28 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
 
   bool converge;
   // set length to MLE distance
-  length[current] = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
+  length = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
 //  cout << "Setting length from mleLength to edge: " << number << endl << flush;
   if ( !onlyMLE )
   {
-    if ( length[current] < MIN_EDGE_LENGTH + 1.0e-08 ) // generate from exponential
+    if ( length < MIN_EDGE_LENGTH + 1.0e-08 ) // generate from exponential
     {
       double lambda = 1.0 / (MIN_EDGE_LENGTH) ;
       exponential_distribution<double> rexp(lambda);
-      length[current] = rexp(rng);
-      logProposalDensity += log(lambda) - lambda*length[current];
+      length = rexp(rng);
+      logProposalDensity += log(lambda) - lambda*length;
     }
     else // generate from gamma
     {
       double logl,dlogl,ddlogl;
-      calculate(length[current],alignment,qmatrix,logl,dlogl,ddlogl);
-      double lambda = -1 * length[current] * ddlogl;
-      double alpha = length[current]*lambda;
+      calculate(length,alignment,qmatrix,logl,dlogl,ddlogl);
+      double lambda = -1 * length * ddlogl;
+      double alpha = length*lambda;
       gamma_distribution<double> rgamma(alpha,1.0 / lambda);
-      length[current] = rgamma(rng);
+      length = rgamma(rng);
       // if(isnan(length))
       // 	cerr << "found nan bl with alpha: " << alpha << " and lambda: " << lambda << endl;
-      logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length[current]) - lambda*length[current];
+      logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length) - lambda*length;
     }
   }
 //  cerr << "Setting edge " << number << " length to " << length << endl;
@@ -1711,7 +1711,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     (*e)->calculate(qmatrix);
   list<Node*> nodeList;
-  //postorderCherryNodeList(nodeList);
+  postorderCherryNodeList(nodeList);
   //depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
   if(VERBOSE)
@@ -2093,9 +2093,9 @@ void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
     nx->calculate(k,alignment,ex);//,recurse); // set pattern and put probability in map if not already there
     ny->calculate(k,alignment,ey);//,recurse);
     nz->calculate(k,alignment,ez);//,recurse);
-    pair<double,Vector4d> px = nx->getProb(); //patternToProbMap[current][nx->getPattern()];
-    pair<double,Vector4d> py = ny->getProb(); //patternToProbMap[current][ny->getPattern()];
-    pair<double,Vector4d> pz = nz->getProb(); //patternToProbMap[current][nz->getPattern()];
+    pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
+    pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
+    pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
 
     Vector4d S1 = P1 * px.second.asDiagonal() * ones;
     Vector4d S2 = P2 * py.second.asDiagonal() * ones;
@@ -2162,9 +2162,9 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
     nx->calculate(k,alignment,ex);//,recurse); // set pattern and put probability in map if not already there
     ny->calculate(k,alignment,ey);//,recurse);
     nz->calculate(k,alignment,ez);//,recurse);
-    pair<double,Vector4d> px = nx->getProb(); //patternToProbMap[current][nx->getPattern()];
-    pair<double,Vector4d> py = ny->getProb(); //patternToProbMap[current][ny->getPattern()];
-    pair<double,Vector4d> pz = nz->getProb(); //Patterntoprobmap[current][nz->getPattern()];
+    pair<double,Vector4d> px = nx->patternToProbMap[nx->getPattern()];
+    pair<double,Vector4d> py = ny->patternToProbMap[ny->getPattern()];
+    pair<double,Vector4d> pz = nz->patternToProbMap[nz->getPattern()];
 
     Vector4d S1 = P1 * px.second.asDiagonal() * ones;
     Vector4d S2 = P2 * py.second.asDiagonal() * ones;

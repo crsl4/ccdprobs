@@ -37,32 +37,20 @@ class Edge
 {
 private:
   int number;
-  int current; // 0 or 1 for index into which length is current for MCMC purposes
-  double length[2];
+  double length;
   Node* nodes[2];
   // things for likelihood calculation
   Matrix4d transitionMatrix;
 public:
-  Edge()
-  {
-    length[0] = 0;
-    length[1] = 0;
-    current = 0;
-  }
-  ~Edge()
-  {
+  Edge() { length = 0; }
+  ~Edge() {
     nodes[0] = nodes[1] = NULL;
   }
-  Edge(int n,double x) : number(n)
-  {
-    current = 0;
-    length[0] = length[1] = x;
-  }
+  Edge(int n,double x) : number(n), length(x) {}
   int getNumber() { return number; }
   void setNumber(int x) { number=x; }
-  int getCurrent() { return current; }
-  double getLength() { return length[current]; }
-  void setLength(double x) { length[current]=x; }
+  double getLength() { return length; }
+  void setLength(double x) { length=x; }
   Node* getOtherNode(Node *n) { return (nodes[0] == n ? nodes[1] : nodes[0]); }
   void setNode(Node *n,int i) { nodes[i]=n; }
   void setNodes(Node *m,Node *n) { nodes[0]=m; nodes[1]=n; }
@@ -73,24 +61,19 @@ public:
     nodes[1] = temp;
   }
   void print(ostream&);
-  void calculate(QMatrix& qmatrix)
-  {
-    transitionMatrix = qmatrix.getTransitionMatrix(length[current]);
-  }
+  void calculate(QMatrix& qmatrix) { transitionMatrix = qmatrix.getTransitionMatrix(length); }
   Matrix4d getTransitionMatrix() { return transitionMatrix; }
   void mleError(bool&);
   void calculate(double,Alignment&,QMatrix&,double&,double&,double&);
   double mleLength(Alignment&,QMatrix&,bool&);
   void randomLength(Alignment&,QMatrix&,mt19937_64&,double&,bool);
   bool isTerminal();
-  void switchCurrent() { current = 1 - current; }
 };
 
 class Node
 {
 private:
   int number;
-  int current; // 0 or 1
   string name;
   vector<Edge*> edges;
   bool leaf;
@@ -103,8 +86,8 @@ private:
   Edge* mapParent; // pointer to parent edge used when creating patternToProbMap, Clau: I think we need this separate from parent
   int minNumber; // smallest number in subtree rooted at node
 public:
-  map<string,pair<double,Vector4d> > patternToProbMap[2];
-  Node() { number = -1; level = 0; current = 0; }
+  map<string,pair<double,Vector4d> > patternToProbMap;
+  Node() { number = -1; level = 0; }
   ~Node()
   {
     edges.clear();

@@ -302,6 +302,7 @@ int main(int argc, char* argv[])
   starttree.unroot();
   cerr << "Start tree: " << starttree.makeTopologyNumbers() << endl;
   jcDistanceMatrixCopy = jcDistanceMatrix;
+  cerr << "foo" << endl;
   starttree.setNJDistances(jcDistanceMatrixCopy,rng);
   cerr << "Setting NJ distances to tree: " << endl;
   cerr << starttree.makeTreeNumbers() << endl;

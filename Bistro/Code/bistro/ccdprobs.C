@@ -9,15 +9,10 @@
 #include <cctype>
 #include <random>
 
-//#include "alias.h"
+#include "alias.h"
 #include "ccdprobs.h"
 
 using namespace std;
-
-#include <Boost/dynamic_bitset.hpp>
-
-using namespace boost;
-
 
 bool operator< (const Clade& c1,const Clade& c2)
 {
