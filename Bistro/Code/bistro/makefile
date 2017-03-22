@@ -42,7 +42,8 @@ bmcmc: main-mcmc.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h rand
 clean:
 	-rm -f $(OBJS) bistro bmcmc
 
-ccprobs.o: ccdprobs.C alias.h ccdprobs.h
+ccdprobs.o: ccdprobs.C alias.h ccdprobs.h
+	echo $(CC) $(CFLAGS)
 	$(CC) $(CFLAGS) -c ccdprobs.C
 
 cladegraph.o: cladegraph.C cladegraph.h tree.h

@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <locale> // isdigit(), tolower()
+//#include <locale> // isdigit(), tolower()
 #include <cctype>
 #include <random>
 
