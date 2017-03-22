@@ -94,11 +94,15 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
   ofstream treeblsort(treeBLFileSort.c_str());
    f << "tree logl logTop logBL logPrior logQ logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
 
+   // debug variable
+   int count = 0;
+   
 // calculate the scale for P and QP: fixit, this is done twice, also in main
    double scaleP = 100000000;
    double temp;
    VectorXd x = q_init.getStationaryP();
    VectorXd v = q_init.getMcmcVarP();
+   
    for ( int i=0; i<x.size(); ++i )
    {
      temp = x(i)*(1-x(i))/v(i);
@@ -117,125 +121,131 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    }
 
    for ( int k=indStart; k<indEnd; ++k )
+   {
+     if(indStart == 0)
      {
-       if(indStart == 0)
-	 {
-	   if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
-	     cerr << '*';
-	   if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
-	     cerr << '|';
-	 }
-       if(VERBOSE)
-	 cout << "------------------" << endl;
-       // here we need to sample a Q
-       double logQ = 0;
-       double otherscale = 1;
-       if( parameters.getFixedQ() )
-	 otherscale = 10000000;
-       if ( VERBOSE )
-	 cout << "logQ before p_star = " << logQ << endl;
-       VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), parameters.getEta()*otherscale*scaleP, logQ, rng);
-       if ( VERBOSE )
-	 cout << "logQ after p_star = " << logQ << endl;
-       VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), parameters.getEta()*otherscale*scaleQP, logQ, rng);
-       if ( VERBOSE )
-	 cout << "logQ after s_star = " << logQ << endl;
+       if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
+	 cerr << '*';
+       if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
+	 cerr << '|';
+     }
+     if(VERBOSE)
+       cout << "------------------" << endl;
+     // here we need to sample a Q
+     double logQ = 0;
+     double otherscale = 1;
+     if( parameters.getFixedQ() )
+       otherscale = 10000000;
+     if ( VERBOSE )
+       cout << "logQ before p_star = " << logQ << endl;
 
-       if( parameters.getFixedQ() ) // not used anymore
-	 logQ = 0;
-       QMatrix model(p_star,s_star);
+     VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), parameters.getEta()*otherscale*scaleP, logQ, rng);
+     if ( VERBOSE )
+       cout << "logQ after p_star = " << logQ << endl;
+     VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), parameters.getEta()*otherscale*scaleQP, logQ, rng);
+     if ( VERBOSE )
+       cout << "logQ after s_star = " << logQ << endl;
 
-      double logTopologyProbability=0;
-      string treeString = ccd.randomTree(rng,logTopologyProbability);
-      Tree tree(treeString,alignment);
-      tree.unroot();
-      MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
-      gtrDistanceMatrixCopy = gtrDistanceMatrix;
-      tree.setNJDistances(gtrDistanceMatrixCopy,rng);
-      if( parameters.getRootFix() )
-	tree.randomizeBL(rng);
-      else
-	tree.randomize(rng);
+     if( parameters.getFixedQ() ) // not used anymore
+       logQ = 0;
+     QMatrix model(p_star,s_star);
 
-      if(VERBOSE)
-	{
-	  cout << coreID << " " << k << "th tree" << endl << flush;
-	  tree.print(cout);
-	  cout << tree.makeTreeNumbers() << endl << flush;
-	  list<Node*> nodeList;
-	  tree.postorderCherryNodeList(nodeList);
-	  cout << "Postorder Node List:";
-	  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-	    cout << " " << (*p)->getNumber();
-	  cout << endl << flush;
-	}
-      double logBL = 0;
+     double logTopologyProbability=0;
+     string treeString = ccd.randomTree(rng,logTopologyProbability);
+     Tree tree(treeString,alignment);
+     tree.unroot();
+     
+     MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
+     gtrDistanceMatrixCopy = gtrDistanceMatrix;
 
-      if( parameters.getNumMLE() == 0 )
-	parameters.setNumMLE(2);
+     tree.setNJDistances(gtrDistanceMatrixCopy,rng);
+     if( parameters.getRootFix() )
+       tree.randomizeBL(rng);
+     else
+       tree.randomize(rng);
 
-      for ( int i=0; i<parameters.getNumMLE(); ++i )
-	{
-	  tree.randomEdges(alignment,model,rng,logBL,true);
-//	  cout << tree.makeTreeNumbers() << endl;
-	}
-      if(VERBOSE)
-	{
-	  cout << "After MLE passes: " << endl << flush;
-	  tree.print(cout);
-	  cout << tree.makeTreeNumbers() << endl << flush;
-	  cout << endl << flush;
-	}
-      if( parameters.getIndependent() )
-	{
+     if(VERBOSE)
+     {
+       cout << coreID << " " << k << "th tree" << endl << flush;
+       tree.print(cout);
+       cout << tree.makeTreeNumbers() << endl << flush;
+       list<Node*> nodeList;
+       tree.postorderCherryNodeList(nodeList);
+       cout << "Postorder Node List:";
+       for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+	 cout << " " << (*p)->getNumber();
+       cout << endl << flush;
+     }
+     double logBL = 0;
+
+     if( parameters.getNumMLE() == 0 )
+       parameters.setNumMLE(2);
+
+     for ( int i=0; i<parameters.getNumMLE(); ++i )
+     {
+       tree.randomEdges(alignment,model,rng,logBL,true);
+     }
+
+     if(VERBOSE)
+     {
+       cout << "After MLE passes: " << endl << flush;
+       tree.print(cout);
+       cout << tree.makeTreeNumbers() << endl << flush;
+       cout << endl << flush;
+     }
+     if( parameters.getIndependent() )
+     {
 //	  cout << "Branch lengths sampled independently" << endl;
-	  tree.randomEdges(alignment,model,rng,logBL,false);
-	}
-      else
-	{
+       tree.randomEdges(alignment,model,rng,logBL,false);
+     }
+     else
+     {
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  //tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), parameters.getEta(), parameters.getWeightMean());
-	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), 1.0, parameters.getWeightMean());
-	}
-      if(VERBOSE)
-      {
-	cout << "After generating branch lengths: " << endl;
-	cout << tree.makeTreeNumbers() << endl;
-      }
-      treebl << tree.makeTreeNumbers() << endl;
-      double logBranchLengthPriorDensity = tree.logPriorExp( (PRIOR_MEAN) );
-      // if(VERBOSE)
-      // 	cout << "calculating the final loglik now before clearing map" << endl;
-      // double logLik0 = tree.calculate(alignment, model);
-      // tree.clearProbMaps(); //added just to see if this was missing
-      if(VERBOSE)
-	cout << "calculating the final loglik now without clearing map" << endl;
-      double logLik = tree.calculate(alignment, model);
-      double logWeight = logBranchLengthPriorDensity + logLik - logBL - logTopologyProbability - logQ;
-      if ( VERBOSE )
-      {
-	cout << "logBranchLengthPriorDensity = " << logBranchLengthPriorDensity << endl;
-	cout << "logLik = " << logLik << endl;
-	cout << "logBL = " << logBL << endl;
-	cout << "logTopologyProbability = " << logTopologyProbability << endl;
-	cout << "logQ = " << logQ << endl;
-      }
-      // string top0 = tree.makeTopologyNumbers();
-      tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
-      tree.sortCanonical();
-      treeblsort << tree.makeTreeNumbers() << endl;
-      string top = tree.makeTopologyNumbers();
-      f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logBL << " " << logBranchLengthPriorDensity << " " << logQ << " " << logWeight << " ";
-      f << model.getStationaryP().transpose() << " " << model.getSymmetricQP().transpose() << endl;
-      logwt.push_back( logWeight );
-      //logwt[k] = logWeight;
-      if ( k==indStart || logWeight > maxLogWeight )
-	maxLogWeight = logWeight;
-      //add to the multimap for the topology the logweight
-      topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
-    }
-  treebl.close();
-  treeblsort.close();
+       tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), 1.0, parameters.getWeightMean());
+     }
+
+     if(VERBOSE)
+     {
+       cout << "After generating branch lengths: " << endl;
+       cout << tree.makeTreeNumbers() << endl;
+     }
+     treebl << tree.makeTreeNumbers() << endl;
+     double logBranchLengthPriorDensity = tree.logPriorExp( (PRIOR_MEAN) );
+     // if(VERBOSE)
+     // 	cout << "calculating the final loglik now before clearing map" << endl;
+     // double logLik0 = tree.calculate(alignment, model);
+     // tree.clearProbMaps(); //added just to see if this was missing
+     if(VERBOSE)
+       cout << "calculating the final loglik now without clearing map" << endl;
+     double logLik = tree.calculate(alignment, model);
+     double logWeight = logBranchLengthPriorDensity + logLik - logBL - logTopologyProbability - logQ;
+     if ( VERBOSE )
+     {
+       cout << "logBranchLengthPriorDensity = " << logBranchLengthPriorDensity << endl;
+       cout << "logLik = " << logLik << endl;
+       cout << "logBL = " << logBL << endl;
+       cout << "logTopologyProbability = " << logTopologyProbability << endl;
+       cout << "logQ = " << logQ << endl;
+     }
+
+     // string top0 = tree.makeTopologyNumbers();
+     tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
+     tree.sortCanonical();
+     treeblsort << tree.makeTreeNumbers() << endl;
+     string top = tree.makeTopologyNumbers();
+     f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logBL << " " << logBranchLengthPriorDensity << " " << logQ << " " << logWeight << " ";
+     f << model.getStationaryP().transpose() << " " << model.getSymmetricQP().transpose() << endl;
+     logwt.push_back( logWeight );
+     //logwt[k] = logWeight;
+
+     if ( k==indStart || logWeight > maxLogWeight )
+       maxLogWeight = logWeight;
+     //add to the multimap for the topology the logweight
+     topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
+   }
+
+   treebl.close();
+   treeblsort.close();
 }
 
 int main(int argc, char* argv[])
@@ -527,9 +537,8 @@ int main(int argc, char* argv[])
 
     // calculate distance from trees to mean tree
     Tree mtree(meanTree,alignment);
-    cerr << "mean tree topology = " << mtree.makeTreeNumbers() << endl;
+    cerr << "mean tree topology = " << mtree.makeTopologyNumbers() << endl;
     int badTrees = 0;
-//    double maximumDistance = -1.0;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
     {
 //      cerr << "bootstrap tree: " << (*t) << endl;

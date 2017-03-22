@@ -642,10 +642,10 @@ double Tree::calculate(const Alignment& alignment,QMatrix& qmatrix)
 void Node::clearProbMaps(Edge* parent)
 {
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
-    {
-      if ( (*e) != parent )
-	getNeighbor(*e)->clearProbMaps(*e);
-    }
+  {
+    if ( (*e) != parent )
+      getNeighbor(*e)->clearProbMaps(*e);
+  }
 //  cout << "clearing prob maps and mapParent for node: " << number << endl << flush;
   patternToProbMap[current].clear();
   mapParent = NULL;
@@ -1220,6 +1220,8 @@ void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edg
 
 void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity,bool onlyMLE)
 {
+  int debug=0;
+  
   // clear probability maps from all nodes for fresh calculation, and clear mapParent for every node
   clearProbMaps(); //we need this here, otherwise it does not work
   // compute transition matrices for all edges using provisional edge lengths
@@ -1705,15 +1707,17 @@ double Tree::logPriorExp(double mean)
 // based on generateBranchLengths in BranchLengths/Code/test/tree.C
 void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool jointMLE, double eta, bool weightMean)
 {
+  int debug=0;
   // clear probability maps from all nodes for fresh calculation
   clearProbMaps();
   // compute transition matrices for all edges using provisional edge lengths
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     (*e)->calculate(qmatrix);
   list<Node*> nodeList;
-  //postorderCherryNodeList(nodeList);
-  //depthFirstNodeList(nodeList);
+  postorderCherryNodeList(nodeList);
+  depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
+
   if(VERBOSE)
     {
       cout << "Starting generateBL. Postorder Node List:";
@@ -1723,36 +1727,38 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
 
   list<Node*>::iterator p=nodeList.begin();
+
   while ( true )
   {
     Node* x;
     Node* y;
     Node* z;
     Node* par; //clau: parent of x,y
+
     if( (*p) == root )
-    //if ( (*p)->getNodeParent() == root )
+      //if ( (*p)->getNodeParent() == root )
+    {
+      if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
       {
-	if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
-	  {
-	    cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
-	    cerr << root->getActiveChild(0)->getNumber() << endl;
-	    cerr << (*p)->getNumber() << endl;
-	    throw 20;
-	  }
-	// par = root;
-	// x = *p++;
-	// y = *p++;
-	// z = *p;
-	par = root;
-	x = par->getEdge(0)->getOtherNode(par);
-	y = par->getEdge(1)->getOtherNode(par);
-	z = par->getEdge(2)->getOtherNode(par);
+	cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
+	cerr << root->getActiveChild(0)->getNumber() << endl;
+	cerr << (*p)->getNumber() << endl;
+	throw 20;
       }
+      // par = root;
+      // x = *p++;
+      // y = *p++;
+      // z = *p;
+      par = root;
+      x = par->getEdge(0)->getOtherNode(par);
+      y = par->getEdge(1)->getOtherNode(par);
+      z = par->getEdge(2)->getOtherNode(par);
+    }
     else if ( (*p)->getNodeParent() == root ) //clau: if p parent is root, just skip
-      {
-    	x = *p++;
-    	continue;
-      }
+    {
+      x = *p++;
+      continue;
+    }
     else //clau: p parent not root, and p not root
     {
       x = *p++; //it means take *p and move right

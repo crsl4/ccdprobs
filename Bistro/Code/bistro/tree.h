@@ -110,8 +110,16 @@ public:
     edges.clear();
     activeChildren.clear();
   }
-  Node(int n,bool l) : number(n), leaf(l) { level = 0;}
-  Node(bool l) : leaf(l) { level = 0; }
+  Node(int n,bool l) : number(n), leaf(l)
+  {
+    level = 0;
+    current = 0;
+  }
+  Node(bool l) : leaf(l)
+  {
+    level = 0;
+    current = 0;
+  }
   int getNumber() const { return number; }
   void setNumber(int x) { number = x; }
   string getName() const { return name; }
