@@ -4,7 +4,7 @@
 #define MIN_EDGE_LENGTH 0.00001
 #define MAX_EDGE_LENGTH 10
 #define TOL 1.0e-6
-#define VERBOSE false
+#define VERBOSE true
 #define PRIOR_MEAN 0.1
 #define LAMBDA 0.19
 
@@ -264,12 +264,64 @@ public:
   double logLikelihoodScore(Alignment&, QMatrix&);
   void clearMapParent();
   Edge* whichMaxBranch(); //finds edge with max length
-  void mcmc(QMatrix&, Alignment& ,int ,double , mt19937_64&, bool);
-  void mcmc(QMatrix&, Alignment& ,int ,double , mt19937_64&, ofstream&, ofstream&, bool);
-  void mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool, bool);
+  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, bool);
+  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, ofstream&, ofstream&, bool);
+  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, ofstream&, ofstream&, bool, bool);
   void setInitialEdgeLengths(double); // set all edge lengths to x
   double distance(Tree*);
   void processTree(CladeGraph*);
+  void mcmcUpdateQ(int,MCMCStats&,QMatrix&,Alignment&,double,mt19937_64&);
+  void mcmcUpdatePi(int,MCMCStats&,QMatrix&,Alignment&,double,mt19937_64&);
+  void mcmcUpdateS(int,MCMCStats&,QMatrix&,Alignment&,double,mt19937_64&);
+  void mcmcUpdateEdges(int,MCMCStats&,QMatrix&,Alignment&,mt19937_64&);
+};
+
+class MCMCStats
+{
+private:
+  double currLogLikelihood;
+  double sumAcceptP;
+  double sumAcceptS;
+  double sumAcceptBL;
+  Vector4d avgP;
+  Vector4d avgPold;
+  Vector4d sP;
+  VectorXd avgS;
+  VectorXd avgSold;
+  VectorXd sS;
+  VectorXd avgBL;
+public:
+  MCMCStats(int,double);
+  double getCurrLogLikelihood() { return currLogLikelihood; }
+  void setCurrLogLikelihood(double x) { currLogLikelihood = x; }
+  double getSumAcceptP() { return sumAcceptP; }
+  void addSumAcceptP(double x) { sumAcceptP += x; }
+  double getSumAcceptS() { return sumAcceptS; }
+  void addSumAcceptS(double x) { sumAcceptS += x; }
+  double getSumAcceptBL() { return sumAcceptBL; }
+  void addSumAcceptBL(double x) { sumAcceptBL += x; }
+  Vector4d getAvgP() { return avgP; }
+  void setAvgP(Vector4d x) { avgP = x; }
+  double getAvgP(int i) { return avgP(i); }
+  double getAvgPold(int i) { return avgPold(i); }
+  Vector4d getAvgPold() { return avgPold; }
+  void getAvgPold(Vector4d x) { avgPold = x; }
+  void saveAvgP() { avgPold = avgP; }
+  Vector4d getSP() { return sP; }
+  double getSP(int i) { return sP(i); }
+  void addSP(Vector4d x) { sP += x; }
+  VectorXd getAvgS() { return avgS; }
+  void setAvgS(VectorXd x) { avgS = x; }
+  double getAvgS(int i) { return avgS(i); }
+  double getAvgSold(int i) { return avgSold(i); }
+  VectorXd getAvgSold() { return avgSold; }
+  void saveAvgS() { avgSold = avgS; }
+  VectorXd getSS() { return sS; }
+  double getSS(int i) { return sS(i); }
+  void addSS(VectorXd x) { sS += x; }
+  double getAvgBL(int i) { return avgBL(i); }
+  void addAvgBL(int i,double x) { avgBL(i) += x; }
+  void printMCMCSummary(ostream&,QMatrix&,int,unsigned int);
 };
 
 #endif

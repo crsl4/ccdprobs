@@ -6,6 +6,7 @@
 #define MCMC_Q_BURN 100
 #define MCMC_Q_SAMPLE 1000
 
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -94,15 +95,11 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
   ofstream treeblsort(treeBLFileSort.c_str());
    f << "tree logl logTop logBL logPrior logQ logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
 
-   // debug variable
-   int count = 0;
-   
 // calculate the scale for P and QP: fixit, this is done twice, also in main
    double scaleP = 100000000;
    double temp;
    VectorXd x = q_init.getStationaryP();
    VectorXd v = q_init.getMcmcVarP();
-   
    for ( int i=0; i<x.size(); ++i )
    {
      temp = x(i)*(1-x(i))/v(i);
@@ -121,131 +118,125 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    }
 
    for ( int k=indStart; k<indEnd; ++k )
-   {
-     if(indStart == 0)
      {
-       if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
-	 cerr << '*';
-       if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
-	 cerr << '|';
-     }
-     if(VERBOSE)
-       cout << "------------------" << endl;
-     // here we need to sample a Q
-     double logQ = 0;
-     double otherscale = 1;
-     if( parameters.getFixedQ() )
-       otherscale = 10000000;
-     if ( VERBOSE )
-       cout << "logQ before p_star = " << logQ << endl;
+       if(indStart == 0)
+	 {
+	   if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
+	     cerr << '*';
+	   if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
+	     cerr << '|';
+	 }
+       if(VERBOSE)
+	 cout << "------------------" << endl;
+       // here we need to sample a Q
+       double logQ = 0;
+       double otherscale = 1;
+       if( parameters.getFixedQ() )
+	 otherscale = 10000000;
+       if ( VERBOSE )
+	 cout << "logQ before p_star = " << logQ << endl;
+       VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), parameters.getEta()*otherscale*scaleP, logQ, rng);
+       if ( VERBOSE )
+	 cout << "logQ after p_star = " << logQ << endl;
+       VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), parameters.getEta()*otherscale*scaleQP, logQ, rng);
+       if ( VERBOSE )
+	 cout << "logQ after s_star = " << logQ << endl;
 
-     VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), parameters.getEta()*otherscale*scaleP, logQ, rng);
-     if ( VERBOSE )
-       cout << "logQ after p_star = " << logQ << endl;
-     VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), parameters.getEta()*otherscale*scaleQP, logQ, rng);
-     if ( VERBOSE )
-       cout << "logQ after s_star = " << logQ << endl;
+       if( parameters.getFixedQ() ) // not used anymore
+	 logQ = 0;
+       QMatrix model(p_star,s_star);
 
-     if( parameters.getFixedQ() ) // not used anymore
-       logQ = 0;
-     QMatrix model(p_star,s_star);
+      double logTopologyProbability=0;
+      string treeString = ccd.randomTree(rng,logTopologyProbability);
+      Tree tree(treeString,alignment);
+      tree.unroot();
+      MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
+      gtrDistanceMatrixCopy = gtrDistanceMatrix;
+      tree.setNJDistances(gtrDistanceMatrixCopy,rng);
+      if( parameters.getRootFix() )
+	tree.randomizeBL(rng);
+      else
+	tree.randomize(rng);
 
-     double logTopologyProbability=0;
-     string treeString = ccd.randomTree(rng,logTopologyProbability);
-     Tree tree(treeString,alignment);
-     tree.unroot();
-     
-     MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
-     gtrDistanceMatrixCopy = gtrDistanceMatrix;
+      if(VERBOSE)
+	{
+	  cout << coreID << " " << k << "th tree" << endl << flush;
+	  tree.print(cout);
+	  cout << tree.makeTreeNumbers() << endl << flush;
+	  list<Node*> nodeList;
+	  tree.postorderCherryNodeList(nodeList);
+	  cout << "Postorder Node List:";
+	  for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+	    cout << " " << (*p)->getNumber();
+	  cout << endl << flush;
+	}
+      double logBL = 0;
 
-     tree.setNJDistances(gtrDistanceMatrixCopy,rng);
-     if( parameters.getRootFix() )
-       tree.randomizeBL(rng);
-     else
-       tree.randomize(rng);
+      if( parameters.getNumMLE() == 0 )
+	parameters.setNumMLE(2);
 
-     if(VERBOSE)
-     {
-       cout << coreID << " " << k << "th tree" << endl << flush;
-       tree.print(cout);
-       cout << tree.makeTreeNumbers() << endl << flush;
-       list<Node*> nodeList;
-       tree.postorderCherryNodeList(nodeList);
-       cout << "Postorder Node List:";
-       for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-	 cout << " " << (*p)->getNumber();
-       cout << endl << flush;
-     }
-     double logBL = 0;
-
-     if( parameters.getNumMLE() == 0 )
-       parameters.setNumMLE(2);
-
-     for ( int i=0; i<parameters.getNumMLE(); ++i )
-     {
-       tree.randomEdges(alignment,model,rng,logBL,true);
-     }
-
-     if(VERBOSE)
-     {
-       cout << "After MLE passes: " << endl << flush;
-       tree.print(cout);
-       cout << tree.makeTreeNumbers() << endl << flush;
-       cout << endl << flush;
-     }
-     if( parameters.getIndependent() )
-     {
+      for ( int i=0; i<parameters.getNumMLE(); ++i )
+	{
+	  tree.randomEdges(alignment,model,rng,logBL,true);
+//	  cout << tree.makeTreeNumbers() << endl;
+	}
+      if(VERBOSE)
+	{
+	  cout << "After MLE passes: " << endl << flush;
+	  tree.print(cout);
+	  cout << tree.makeTreeNumbers() << endl << flush;
+	  cout << endl << flush;
+	}
+      if( parameters.getIndependent() )
+	{
 //	  cout << "Branch lengths sampled independently" << endl;
-       tree.randomEdges(alignment,model,rng,logBL,false);
-     }
-     else
-     {
+	  tree.randomEdges(alignment,model,rng,logBL,false);
+	}
+      else
+	{
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
-       tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), 1.0, parameters.getWeightMean());
-     }
-
-     if(VERBOSE)
-     {
-       cout << "After generating branch lengths: " << endl;
-       cout << tree.makeTreeNumbers() << endl;
-     }
-     treebl << tree.makeTreeNumbers() << endl;
-     double logBranchLengthPriorDensity = tree.logPriorExp( (PRIOR_MEAN) );
-     // if(VERBOSE)
-     // 	cout << "calculating the final loglik now before clearing map" << endl;
-     // double logLik0 = tree.calculate(alignment, model);
-     // tree.clearProbMaps(); //added just to see if this was missing
-     if(VERBOSE)
-       cout << "calculating the final loglik now without clearing map" << endl;
-     double logLik = tree.calculate(alignment, model);
-     double logWeight = logBranchLengthPriorDensity + logLik - logBL - logTopologyProbability - logQ;
-     if ( VERBOSE )
-     {
-       cout << "logBranchLengthPriorDensity = " << logBranchLengthPriorDensity << endl;
-       cout << "logLik = " << logLik << endl;
-       cout << "logBL = " << logBL << endl;
-       cout << "logTopologyProbability = " << logTopologyProbability << endl;
-       cout << "logQ = " << logQ << endl;
-     }
-
-     // string top0 = tree.makeTopologyNumbers();
-     tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
-     tree.sortCanonical();
-     treeblsort << tree.makeTreeNumbers() << endl;
-     string top = tree.makeTopologyNumbers();
-     f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logBL << " " << logBranchLengthPriorDensity << " " << logQ << " " << logWeight << " ";
-     f << model.getStationaryP().transpose() << " " << model.getSymmetricQP().transpose() << endl;
-     logwt.push_back( logWeight );
-     //logwt[k] = logWeight;
-
-     if ( k==indStart || logWeight > maxLogWeight )
-       maxLogWeight = logWeight;
-     //add to the multimap for the topology the logweight
-     topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
-   }
-
-   treebl.close();
-   treeblsort.close();
+	  //tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), parameters.getEta(), parameters.getWeightMean());
+	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), 1.0, parameters.getWeightMean());
+	}
+      if(VERBOSE)
+      {
+	cout << "After generating branch lengths: " << endl;
+	cout << tree.makeTreeNumbers() << endl;
+      }
+      treebl << tree.makeTreeNumbers() << endl;
+      double logBranchLengthPriorDensity = tree.logPriorExp( (PRIOR_MEAN) );
+      // if(VERBOSE)
+      // 	cout << "calculating the final loglik now before clearing map" << endl;
+      // double logLik0 = tree.calculate(alignment, model);
+      // tree.clearProbMaps(); //added just to see if this was missing
+      if(VERBOSE)
+	cout << "calculating the final loglik now without clearing map" << endl;
+      double logLik = tree.calculate(alignment, model);
+      double logWeight = logBranchLengthPriorDensity + logLik - logBL - logTopologyProbability - logQ;
+      if ( VERBOSE )
+      {
+	cout << "logBranchLengthPriorDensity = " << logBranchLengthPriorDensity << endl;
+	cout << "logLik = " << logLik << endl;
+	cout << "logBL = " << logBL << endl;
+	cout << "logTopologyProbability = " << logTopologyProbability << endl;
+	cout << "logQ = " << logQ << endl;
+      }
+      // string top0 = tree.makeTopologyNumbers();
+      tree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
+      tree.sortCanonical();
+      treeblsort << tree.makeTreeNumbers() << endl;
+      string top = tree.makeTopologyNumbers();
+      f << top << " " << logLik << " " << " " << logTopologyProbability << " " << logBL << " " << logBranchLengthPriorDensity << " " << logQ << " " << logWeight << " ";
+      f << model.getStationaryP().transpose() << " " << model.getSymmetricQP().transpose() << endl;
+      logwt.push_back( logWeight );
+      //logwt[k] = logWeight;
+      if ( k==indStart || logWeight > maxLogWeight )
+	maxLogWeight = logWeight;
+      //add to the multimap for the topology the logweight
+      topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
+    }
+  treebl.close();
+  treeblsort.close();
 }
 
 int main(int argc, char* argv[])
@@ -287,7 +278,6 @@ int main(int argc, char* argv[])
   cout << "Jukes-Cantor Distance Matrix:" << endl;
   cout << endl << jcDistanceMatrix << endl << endl;
   milliseconds ms3 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
-  
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
   MatrixXd jcDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -302,7 +292,7 @@ int main(int argc, char* argv[])
   cerr << jctree.makeTopologyNumbers() << endl << endl;
   milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-  // --------------------------- Use JC tree or input tree, and NJ branch lengths  ---------------
+// --------------------------- Use JC tree or input tree, and NJ branch lengths  ---------------
   string treetext; // the tree to use in MCMC will depend on whether a tree was input or not
   if ( !parameters.getTopology().empty() )
     treetext = parameters.getTopology();
@@ -313,14 +303,13 @@ int main(int argc, char* argv[])
   starttree.unroot();
   cerr << "Start tree: " << starttree.makeTopologyNumbers() << endl;
   jcDistanceMatrixCopy = jcDistanceMatrix;
-  cerr << "foo" << endl;
   starttree.setNJDistances(jcDistanceMatrixCopy,rng);
   cerr << "Setting NJ distances to tree: " << endl;
   cerr << starttree.makeTreeNumbers() << endl;
 
   milliseconds ms5 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-  // ---------------------- Estimate Q with base frequencies and pairwise counts -----------------
+// ---------------------- Estimate Q with base frequencies and pairwise counts -----------------
   vector<double> p_init = alignment.baseFrequencies();
   cerr << "Estimated base frequencies: " << p_init.at(0) << "," << p_init.at(1) << "," << p_init.at(2) << "," << p_init.at(3) << endl;
 
@@ -344,18 +333,15 @@ int main(int argc, char* argv[])
     s0 = s_pairwise;
 
   QMatrix q_init(p0,s0);
-  
-// initial mcmc var (just so that there are not zeros)
-  Vector4d vp0;
-  for ( int j=0; j<4; ++j )
-    vp0(j) = p0(j)*(1-p0(j));
 
-  VectorXd vs0(6);
-  for ( int j=0; j<6; ++j )
-    vs0(j) = s0(j)*(1-s0(j));
+//  parameters.setFixedQ(enteredPorS);
 
-  q_init.setMcmcVarP(vp0);
-  q_init.setMcmcVarQP(vs0);
+// old initialization of Q:
+//  vector<double> p_init(4,0.25);
+  // vector<double> s_init(6,0.1);
+  // s_init[1] = 0.3;
+  // s_init[4] = 0.3;
+//  QMatrix q_init(p_init,s_init);
 
 // ------------------------------ Put MLE branch lengths to tree -------------------------
   for ( int i=0; i<4; ++i )
@@ -366,22 +352,29 @@ int main(int argc, char* argv[])
   cout << "MLE Branch Lengths" << endl;
   cout << starttree.makeTreeNumbers() << endl;
 
-// MCMC
+// ------------------------------ MCMC for Q on fixed tree with MLE branch lengths -------------
   if ( parameters.getDoMCMC() )
   {
     cerr << "Running MCMC to estimate Q matrix ..." << endl;
+    // Run MCMC on tree to estimate Q matrix parameters
 
     // burnin
     cerr << "burn-in:" << endl;
-    unsigned int mcmcGenerations = parameters.getNumMCMC();
-    unsigned int mcmcBurn =  mcmcGenerations / 10;
-    starttree.mcmc(q_init,alignment,mcmcBurn,alignment.getNumSites(),rng,true);
+    //  q_init.mcmc(alignment,jctree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
+    starttree.mcmc(q_init,alignment,(MCMC_Q_BURN),alignment.getNumSites(),rng, true);
+//    q_init.mcmc(alignment,starttree,(MCMC_Q_BURN),alignment.getNumSites(),rng);
     cerr << endl << " done." << endl;
+    // cout << "Start tree after MCMC burnin: " << endl;
+    // cout << starttree.makeTreeNumbers() << endl;
 
     // mcmc to get final Q
     cerr << "sampling:" << endl;
-    starttree.mcmc(q_init,alignment,mcmcGenerations,alignment.getNumSites(),rng,false);
+    //  q_init.mcmc(alignment,jctree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
+    starttree.mcmc(q_init,alignment,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng, false);
+//    q_init.mcmc(alignment,starttree,(MCMC_Q_SAMPLE),alignment.getNumSites(),rng);
     cerr << endl << " done." << endl;
+    // cout << "Start tree after MCMC: " << endl;
+    // cout << starttree.makeTreeNumbers() << endl;
 
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
 // save to file)
@@ -438,6 +431,7 @@ int main(int argc, char* argv[])
 // not normalized maps; normalization taken care of during alias creation
   map<string,int> topologyToCountMap;
   map<string,double> topologyToWeightMap;
+  map<string,double> topologyToLogLikWeightMap;
   map<string,double> topologyToDistanceWeightMap;    
 
 // --------------------------------------- Bootstrap of topologies from ccdprobs -----------------------
@@ -449,7 +443,10 @@ int main(int argc, char* argv[])
       parameters.setNumBootstrap(1000);
     cerr << "Beginning " << parameters.getNumBootstrap() << " bootstrap replicates ..." << endl;
     map<string,int> topologyToParsimonyScoreMap;
+    map<string,double> topologyToLogLikScoreMap;
+    map<string,double> topologyToDistanceMap;
     int minimumParsimonyScore = -1;
+    double maximumLogLikScore = -1.0;
     MatrixXd bootDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
     vector<int> weights(alignment.getNumSites());
     cerr << '|';
@@ -458,8 +455,6 @@ int main(int argc, char* argv[])
     ofstream bootstrapTrees(bootstrapTreesFile.c_str());
     string bootstrapTreesFileBL = parameters.getOutFileRoot() + ".bootstrapBL";
     ofstream bootstrapTreesBL(bootstrapTreesFileBL.c_str());
-    string bootstrapTreesDistances = parameters.getOutFileRoot() + ".distances";
-    ofstream bootstrapTreesDist(bootstrapTreesDistances.c_str());
     // vector of strings trees
     // change to using push_back() to avoid keeping bad trees
     vector<string> bootstrapStrings;
@@ -501,6 +496,22 @@ int main(int argc, char* argv[])
 	  if ( score < minimumParsimonyScore || b==0 )
 	    minimumParsimonyScore = score;
 	}
+	if( parameters.getLoglikWt() )
+	{
+	  // add likelihood score to map if not there already
+	  // update minimum loglik
+	  if ( topologyToLogLikScoreMap.find(top) == topologyToLogLikScoreMap.end() )
+	  {
+	    bootTree.unroot();
+	    MatrixXd gtrDistanceMatrixCopy2(alignment.getNumTaxa(),alignment.getNumTaxa());
+	    gtrDistanceMatrixCopy2 = gtrDistanceMatrix;
+	    bootTree.setNJDistances(gtrDistanceMatrixCopy2,rng);
+	    int score = bootTree.logLikelihoodScore(alignment, model_init);
+	    topologyToLogLikScoreMap[ top ] = score;
+	    if ( score > maximumLogLikScore || b==0 )
+	      maximumLogLikScore = score;
+	  }
+	}
 	topologyToCountMap[ top ]++;
       } // end of bootstrap
       cerr << endl;
@@ -508,8 +519,6 @@ int main(int argc, char* argv[])
 	cerr << "Warning: found " << badTrees << " bootstrap tree" << (badTrees > 1 ? "s" : "") << "with nan edge lengths." << endl;
     }
     bootstrapTrees.close();
-    bootstrapTreesBL.close();
-
     cerr << endl << "    ... done." << endl;
 
     // mean tree
@@ -540,8 +549,9 @@ int main(int argc, char* argv[])
 
     // calculate distance from trees to mean tree
     Tree mtree(meanTree,alignment);
-    cerr << "mean tree topology = " << mtree.makeTopologyNumbers() << endl;
+//    cerr << "read mean tree correctly" << endl;
     int badTrees = 0;
+    double maximumDistance = -1.0;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
     {
 //      cerr << "bootstrap tree: " << (*t) << endl;
@@ -559,17 +569,20 @@ int main(int argc, char* argv[])
       boottree->makeBinary();
       boottree->sortCanonical();
       string topDist = boottree->makeTopologyNumbers();
-      bootstrapTreesDist << topDist << " " << d << endl;
-      if ( topologyToDistanceWeightMap.find(topDist) == topologyToDistanceWeightMap.end() )
-	topologyToDistanceWeightMap[ topDist ] = exp(-parameters.getWeightScale() * d);
-      else
-	topologyToDistanceWeightMap[ topDist ] += exp(-parameters.getWeightScale() * d);
+      if ( topologyToDistanceMap.find(topDist) == topologyToDistanceMap.end() )
+      {
+	topologyToDistanceMap[ topDist ] = d;
+	if ( d > maximumDistance )
+	{
+	  cerr << "maximum distance: " << maximumDistance << endl;
+	  maximumDistance = d;
+	}
+      }
       delete boottree;
     }
-    bootstrapTreesDist.close();
-
-//    for ( map<string,double>::iterator m=topologyToDistanceWeightMap.begin(); m != topologyToDistanceWeightMap.end(); ++m )
-//      cerr << "topology to distance weight, tree: " << (*m).first << " distance weight: " << (*m).second << endl;
+    cerr << "maximum distance: " << maximumDistance << endl;
+    for ( map<string,double>::iterator m=topologyToDistanceMap.begin(); m != topologyToDistanceMap.end(); ++m )
+      cerr << "topology to distance weight, tree: " << (*m).first << " distance: " << (*m).second << endl;
 
     if ( badTrees > 0 )
       cerr << "Warning: found " << badTrees << " bootstrap trees with nan edge lengths." << endl;
@@ -577,20 +590,34 @@ int main(int argc, char* argv[])
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
     {
       topologyToWeightMap[ (*m).first ] =
-	(*m).second * exp( 0.5 *
+	(*m).second * exp( parameters.getParsimonyScale() *
 			   (minimumParsimonyScore - topologyToParsimonyScoreMap[ (*m).first ]) );
+      topologyToDistanceWeightMap[ (*m).first ] =
+	(*m).second * exp( parameters.getParsimonyScale() *
+			   (topologyToDistanceMap[ (*m).first ] - maximumDistance) );
+      if( parameters.getLoglikWt() )
+      {
+	topologyToLogLikWeightMap[ (*m).first ] =
+	  (*m).second * exp( parameters.getParsimonyScale() *
+			     (topologyToLogLikScoreMap[ (*m).first ] - maximumLogLikScore) );
+      }
     }
+
     cout << endl << "Topology counts to file" << endl;
     cerr << endl << "Topology counts to file" << endl;
     {
       string topologyCountsFile = parameters.getOutFileRoot() + ".topCounts";
       ofstream topCounts(topologyCountsFile.c_str());
       map<string,double>::iterator wm=topologyToWeightMap.begin();
+      map<string,double>::iterator loglwm=topologyToLogLikWeightMap.begin();
       map<string,double>::iterator distwm=topologyToDistanceWeightMap.begin();
       topCounts << "tree count parsimonyWt parsimonyScore parsimonyDiff";
-      topCounts << " distanceWt" << endl;
+      if( parameters.getLoglikWt() )
+	topCounts << " loglikWt loglikScore loglikDiff";
+      topCounts << " distanceWt distance distDiff" << endl;
       for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
       {
+	cerr << "inside for" << endl;
 	Tree t((*cm).first,alignment);
 	t.unroot();
 	t.reroot(1);
@@ -600,7 +627,14 @@ int main(int argc, char* argv[])
 	topCounts << setw(10) << setprecision(4) << fixed << (*wm).second;
 	topCounts << " " << setw(5) << topologyToParsimonyScoreMap[ (*cm).first ] << " " << setw(4) << minimumParsimonyScore - topologyToParsimonyScoreMap[ (*cm).first ];
 	topCounts << " " << flush;
+	if( parameters.getLoglikWt() )
+	{
+	  topCounts << setw(10) << setprecision(4) << fixed << (*loglwm).second << flush;
+	  topCounts << " " << setw(5) << topologyToLogLikScoreMap[ (*cm).first ] << " " << setw(4) << topologyToLogLikScoreMap[ (*cm).first ] - maximumLogLikScore << flush;
+	  ++loglwm;
+	}
 	topCounts << setw(10) << setprecision(4) << fixed << (*distwm).second << flush;
+	topCounts << " " << setw(5) << topologyToDistanceMap[ (*cm).first ] << " " << setw(4) << topologyToDistanceMap[ (*cm).first ] - maximumDistance << flush;
 	++distwm;
 	topCounts << endl;
 	++wm;
@@ -618,7 +652,7 @@ int main(int argc, char* argv[])
     cerr << "Will not do bootstrap, using input tree instead: " << t << endl;
     topologyToCountMap[ t ]++;
     topologyToWeightMap[ t ] = 1.0;
-    topologyToDistanceWeightMap[ t ] = 1.0;
+    topologyToLogLikWeightMap[ t ] = 1.0;
   }
 
 
@@ -631,12 +665,15 @@ int main(int argc, char* argv[])
 // --------------------- Clade distribution from bootstrap sample ------------------------------------
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdParsimony(topologyToWeightMap,taxaNumbers,taxaNames);
+  CCDProbs<double> ccdLogLik(topologyToLogLikWeightMap,taxaNumbers,taxaNames);
   CCDProbs<double> ccdDist(topologyToDistanceWeightMap,taxaNumbers,taxaNames);
   // write map out to temp files to check
   string originalSmapFile = parameters.getOutFileRoot() + "-nopars.smap";
   string originalTmapFile = parameters.getOutFileRoot() + "-nopars.tmap";
   string parsimonySmapFile = parameters.getOutFileRoot() + "-pars.smap";
   string parsimonyTmapFile = parameters.getOutFileRoot() + "-pars.tmap";
+  string loglikSmapFile = parameters.getOutFileRoot() + "-loglik.smap";
+  string loglikTmapFile = parameters.getOutFileRoot() + "-loglik.tmap";
   string distSmapFile = parameters.getOutFileRoot() + "-dist.smap";
   string distTmapFile = parameters.getOutFileRoot() + "-dist.tmap";
   ofstream smap(originalSmapFile.c_str());
@@ -650,6 +687,12 @@ int main(int argc, char* argv[])
   smap.close();
   tmap.open(parsimonyTmapFile);
   ccdParsimony.writePairCount(tmap);
+  tmap.close();
+  smap.open(loglikSmapFile);
+  ccdLogLik.writeCladeCount(smap);
+  smap.close();
+  tmap.open(loglikTmapFile);
+  ccdLogLik.writePairCount(tmap);
   tmap.close();
   smap.open(distSmapFile);
   ccdDist.writeCladeCount(smap);
@@ -715,6 +758,7 @@ int main(int argc, char* argv[])
     vector<double> maxLogW(cores); //vector of maxlogweight
     cerr << "jointMLE " << parameters.getJointMLE() << endl;
     cerr << "fixedQ " << parameters.getFixedQ() << endl;
+    cerr << "loglik weights " << parameters.getLoglikWt() << endl;
     cerr << "eta " << parameters.getEta() << endl;
 
     for ( int i=0; i<cores; ++i )
@@ -723,7 +767,10 @@ int main(int argc, char* argv[])
       if ( !parameters.getReweight() )
 	threads.push_back(thread(randomTrees<int>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccd, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
       else
-	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdDist, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	if( parameters.getLoglikWt() )
+	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdLogLik, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	else
+	  threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
     }
 
     for(auto &t : threads){

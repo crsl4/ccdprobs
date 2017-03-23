@@ -33,6 +33,7 @@ private:
   bool enteredP;
   bool enteredS;
   bool doMCMC;
+  int numMCMC;
 public:
   Parameter()
   {
@@ -57,6 +58,7 @@ public:
     enteredP = false;
     enteredS = false;
     doMCMC = true;
+    numMCMC = 1000;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -103,6 +105,8 @@ public:
   void setEnteredS(bool b) { enteredS = b; }
   bool getDoMCMC() const { return doMCMC; }
   void setDoMCMC(bool b) { doMCMC = b; }
+  int getNumMCMC() { return numMCMC; }
+  void setNumMCMC(int x) { numMCMC = x; }
 };
 
 #endif

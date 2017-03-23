@@ -13,6 +13,7 @@
 #include "sequence.h"
 
 class Tree;
+class MCMCStats;
 
 using namespace std;
 using namespace Eigen;
@@ -70,6 +71,7 @@ public:
   Vector4d getMcmcVarP() const { return mcmcVarP; }
   void setMcmcVarQP(VectorXd v) { mcmcVarQP = v; }
   void setMcmcVarP(Vector4d v) { mcmcVarP = v; }
+  void resetAfterMCMC(MCMCStats&);
 };
 
 VectorXd dirichletProposal(VectorXd ,double ,double& ,mt19937_64& );

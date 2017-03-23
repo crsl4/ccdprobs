@@ -740,7 +740,7 @@ void Tree::randomizeBL(mt19937_64& rng)
 	root = maxEdge->getNode(1);
     }
   root->randomize(rng,NULL);
-//  setNodeLevels();
+  setNodeLevels();
 }
 
 Edge* Tree::whichMaxBranch()
@@ -1715,7 +1715,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     (*e)->calculate(qmatrix);
   list<Node*> nodeList;
   postorderCherryNodeList(nodeList);
-  depthFirstNodeList(nodeList);
+  //depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
 
   if(VERBOSE)
@@ -2465,159 +2465,179 @@ bool Edge::isTerminal()
     return false;
 }
 
-void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, bool burnin)
+MCMCStats::MCMCStats(int numEdges,double curr)
 {
-  ofstream treeStream;
-  ofstream parStream;
-  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,false, burnin);
+  currLogLikelihood = curr;
+  sumAcceptP = 0;
+  sumAcceptS = 0;
+  sumAcceptBL = 0;
+  avgP = Vector4d::Zero();
+  avgPold = Vector4d::Zero();
+  sP = Vector4d::Zero();
+  avgS = VectorXd::Zero(6);
+  avgSold = VectorXd::Zero(6);
+  sS = VectorXd::Zero(6);
+  avgBL = VectorXd::Zero(numEdges);
 }
 
-void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool burnin)
+void Tree::mcmcUpdatePi(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,double scale,mt19937_64& rng)
 {
-  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true, burnin);
-}
-
-// for the variance: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-void Tree::mcmc(QMatrix& Q,Alignment& alignment,int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput, bool burnin)
-{
+  Vector4d x = Q.getStationaryP();
+  double logProposalRatio = 0;
+  Vector4d y = dirichletProposal(x,scale,logProposalRatio,rng);
+  QMatrix propQ(y,Q.getSymmetricQP());
   clearProbMaps();
-  double currLogLikelihood = calculate(alignment,Q);
-  double sumAcceptP = 0;
-  double sumAcceptS = 0;
-  double sumAcceptBL = 0;
-  Vector4d avgP = Vector4d::Zero();
-  Vector4d avgPold = Vector4d::Zero();
-  Vector4d sP = Vector4d::Zero();
-  Vector4d prod1 = Vector4d::Zero();
-  Vector4d prod2 = Vector4d::Zero();
-  Vector4d prod12 = Vector4d::Zero();
-  VectorXd avgS = VectorXd::Zero(6);
-  VectorXd avgSold = VectorXd::Zero(6);
-  VectorXd sS = VectorXd::Zero(6);
-  VectorXd prod3 = VectorXd::Zero(6);
-  VectorXd prod4 = VectorXd::Zero(6);
-  VectorXd prod34 = VectorXd::Zero(6);
-  VectorXd avgBL = VectorXd::Zero(getNumEdges());
-
-  cerr << '|';
-  for ( int i=0; i<numGenerations; ++i )
+  double propLogLikelihood = calculate(alignment,propQ);
+  double acceptProbability = exp(propLogLikelihood - stats.getCurrLogLikelihood() + logProposalRatio);
+  if ( acceptProbability > 1 )
+    acceptProbability = 1;
+  stats.addSumAcceptP(acceptProbability);
+  uniform_real_distribution<double> runif(0,1);
+  if ( runif(rng) < acceptProbability )
   {
-    if ( (i+1) % (numGenerations / 100) == 0 )
-      cerr << '*';
-    if ( (i+1) % (numGenerations / 10) == 0 )
-      cerr << '|';
-    // for( int kk=0; kk<10; ++kk ) //we want to update Q 10 times per once for BL
-    // {
-      Vector4d x = Q.getStationaryP();
-      double logProposalRatio = 0;
-      Vector4d y = dirichletProposal(x,scale,logProposalRatio,rng);
-      QMatrix propQ(y,Q.getSymmetricQP());
-      clearProbMaps();
-      double propLogLikelihood = calculate(alignment,propQ);
-      double acceptProbability = exp(propLogLikelihood - currLogLikelihood + logProposalRatio);
-      if ( acceptProbability > 1 )
-	acceptProbability = 1;
-      sumAcceptP += acceptProbability;
-      uniform_real_distribution<double> runif(0,1);
-      if ( runif(rng) < acceptProbability )
-      {
-	Q.resetStationaryP(y);
-	currLogLikelihood = propLogLikelihood;
-      }
-      prod1 = Q.getStationaryP() - avgPold;
-      avgP = avgPold + prod1/(i+1);
-      prod2 = Q.getStationaryP() - avgP;
-      for ( int j=0; j<4; ++j )
-	prod12(j) = prod1(j)*prod2(j);
-      sP += prod12;
-      avgPold = avgP;
-      VectorXd xx = Q.getSymmetricQP();
-      logProposalRatio = 0;
-      VectorXd yy(6);
-      yy = dirichletProposal(xx,scale,logProposalRatio,rng);
-      propQ.reset(Q.getStationaryP(),yy);
-      clearProbMaps();
-      propLogLikelihood = calculate(alignment,propQ);
-      acceptProbability = exp(propLogLikelihood - currLogLikelihood + logProposalRatio);
-      if ( acceptProbability > 1 )
-	acceptProbability = 1;
-      sumAcceptS += acceptProbability;
-      if ( runif(rng) < acceptProbability )
-      {
-	Q.resetSymmetricQP(yy);
-	currLogLikelihood = propLogLikelihood;
-      }
-      prod3 = Q.getSymmetricQP() - avgSold;
-      avgS = avgSold + prod3/(i+1);
-      prod4 = Q.getSymmetricQP() - avgS;
-      for ( int j=0; j<6; ++j )
-	prod34(j) = prod3(j)*prod4(j);
-      sS += prod34;
-      avgSold = avgS;
-//    }
-    // now with Q, we want to sample branch lengths
-    clearProbMaps();
+    Q.resetStationaryP(y);
+    stats.setCurrLogLikelihood(propLogLikelihood);
+  }
+  Vector4d prod1 = Q.getStationaryP() - stats.getAvgPold();
+  stats.setAvgP(stats.getAvgPold() + prod1/(i+1));
+  Vector4d prod2 = Q.getStationaryP() - stats.getAvgP();
+  stats.addSP( prod2.cwiseProduct(prod1) );
+  stats.saveAvgP();
+}
+
+void Tree::mcmcUpdateS(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,double scale,mt19937_64& rng)
+{
+  VectorXd xx = Q.getSymmetricQP();
+  double logProposalRatio = 0;
+  VectorXd yy(6);
+  yy = dirichletProposal(xx,scale,logProposalRatio,rng);
+  QMatrix propQ(Q.getStationaryP(),yy);
+  clearProbMaps();
+  double propLogLikelihood = calculate(alignment,propQ);
+  double acceptProbability = exp(propLogLikelihood - stats.getCurrLogLikelihood() + logProposalRatio);
+  if ( acceptProbability > 1 )
+    acceptProbability = 1;
+  stats.addSumAcceptS(acceptProbability);
+  uniform_real_distribution<double> runif(0,1);
+  if ( runif(rng) < acceptProbability )
+  {
+    Q.resetSymmetricQP(yy);
+    stats.setCurrLogLikelihood(propLogLikelihood);
+  }
+  VectorXd prod3(6);
+  prod3 = Q.getSymmetricQP() - stats.getAvgSold();
+  stats.setAvgS(stats.getAvgSold() + prod3/(i+1));
+  VectorXd prod4(6);
+  prod4 = Q.getSymmetricQP() - stats.getAvgS();
+  stats.addSS(prod4.cwiseProduct(prod3));
+  stats.saveAvgS();
+}
+
+void Tree::mcmcUpdateQ(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,double scale,mt19937_64& rng)
+{
+  mcmcUpdatePi(i,stats,Q,alignment,scale,rng);
+  mcmcUpdateS(i,stats,Q,alignment,scale,rng);
+}
+
+void Tree::mcmcUpdateEdges(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,mt19937_64& rng)
+{
+  // now with Q, we want to sample branch lengths
+  clearProbMaps();
+  {
     int j = 0;
     //make tree function
     for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     {
       double xxx = (*e)->getLength();
-      logProposalRatio = 0;
+      double logProposalRatio = 0;
       uniform_real_distribution<double> runif(0,1);
       double r = exp(LAMBDA*(runif(rng)-0.5));
       double yyy = xxx * r;
       (*e)->setLength(yyy);
-//      clearProbMaps();
-      propLogLikelihood = calculate(alignment,Q); //make faster later
-      acceptProbability = exp(propLogLikelihood - currLogLikelihood + log(r));
+      clearProbMaps();
+      double propLogLikelihood = calculate(alignment,Q); //make faster later
+      double acceptProbability = exp(propLogLikelihood - stats.getCurrLogLikelihood() + log(r));
       if ( acceptProbability > 1 )
 	acceptProbability = 1;
-      sumAcceptBL += acceptProbability; // total for all branches
+      stats.addSumAcceptBL(acceptProbability); // total for all branches
       if ( runif(rng) < acceptProbability )
       {
 	(*e)->setLength(yyy);
-	currLogLikelihood = propLogLikelihood;
+	stats.setCurrLogLikelihood(propLogLikelihood);
       }
       else
       {
 	(*e)->setLength(xxx);
       }
-      avgBL(j) += (*e)->getLength();
-      j++;
+      stats.addAvgBL(j++,(*e)->getLength());
     }
+  }
+}
+
+void MCMCStats::printMCMCSummary(ostream& f,QMatrix& Q,int numEdges,unsigned int numGenerations)
+{
+  f << "stationary acceptance: " << sumAcceptP / numGenerations << endl;
+  f << "symmetric acceptance: " << sumAcceptS / numGenerations << endl;
+  f << "branch length acceptance: " << sumAcceptBL / (numEdges * numGenerations) << endl;
+  sP /= numGenerations;
+  sS /= numGenerations;
+  f << "avgP: " << avgP.transpose() << endl;
+  f << "sP: " << sP.transpose() << endl;
+  f << "avgS: " << avgS.transpose() << endl;
+  f << "sS: " << sS.transpose() << endl;
+  f << Q.getStationaryP().transpose() << endl;
+  f << Q.getSymmetricQP().transpose() << endl;
+  f << endl << Q.getQ() << endl << endl;
+}
+
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,mt19937_64& rng, bool burnin)
+{
+  ofstream treeStream;
+  ofstream parStream;
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,false,burnin);
+}
+
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool burnin)
+{
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true,burnin);
+}
+
+// for the variance: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,
+		mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput, bool burnin)
+{
+  clearProbMaps();
+  double currentLogLikelihood = calculate(alignment,Q);
+  MCMCStats stats(getNumEdges(),currentLogLikelihood);
+  
+  cerr << '|';
+  for ( int i=0; i<numGenerations; ++i )
+  {
+    if ( (numGenerations >= 100) && ( (i+1) % (numGenerations / 100) == 0 ) )
+      cerr << '*';
+    if ( (numGenerations >= 10) && ( (i+1) % (numGenerations / 10) == 0 ) )
+      cerr << '|';
+    mcmcUpdateQ(i,stats,Q,alignment,scale,rng);
+    mcmcUpdateEdges(i,stats,Q,alignment,rng);
     if ( printOutput )
     {
-      parStream << currLogLikelihood << " " << Q.getStationaryP().transpose() << " " << Q.getSymmetricQP().transpose() << endl;
+      parStream << stats.getCurrLogLikelihood() << " " << Q.getStationaryP().transpose() << " " << Q.getSymmetricQP().transpose() << endl;
       sortCanonical();
       treeStream << makeTreeNumbers() << endl;
     }
   }
-  cout << "stationary acceptance: " << sumAcceptP / numGenerations << endl;
-  cout << "symmetric acceptance: " << sumAcceptS / numGenerations << endl;
-  cout << "branch length acceptance: " << sumAcceptBL / (getNumEdges() * numGenerations) << endl;
-  sP /= numGenerations;
-  sS /= numGenerations;
-  cout << "avgP: " << avgP.transpose() << endl;
-  cout << "sP: " << sP.transpose() << endl;
-  cout << "avgS: " << avgS.transpose() << endl;
-  cout << "sS: " << sS.transpose() << endl;
   if ( !burnin )
   {
-    Q.reset(avgP,avgS);
-    Q.setMcmcVarP(sP);
-    Q.setMcmcVarQP(sS);
-  }
-  cout << Q.getStationaryP().transpose() << endl;
-  cout << Q.getSymmetricQP().transpose() << endl;
-  cout << endl << Q.getQ() << endl << endl;
-  if ( !burnin )
-  {
-    int i = 0;
-    for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    Q.resetAfterMCMC(stats);
     {
-      (*e)->setLength(avgBL(i)/numGenerations);
-      i++;
+      int i = 0;
+      for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+      {
+	(*e)->setLength(stats.getAvgBL(i)/numGenerations);
+	i++;
+      }
     }
+    stats.printMCMCSummary(cout,Q,getNumEdges(),numGenerations);
   }
 }
 

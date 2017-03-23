@@ -27,7 +27,6 @@ LDLIBS = -lpthread
 # CFLAGS = -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations -g -v -da -Q
 # LDLIBS = -lpthread
 
-
 all: bistro bmcmc
 
 bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h cladegraph.h $(OBJS)
@@ -43,7 +42,6 @@ clean:
 	-rm -f $(OBJS) bistro bmcmc
 
 ccdprobs.o: ccdprobs.C alias.h ccdprobs.h
-	echo $(CC) $(CFLAGS)
 	$(CC) $(CFLAGS) -c ccdprobs.C
 
 cladegraph.o: cladegraph.C cladegraph.h tree.h

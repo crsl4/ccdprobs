@@ -269,3 +269,10 @@ vector<double> convert(VectorXd x)
     y[i] = x(i);
   return y;
 }
+
+void QMatrix::resetAfterMCMC(MCMCStats& stats)
+{
+  reset(stats.getAvgP(),stats.getAvgS());
+  setMcmcVarP(stats.getSP());
+  setMcmcVarQP(stats.getSS());
+}
