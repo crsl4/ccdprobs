@@ -10,7 +10,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 ## Check with Bret
 - same results with cats-dogs in mrbayes, does he have another nexus file that he used for the paper?
 - we have bad results now with bistro because of the random root thing (cats dogs need a good root): although rootFix did not solve this
-- we cannot compare bistro (dist2) with bmcmc (mcmc2) because in mcmc2 it is not written as sort canonical, don't know why!
+- tried fixed tree in bistro, but problems with bmcmc (repeated bl, see mcmc2.tre)
 - Sequential IS?
 
 ## Jordan
