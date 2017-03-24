@@ -56,8 +56,7 @@ bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string,
 // this function is not used in mcmc, that one used is in model.C
 VectorXd dirichletProposalDensityScale(VectorXd x,double scale,double& logProposalDensity,mt19937_64& rng)
 {
-  //  cout << "vector x: " << x.transpose() << endl;
-  //cout << "vector v: " << v.transpose() << endl;
+  cout << "vector x: " << x.transpose() << endl;
   VectorXd alpha(x.size());
   VectorXd y(x.size());
   double sum = 0;
@@ -65,14 +64,22 @@ VectorXd dirichletProposalDensityScale(VectorXd x,double scale,double& logPropos
   for ( int i=0; i<x.size(); ++i )
   {
     alpha(i) = scale*x(i);
+    if (VERBOSE)
+      cout << "alpha: " << alpha(i) << endl;
     gamma_distribution<double> rgamma(alpha(i),1.0);
     y(i) = rgamma(rng);
+    if (VERBOSE)
+      cout << "proposed y: " << y(i) << endl;
     sum += y(i);
     sumalpha += alpha(i);
   }
+  if (VERBOSE)
+    cout << "sum: " << sum << endl;
   for ( int i=0; i<x.size(); ++i )
   {
     y(i) /= sum;
+    if (VERBOSE)
+      cout << "proposed y: " << y(i) << endl;
   }
   for ( int i=0; i<x.size(); ++i )
   {
@@ -102,7 +109,11 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    double temp;
    VectorXd x = q_init.getStationaryP();
    VectorXd v = q_init.getMcmcVarP();
-   
+   if(VERBOSE)
+   {
+     cout << "p in q_init: " << q_init.getStationaryP() << endl;
+     cout << "var(p) in q_init: " << q_init.getMcmcVarP() << endl;
+   }
    for ( int i=0; i<x.size(); ++i )
    {
      temp = x(i)*(1-x(i))/v(i);
@@ -113,12 +124,20 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    double scaleQP = 100000000;
    x = q_init.getSymmetricQP();
    v = q_init.getMcmcVarQP();
+   if(VERBOSE)
+   {
+     cout << "s in q_init: " << q_init.getSymmetricQP() << endl;
+     cout << "var(s) in q_init: " << q_init.getMcmcVarQP() << endl;
+   }
    for ( int i=0; i<x.size(); ++i )
    {
      temp = x(i)*(1-x(i))/v(i);
      if( temp < scaleQP )
        scaleQP = temp;
    }
+
+   if(VERBOSE)
+     cout << "inside randomTrees, scaleP: " << scaleP << " scaleQP: " << scaleQP << endl; 
 
    for ( int k=indStart; k<indEnd; ++k )
    {
@@ -137,15 +156,25 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      if( parameters.getFixedQ() )
        otherscale = 10000000;
      if ( VERBOSE )
+     {
        cout << "logQ before p_star = " << logQ << endl;
+       cout << "eta: " << parameters.getEta() << endl;
+     }
 
      VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), parameters.getEta()*otherscale*scaleP, logQ, rng);
      if ( VERBOSE )
+     {
        cout << "logQ after p_star = " << logQ << endl;
+       cout << "p_star: " << p_star.transpose() << endl;
+       cout << "scaleP: " << scaleP << endl;
+     }
      VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), parameters.getEta()*otherscale*scaleQP, logQ, rng);
      if ( VERBOSE )
+     {
        cout << "logQ after s_star = " << logQ << endl;
-
+       cout << "s_star: " << s_star.transpose() << endl;
+       cout << "scaleQP: " << scaleQP << endl;
+     }
      if( parameters.getFixedQ() ) // not used anymore
        logQ = 0;
      QMatrix model(p_star,s_star);
@@ -382,35 +411,34 @@ int main(int argc, char* argv[])
     cerr << "sampling:" << endl;
     starttree.mcmc(q_init,alignment,mcmcGenerations,alignment.getNumSites(),rng,false);
     cerr << endl << " done." << endl;
+  }
+  cerr << "After MCMC block" << endl;
 
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
 // save to file)
-    double scaleP = 100000000;
-    double temp;
-    VectorXd x = q_init.getStationaryP();
-    VectorXd v = q_init.getMcmcVarP();
-    for ( int i=0; i<x.size(); ++i )
-    {
-      temp = x(i)*(1-x(i))/v(i);
-      cout << "Scale for p" << i << " is " << temp << endl;
-      if(temp < scaleP)
-	scaleP = temp;
-    }
-    cout << "Dirichlet for P scale: " << scaleP << endl;
-    double scaleQP = 100000000;
-    x = q_init.getSymmetricQP();
-    v = q_init.getMcmcVarQP();
-    for ( int i=0; i<x.size(); ++i )
-    {
-      temp = x(i)*(1-x(i))/v(i);
-      cout << "Scale for s" << i << " is " << temp << endl;
-      if( temp < scaleQP )
-	scaleQP = temp;
-    }
-    cout << "Dirichlet for QP scale: " << scaleQP << endl;
+  double scaleP = 100000000;
+  double temp;
+  VectorXd x = q_init.getStationaryP();
+  VectorXd v = q_init.getMcmcVarP();
+  for ( int i=0; i<x.size(); ++i )
+  {
+    temp = x(i)*(1-x(i))/v(i);
+    cout << "Scale for p" << i << " is " << temp << endl;
+    if(temp < scaleP)
+      scaleP = temp;
   }
-
-  cerr << "After MCMC block" << endl;
+  cout << "Dirichlet for P scale: " << scaleP << endl;
+  double scaleQP = 100000000;
+  x = q_init.getSymmetricQP();
+  v = q_init.getMcmcVarQP();
+  for ( int i=0; i<x.size(); ++i )
+  {
+    temp = x(i)*(1-x(i))/v(i);
+    cout << "Scale for s" << i << " is " << temp << endl;
+    if( temp < scaleQP )
+      scaleQP = temp;
+  }
+  cout << "Dirichlet for QP scale: " << scaleQP << endl;
   
   // Initial Q, either from naive estimate or MCMC on fixed tree with MLE BL
   //QMatrix model_init(parameters.getStationaryP(),parameters.getSymmetricQP());

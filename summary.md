@@ -2,6 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- identify error: check no mcmc mean/variance of rates
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots

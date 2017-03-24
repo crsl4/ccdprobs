@@ -1,3 +1,8 @@
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 -s 3110090550 --threads 1 > tmp.log 
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --no-MCMC -s 3110090550 --threads 1 > tmp.log 
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 -p 0.284858,0.272258,0.144999,0.297885 -q 0.234899,0.156195,0.086587,0.021415,0.492271,0.00863229 --no-MCMC -s 3110090550 --threads 1 > tmp.log 
+
+
 ## something does not work here
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o dist2 -r 1000 -b 1000 -p 0.284858,0.272258,0.144999,0.297885 -q 0.234899,0.156195,0.086587,0.021415,0.492271,0.00863229 --no-MCMC --fixedQ > dist2.log
 
