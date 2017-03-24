@@ -377,11 +377,11 @@ int main(int argc, char* argv[])
 // initial mcmc var (just so that there are not zeros)
   Vector4d vp0;
   for ( int j=0; j<4; ++j )
-    vp0(j) = p0(j)*(1-p0(j));
+    vp0(j) = p0(j)*(1-p0(j))/alignment.getNumSites();
 
   VectorXd vs0(6);
   for ( int j=0; j<6; ++j )
-    vs0(j) = s0(j)*(1-s0(j));
+    vs0(j) = s0(j)*(1-s0(j))/alignment.getNumSites();
 
   q_init.setMcmcVarP(vp0);
   q_init.setMcmcVarQP(vs0);
@@ -420,6 +420,9 @@ int main(int argc, char* argv[])
   double temp;
   VectorXd x = q_init.getStationaryP();
   VectorXd v = q_init.getMcmcVarP();
+  cout << "mean p: " << x.transpose() << endl;
+  cout << "var p: " << v.transpose() << endl;
+
   for ( int i=0; i<x.size(); ++i )
   {
     temp = x(i)*(1-x(i))/v(i);
@@ -431,6 +434,9 @@ int main(int argc, char* argv[])
   double scaleQP = 100000000;
   x = q_init.getSymmetricQP();
   v = q_init.getMcmcVarQP();
+  cout << "mean s: " << x.transpose() << endl;
+  cout << "var s: " << v.transpose() << endl;
+
   for ( int i=0; i<x.size(); ++i )
   {
     temp = x(i)*(1-x(i))/v(i);
