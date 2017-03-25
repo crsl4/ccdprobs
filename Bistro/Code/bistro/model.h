@@ -71,7 +71,7 @@ public:
   Vector4d getMcmcVarP() const { return mcmcVarP; }
   void setMcmcVarQP(VectorXd v) { mcmcVarQP = v; }
   void setMcmcVarP(Vector4d v) { mcmcVarP = v; }
-  void resetAfterMCMC(MCMCStats&);
+  void resetAfterMCMC(MCMCStats&,unsigned int);
 };
 
 VectorXd dirichletProposal(VectorXd ,double ,double& ,mt19937_64& );

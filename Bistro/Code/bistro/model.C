@@ -270,9 +270,9 @@ vector<double> convert(VectorXd x)
   return y;
 }
 
-void QMatrix::resetAfterMCMC(MCMCStats& stats)
+void QMatrix::resetAfterMCMC(MCMCStats& stats,unsigned int numGenerations)
 {
   reset(stats.getAvgP(),stats.getAvgS());
-  setMcmcVarP(stats.getSP());
-  setMcmcVarQP(stats.getSS());
+  setMcmcVarP(stats.getSP()/numGenerations);
+  setMcmcVarQP(stats.getSS()/numGenerations);
 }
