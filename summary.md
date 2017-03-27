@@ -2,7 +2,6 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- identify error: check no mcmc mean/variance of rates
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
@@ -10,8 +9,10 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## Check with Bret
 - same results with cats-dogs in mrbayes, does he have another nexus file that he used for the paper?
-- we have bad results now with bistro because of the random root thing (cats dogs need a good root): although rootFix did not solve this
-- tried fixed tree in bistro, but problems with bmcmc (repeated bl, see mcmc2.tre)
+- --no-reweight option used the parsimony which was the default before
+- artiodactyl fixed tree ESS 39% (bistro9-fixT), no fixed tree 18% (bistro9), no fixed tree with parsimony (same seed): 16% (bistro9-p), maybe more improvement with different scale (now 200): compare clouds and plots
+- cats-dogs fixed tree ESS 15% (dist2-fixT, dist2-fixT-root), no fixed tree 0.25% (dist2), no fixed tree with parsimony (same seed): 1% (dist2-p): plots weird, need to double check order of bl
+
 - Sequential IS?
 
 ## Jordan
@@ -24,6 +25,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
     - 024,027 (or more) in datasets
   - Compare Bret's mean tree to Megan's mean tree, as well as with most likely tree in MrBayes
   - Later: weight trees by distance to "center tree", and compare weights to MrBayes PP
+  - Compare performance of bistro with different scales
 
 ## Known problems
 - Problem with long branches: only use joint BL density if there is a long branch (ESS is better with independent BL if there is not a long BL)

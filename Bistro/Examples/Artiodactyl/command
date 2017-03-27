@@ -1,17 +1,29 @@
-../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 -s 3110090550 --threads 1 > tmp.log 
-../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --no-MCMC -s 3110090550 --threads 1 > tmp.log 
-../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 -p 0.284858,0.272258,0.144999,0.297885 -q 0.234899,0.156195,0.086587,0.021415,0.492271,0.00863229 --no-MCMC -s 3110090550 --threads 1 > tmp.log 
+source("../../Scripts/summary.R")
+compareBistro("bistro9-fixT",besttree="(1,2,(3,(4,(5,6))));",bmcmc="mcmc2")
+compareBistro("bistro9",besttree="(1,2,(3,(4,(5,6))));",bmcmc="mcmc2")
+compareBistro("bistro9-p",besttree="(1,2,(3,(4,(5,6))));",bmcmc="mcmc2")
+
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro9 -r 1000 -b 1000 -s 3340639079 > bistro9.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro9-p -r 1000 -b 1000 --no-reweight -s 3340639079 > bistro9-p.log
+
+## compare artiodactyl and bmcmc on same tree
+../../Code/bistro/bmcmc -f ../../Data/artiodactyl-6.fasta -o mcmc2 -r 10000 -b 1000 -t "(Camel,Dolphin,(Pig,(Cow,(Sheep,Giraffe))));" > mcmc2.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro9-fixT -r 1000 -b 1000 -t "(Camel,Dolphin,(Pig,(Cow,(Sheep,Giraffe))));" > bistro9-fixT.log
+
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 -s 3110090550 --threads 1 > tmp.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --no-MCMC -s 3110090550 --threads 1 > tmp.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 -p 0.284858,0.272258,0.144999,0.297885 -q 0.234899,0.156195,0.086587,0.021415,0.492271,0.00863229 --no-MCMC -s 3110090550 --threads 1 > tmp.log
 
 
 ## something does not work here
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o dist2 -r 1000 -b 1000 -p 0.284858,0.272258,0.144999,0.297885 -q 0.234899,0.156195,0.086587,0.021415,0.492271,0.00863229 --no-MCMC --fixedQ > dist2.log
 
 ## check if distance weights are computed correctly
-../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp2 -r 1000 -b 10 --onlyBootstrap -s 3110090550 > tmp2.log 
-../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o dist -r 1000 -b 1000 --onlyBootstrap -s 875220241 > dist.log 
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp2 -r 1000 -b 10 --onlyBootstrap -s 3110090550 > tmp2.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o dist -r 1000 -b 1000 --onlyBootstrap -s 875220241 > dist.log
 
 ## test mean distances:
-../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --onlyBootstrap -s 3110090550 > tmp.log 
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --onlyBootstrap -s 3110090550 > tmp.log
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --onlyBootstrap > tmp.log
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o tmp -r 1000 -b 10 --onlyBootstrap -p 0.284858,0.272258,0.144999,0.297885 -q 0.234899,0.156195,0.086587,0.021415,0.492271,0.00863229 --no-MCMC -s 2527267968 > tmp.log
 
