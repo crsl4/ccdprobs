@@ -1,5 +1,6 @@
 source("../../Scripts/summary.R")
 compareBistro("dist2-fixT",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")
+
 compareBistro("dist2-fixT-root",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")
 compareBistro("dist2",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")
 compareBistro("dist2-p",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")

@@ -2,16 +2,24 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- ln -s path/bistro ~/bin/bistro
+- change comment to keep MCMC to mcmc in parameters.C: turn -m for -num-mcmc, and -M for the MLE (old -m)
+- save simulating trees before pulling bret changes (keep artiodactyl stuff separate)
+- write somewhere that no-reweight is doing parsimony
+- add label to corplots (which is bistro which is other)
+- run simulated data 16 taxa: bmcmc on true tree, bistro on true tree, and bistro and mrbayes not in true tree; try with fewer sites; run with independent; run mrbayes; run with shorter bl
+- add `sed 's/\[[^]]*\]//g' articodactylMBTree.txt > cleanMBTree.txt` somewhere
+- there is something off with the branch lengths: long branches being proposed with joint case (not su much with independent case)
+- check error in base frequencies
+
+
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 
 ## Check with Bret
-- same results with cats-dogs in mrbayes, does he have another nexus file that he used for the paper?
-- --no-reweight option used the parsimony which was the default before
-- artiodactyl fixed tree ESS 39% (bistro9-fixT), no fixed tree 18% (bistro9), no fixed tree with parsimony (same seed): 16% (bistro9-p), maybe more improvement with different scale (now 200): compare clouds and plots
-- cats-dogs fixed tree ESS 15% (dist2-fixT, dist2-fixT-root), no fixed tree 0.25% (dist2), no fixed tree with parsimony (same seed): 1% (dist2-p): plots weird, need to double check order of bl
+
 
 - Sequential IS?
 
