@@ -11,7 +11,7 @@ translate
       10 Cuon_alpinus___dhole,
       11 Vulpes_vulpes___red_fox,
       12 Nyctereutes_procyonoides___raccoon_dog;
-prob crudeSE(ESS=4.94) clade
+prob crudeSE(ESS=150.92) clade
 1.00000000 0.00000000 {1-12} ************
 1.00000000 0.00000000 {2-12} .***********
 1.00000000 0.00000000 {2,7-12} .*....******

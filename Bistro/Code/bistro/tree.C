@@ -2610,8 +2610,8 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,doub
   double currentLogLikelihood = calculate(alignment,Q);
   MCMCStats stats(getNumEdges(),currentLogLikelihood);
 
-  ofstream pstream("p.txt");
-  ofstream sstream("s.txt");
+//  ofstream pstream("p.txt");
+//  ofstream sstream("s.txt");
   
   cerr << '|';
   for ( int i=0; i<numGenerations; ++i )
@@ -2621,8 +2621,8 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,doub
     if ( (numGenerations >= 10) && ( (i+1) % (numGenerations / 10) == 0 ) )
       cerr << '|';
     mcmcUpdateQ(i,stats,Q,alignment,scale,rng);
-    pstream << Q.getStationaryP().transpose() << endl;
-    sstream << Q.getSymmetricQP().transpose() << endl;
+//    pstream << Q.getStationaryP().transpose() << endl;
+//    sstream << Q.getSymmetricQP().transpose() << endl;
     mcmcUpdateEdges(i,stats,Q,alignment,rng);
     if ( printOutput )
     {

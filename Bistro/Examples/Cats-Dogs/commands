@@ -1,7 +1,21 @@
+source("../../Scripts/summary.R")
+compareBistro("dist2-fixT",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")
+compareBistro("dist2-fixT-root",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")
+compareBistro("dist2",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")
+compareBistro("dist2-p",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")
+
+
+
 ## compare the distance weights
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist2-fixT-root -r 1000 -b 1000 -t "(Felis_catus___domestic_cat,(Acinonyx_jubatus___cheetah,(((((Canis_lupus_familiaris___domestic_dog,Canis_lupus___gray_wolf),Canis_latrans___coyote),Cuon_alpinus___dhole),Vulpes_vulpes___red_fox),Nyctereutes_procyonoides___raccoon_dog)),(Neofelis_nebulosa___clouded_leopard,((Uncia_uncia___snow_leopard,Panthera_pardus___leopard),Panthera_tigris___tiger)));" --rootFix > dist2-fixT-root.log
+
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist2-fixT -r 1000 -b 1000 -t "(Felis_catus___domestic_cat,(Acinonyx_jubatus___cheetah,(((((Canis_lupus_familiaris___domestic_dog,Canis_lupus___gray_wolf),Canis_latrans___coyote),Cuon_alpinus___dhole),Vulpes_vulpes___red_fox),Nyctereutes_procyonoides___raccoon_dog)),(Neofelis_nebulosa___clouded_leopard,((Uncia_uncia___snow_leopard,Panthera_pardus___leopard),Panthera_tigris___tiger)));" > dist2-fixT.log
-../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist2 -r 1000 -b 1000 > dist2.log
+
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist2 -r 1000 -b 1000 -s 2530014257 > dist2.log
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist2-p -r 1000 -b 1000 --no-reweight -s 2530014257 > dist2-p.log
+../../Code/bistro/bmcmc -f ../../Data/cats-dogs.fasta -o mcmc2 -r 10000 -b 1000 -t "(Felis_catus___domestic_cat,(Acinonyx_jubatus___cheetah,(((((Canis_lupus_familiaris___domestic_dog,Canis_lupus___gray_wolf),Canis_latrans___coyote),Cuon_alpinus___dhole),Vulpes_vulpes___red_fox),Nyctereutes_procyonoides___raccoon_dog)),(Neofelis_nebulosa___clouded_leopard,((Uncia_uncia___snow_leopard,Panthera_pardus___leopard),Panthera_tigris___tiger)));" > mcmc2.log
+
+
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist-fix -r 1000 -b 1000 --fixedQ > dist-fix.log
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist-root -r 1000 -b 1000 --rootFix > dist-root.log
 ../../Code/bistro/bmcmc -f ../../Data/cats-dogs.fasta -o mcmc2 -r 10000 -b 1000 -t "(Felis_catus___domestic_cat,(Acinonyx_jubatus___cheetah,(((((Canis_lupus_familiaris___domestic_dog,Canis_lupus___gray_wolf),Canis_latrans___coyote),Cuon_alpinus___dhole),Vulpes_vulpes___red_fox),Nyctereutes_procyonoides___raccoon_dog)),(Neofelis_nebulosa___clouded_leopard,((Uncia_uncia___snow_leopard,Panthera_pardus___leopard),Panthera_tigris___tiger)));" > mcmc2.log
