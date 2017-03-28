@@ -22,6 +22,25 @@ string trim(const string& str)
     return str.substr(first, (last - first + 1));
 }
 
+bool baseNotUncertain(char a)
+{
+  return ( (a=='a') || (a=='c') || (a=='g') || (a=='t') );
+}
+
+int baseToInt(char a)
+{
+  switch ( a )
+  {
+  case 'a' : return 0;
+  case 'c' : return 1;
+  case 'g' : return 2;
+  case 't' : return 3;
+  default :
+    cerr << "Error: baseToInt called on character that is not 'a', 'c', 'g', or 't'." << endl;
+    exit(1);
+  }
+}
+    
 int Sequence::readFastaSequence(istream& f)
 {
   char c;
@@ -119,39 +138,45 @@ void Alignment::summarize(ostream& f )
 vector<double> Alignment::baseFrequencies()
 {
   map<char,int> counts;
-  vector<double> pi(4);
+  int total = 0;
+  vector<double> pi(4,0);
   for ( vector<Sequence*>::iterator p=sequences.begin(); p!= sequences.end(); ++p )
-    for ( int k=0; k<(*p)->getSize(); ++k )
-      counts[(*p)->getBase(k)]++;
-  int i = 0;
-  cerr << "read all counts" << endl;
-  for ( map<char,int>::iterator m=counts.begin(); m !=counts.end(); ++m )
   {
-    pi[i] = (m->second)/(counts.size()*(double)numSites);
-    i++;
+    for ( int k=0; k<(*p)->getSize(); ++k )
+    {
+      char a = tolower((*p)->getBase(k));
+      if ( baseNotUncertain(a) )
+      {
+	counts[a]++;
+	++total;
+      }
+    }
   }
+  map<char,int>::iterator m = counts.find('a');
+  if ( m == counts.end() )
+    pi[0] = 0;
+  else
+    pi[0] = m->second / (double)(total);
+  m = counts.find('c');
+  if ( m == counts.end() )
+    pi[1] = 0;
+  else
+    pi[1] = m->second / (double)(total);
+  m = counts.find('g');
+  if ( m == counts.end() )
+    pi[2] = 0;
+  else
+    pi[2] = m->second / (double)(total);
+  m = counts.find('t');
+  if ( m == counts.end() )
+    pi[3] = 0;
+  else
+    pi[3] = m->second / (double)(total);
+
+  cerr << "read all counts" << endl;
   return pi;
 }
 
-bool baseNotUncertain(char a)
-{
-  return ( (a=='a') || (a=='c') || (a=='g') || (a=='t') );
-}
-
-int baseToInt(char a)
-{
-  switch ( a )
-  {
-  case 'a' : return 0;
-  case 'c' : return 1;
-  case 'g' : return 2;
-  case 't' : return 3;
-  default :
-    cerr << "Error: baseToInt called on character that is not 'a', 'c', 'g', or 't'." << endl;
-    exit(1);
-  }
-}
-    
 // Assumes that matrix is correctly sized before
 // Even though matrix is symmetric, store distance in both upper and lower triangle to faciliate
 //   calculation of row sums
