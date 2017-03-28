@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
   ofstream parStream(parFile.c_str());
     
   cerr << "burn-in:" << endl;
-  tree.mcmc(q_init,alignment,parameters.getNumBootstrap(),alignment.getNumSites(),rng,treeStream,parStream, true);
+  tree.mcmc(q_init,alignment,parameters.getNumMCMC()/10,alignment.getNumSites(),rng,treeStream,parStream, true);
   cerr << endl << " done." << endl;
   cerr << "tree after burn-in: " << endl;
   cerr << tree.makeTreeNumbers() << endl;
@@ -279,7 +279,7 @@ int main(int argc, char* argv[])
 
   // mcmc
   cerr << "sampling:" << endl;
-  tree.mcmc(q_init,alignment,parameters.getNumRandom(),alignment.getNumSites(),rng,treeStream,parStream, false);
+  tree.mcmc(q_init,alignment,parameters.getNumMCMC(),alignment.getNumSites(),rng,treeStream,parStream, false);
   cerr << endl << " done." << endl;
   cerr << "average tree: " << endl;
   cerr << tree.makeTreeNumbers() << endl;

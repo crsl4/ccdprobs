@@ -89,6 +89,7 @@ plotBistro = function(bistro) {
 }
 
 plotBistro2 = function(bistro) {
+  require(dplyr)
   require(ggplot2)
   require(viridis)
   temp.tree = as.character(bistro$tree)

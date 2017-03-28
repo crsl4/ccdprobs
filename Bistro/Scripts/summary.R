@@ -7,8 +7,12 @@
 ## bistro writes it like this: "(1,(2,(((((7,8),9),10),12),11)),(3,((4,5),6)));"
 ## primates: "(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));"
 
+stem = "run1"
+besttree="(1,2,((3,4),(((5,6),(7,8)),(((((((9,10),11),12),13),14),15),16))));"
+
 summaryBistro = function(stem, besttree=NULL)
 {
+    require(ape)
   ## now do bistro
   source("../../Scripts/readBistro.r")
   bistro = readBistro(stem)
@@ -82,25 +86,22 @@ summaryBistro = function(stem, besttree=NULL)
   }
   dev.off()
 
-##  df2 = rbind(bistro)
-##  df2$set = factor( rep("Bistro",nrow(bistro)) )
+df2 = bistro %>% select(pi1,pi2,pi3,pi4,s1,s2,s3,s4,s5,s6)
 
-##pdf(paste0(stem,"-rates-density.pdf"))
-##  vpal = viridis(2,end=0.8)
-##  if(length(q) != 10)
-##    stop("input vector q with true values does not have 10 elements: 4 pi, 6 s")
-  # for(i in 1:(ncol(df2)-1))
-  # {
-  #   median.bistro = mean( drop(as.matrix(filter(df2,set=="Bistro") %>% select(i))) )
-  #   trueQ = q[i]
-  #   plot(ggplot(df2,aes(x=df2[,i],col=set))+geom_density() +
-  #          scale_color_manual(values=vpal) +
-  #          geom_vline(xintercept=median.bistro,color=vpal[1]) +
-  #          geom_vline(xintercept=trueQ,color="black") +
-  #          ggtitle(paste(names(df2)[i])) +
-  #          theme_bw())
-  # }
-  # dev.off()
+df2$set = factor( rep("Bistro",nrow(bistro)) )
+
+pdf(paste0(stem,"-rates-density.pdf"))
+  vpal = viridis(2,end=0.8)
+ for(i in 1:(ncol(df2)-1))
+ {
+   median.bistro = mean( drop(as.matrix(filter(df2,set=="Bistro") %>% select(i))) )
+   plot(ggplot(df2,aes(x=df2[,i],col=set))+geom_density() +
+          scale_color_manual(values=vpal) +
+          geom_vline(xintercept=median.bistro,color=vpal[1]) +
+          ggtitle(paste(names(df2)[i])) +
+          theme_bw())
+ }
+ dev.off()
 }
 
 compareBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));", bmcmc="mcmc1"){
@@ -161,7 +162,7 @@ compareBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));", bmcmc="mcmc1")
     bistro = readBistro(stem)
     data = readDataSort(stem)
     pdf(paste0(stem,other,"-cloud.pdf"))
-    plotBistro(bistro)
+    plotBistro2(bistro)
     dev.off()
 
     ## we need to treat the cats-dogs differently because canonical sort in bistro does not
@@ -280,6 +281,7 @@ compareBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));", bmcmc="mcmc1")
     else
         {
             foo2 = read.table(paste0(bmcmc,".par"))
+            burn = round(n/11)
             foo2 = foo2[-(1:burn),-1]
             if ( n > 1000 )
                 foo2 = foo2[sample(1:nrow(foo2),1000,replace=FALSE),]

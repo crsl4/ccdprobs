@@ -11,19 +11,24 @@ source("old/transformRates.r")
 seed = 0558
 set.seed(seed)
 
-nsites = 1500
+fileRoot = "sim-16-500"
+##nsites = 1500
+nsites = 500
 alpha = 1000
-tree.text = "(Camel:1.460221e-01,Dolphin:1.214757e-01,(Pig:1.072255e-01,(Cow:8.941711e-02,(Sheep:8.610459e-02,Giraffe:7.642583e-02):1.846791e-02):5.146787e-02):2.783294e-02);"
+#tree.text = "(Camel:1.460221e-01,Dolphin:1.214757e-01,(Pig:1.072255e-01,(Cow:8.941711e-02,(Sheep:8.610459e-02,Giraffe:7.642583e-02):1.846791e-02):5.146787e-02):2.783294e-02);"
+tree.text = "((((A:0.0025,B:0.0025):0.0025,(C:0.0025,D:0.0025):0.0025):0.0325,((E:0.0125,F:0.0125):0.0125,(G:0.0125,H:0.0125):0.0125):0.0125):0.0625,(((((((I:0.0125,J:0.0125):0.0125,K:0.025):0.0125,L:0.0375):0.0125,M:0.05):0.0125,N:0.0625):0.0125,O:0.075):0.0125,P:0.0875):0.0125);"
 
 tree = read.tree(text=tree.text)
 ntax = length(tree$tip.label)
 
 ## from artiodactyl-6.nex.pstat
-p = c(0.2870113,0.2715106,0.1457293,0.2957489)
-r = c(0.2116111, 0.2557697, 0.6806020, 0.3338476, 0.4193366, 0.1183771)
+#p = c(0.2870113,0.2715106,0.1457293,0.2957489)
+#r = c(0.2116111, 0.2557697, 0.6806020, 0.3338476, 0.4193366, 0.1183771)
 
-s = getS(c(r,p))
-s = s[1:6]
+#s = getS(c(r,p))
+#s = s[1:6]
+p = c(0.3,0.3,0.1,0.3)
+s = c(0.1,0.3,0.1,0.1,0.3,0.1)
 Q = makeQfromS(s,p,4)
 
 ##r=r/r[6]
@@ -33,7 +38,9 @@ x = simData(tree,nsites,Q,alpha)
 dat = convertData(x,ntax)
 
 ## writing fasta file
-filename = paste0("../Data/sim-artiodactyl-6.fasta")
+##filename = paste0("../Data/sim-artiodactyl-6.fasta")
+##filename = paste0("../Data/sim-16.fasta")
+filename = paste0("../Data/",fileRoot,".fasta")
 for(i in 1:ntax){
     if(i == 1){
         write(paste0(">",tree$tip.label[i]), file=filename)
@@ -45,7 +52,8 @@ for(i in 1:ntax){
 }
 
 ## writing nex file
-filename = paste0("../Examples/Simulations/sim-artiodactyl-6.nex")
+##filename = paste0("../Examples/Simulations/sim-artiodactyl-6.nex")
+filename = paste0("../Data/",fileRoot,".nex")
 
 ## need to write a nex file as well
 write("#NEXUS", file=filename)
@@ -82,6 +90,8 @@ write("end;", file=filename, append=TRUE)
 
 
 
+if ( FALSE )
+    {
 ## =======================================================================
 ## cats and dogs
 seed = 1234
@@ -182,3 +192,4 @@ round(as.matrix(dist.dna(sim.cd,model="TN93")),3)
 round(as.matrix(dist.dna(real.cd,model="TN93")),3)
 round(cophenetic.phylo(tree),3)
 
+}
