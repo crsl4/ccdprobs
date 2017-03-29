@@ -35,7 +35,7 @@ void usage(ostream& f)
   f << "    --weightMean                   |  weight the MLE with prior mean (false)" << endl;
   f << "    --onlyBootstrap                |  only does the bootstrap sample of trees (false)" << endl;
   f << "    --no-MCMC                      |  do not use MCMC to estimate Q" << endl;
-  f << "    --num-MCMC num                 |  nonnegative integer number of MCMC cycles (1000), update Q and all edge lengths" << endl;
+  f << "    -m num                         |  nonnegative integer number of MCMC cycles (1000), update Q and all edge lengths" << endl;
   exit(1);
 }
 
@@ -145,7 +145,7 @@ void Parameter::processCommandLine(int argc,char* argv[])
       }
 
     }
-    else if ( strcmp(argv[k],"--num-mcmc") == 0)
+    else if ( strcmp(argv[k],"-m") == 0)
     {
       if ( ++k < argc )
       {
@@ -155,7 +155,7 @@ void Parameter::processCommandLine(int argc,char* argv[])
       }
       else
       {
-        cerr << "Error: flag `--num-mcmc' not followed by an integer" << endl;
+        cerr << "Error: flag `-m' not followed by an integer" << endl;
         usage(cerr);
       }
     }
@@ -169,7 +169,7 @@ void Parameter::processCommandLine(int argc,char* argv[])
       }
       else
       {
-        cerr << "Error: flag `-m' not followed by an integer" << endl;
+        cerr << "Error: flag `-M' not followed by an integer" << endl;
         usage(cerr);
       }
     }
