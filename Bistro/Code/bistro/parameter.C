@@ -26,7 +26,7 @@ void usage(ostream& f)
   f << "    -p stationary-distribution     |  [ not used ] four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
   f << "    -q symmetric-q-parameters      |  [ not used ] six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
   f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
-  f << "    --no-reweight                  |  do *not* reweight bootstrap sample with weight proportional to exp(-distance)" << endl;
+  f << "    --no-reweight                  |  do *not* reweight bootstrap sample with weight proportional to exp(-distance), but exp(-parsimony)" << endl;
   f << "    --weight-scale scale           |  scale to compute the distance weights from counts, positive number (200)" << endl;
   f << "    --threads num                  |  number of threads for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;
   f << "    --fixedQ                       |  multiply dirichlet scale by 10million, and artificially set logQ=0" << endl;

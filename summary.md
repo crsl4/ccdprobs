@@ -2,14 +2,10 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- change comment to keep MCMC to mcmc in parameters.C: turn -m for -num-mcmc, and -M for the MLE (old -m)
-- save simulating trees before pulling bret changes (keep artiodactyl stuff separate)
-- write somewhere that no-reweight is doing parsimony
 - add label to corplots (which is bistro which is other)
 - run simulated data 16 taxa: bmcmc on true tree, bistro on true tree, and bistro and mrbayes not in true tree; try with fewer sites; run with independent; run mrbayes; run with shorter bl
-- add `sed 's/\[[^]]*\]//g' articodactylMBTree.txt > cleanMBTree.txt` somewhere
 - there is something off with the branch lengths: long branches being proposed with joint case (not su much with independent case)
-- check error in base frequencies
+
 
 
 - Write up manuscript, and figure out simulation study for small datasets:
@@ -60,9 +56,8 @@ input split into tree if they are compatible. The score of a split is the square
 - fatal error: boost/dynamic_bitset.hpp: No such file or directory; sometimes Boost, sometimes boost
 - Alignment summary print number of taxa and sequence length
 - Some functions need the root to have two children, some need to have three children, we need to change the functions so that they all work either way
-- Use -p and -q if set
 - Get rid of old unused functions in bistro
-- Add a parameter for MCMC number of generations
+- change back --no-reweight to use raw bootstrap counts
 
 
 
