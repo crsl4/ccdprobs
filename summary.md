@@ -2,8 +2,8 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- add label to corplots (which is bistro which is other)
-- run simulated data 16 taxa: bmcmc on true tree, bistro on true tree, and bistro and mrbayes not in true tree; try with fewer sites; run with independent; run mrbayes; run with shorter bl
+- run simulated data 16 taxa (500 and 1500 sites): bistro, bistro on true tree, bistro independent, mrbayes; run with shorter bl
+- same for sim-cats-dogs, sim-whales only for 1500
 - there is something off with the branch lengths: long branches being proposed with joint case (not su much with independent case)
 
 
@@ -14,7 +14,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-
+- weird long branches proposed, not in artiodactyl
 
 - Sequential IS?
 

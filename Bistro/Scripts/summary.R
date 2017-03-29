@@ -193,8 +193,8 @@ compareBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));", bmcmc="mcmc1")
 
     require(corrplot)
     pdf(paste0(stem,other,"-corr.pdf"))
-    corrplot(cor(m.bistro))
-    corrplot(cor(m.mb))
+    corrplot(cor(m.bistro), main="bistro")
+    corrplot(cor(m.mb), main=other)
     dev.off()
 
     ## combine data for combined plots
