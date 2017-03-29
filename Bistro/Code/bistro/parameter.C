@@ -17,7 +17,7 @@ void usage(ostream& f)
   f << "    -f sequence-file-name          |  the FASTA format file name with the sequence data" << endl;
   f << "    -b num-bootstrap               |  nonnegative integer number of bootstrap trees (1000)" << endl;
   f << "    -r num-random                  |  nonnegative integer number of random trees (0, no sampling of trees)" << endl;
-  f << "    -m num-mle                     |  nonnegative integer number of MLE passes before generating random gamma lengths (2)" << endl;
+  f << "    -M num-mle                     |  nonnegative integer number of MLE passes before generating random gamma lengths (2)" << endl;
   f << "    -o file-root                   |  name of root for all output files" << endl;
   f << "    -s seed                        |  positive integer random seed (machine chosen if not provided)" << endl;
   f << "    -h || --help                   |  print this help message" << endl;
@@ -159,7 +159,7 @@ void Parameter::processCommandLine(int argc,char* argv[])
         usage(cerr);
       }
     }
-    else if ( strcmp(argv[k],"-m") == 0)
+    else if ( strcmp(argv[k],"-M") == 0)
     {
       if ( ++k < argc )
       {

@@ -53,6 +53,7 @@ and its topology
 
 -p 0.267,0.235,0.181,0.317 -q 0.0108929,0.3428420,0.0398413,0.0106884,0.5949126,0.0008228
 
+##### warning: 3/29/2017 changed -m to -M
 ../../Code/bistro/bistro -p 0.267,0.235,0.181,0.317 -q 0.0108929,0.3428420,0.0398413,0.0106884,0.5949126,0.0008228 -f ../../Data/cats-dogs.fasta -b 10000 -r 1000 -m 2
 
 ## after joint branch lengths sampling

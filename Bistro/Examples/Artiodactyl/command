@@ -81,6 +81,7 @@ summaryBistro("testtree3", besttree="(1,(2,3),(4,(5,6)));", bmcmc="mcmc3")
 
 ../../Code/bistro/bistro -p 0.309,0.288,0.134,0.269 -q 0.1847391,0.1289626,0.0373299,0.0079465,0.6403711,0.0006508 -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1
 
+#### warning: 3/29/2017, changed -m to -M
 time ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -b 10000 -r 1000 -m 4 -o run9.txt > run9.log
 
 ## debug generateBranchLengths:

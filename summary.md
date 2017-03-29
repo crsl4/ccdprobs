@@ -2,7 +2,6 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- ln -s path/bistro ~/bin/bistro
 - change comment to keep MCMC to mcmc in parameters.C: turn -m for -num-mcmc, and -M for the MLE (old -m)
 - save simulating trees before pulling bret changes (keep artiodactyl stuff separate)
 - write somewhere that no-reweight is doing parsimony
@@ -84,6 +83,8 @@ input split into tree if they are compatible. The score of a split is the square
 - Number of cores -1 by convention?
 - New valgrind error
 
+## Notes:
+ln -s Documents/phylo/projects/present/CladeCondProb/ccdprobs/Bistro/Code/bistro/bistro /usr/local/bin/bistro
 
 -----------------------
 # URS project

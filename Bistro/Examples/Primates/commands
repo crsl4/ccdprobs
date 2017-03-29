@@ -23,6 +23,7 @@ summaryBistro("test2",besttree="(1,2,((((((3,4),5),6),7),(((8,9),10),11)),12));"
 perl ../../scripts/nexus2phylip.pl -nexus primates.nex
 ## then use keyboard macro to convert to fasta (change from primates.phy to primates.fasta)
 
+#### warning: 3/29/2017 changed -m to -M
 time ../../Code/bistro/bistro -f ../../Data/primates.fasta -b 10000 -r 100 -m 4 -o run1.txt > run1.log
 
 ## compare to mrbayes
