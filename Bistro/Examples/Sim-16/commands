@@ -1,0 +1,20 @@
+## compare bistro and mrbayes
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro1 -r 1000 -b 1000 -s 2003894300 > bistro1.log
+mb sim-16-nsites1500.nex
+(later output files copied to Examples/Sim-16)
+
+despues, debemos copiar los de mb al folder de Examples/sim16
+y despues queremos un maldito summary function q le des el nombre de bistro file, el nombre de mrbayes file y el true tree, true p,s y te haga las graficas para comparar
+probar con este caso, y despues correr:
+
+- sim16 nsites 1500 indep (same seed)
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro1-ind -r 1000 -b 1000 -s 2003894300 --independent > bistro1-ind.log
+
+- sim16 nsites 1500 bistro on true tree
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro1-fixT -r 1000 -b 1000 -s 2003894300 -t "((((A,B),(C,D)),((E,F),(G,H))),(((((((I,J),K),L),M),N),O),P));" > bistro1-fixT.log
+
+- sim16 nsites 500 bistro and mb
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites500.fasta -o bistro1-500 -r 1000 -b 1000 -s 1589293075 > bistro1-500.log
+mb sim-16-nsites500.nex
+(later output files copied to Examples/Sim-16)
+

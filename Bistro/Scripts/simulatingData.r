@@ -10,9 +10,10 @@ source("old/transformRates.r")
 
 seed = 0558
 set.seed(seed)
-which = "artiodactyl"
+## which = "artiodactyl"
 ## which = "cats-dogs"
-## which = "sim-16"
+which = "sim-16"
+##which = "whales"
 nsites = 500
 alpha = 1000
 

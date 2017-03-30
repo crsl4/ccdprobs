@@ -34,7 +34,7 @@ void usage(ostream& f)
   f << "    --rootFix                      |  fix the root at one of the two nodes attached to longest branch (false)" << endl;
   f << "    --weightMean                   |  weight the MLE with prior mean (false)" << endl;
   f << "    --onlyBootstrap                |  only does the bootstrap sample of trees (false)" << endl;
-  f << "    --no-MCMC                      |  do not use MCMC to estimate Q" << endl;
+  f << "    --no-mcmc                      |  do not use MCMC to estimate Q" << endl;
   f << "    -m num                         |  nonnegative integer number of MCMC cycles (1000), update Q and all edge lengths" << endl;
   exit(1);
 }
@@ -67,13 +67,13 @@ void Parameter::processCommandLine(int argc,char* argv[])
 {
   if ( argc==1 )
     usage(cerr);
-  
+
   int k=0;
   while ( ++k < argc )
   {
     if ( strcmp(argv[k],"-h") == 0 || strcmp(argv[k],"--help") == 0 )
       usage(cerr);
-    
+
     if ( strcmp(argv[k],"-f") == 0 )
     {
       if ( ++k < argc )
@@ -267,7 +267,7 @@ void Parameter::processCommandLine(int argc,char* argv[])
     {
       fixedQ = true;
     }
-    else if ( strcmp(argv[k],"--no-MCMC") == 0 )
+    else if ( strcmp(argv[k],"--no-mcmc") == 0 )
     {
       doMCMC = false;
     }

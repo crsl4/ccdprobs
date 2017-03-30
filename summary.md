@@ -2,9 +2,13 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- run simulated data 16 taxa (500 and 1500 sites): bistro, bistro on true tree, bistro independent, mrbayes; run with shorter bl
-- same for sim-cats-dogs, sim-whales only for 1500
-- there is something off with the branch lengths: long branches being proposed with joint case (not su much with independent case)
+- finish all the runs with simulated data (I think that only fixed tree are missing)
+- write a script to summarize results (see sim16 commands)
+- focus on
+  - best tree = true tree (identified by mean tree?)
+  - excessively long branches proposed?
+  - good estimates of p,s?
+
 
 
 
@@ -15,7 +19,14 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## Check with Bret
 - weird long branches proposed, not in artiodactyl
-
+- sim16 1500: 1.23%
+- sim16 1500 indep: 0.65%
+- sim16 fix tree: 0.51%
+- sim16 500: 0.15%
+- sim cats dogs 1500: 0.5%
+- sim cats dogs fixed tree: 1.16%
+- sim whales 1500: 0.3%
+- sim whales fixed tree (mb tree has polytomy, not run, but used to simulate)
 - Sequential IS?
 
 ## Jordan

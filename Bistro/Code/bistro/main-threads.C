@@ -56,7 +56,7 @@ bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string,
 // this function is not used in mcmc, that one used is in model.C
 VectorXd dirichletProposalDensityScale(VectorXd x,double scale,double& logProposalDensity,mt19937_64& rng)
 {
-  cout << "vector x: " << x.transpose() << endl;
+//  cout << "vector x: " << x.transpose() << endl;
   VectorXd alpha(x.size());
   VectorXd y(x.size());
   double sum = 0;

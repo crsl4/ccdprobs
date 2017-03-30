@@ -1,0 +1,15 @@
+- sim-cats dogs 1500 bistro, mb
+../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro1-cats -r 1000 -b 1000 > bistro1-cats.log
+mb sim-cats-dogs-nsites1500.nex
+(then moved output files to Examples/Simulations)
+
+- sim-cats dogs 1500 bistro on true tree
+../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro1-cats-fixT -r 1000 -b 1000 -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" > bistro1-cats-fixT.log
+
+- sim-whales 1500 bistro,mb
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o bistro1-whales -r 1000 -b 1000 > bistro1-whales.log
+mb sim-whales-nsites1500.nex
+(then moved output files to Examples/Simulations)
+
+- sim-whales 1500 bistro on true tree (not run yet)
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o bistro1-whales-fixT -r 1000 -b 1000 -t "(1,2,((3,(((4,5),14),((6,7),(((8,9),11),10,12,13)))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));" > bistro1-whales-fixT.log
