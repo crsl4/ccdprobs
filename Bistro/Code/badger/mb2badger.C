@@ -526,7 +526,7 @@ int main(int argc, char *argv[])
   string line;
   int lineNumber=0;
   while(getline(f,line)) {
-    cerr << line << endl;
+    //   cerr << line << endl;
     lineNumber++;
     // skip if line is not in format "  tree name = treeRep"
     istringstream s(line);
@@ -535,14 +535,14 @@ int main(int argc, char *argv[])
     if(keyTree != "tree")
       continue;
     s >> name >> equalSign >> comment;
-    cerr << "keytree: " << keyTree << endl << " name: " << name << endl;
-    cerr << "equalSign: " << equalSign << endl << "comment: " << comment << endl;
+//    cerr << "keytree: " << keyTree << endl << " name: " << name << endl;
+//    cerr << "equalSign: " << equalSign << endl << "comment: " << comment << endl;
     if(equalSign != "=")
       continue;
     // rest should be a parenthetic representation of a tree.  assume no spaces!
     string treeString;
     s >> treeString;
-    cerr << treeString << endl;
+    //  cerr << treeString << endl;
     Tree tree(treeString,lineNumber);
     numTrees++;
     tree.printTop(topOut);
