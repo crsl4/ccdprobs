@@ -528,3 +528,256 @@ summaryBistroSim = function(stem, mb=FALSE, besttree="(1,2,(3,(4,(5,6))));", bmc
         }
     dev.off()
 }
+
+
+## function to compare bistro and mb for simulated data with true tree with BL, and q=(p,s)
+compareBistroMB = function(stem, mb=NULL, truetree="(1:1.0,2:1.0,(3:1.0,(4:1.0,(5:1.0,6:1.0):1.0):1.0):1.0);", q=c(0.2870113,0.2715106,0.1457293,0.2957489,0.12041579,0.07811855,0.42186604,0.09645864,0.24588493,0.03725606)){
+    if(mb != NULL){
+        ## mrbayes
+        top1 = read.table("ccdw.run1.top")
+        top2 = read.table("ccdw.run2.top")
+        tre1 = read.table("ccdw.run1.tre")
+        tre2 = read.table("ccdw.run2.tre")
+
+        ## remove burnin
+        top = c(as.character(top1[-(1:2001),]),as.character(top2[-(1:2001),]))
+        tre = c(as.character(tre1[-(1:2001),]),as.character(tre2[-(1:2001),]))
+        ## best tree: need to change this, because the truetree has bl!!!
+        keep = which(top==truetree)
+
+        ## sample 1000 for better plots
+        keep = sort(sample(keep,1000))
+        tre.mb = tre[keep]
+
+        ## remove big stuff
+        rm(top1,top2,tre1,tre2,top,tre,keep)
+        other = "MrBayes"
+        N.mb = length(tre.mb) ### 1000 now!!!
+        tree = read.tree(text=tre.mb[1])
+        ## get number of edges
+        m.mb = matrix(0,N.mb,length(tree$edge.length))
+        colnames(m.mb) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
+
+        for ( i in 1:N.mb ){
+            tree = read.tree(text=tre.mb[i])
+            m.mb[i,] = tree$edge.length
+        }
+    }
+
+
+    require(ape)
+    require(phangorn)
+
+    ## now do bistro
+    source("../../Scripts/readBistro.r")
+    bistro = readBistro(stem)
+    data = readDataSort(stem)
+    pdf(paste0(stem,other,"-cloud.pdf"))
+    plotBistro(bistro)
+    dev.off()
+
+    tab = rev(sort(table(bistro$tree)))
+    mosttree = read.tree(text=names(tab[1]))
+    ttree = read.tree(text=truetree)
+
+    con = file(paste0(stem,"-pars.smap"), "r")
+    dict = vector(mode="list", length=length(ttree$tip.label))
+    nm = rep(NA,length(ttree$tip.label))
+    i = 1
+    while ( TRUE ) {
+        line = readLines(con, n = 1)
+        if( grepl("translate",line) )
+            next
+        v = strsplit(line, "\\s+")[[1]]
+        v = v[v != ""]
+        if( grepl(";", line) ){
+            v[2] = strsplit(v[2],";")[[1]]
+            nm[i] = v[2]
+            dict[i] = v[1]
+            break
+        }else{
+            v[2] = strsplit(v[2],",")[[1]]
+            nm[i] = v[2]
+            dict[i] = v[1]
+            i = i+1
+        }
+    }
+    close(con)
+    names(dict)=nm
+
+    ## changing taxon names to numbers in true tree
+    for(i in 1:length(ttree$tip.label))
+        ttree$tip.label[i] = dict[[ttree$tip.label[i]]]
+
+    ## checking if most sampled tree is equal to true tree
+    if( RF.dist(unroot(ttree),mosttree) == 0 )
+        print(paste0("Most frequently sampled tree is equal to the true tree: ",round(tab[1]/sum(tab),2)))
+    else
+        print(paste0("Most frequently sampled tree is NOT equal to the true tree: ",names(tab[1])," ", round(tab[1]/sum(tab),2)))
+
+    keep = rep(FALSE,length(bistro$tree))
+    for(i in 1:length(bistro$tree)){
+        tree1 = read.tree(text=as.character(bistro$tree[i]))
+        if(RF.dist(tree1,unroot(ttree)) == 0)
+            keep[i] = TRUE
+    }
+
+    ## keep only trees that match the true tree
+    tre.bistro = data$V1[keep]
+    tree=read.tree(text=as.character(tre.bistro[1]))
+
+    ## how to match bl from trees to true tree? aqui voy
+    ## creo q hay q match splits, checar ticr script
+
+    ## Make a list of all descendants from each edge
+    nedg <- dim(tree$edge)[1] # total number of edges
+    edgeDescendants <- vector("list",nedg)
+    for (i in nedg:1){
+        childnode <- tree$edge[i,2]
+        if (childnode <= ntax){ # external edge, childnode = leaf
+            edgeDescendants[[i]] <- tree$tip.label[childnode]
+        } else { # internal edge
+            tmp <- which(tree$edge[,1]==childnode) # indices of the 2 children edges
+            edgeDescendants[[i]] <- c(edgeDescendants[[tmp[1]]],edgeDescendants[[tmp[2]]])
+        }
+    }
+
+
+    N.bistro = length(tre.bistro)
+    ## get number of edges
+    m.bistro = matrix(0,N.bistro,length(tree$edge[,1]))
+    colnames(m.bistro) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
+
+    for ( i in 1:N.bistro )
+        {
+            tree = read.tree(text=as.character(tre.bistro[i]))
+            m.bistro[i,] = tree$edge.length
+        }
+
+    require(corrplot)
+    pdf(paste0(stem,other,"-corr.pdf"))
+    corrplot(cor(m.bistro))
+    corrplot(cor(m.mb))
+    dev.off()
+
+    ## combine data for combined plots
+    m = rbind(m.bistro,m.mb)
+    df = data.frame(m)
+    df$set = factor( c(rep("Bistro",N.bistro),rep(other,N.mb)) )
+
+    ## make the plots
+    adjEdges = getAdjacentEdges(tree)
+
+    require(viridis)
+    require(ggplot2)
+    require(dplyr)
+
+    pdf(paste0(stem,other,"-scatter.pdf"))
+    vpal = viridis(2,end=0.8)
+    for( i in 1:nrow(adjEdges))
+        {
+            i1 = adjEdges[i,1]
+            i2 = adjEdges[i,2]
+            median.bistro.1 = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i1))) )
+            median.bistro.2 = median( drop(as.matrix(filter(df,set=="Bistro") %>% select(i2))) )
+            median.mb.1 = median( drop(as.matrix(filter(df,set==other) %>% select(i1))) )
+            median.mb.2 = median( drop(as.matrix(filter(df,set==other) %>% select(i2))) )
+
+            plot(
+                ggplot(df,aes(x=df[,adjEdges[i,1]],
+                              y=df[,adjEdges[i,2]],
+                              color=set)
+                       ) +
+                geom_point(alpha=0.5) +
+                scale_color_manual(values=vpal) +
+                geom_vline(xintercept=median.bistro.1,color=vpal[1]) +
+                geom_vline(xintercept=median.mb.1,color=vpal[2]) +
+                geom_hline(yintercept=median.bistro.2,color=vpal[1]) +
+                geom_hline(yintercept=median.mb.2,color=vpal[2]) +
+                                        #   facet_grid(set ~ .) +
+                ggtitle(paste(names(df)[adjEdges[i,1]],names(df)[adjEdges[i,2]])) +
+                theme_bw()
+                )
+        }
+    dev.off()
+
+    pdf(paste0(stem,other,"-density.pdf"))
+    vpal = viridis(2,end=0.8)
+    if(ncol(m) != length(bl))
+        stop("input bl vector with true values does not match the number of bl")
+    for(i in 1:ncol(m))
+        {
+            median.bistro = mean( drop(as.matrix(filter(df,set=="Bistro") %>% select(i))) )
+            median.mb = mean( drop(as.matrix(filter(df,set==other) %>% select(i))) )
+            trueBL = bl[i]
+
+            plot(ggplot(df,aes(x=df[,i],col=set))+geom_density() +
+                 scale_color_manual(values=vpal) +
+                 geom_vline(xintercept=median.bistro,color=vpal[1]) +
+                 geom_vline(xintercept=median.mb,color=vpal[2]) +
+                 geom_vline(xintercept=trueBL,color="black") +
+                 ggtitle(paste(names(df)[i])) +
+                 theme_bw())
+
+        }
+    dev.off()
+
+########################################################################################
+    if(mb)
+        {
+            foo1 = read.table("ccdw.run1.p", header=TRUE)
+            foo2 = read.table("ccdw.run2.p", header=TRUE)
+            foo = rbind(foo1[-(1:2001),],foo2[-(1:2001),])
+            foo$sAC = with(foo, r.A...C. * pi.A. * pi.C.)
+            foo$sAG = with(foo, r.A...G. * pi.A. * pi.G.)
+            foo$sAT = with(foo, r.A...T. * pi.A. * pi.T.)
+            foo$sCG = with(foo, r.C...G. * pi.C. * pi.G.)
+            foo$sCT = with(foo, r.C...T. * pi.C. * pi.T.)
+            foo$sGT = with(foo, r.G...T. * pi.G. * pi.T.)
+            s = with(foo,sAC+sAG+sAT+sCG+sCT+sGT)
+            foo$sAC = foo$sAC/s
+            foo$sAG = foo$sAG/s
+            foo$sAT = foo$sAT/s
+            foo$sCG = foo$sCG/s
+            foo$sCT = foo$sCT/s
+            foo$sGT = foo$sGT/s
+            N.mb2 = length(foo$Gen)
+            foo2 = subset(foo,select=c("pi.A.","pi.C.","pi.G.","pi.T.","sAC","sAG","sAT","sCG","sCT","sGT"))
+            names(foo2) = c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6")
+        }
+    else
+        {
+            foo2 = read.table(paste0(bmcmc,".par"))
+            foo2 = foo2[-(1:burn),-1]
+            if ( n > 1000 )
+                foo2 = foo2[sample(1:nrow(foo2),1000,replace=FALSE),]
+            names(foo2) = c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6")
+            N.mb2 = nrow(foo2)
+        }
+    bistro2 = subset(bistro,select=c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6"))
+    N.bistro2 = nrow(bistro2)
+
+    df2 = rbind(bistro2,foo2)
+    df2$set = factor( c(rep("Bistro",N.bistro2),rep(other,N.mb2)) )
+
+
+    pdf(paste0(stem,other,"-rates-density.pdf"))
+    vpal = viridis(2,end=0.8)
+    if(length(q) != 10)
+        stop("input vector q with true values does not have 10 elements: 4 pi, 6 s")
+    for(i in 1:(ncol(df2)-1))
+        {
+            median.bistro = mean( drop(as.matrix(filter(df2,set=="Bistro") %>% select(i))) )
+            median.mb = mean( drop(as.matrix(filter(df2,set==other) %>% select(i))) )
+            trueQ = q[i]
+            print(median.mb)
+            plot(ggplot(df2,aes(x=df2[,i],col=set))+geom_density() +
+                 scale_color_manual(values=vpal) +
+                 geom_vline(xintercept=median.bistro,color=vpal[1]) +
+                 geom_vline(xintercept=median.mb,color=vpal[2]) +
+                 geom_vline(xintercept=trueQ,color="black") +
+                 ggtitle(paste(names(df2)[i])) +
+                 theme_bw())
+        }
+    dev.off()
+}

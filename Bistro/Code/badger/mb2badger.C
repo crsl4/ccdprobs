@@ -5,7 +5,7 @@
 // Input: a MrBayes .t file
 // Output: a .top file and a .tre file
 //         where each tree is binary and in sorted subtree order
-// 
+//
 // 25 October 2016
 //   Changed code so that parent edge is not always last
 //     and do not print binary tree if a node has degree greater than 3
@@ -324,13 +324,13 @@ void Tree::readSubtree(istringstream& s,Node* parent,int& numLeft,int numLine)
   e->setLength(length);
 }
 
-Tree::Tree(string line,int lineNumber) 
+Tree::Tree(string line,int lineNumber)
 {
   // read in the tree from parenthetic representation.
   // Create new nodes and edges on the fly.
   // Then renumber.
   // Then, reorder so that leaves come first.
-  
+
   numEdges = 0;
   numTaxa = 0;
 
@@ -480,7 +480,7 @@ void Tree::printTree(ostream& f) {
     }
 //  }
 //  else { // degree is 3 or more
-//    // combine first degree-1 subtrees 
+//    // combine first degree-1 subtrees
 //    f << "(";
 //    for(int i=0;i<degree-1;i++) {
 //      Edge* e = root->getEdge(i);
@@ -516,7 +516,7 @@ int main(int argc, char *argv[])
 
   if(ext!=string::npos) // '.' in filename, erase from last '.'
     fileRoot.erase(ext,fileRoot.length() - ext);
-    
+
   string topFile = fileRoot + ".top";
   string treeFile = fileRoot + ".tre";
 
@@ -526,19 +526,23 @@ int main(int argc, char *argv[])
   string line;
   int lineNumber=0;
   while(getline(f,line)) {
+    cerr << line << endl;
     lineNumber++;
     // skip if line is not in format "  tree name = treeRep"
     istringstream s(line);
-    string keyTree,name,equalSign;
+    string keyTree,name,equalSign,comment;
     s >> keyTree;
     if(keyTree != "tree")
       continue;
-    s >> name >> equalSign;
+    s >> name >> equalSign >> comment;
+    cerr << "keytree: " << keyTree << endl << " name: " << name << endl;
+    cerr << "equalSign: " << equalSign << endl << "comment: " << comment << endl;
     if(equalSign != "=")
       continue;
     // rest should be a parenthetic representation of a tree.  assume no spaces!
     string treeString;
     s >> treeString;
+    cerr << treeString << endl;
     Tree tree(treeString,lineNumber);
     numTrees++;
     tree.printTop(topOut);

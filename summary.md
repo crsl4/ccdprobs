@@ -2,7 +2,6 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- finish all the runs with simulated data (I think that only fixed tree are missing)
 - write a script to summarize results (see sim16 commands)
 - focus on
   - best tree = true tree (identified by mean tree?)
@@ -27,6 +26,8 @@ Bret Larget, Claudia Solis-Lemus (2016)
 - sim cats dogs fixed tree: 1.16%
 - sim whales 1500: 0.3%
 - sim whales fixed tree (mb tree has polytomy, not run, but used to simulate)
+- still need to summarize mb to add to the compare script, forgot how!
+
 - Sequential IS?
 
 ## Jordan
