@@ -2,12 +2,14 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- write a script to summarize results (see sim16 commands)
+- finish a script to summarize results (see sim16 commands): check simcats, sim16
 - focus on
   - best tree = true tree (identified by mean tree?)
   - excessively long branches proposed?
   - good estimates of p,s?
-
+- rerun sim whales
+- weird long branches proposed, not in artiodactyl
+- pairwise distances between 99 sample trees and mean tree, and do MDS: smdscale
 
 
 
@@ -17,7 +19,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- weird long branches proposed, not in artiodactyl
+
 - sim16 1500: 1.23%
 - sim16 1500 indep: 0.65%
 - sim16 fix tree: 0.51%
@@ -29,6 +31,11 @@ Bret Larget, Claudia Solis-Lemus (2016)
 - still need to summarize mb to add to the compare script, forgot how!
 
 - Sequential IS?
+
+grep '>' sim-whales-nsites1500.fasta > whales-names
+replace > with nothing
+replace $ (end of line) with comma
+
 
 ## Jordan
 - Create bootstrap sample of trees for different datasets:

@@ -86,22 +86,22 @@ summaryBistro = function(stem, besttree=NULL)
   }
   dev.off()
 
-df2 = bistro %>% select(pi1,pi2,pi3,pi4,s1,s2,s3,s4,s5,s6)
+    df2 = bistro %>% select(pi1,pi2,pi3,pi4,s1,s2,s3,s4,s5,s6)
 
-df2$set = factor( rep("Bistro",nrow(bistro)) )
+    df2$set = factor( rep("Bistro",nrow(bistro)) )
 
-pdf(paste0(stem,"-rates-density.pdf"))
-  vpal = viridis(2,end=0.8)
- for(i in 1:(ncol(df2)-1))
- {
-   median.bistro = mean( drop(as.matrix(filter(df2,set=="Bistro") %>% select(i))) )
-   plot(ggplot(df2,aes(x=df2[,i],col=set))+geom_density() +
-          scale_color_manual(values=vpal) +
-          geom_vline(xintercept=median.bistro,color=vpal[1]) +
-          ggtitle(paste(names(df2)[i])) +
-          theme_bw())
- }
- dev.off()
+    pdf(paste0(stem,"-rates-density.pdf"))
+    vpal = viridis(2,end=0.8)
+    for(i in 1:(ncol(df2)-1))
+        {
+            median.bistro = mean( drop(as.matrix(filter(df2,set=="Bistro") %>% select(i))) )
+            plot(ggplot(df2,aes(x=df2[,i],col=set))+geom_density() +
+                 scale_color_manual(values=vpal) +
+                 geom_vline(xintercept=median.bistro,color=vpal[1]) +
+                 ggtitle(paste(names(df2)[i])) +
+                 theme_bw())
+        }
+    dev.off()
 }
 
 compareBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));", bmcmc="mcmc1"){
