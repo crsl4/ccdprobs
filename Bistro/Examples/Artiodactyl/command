@@ -1,3 +1,6 @@
+## test of distance matrix
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro10 -r 10 -b 10 -s 1495847783 > bistro10.log
+
 source("../../Scripts/summary.R")
 compareBistro("bistro9-fixT",besttree="(1,2,(3,(4,(5,6))));",bmcmc="mcmc2")
 compareBistro("bistro9",besttree="(1,2,(3,(4,(5,6))));",bmcmc="mcmc2")

@@ -496,6 +496,7 @@ int main(int argc, char* argv[])
     // vector of strings trees
     // change to using push_back() to avoid keeping bad trees
     vector<string> bootstrapStrings;
+    string meanTree;
     { // block to contain badTrees
       int badTrees=0;
       for ( int b=0; b<parameters.getNumBootstrap(); ++b )
@@ -546,23 +547,9 @@ int main(int argc, char* argv[])
     cerr << endl << "    ... done." << endl;
 
     // mean tree
-//    test();
-//    Trees trees;
-//    cerr << "defined trees ok" << endl;
-//    cerr << "bootstrapStrings.size() = " << bootstrapStrings.size() << endl;
-//    if ( bootstrapStrings.size() > 0 )
-//      cerr << "First tree: " << bootstrapStrings[0] << endl;
-//    trees.readTrees(bootstrapStrings);
-//    cerr << "read trees ok" << endl;
-//    stringstream c;
-//    string meanTree = trees.printMeanTree();
-//    cerr << "after printMeanTree" << endl;
-//    cerr << "compute mean tree ok" << endl;
-//    cerr << endl << "successful mean of trees" << endl << meanTree << endl;
-//    cout << endl << "successful mean of trees" << endl << meanTree << endl;
     CladeGraph cladeGraph;
     cladeGraph.findMeanTree(bootstrapStrings,alignment);
-    string meanTree = cladeGraph.getMeanTree();
+    meanTree = cladeGraph.getMeanTree();
     cerr << "meanTree = " << meanTree << endl;
 
     string meanTreeFile = parameters.getOutFileRoot() + ".meanTree";
@@ -642,6 +629,43 @@ int main(int argc, char* argv[])
       topCounts.close();
     }
     cerr << "after writing to files" << endl;
+
+    // computing tree distance matrix, only if there are fewer than 100 bootstrap trees (fixit: sample)
+    if( parameters.getNumBootstrap() < 101 )
+    {
+      cerr << "Fewer than 100 bootstrap trees, so we will compute the tree distance matrix" << endl;
+      Tree mtree(meanTree,alignment);
+      MatrixXd treeDistanceMatrix(parameters.getNumBootstrap()+1,parameters.getNumBootstrap()+1);
+      for ( int i = 0; i<bootstrapStrings.size(); ++i)
+      {
+	string fooi = bootstrapStrings[i];
+	if ( fooi.find("nan") != string::npos )
+	{
+	  ++badTrees;
+	  continue;
+	}
+	Tree* treei = new Tree(fooi, alignment);
+	for ( int j = i+1; j<bootstrapStrings.size(); ++j)
+	{
+	  string fooj = bootstrapStrings[j];
+	  if ( fooj.find("nan") != string::npos )
+	  {
+	    ++badTrees;
+	    continue;
+	  }
+	  Tree* treej = new Tree(fooj, alignment);
+	  double dd = treei->distance(treej);
+	  treeDistanceMatrix(i,j) = dd;
+	  treeDistanceMatrix(j,i) = dd;
+	}
+	double d = mtree.distance(treei);
+	treeDistanceMatrix(i,bootstrapStrings.size()) = d;
+	treeDistanceMatrix(bootstrapStrings.size(),i) = d;
+      }
+      cerr << treeDistanceMatrix << endl;
+      cout << "Tree distance matrix: " << endl << endl;
+      cout << treeDistanceMatrix << endl;
+    }
   }
   else // topology input, so only one tree in the map
   {

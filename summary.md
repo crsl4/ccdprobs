@@ -21,6 +21,7 @@ cats mean tree = true tree
 - sim whales 1500: 0.14%: true tree only sampled once, it is not even the one with w=0.8: comparison plot, most sampled tree is different from true tree; mean tree tiny difference from true tree
 - sim whales fixed tree: 0.1%, long BL, bl 54.53=20!!
 - cannot summarize mrbayes for whales, because we did not sorted the nex file
+- pairwise distances, but only when bootstrap<100, need to add sample of trees; and need to do R stufff with mds
 
 - Sequential IS?
 
