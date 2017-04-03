@@ -2,16 +2,27 @@
 ../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro1 -r 1000 -b 1000 -s 2003894300 > bistro1.log
 mb sim-16-nsites1500.nex
 (later output files copied to Examples/Sim-16)
+../../Code/badger/mb2badger sim-16-nsites1500.nex.run1.t
+../../Code/badger/mb2badger sim-16-nsites1500.nex.run2.t
+cp sim-16-nsites1500.nex.run1.p sim-16-nsites1500.run1.p
+cp sim-16-nsites1500.nex.run2.p sim-16-nsites1500.run2.p
+also, need to remove the first line of the run1.p and run2.p files:
+saved into sim-16-nsites1500.run1.p
 
-despues, debemos copiar los de mb al folder de Examples/sim16
-y despues queremos un maldito summary function q le des el nombre de bistro file, el nombre de mrbayes file y el true tree, true p,s y te haga las graficas para comparar
-probar con este caso, y despues correr:
+## In R:
+source("../../Scripts/summary.R")
+compareBistroMB("bistro1",mb="sim-16-nsites1500",truetree="(A:0.0025,B:0.0025,((C:0.0025,D:0.0025):0.0025,(((E:0.0125,F:0.0125):0.0125,(G:0.0125,H:0.0125):0.0125):0.0625,(((((((I:0.0125,J:0.0125):0.0125,K:0.025):0.0125,L:0.0375):0.0125,M:0.05):0.0125,N:0.0625):0.0125,O:0.075):0.0125,P:0.0875):0.0125):0.0325):0.0025);",trueq=c(0.3,0.3,0.1,0.3,0.1,0.3,0.1,0.1,0.3,0.1))
+
+
+
 
 - sim16 nsites 1500 indep (same seed)
 ../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro1-ind -r 1000 -b 1000 -s 2003894300 --independent > bistro1-ind.log
 
 - sim16 nsites 1500 bistro on true tree
 ../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro1-fixT -r 1000 -b 1000 -s 2003894300 -t "((((A,B),(C,D)),((E,F),(G,H))),(((((((I,J),K),L),M),N),O),P));" > bistro1-fixT.log
+
+compareBistroMB("bistro1-fixT",mb="sim-16-nsites1500",truetree="(A:0.0025,B:0.0025,((C:0.0025,D:0.0025):0.0025,(((E:0.0125,F:0.0125):0.0125,(G:0.0125,H:0.0125):0.0125):0.0625,(((((((I:0.0125,J:0.0125):0.0125,K:0.025):0.0125,L:0.0375):0.0125,M:0.05):0.0125,N:0.0625):0.0125,O:0.075):0.0125,P:0.0875):0.0125):0.0325):0.0025);",trueq=c(0.3,0.3,0.1,0.3,0.1,0.3,0.1,0.1,0.3,0.1))
 
 - sim16 nsites 500 bistro and mb
 ../../Code/bistro/bistro -f ../../Data/sim-16-nsites500.fasta -o bistro1-500 -r 1000 -b 1000 -s 1589293075 > bistro1-500.log

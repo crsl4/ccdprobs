@@ -2,16 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- finish a script to summarize results (see sim16 commands): check simcats, sim16
-- focus on
-  - best tree = true tree (identified by mean tree?)
-  - excessively long branches proposed?
-  - good estimates of p,s?
-- rerun sim whales
-- weird long branches proposed, not in artiodactyl
 - pairwise distances between 99 sample trees and mean tree, and do MDS: smdscale
-
-
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -19,22 +10,19 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-
-- sim16 1500: 1.23%
+*** 2 problems: long BL, true tree sampled only once in whales
+- sim16 1500: 1.23%: long BL, some true BL outside of densities
 - sim16 1500 indep: 0.65%
 - sim16 fix tree: 0.51%
 - sim16 500: 0.15%
-- sim cats dogs 1500: 0.5%
-- sim cats dogs fixed tree: 1.16%
-- sim whales 1500: 0.3%
-- sim whales fixed tree (mb tree has polytomy, not run, but used to simulate)
-- still need to summarize mb to add to the compare script, forgot how!
+- sim cats dogs 1500: 0.5%, long BL, but plots well centered, most sampled tree is different from true tree
+- sim cats dogs fixed tree: 1.16%, long BL, but plots well centered
+cats mean tree = true tree
+- sim whales 1500: 0.14%: true tree only sampled once, it is not even the one with w=0.8: comparison plot, most sampled tree is different from true tree; mean tree tiny difference from true tree
+- sim whales fixed tree: 0.1%, long BL, bl 54.53=20!!
+- cannot summarize mrbayes for whales, because we did not sorted the nex file
 
 - Sequential IS?
-
-grep '>' sim-whales-nsites1500.fasta > whales-names
-replace > with nothing
-replace $ (end of line) with comma
 
 
 ## Jordan

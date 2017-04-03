@@ -2,14 +2,38 @@
 ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro1-cats -r 1000 -b 1000 > bistro1-cats.log
 mb sim-cats-dogs-nsites1500.nex
 (then moved output files to Examples/Simulations)
+../../Code/badger/mb2badger sim-cats-dogs-nsites1500.nex.run1.t
+../../Code/badger/mb2badger sim-cats-dogs-nsites1500.nex.run2.t
+cp sim-cats-dogs-nsites1500.nex.run1.p sim-cats-dogs-nsites1500.run1.p
+cp sim-cats-dogs-nsites1500.nex.run2.p sim-cats-dogs-nsites1500.run2.p
+also, need to remove the first line of the run1.p and run2.p files:
+saved into sim-cats-dogs-nsites1500.run1.p
 
 - sim-cats dogs 1500 bistro on true tree
 ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro1-cats-fixT -r 1000 -b 1000 -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" > bistro1-cats-fixT.log
 
+## In R:
+source("../../Scripts/summary.R")
+compareBistroMB("bistro1-cats",mb="sim-cats-dogs-nsites1500",truetree="(cheetah:0.11850973637208513101,((((snow_leopard:0.04020488777776567990,leopard:0.03846672365840048818):0.01445254156731264929,tiger:0.07079306712878565000):0.01190623639760595223,clouded_leopard:0.10461902411036745619):0.04344639957238824457,(red_fox:0.11974055940327851810,(((coyote:0.00840558068745050208,(gray_wolf:0.00206050882985083861,dog:0.00185256446369396789):0.03205946058703370433):0.02609285257533808938,dhole:0.07049077201732806275):0.13276609809571754406,raccoon_dog:0.15542990325076813662):0.07955504846187926027):0.79869116234474835103):0.03995629108638096977,cat:0.03751335233479641956):0.0;", trueq=c(0.242929500,0.235609700,0.206743300,0.314717500,0.047201519,0.293928352,0.068691153,0.012274385,0.569989255,0.007915336))
+compareBistroMB("bistro1-cats-fixT",mb="sim-cats-dogs-nsites1500",truetree="(cheetah:0.11850973637208513101,((((snow_leopard:0.04020488777776567990,leopard:0.03846672365840048818):0.01445254156731264929,tiger:0.07079306712878565000):0.01190623639760595223,clouded_leopard:0.10461902411036745619):0.04344639957238824457,(red_fox:0.11974055940327851810,(((coyote:0.00840558068745050208,(gray_wolf:0.00206050882985083861,dog:0.00185256446369396789):0.03205946058703370433):0.02609285257533808938,dhole:0.07049077201732806275):0.13276609809571754406,raccoon_dog:0.15542990325076813662):0.07955504846187926027):0.79869116234474835103):0.03995629108638096977,cat:0.03751335233479641956):0.0;", trueq=c(0.242929500,0.235609700,0.206743300,0.314717500,0.047201519,0.293928352,0.068691153,0.012274385,0.569989255,0.007915336))
+
+
 - sim-whales 1500 bistro,mb
-../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o bistro1-whales -r 1000 -b 1000 > bistro1-whales.log
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro1-whales -r 1000 -b 1000 > bistro1-whales.log
 mb sim-whales-nsites1500.nex
 (then moved output files to Examples/Simulations)
+../../Code/badger/mb2badger sim-whales-nsites1500.nex.run1.t
+../../Code/badger/mb2badger sim-whales-nsites1500.nex.run2.t
+cp sim-whales-nsites1500.nex.run1.p sim-whales-nsites1500.run1.p
+cp sim-whales-nsites1500.nex.run2.p sim-whales-nsites1500.run2.p
+also, need to remove the first line of the run1.p and run2.p files:
+saved into sim-whales-nsites1500.run1.p
 
-- sim-whales 1500 bistro on true tree (not run yet)
-../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o bistro1-whales-fixT -r 1000 -b 1000 -t "(1,2,((3,(((4,5),14),((6,7),(((8,9),11),10,12,13)))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));" > bistro1-whales-fixT.log
+
+- sim-whales 1500 bistro on true tree
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro1-whales-fixT -r 1000 -b 1000 -t "(1,2,((3,(((4,5),14),((6,7),((((8,9),11),(10,12)),13)))),(15,((((16,17),((18,19),(20,21))),((24,((25,26),((27,28),(29,30)))),31)),(22,23)))));" > bistro1-whales-fixT.log
+
+## In R:
+source("../../Scripts/summary.R")
+compareBistroMB("bistro1-whales",truetree="(1:0.0231136,2:0.0372603,((3:0.094114,(((4:0.025742,5:0.022279):0.0249355,14:0.0685793):0.00162364,((6:0.027438,7:0.0173734):0.0210568,((((8:0.0170381,9:0.0189656):0.0173591,11:0.0375513):0.00117174,(10:0.0324844,12:0.0337327):0.00110449):0.000772143,13:0.0327726):0.00476205):0.00772679):0.014146):0.00534651,(15:0.101767,((((16:0.0503164,17:0.0470883):0.0368309,((18:0.0110323,19:0.00505243):0.02207,(20:0.0116344,21:0.0071754):0.0214576):0.0500723):0.0548426,((24:0.0799893,((25:0.0553201,26:0.0455578):0.0283923,((27:0.0766089,28:0.0689195):0.00240495,(29:0.0489559,30:0.0222969):0.0290598):0.00387214):0.00247192):0.0113158,31:0.12489):0.0064916):0.00406787,(22:0.0938027,23:0.0901243):0.00790296):0.00718762):0.0331146):0.064614);",trueq=c(0.231333,0.225334,0.173454,0.369879,0.151508,0.198957,0.0548603,0.0118846,0.578106,0.00468519))
+compareBistroMB("bistro1-whales-fixT",truetree="(1:0.0231136,2:0.0372603,((3:0.094114,(((4:0.025742,5:0.022279):0.0249355,14:0.0685793):0.00162364,((6:0.027438,7:0.0173734):0.0210568,((((8:0.0170381,9:0.0189656):0.0173591,11:0.0375513):0.00117174,(10:0.0324844,12:0.0337327):0.00110449):0.000772143,13:0.0327726):0.00476205):0.00772679):0.014146):0.00534651,(15:0.101767,((((16:0.0503164,17:0.0470883):0.0368309,((18:0.0110323,19:0.00505243):0.02207,(20:0.0116344,21:0.0071754):0.0214576):0.0500723):0.0548426,((24:0.0799893,((25:0.0553201,26:0.0455578):0.0283923,((27:0.0766089,28:0.0689195):0.00240495,(29:0.0489559,30:0.0222969):0.0290598):0.00387214):0.00247192):0.0113158,31:0.12489):0.0064916):0.00406787,(22:0.0938027,23:0.0901243):0.00790296):0.00718762):0.0331146):0.064614);",trueq=c(0.231333,0.225334,0.173454,0.369879,0.151508,0.198957,0.0548603,0.0118846,0.578106,0.00468519))
