@@ -1,4 +1,5 @@
-
+## test distance matrices
+../../Code/bistro/bistro -f ../../Data/whales.fasta -o mds -r 1000 -b 100 > mds.log
 
 
 #### warning: 3/29/2017 changed -m to -M

@@ -635,7 +635,7 @@ int main(int argc, char* argv[])
     {
       cerr << "Fewer than 100 bootstrap trees, so we will compute the tree distance matrix" << endl;
       Tree mtree(meanTree,alignment);
-      MatrixXd treeDistanceMatrix(parameters.getNumBootstrap()+1,parameters.getNumBootstrap()+1);
+      MatrixXd treeDistanceMatrix = MatrixXd::Zero(parameters.getNumBootstrap()+1,parameters.getNumBootstrap()+1);
       for ( int i = 0; i<bootstrapStrings.size(); ++i)
       {
 	string fooi = bootstrapStrings[i];
@@ -662,6 +662,7 @@ int main(int argc, char* argv[])
 	treeDistanceMatrix(i,bootstrapStrings.size()) = d;
 	treeDistanceMatrix(bootstrapStrings.size(),i) = d;
       }
+      cerr << "Found " << badTrees << " for the pairwise distance matrix" << endl;
       cerr << treeDistanceMatrix << endl;
       cout << "Tree distance matrix: " << endl << endl;
       cout << treeDistanceMatrix << endl;

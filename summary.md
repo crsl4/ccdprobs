@@ -2,8 +2,6 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- pairwise distances between 99 sample trees and mean tree, and do MDS: smdscale
-
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
@@ -21,7 +19,7 @@ cats mean tree = true tree
 - sim whales 1500: 0.14%: true tree only sampled once, it is not even the one with w=0.8: comparison plot, most sampled tree is different from true tree; mean tree tiny difference from true tree
 - sim whales fixed tree: 0.1%, long BL, bl 54.53=20!!
 - cannot summarize mrbayes for whales, because we did not sorted the nex file
-- pairwise distances, but only when bootstrap<100, need to add sample of trees; and need to do R stufff with mds
+- pairwise distances, but only when bootstrap<100, need to add sample of trees; and need to do R stuff with mds, we have matrices for artiodactyl, cats, whales, sim16, simcats, simwhales
 
 - Sequential IS?
 

@@ -1,3 +1,7 @@
+## test distance matrices
+../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o mds-cats -r 10 -b 100 > mds-cats.log
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o mds-whales -r 10 -b 100 > mds-whales.log
+
 - sim-cats dogs 1500 bistro, mb
 ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro1-cats -r 1000 -b 1000 > bistro1-cats.log
 mb sim-cats-dogs-nsites1500.nex

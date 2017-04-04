@@ -1,3 +1,6 @@
+## test distance matrix
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o mds -r 10 -b 100 > mds.log
+
 ## compare bistro and mrbayes
 ../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro1 -r 1000 -b 1000 -s 2003894300 > bistro1.log
 mb sim-16-nsites1500.nex

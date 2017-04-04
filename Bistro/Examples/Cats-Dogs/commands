@@ -1,3 +1,6 @@
+## test distance matrices
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o mds -r 1000 -b 100 > mds.log
+
 ## check if we have long branches as in sim-cats
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o dist2-2 -r 1000 -b 1000 -s 2530014257 > dist2-2.log
 
