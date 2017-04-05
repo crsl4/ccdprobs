@@ -103,7 +103,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 
    // debug variable
    int count = 0;
-   
+
 // calculate the scale for P and QP: fixit, this is done twice, also in main
    double scaleP = 100000000;
    double temp;
@@ -137,7 +137,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    }
 
    if(VERBOSE)
-     cout << "inside randomTrees, scaleP: " << scaleP << " scaleQP: " << scaleQP << endl; 
+     cout << "inside randomTrees, scaleP: " << scaleP << " scaleQP: " << scaleQP << endl;
 
    for ( int k=indStart; k<indEnd; ++k )
    {
@@ -183,7 +183,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      string treeString = ccd.randomTree(rng,logTopologyProbability);
      Tree tree(treeString,alignment);
      tree.unroot();
-     
+
      MatrixXd gtrDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
      gtrDistanceMatrixCopy = gtrDistanceMatrix;
 
@@ -316,7 +316,7 @@ int main(int argc, char* argv[])
   cout << "Jukes-Cantor Distance Matrix:" << endl;
   cout << endl << jcDistanceMatrix << endl << endl;
   milliseconds ms3 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
-  
+
   // Find Initial Neighbor-joining tree
   cerr << "Finding initial neighbor-joining tree ...";
   MatrixXd jcDistanceMatrixCopy(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -372,7 +372,7 @@ int main(int argc, char* argv[])
     s0 = s_pairwise;
 
   QMatrix q_init(p0,s0);
-  
+
 // initial mcmc var (just so that there are not zeros)
   Vector4d vp0;
   for ( int j=0; j<4; ++j )
@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
       scaleQP = temp;
   }
   cout << "Dirichlet for QP scale: " << scaleQP << endl;
-  
+
   // Initial Q, either from naive estimate or MCMC on fixed tree with MLE BL
   //QMatrix model_init(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model_init(q_init.getStationaryP(),q_init.getSymmetricQP());
@@ -471,7 +471,7 @@ int main(int argc, char* argv[])
 // not normalized maps; normalization taken care of during alias creation
   map<string,int> topologyToCountMap;
   map<string,double> topologyToWeightMap;
-  map<string,double> topologyToDistanceWeightMap;    
+  map<string,double> topologyToDistanceWeightMap;
 
 // --------------------------------------- Bootstrap of topologies from ccdprobs -----------------------
   if( parameters.getTopology().empty() ) //only do bootstrap if not fixed topology as input
@@ -551,6 +551,7 @@ int main(int argc, char* argv[])
     cladeGraph.findMeanTree(bootstrapStrings,alignment);
     meanTree = cladeGraph.getMeanTree();
     cerr << "meanTree = " << meanTree << endl;
+    cout << "meanTree = " << meanTree << endl;
 
     string meanTreeFile = parameters.getOutFileRoot() + ".meanTree";
     ofstream meanTreeFileStream(meanTreeFile.c_str());
@@ -593,7 +594,7 @@ int main(int argc, char* argv[])
 
     if ( badTrees > 0 )
       cerr << "Warning: found " << badTrees << " bootstrap trees with nan edge lengths." << endl;
-    
+
     for ( map<string,int>::iterator m=topologyToCountMap.begin(); m != topologyToCountMap.end(); ++m )
     {
       topologyToWeightMap[ (*m).first ] =
@@ -663,7 +664,7 @@ int main(int argc, char* argv[])
 	treeDistanceMatrix(bootstrapStrings.size(),i) = d;
       }
       cerr << "Found " << badTrees << " for the pairwise distance matrix" << endl;
-      cerr << treeDistanceMatrix << endl;
+//      cerr << treeDistanceMatrix << endl;
       cout << "Tree distance matrix: " << endl << endl;
       cout << treeDistanceMatrix << endl;
     }
@@ -892,17 +893,17 @@ int main(int argc, char* argv[])
   milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   cout << "Times: " << endl;
-  cout << ms1.count() - ms0.count() << endl;
-  cout << ms2.count() - ms1.count() << endl;
-  cout << ms3.count() - ms2.count() << endl;
-  cout << ms4.count() - ms3.count() << endl;
-  cout << ms5.count() - ms4.count() << endl;
-  cout << ms6.count() - ms5.count() << endl;
-  cout << ms7.count() - ms6.count() << endl;
-  cout << ms8.count() - ms7.count() << endl;
-  cout << ms9.count() - ms8.count() << endl;
-  cout << ms10.count() - ms9.count() << endl;
-  cout << ms11.count() - ms10.count() << endl;
+  // cout << "Processing command-line arguments: " << (ms1.count() - ms0.count())/1000 << "seconds" << endl;
+  // cout << "Reading FASTA: " << (ms2.count() - ms1.count())/1000 << "seconds" << endl;
+  // cout << "Jukes-Cantor distances: " << (ms3.count() - ms2.count())/1000 << "seconds" << endl;
+  // cout << "Getting initial JC NJ tree: " << (ms4.count() - ms3.count())/1000 << "seconds" << endl;
+  // cout << "Setting NJ branch lengths on tree: " << (ms5.count() - ms4.count())/1000 << "seconds" << endl;
+  cout << "MCMC: " << (ms6.count() - ms5.count())/1000 << "seconds" << endl;
+//  cout << "GTR distance matrix: " << (ms7.count() - ms6.count())/1000 << "seconds" << endl;
+  cout << "Bootstrap: " << (ms8.count() - ms7.count())/1000 << "seconds" << endl;
+//  cout << ms9.count() - ms8.count() << endl;
+  cout << "Estimate ccdprobs from bootstrap: " << (ms10.count() - ms9.count())/1000 << "seconds" << endl;
+  cout << "Importance sampling: " << (ms11.count() - ms10.count())/1000 << "seconds" << endl;
 
   return 0;
 }

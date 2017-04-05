@@ -72,11 +72,10 @@ plotBistro = function(bistro) {
     rm(temp.tree)
     bistro$Rank = 6
     n = length(names(tab))
-    for ( i in 1:6 )
-        {
-            if ( i < n )
-                bistro$Rank[bistro$Tree==names(tab)[i]] = i
-        }
+    for ( i in 1:6 ){
+        if ( i < n )
+            bistro$Rank[bistro$Tree==names(tab)[i]] = i
+    }
     bistro$Tree = with( bistro, reorder(Tree,Rank) )
 ##    viridis.scale = viridis(n=length(levels(bistro$Tree)))
     my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=w,shape=Tree)) +

@@ -12,21 +12,34 @@
 using namespace std;
 using namespace Eigen;
 
+void checkMuV(double mu, double v)
+{
+  if(mu < 0 || v < 0)
+  {
+    cerr << "Error with either mu or v negative: " << mu << ", " << v << endl;
+    exit(1);
+  }
+  else if( mu < TOL || v < TOL)
+    cerr << "Warning with either mu or v smaller than TOL: " << mu << ", " << v << endl;
+}
+
 void calculateAlphaLambda(double mu, double v, double eta, double& alpha, double& lambda)
 {
+  checkMuV(mu,v);
   alpha = mu*mu / (v * v);
   lambda = mu / (v * v);
   if(alpha<1)
-    {
-      //cout << "Entering alpha<1 case" << endl;
-      lambda = sqrt( (alpha+1.0)/alpha ) * lambda;
-      alpha = (alpha + 1.0);
-    }
+  {
+    //cout << "Entering alpha<1 case" << endl;
+    lambda = sqrt( (alpha+1.0)/alpha ) * lambda;
+    alpha = (alpha + 1.0);
+  }
   else
-    {
-      alpha = eta*alpha;
-      lambda = eta*lambda;
-    }
+  {
+    alpha = eta*alpha;
+    lambda = eta*lambda;
+  }
+  cout << "almv, " << alpha << ", " << lambda << ", " << mu << ", " << v << endl;
 }
 
 double gamma(double alpha, double b, mt19937_64& rng)

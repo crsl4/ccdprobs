@@ -20,6 +20,62 @@
 using namespace std;
 using namespace Eigen;
 
+void checkCov2d(Matrix2d cov, bool called)
+{
+  double det = cov.determinant();
+  if( cov(0,0) < 0 || det < 0)
+  {
+    cerr << "Covariance matrix not positive definite in checkCov2d" << endl << cov << endl;
+    if(called)
+      cerr << "the function was called from checkCov3d" << endl;
+    exit(1);
+  }
+  else
+  {
+    if( cov(0,0) < TOL || cov(1,1) < TOL )
+    {
+      cerr << "Variance too close to zero in checkCov2d: " << cov(0,0) << ", " << cov(1,1) << endl;
+      cerr << cov << endl;
+      if(called)
+	cerr << "the function was called from checkCov3d" << endl;
+    }
+    else if( det < TOL )
+    {
+      cerr << "Determinant too close to zero in checkCov2d: " << det << endl;
+      cerr << cov << endl;
+      if(called)
+	cerr << "the function was called from checkCov3d" << endl;
+    }
+  }
+}
+
+void checkCov3d(Matrix3d cov)
+{
+  double det = cov.determinant();
+  Matrix2d mm;
+  mm << cov(0,0), cov(0,1),
+    cov(1,0), cov(1,1);
+  checkCov2d(mm,true);
+  if( cov(0,0) < 0 || det < 0)
+  {
+    cerr << "Covariance matrix not positive definite in checkCov3d" << endl << cov << endl;
+    exit(1);
+  }
+  else
+  {
+    if( cov(0,0) < TOL || cov(1,1) < TOL || cov(2,2) < TOL)
+    {
+      cerr << "Variance too close to zero in checkCov3d: " << cov(0,0) << ", " << cov(1,1) << ", " << cov(2,2) << endl;
+      cerr << cov << endl;
+    }
+    else if( det < TOL )
+    {
+      cerr << "Determinant too close to zero in checkCov3d: " << det << endl;
+      cerr << cov << endl;
+    }
+  }
+}
+
 void Node::print(ostream& f)
 {
   f << setw(3) << number << ": " << name << ": " << level << ": ";
@@ -962,6 +1018,7 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   nodes[1] -> setMapParent(this);
 }
 
+// necsito anhadir los pasos de NR en individual branches y despues comparar con lo q sale cuando se evalua el likelihood jointly
 double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 {
   if(VERBOSE)
@@ -1221,7 +1278,7 @@ void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edg
 void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity,bool onlyMLE)
 {
   int debug=0;
-  
+
   // clear probability maps from all nodes for fresh calculation, and clear mapParent for every node
   clearProbMaps(); //we need this here, otherwise it does not work
   // compute transition matrices for all edges using provisional edge lengths
@@ -1798,12 +1855,15 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 
       if(!converge)
 	cout << "Newton-Raphson did not converge" << endl;
-      double prop_logl;
+      double prop_logl = 0;
       Vector3d prop_gradient;
       Matrix3d prop_hessian;
       partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
       Vector3d mu = t;
+      cerr << "Hessian: " << endl;
+      cerr << prop_hessian << endl;
       Matrix3d cov = (-1) * prop_hessian.inverse();
+      checkCov3d(cov);
       	// XXX replace mle mu with weighted average of mle and prior mean
 	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
 	// use weights proportional to 1 / variance of each estimate
@@ -1846,26 +1906,31 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	//   }
 
 	Vector2d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength());
+	cerr << "branch lengths before joint MLE: " << t.transpose() << endl;
 	bool converge;
 	if(jointMLE)
 	  t = mleLength2D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
-
-	double prop_logl;
+	cerr << "branch lengths after joint MLE: " << t.transpose() << endl;
+	double prop_logl=0;
 	Vector2d prop_gradient;
 	Matrix2d prop_hessian;
 	double lz = par->getEdgeParent()->getLength(); //kept fixed throughout
 	partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
 	Vector2d mu = t;
+	cerr << "Gradient: " << prop_gradient.transpose() << endl;
+	cerr << "Hessian: " << endl;
+	cerr << prop_hessian << endl;
 	Matrix2d cov = (-1) * prop_hessian.inverse();
+	checkCov2d(cov,false);
 	// XXX replace mle mu with weighted average of mle and prior mean
 	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
 	// use weights proportional to 1 / variance of each estimate
 	if(weightMean)
-	  {
-	    double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
-	    mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
-	    mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
-	  }
+	{
+	  double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
+	  mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
+	  mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
+	}
 	t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
 	//	t = multivariateNormal(mu,cov,rng, logdensity,eta);
 	x->getEdgeParent()->setLength( t[0] );
@@ -1890,6 +1955,8 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
   Vector2d curr_gradient;
   Matrix2d curr_hessian;
   partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
+  cerr << "Initial gradient: " << curr_gradient.transpose() << endl;
+  cerr << "Initial hessian: " << endl << curr_hessian << endl;
   Vector2d prop = curr;
   double prop_logl = curr_logl;
   Vector2d prop_gradient = curr_gradient;
@@ -1961,9 +2028,10 @@ Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge*
 	  }
       }
   } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
-//  cout << "Finally converged to" << endl;
-//  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
-//  cout << "prop: " << prop.transpose() << endl;
+ cout << "Finally converged to" << endl;
+ cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+ cout << "prop: " << prop.transpose() << endl;
+ cout << "Hessian: " << endl << prop_hessian << endl;
   return prop;
 }
 
@@ -2612,7 +2680,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,doub
 
 //  ofstream pstream("p.txt");
 //  ofstream sstream("s.txt");
-  
+
   cerr << '|';
   for ( int i=0; i<numGenerations; ++i )
   {
@@ -2721,7 +2789,7 @@ double Tree::distance(Tree* other)
   // for ( ; p2 != map2.end(); ++p2 )
   //   cerr << p2->first << " --> " << p2->second << endl;
   // p2 = map2.begin();
-  
+
   while ( p1 != map1.end() || p2 != map2.end() )
   {
 //    cerr << "Clade 1: " << p1->first << " " << p1->second << endl;

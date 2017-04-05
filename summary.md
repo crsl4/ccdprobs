@@ -2,12 +2,31 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- vamos en q anhadimos un monton de prints, y q el individual MLE cambia del joint MLE:
+branch lengths before joint MLE: 0.050790 0.028995
+Initial gradient:  -602.892870 -1312.026804
+Initial hessian:
+-8979.288156   948.334247
+  948.334247   862.319441
+branch lengths after joint MLE:  0.050529 46.345215
+Gradient: -0.000000 -0.000000
+Hessian:
+-14671.025746      0.000000
+     0.000000      0.000000
+But we still have weird hessians, which lead to weird cov (non positive matrices)
+
+- how often do we have the bad alpha cases in the bl?
+- add prints to see if the weird big alphas are linked to L(0,0): do we want a minimum variance? weird negative var! add checks for the vc matrix: tiny v, and v<0; why alpha==1; add a check for positive definite (determinant)=> what to do? make the correlation coefficient = 1 or -1 depending on the sign of s: sigma1*sigma2
+r s
+s t
+
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
-
-## Check with Bret
+## Later:
+- test with weightMean option
+- do a rmd file to summarize result better, what is the problem with distance weights!? what is the problem with bl? (use Rstudio): check conclusions below. first rerun to see things are fixed now with alpha problem
 *** 2 problems: long BL, true tree sampled only once in whales
 - sim16 1500: 1.23%: long BL, some true BL outside of densities
 - sim16 1500 indep: 0.65%
@@ -18,8 +37,8 @@ Bret Larget, Claudia Solis-Lemus (2016)
 cats mean tree = true tree
 - sim whales 1500: 0.14%: true tree only sampled once, it is not even the one with w=0.8: comparison plot, most sampled tree is different from true tree; mean tree tiny difference from true tree
 - sim whales fixed tree: 0.1%, long BL, bl 54.53=20!!
-- cannot summarize mrbayes for whales, because we did not sorted the nex file
-- pairwise distances, but only when bootstrap<100, need to add sample of trees; and need to do R stuff with mds, we have matrices for artiodactyl, cats, whales, sim16, simcats, simwhales
+
+## Check with Bret
 
 - Sequential IS?
 
