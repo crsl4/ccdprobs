@@ -27,6 +27,7 @@ void calculateAlphaLambda(double mu, double v, double eta, double& alpha, double
       alpha = eta*alpha;
       lambda = eta*lambda;
     }
+  cerr << "alpha = " << alpha << ", lambda = " << lambda << ", mu = " << mu << ", v = " << v << endl;
 }
 
 double gamma(double alpha, double b, mt19937_64& rng)
