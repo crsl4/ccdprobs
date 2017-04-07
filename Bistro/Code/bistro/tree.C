@@ -1211,6 +1211,10 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
       upperlimit = prop;
     }
   } while ( fabs(curr - prop) > 1.0e-8);
+  cerr << "in mleLength: individual NR" << endl;
+  cerr << "MLE BL: " << prop << endl;
+  cerr << "1st derivative: " << prop_dlogl << endl;
+  cerr << "2nd derivative: " << prop_ddlogl << endl;
   return prop;
 }
 
@@ -1853,6 +1857,11 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       if(jointMLE)
 	t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge);
 
+      double logfoo;
+      x->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
+      y->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
+      z->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
+
       if(!converge)
 	cout << "Newton-Raphson did not converge" << endl;
       double prop_logl = 0;
@@ -1910,7 +1919,25 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	bool converge;
 	if(jointMLE)
 	  t = mleLength2D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
-	cerr << "branch lengths after joint MLE: " << t.transpose() << endl;
+	double logl=0;
+	Vector2d gradient;
+	Matrix2d hessian;
+	double lz0 = par->getEdgeParent()->getLength(); //kept fixed throughout
+	partialPathCalculations2D(t,lz0,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,logl,gradient,hessian);//,true);
+	cerr << "Gradient: " << gradient.transpose() << endl;
+	cerr << "Hessian: " << endl;
+	cerr << hessian << endl;
+
+	for(int ii=0; ii<2; ++ii)
+	{
+	  double logfoo;
+	  x->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
+	  y->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
+	  t(0) = x->getEdgeParent()->getLength();
+	  t(1) = y->getEdgeParent()->getLength();
+	  cerr << "branch lengths after MLE pass: " << t.transpose() << endl;
+	}
+
 	double prop_logl=0;
 	Vector2d prop_gradient;
 	Matrix2d prop_hessian;

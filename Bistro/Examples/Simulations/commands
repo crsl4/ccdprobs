@@ -1,7 +1,8 @@
 ## testing cov positive definite
 ../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o test -r 100 -b 100 --no-mcmc --threads 1 > test.log
 ../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o test -r 100 -b 100 --no-mcmc > test.log
-../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o test -r 100 -b 100 --no-mcmc --threads 1 --jointMLE > test.log
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o test -r 10 -b 10 --no-mcmc --threads 1 --jointMLE > test.log
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o test -r 10 -b 10 --no-mcmc --threads 1  > test.log
 
 ## test distance matrices
 ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o mds-cats -r 10 -b 100 > mds-cats.log

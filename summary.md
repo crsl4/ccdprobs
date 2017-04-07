@@ -2,29 +2,17 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- vamos en q anhadimos un monton de prints, y q el individual MLE cambia del joint MLE:
-branch lengths before joint MLE: 0.050790 0.028995
-Initial gradient:  -602.892870 -1312.026804
-Initial hessian:
--8979.288156   948.334247
-  948.334247   862.319441
-branch lengths after joint MLE:  0.050529 46.345215
-Gradient: -0.000000 -0.000000
-Hessian:
--14671.025746      0.000000
-     0.000000      0.000000
-But we still have weird hessians, which lead to weird cov (non positive matrices)
-
-- how often do we have the bad alpha cases in the bl?
-- add prints to see if the weird big alphas are linked to L(0,0): do we want a minimum variance? weird negative var! add checks for the vc matrix: tiny v, and v<0; why alpha==1; add a check for positive definite (determinant)=> what to do? make the correlation coefficient = 1 or -1 depending on the sign of s: sigma1*sigma2
-r s
-s t
+- grid of branch lengths on likelihood when we stop, to try to understand what is happening, first we need to fix the NR problem
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 ## Later:
+- how often do we have the bad alpha cases in the bl?
+- add prints to see if the weird big alphas are linked to L(0,0): do we want a minimum variance? weird negative var! add checks for the vc matrix: tiny v, and v<0; why alpha==1; add a check for positive definite (determinant)=> what to do? make the correlation coefficient = 1 or -1 depending on the sign of s: sigma1*sigma2
+r s
+s t
 - test with weightMean option
 - do a rmd file to summarize result better, what is the problem with distance weights!? what is the problem with bl? (use Rstudio): check conclusions below. first rerun to see things are fixed now with alpha problem
 *** 2 problems: long BL, true tree sampled only once in whales
@@ -38,9 +26,70 @@ cats mean tree = true tree
 - sim whales 1500: 0.14%: true tree only sampled once, it is not even the one with w=0.8: comparison plot, most sampled tree is different from true tree; mean tree tiny difference from true tree
 - sim whales fixed tree: 0.1%, long BL, bl 54.53=20!!
 
-## Check with Bret
 
-- Sequential IS?
+## Current problems:
+- individual MLE cambia del joint MLE:
+branch lengths before joint MLE: 0.050790 0.028995
+Initial gradient:  -602.892870 -1312.026804
+Initial hessian:
+-8979.288156   948.334247
+  948.334247   862.319441
+branch lengths after joint MLE:  0.050529 46.345215
+Gradient: -0.000000 -0.000000
+Hessian:
+-14671.025746      0.000000
+     0.000000      0.000000
+But we still have weird hessians, which lead to weird cov (non positive matrices)
+- When finding the individual MLE, the first derivative is 0, but when using the same individual MLE in the joint likelihood, then the gradient is far from zero, why?
+When we optimized t1, we had t2 at something else!
+Do we care?
+Also, see these BL:
+MLE BL: 0.005544
+1st derivative: -0.000000
+2nd derivative: -118928.778204
+MLE BL: 0.046195
+1st derivative: 0.000000
+2nd derivative: -28237.935574
+branch lengths before joint MLE: 0.005544 0.046195
+Initial gradient: 257.686841 900.635353
+Initial hessian:
+-152586.908387   -1237.719476
+  -1237.719476  -48395.345476
+branch lengths after joint MLE: 0.007418 0.077757
+Gradient: 0.000000 0.000000
+Hessian:
+-103429.536925    -363.135084
+   -363.135084  -16626.654090
+   -------------------------
+   MLE BL: 0.025094
+   1st derivative: -0.000000
+   2nd derivative: -50764.555167
+   MLE BL: 0.032610
+   1st derivative: -0.000000
+   2nd derivative: -39232.473999
+branch lengths before joint MLE: 0.025094 0.032610
+Initial gradient: -1036.520865 -1394.911543
+Initial hessian:
+-4077.546622  1122.497826
+ 1122.497826   999.863442
+branch lengths after joint MLE:  0.024296 48.201786
+Gradient: -0.000000 -0.000000
+Hessian:
+-23281.606224      0.000000
+     0.000000      0.000000
+
+## Check with Bret
+- problem 1: individual MLE does not match joint MLE, do we care?
+- problem 2: if we use the individual MLE, we get hessians with very big numbers => cov with very small numbers, and unstable => positive definite problems
+- problem 3: if we use the joint MLE, the NR is a nightmare, and we don't fix the hessian problems => hessian close to zero, flat lik, problems!
+- problem 4: if we use the individual MLE, we are not in the joint MLE, so the fisher info does not behave well:
+branch lengths before joint MLE: 0.050160 0.028767
+Gradient:  -609.960221 -1331.223637
+Hessian:
+-9282.820332   979.369411
+  979.369411   886.695211
+
+
 
 
 ## Jordan
@@ -67,6 +116,7 @@ cats mean tree = true tree
 - **Mean trees** Why minimizing geodesic to get the frechet mean instead of bret algorithm: `argmin_a \sum_t \sum_s (t(s)-a(s))^2` (s=split, t=list of input trees)?
 Bret algorithm: give a score to each split (see below), sort the splits, and
 input split into tree if they are compatible. The score of a split is the square of the parent edge of the split, and the best score for the subtree. **Question:** How are the Frechet mean and the Bret mean different?
+- Sequential IS?
 
 
 ## Performance improvements
