@@ -274,6 +274,7 @@ public:
   void mcmcUpdatePi(int,MCMCStats&,QMatrix&,Alignment&,double,mt19937_64&);
   void mcmcUpdateS(int,MCMCStats&,QMatrix&,Alignment&,double,mt19937_64&);
   void mcmcUpdateEdges(int,MCMCStats&,QMatrix&,Alignment&,mt19937_64&);
+  void printDerivatives(ostream&,Alignment&,QMatrix&);
 };
 
 class MCMCStats

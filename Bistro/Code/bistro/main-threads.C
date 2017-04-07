@@ -215,6 +215,9 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        tree.randomEdges(alignment,model,rng,logBL,true);
      }
 
+     tree.print(cerr);
+     tree.printDerivatives(cerr,alignment,model);
+     
      if(VERBOSE)
      {
        cout << "After MLE passes: " << endl << flush;

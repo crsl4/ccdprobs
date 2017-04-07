@@ -1226,6 +1226,8 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
 {
   nodes[0]->clearProbMapsSmart(this);
   nodes[1]->clearProbMapsSmart(this);
+//  nodes[0]->clearProbMaps(this);
+//  nodes[1]->clearProbMaps(this);
 
   bool converge;
   // set length to MLE distance
@@ -1935,7 +1937,7 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	  y->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
 	  t(0) = x->getEdgeParent()->getLength();
 	  t(1) = y->getEdgeParent()->getLength();
-	  cerr << "branch lengths after MLE pass: " << t.transpose() << endl;
+	  cerr << "branch lengths after MLE pass: " << x->getEdgeParent()->getNumber() << " " << y->getEdgeParent()->getNumber() << " " << t.transpose() << endl;
 	}
 
 	double prop_logl=0;
@@ -2848,4 +2850,15 @@ double Tree::distance(Tree* other)
 
   return sqrt(dist);
 //  cerr << dist << endl;
+}
+
+void Tree::printDerivatives(ostream& f,Alignment& alignment,QMatrix& model)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!= edges.end(); ++e )
+  {
+    clearProbMaps();
+    double logl,dlogl,ddlogl;
+    (*e)->calculate((*e)->getLength(),alignment,model,logl,dlogl,ddlogl);
+    f << setw(2) << (*e)->getNumber() << " " << (*e)->getLength() << " " << logl << " " << dlogl << " " << ddlogl << endl;
+  }
 }
