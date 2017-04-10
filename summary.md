@@ -2,7 +2,11 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- acabar de checar q el orden este bien en test
+- checar las alphas y lambdas ahora, no deben haber cosas raras esta vez
+
 - grid of branch lengths on likelihood when we stop, to try to understand what is happening, first we need to fix the NR problem
+
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without

@@ -1781,13 +1781,13 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   //depthFirstNodeList(nodeList);
   setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
 
-  if(VERBOSE)
-    {
+  // if(VERBOSE)
+  //   {
       cout << "Starting generateBL. Postorder Node List:";
       for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
 	cout << " " << (*p)->getNumber();
       cout << endl << flush;
-    }
+//    }
 
   list<Node*>::iterator p=nodeList.begin();
 
@@ -1797,7 +1797,9 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     Node* y;
     Node* z;
     Node* par; //clau: parent of x,y
+    Node* par2; //to check
 
+    cerr << "Node *p: " << (*p)->getNumber() << endl;
     if( (*p) == root )
       //if ( (*p)->getNodeParent() == root )
     {
@@ -1825,10 +1827,18 @@ void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     else //clau: p parent not root, and p not root
     {
       x = *p++; //it means take *p and move right
-      y = *p++;
+      y = *p;
       par = x->getNodeParent();
+      par2 = y->getNodeParent();
+      if( par->getNumber() != par2->getNumber() )
+	continue;
       z = par->getNodeParent();
+      y = *p++;
     }
+    cerr << "Node x: " << x->getNumber() << endl;
+    cerr << "Node y: " << y->getNumber() << endl;
+    cerr << "Node z: " << z->getNumber() << endl;
+    cerr << "Node par: " << par->getNumber() << endl;
 
     // clear prob maps recursively through entire tree
     // there is a smarter way to do this for only part of the tree, depending on order of edges
