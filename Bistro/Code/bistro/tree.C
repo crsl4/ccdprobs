@@ -1789,6 +1789,8 @@ double Tree::logPriorExp(double mean)
 
 void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, double eta, Edge* parent)
 {
+  cerr << "Calling generateBranchLengths on node " << number << endl;
+								
   mapParent = NULL;
   if ( leaf )
     return;
@@ -1829,6 +1831,11 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       otherEdge = *e; // parent edge
     }
   }
+
+  cerr << "left node is " << left->getNumber() << endl;
+  cerr << "right node is " << right->getNumber() << endl;
+  cerr << "other node is " << other->getNumber() << endl;
+
   if ( parent != NULL ) // non-root case
   {
     left->clearProbMapsSmart(leftEdge);
@@ -1856,7 +1863,7 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     double prop_logl=0;
     Vector2d prop_gradient;
     Matrix2d prop_hessian;
-    partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,logl,gradient,hessian);
+    partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,prop_logl,prop_gradient,prop_hessian);
     Vector2d mu = t;
     cerr << "Gradient: " << prop_gradient.transpose() << endl;
     cerr << "Hessian: " << endl;
