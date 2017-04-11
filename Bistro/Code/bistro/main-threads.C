@@ -205,14 +205,10 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 	 cout << " " << (*p)->getNumber();
        cout << endl << flush;
      }
-     double logBL = 0;
-
-     if( parameters.getNumMLE() == 0 )
-       parameters.setNumMLE(2);
 
      for ( int i=0; i<parameters.getNumMLE(); ++i )
      {
-       tree.randomEdges(alignment,model,rng,logBL,true);
+       tree.mleLengths(alignment,model);
      }
 
      tree.print(cerr);
@@ -225,15 +221,18 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        cout << tree.makeTreeNumbers() << endl << flush;
        cout << endl << flush;
      }
+
+     double logBL = 0;
+
      if( parameters.getIndependent() )
      {
 //	  cout << "Branch lengths sampled independently" << endl;
-       tree.randomEdges(alignment,model,rng,logBL,false);
+       tree.randomEdges(alignment,model,rng,logBL);
      }
      else
      {
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
-       tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), 1.0, parameters.getWeightMean());
+       tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getEta());
      }
 
      if(VERBOSE)
@@ -391,8 +390,7 @@ int main(int argc, char* argv[])
 // ------------------------------ Put MLE branch lengths to tree -------------------------
   for ( int i=0; i<4; ++i )
   {
-    double logFoo;
-    starttree.randomEdges(alignment,q_init,rng,logFoo,true);
+    starttree.mleLengths(alignment,q_init);
   }
   cout << "MLE Branch Lengths" << endl;
   cout << starttree.makeTreeNumbers() << endl;

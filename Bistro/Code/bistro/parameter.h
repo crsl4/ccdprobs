@@ -43,7 +43,7 @@ public:
     seed = 0;
     numBootstrap = 0;
     numRandom = 0;
-    numMLE = 0;
+    numMLE = 2;
     outFileRoot = (string)("run1");
     independent = false;
     jointMLE = false;

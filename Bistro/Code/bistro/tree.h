@@ -81,7 +81,8 @@ public:
   void mleError(bool&);
   void calculate(double,Alignment&,QMatrix&,double&,double&,double&);
   double mleLength(Alignment&,QMatrix&,bool&);
-  void randomLength(Alignment&,QMatrix&,mt19937_64&,double&,bool);
+  void callMLELength(Alignment&,QMatrix&);
+  void randomLength(Alignment&,QMatrix&,mt19937_64&,double&);
   bool isTerminal();
   void switchCurrent() { current = 1 - current; }
 };
@@ -177,11 +178,17 @@ public:
   int getMinNumber() const { return minNumber; }
   int setMinNumber(Edge*);
   void sortCanonical(Edge*);
-  void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&,bool);
+  void subtreeMLELengths(Alignment&,QMatrix&,Edge*);
+  void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&);
   void parsimonyScore(Alignment&,Edge*,int,int&,int&);
   void clearMapParent();
   void distance(map<dynamic_bitset<unsigned char>,double>&,Clade&,Edge*);
   void processTree(CladeGraph*,dynamic_bitset<unsigned char>&,Edge* parent);
+  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&,double,Edge*);
+  void partialPathCalculations2D(Vector2d ,double,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector2d& ,Matrix2d&);
+  void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d&);
+  double vectorProduct(vector<Vector4d>);
+  double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
 };
 
 class Tree
@@ -240,7 +247,7 @@ public:
   void depthFirstNodeList(list<Node*>&);
   void postorderCherryNodeList(list<Node*>&);
   void setActiveChildrenAndNodeParents();
-  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&, bool, double,bool);
+  void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&,double);
   void reroot(int);
   void setMinNumber() { root->setMinNumber(NULL); }
   void sortCanonical()
@@ -250,14 +257,13 @@ public:
   }
   void setNJDistances(MatrixXd&,mt19937_64&);
   void unroot();
-  void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&,bool);
+  void mleLengths(Alignment&,QMatrix&);
+  void randomEdges(Alignment&,QMatrix&,mt19937_64&,double&);
   double logPriorExp(double);
-  Vector2d mleLength2D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
-  void partialPathCalculations2D(Vector2d ,double,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector2d& ,Matrix2d&);// ,bool);
-  Vector3d mleLength3D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
-  void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d&);// ,bool);
-  double vectorProduct(vector<Vector4d>);
-  double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
+//  Vector2d mleLength2D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
+//  void partialPathCalculations2D(Vector2d ,double,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector2d& ,Matrix2d&);// ,bool);
+//  Vector3d mleLength3D(Alignment&,Node*,Edge*,Node*,Edge*,Node*,Edge*,QMatrix&,bool&);
+//  void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d&);// ,bool);
   void mleError(bool&);
   void makeBinary();
   int parsimonyScore(Alignment&);

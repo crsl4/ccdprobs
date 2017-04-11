@@ -1222,38 +1222,41 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 // do all conditional calculations for both subtrees
 // find MLE of edge length conditional on rest of tree
 // gamma distributed random length
-void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity, bool onlyMLE)
+
+void Edge::callMLELength(Alignment& alignment,QMatrix& qmatrix)
 {
   nodes[0]->clearProbMapsSmart(this);
   nodes[1]->clearProbMapsSmart(this);
-//  nodes[0]->clearProbMaps(this);
-//  nodes[1]->clearProbMaps(this);
+  bool converge;
+  length[current] = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
+  calculate(qmatrix);
+}
 
+void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
+{
+  nodes[0]->clearProbMapsSmart(this);
+  nodes[1]->clearProbMapsSmart(this);
   bool converge;
   // set length to MLE distance
   length[current] = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
-//  cout << "Setting length from mleLength to edge: " << number << endl << flush;
-  if ( !onlyMLE )
+  if ( length[current] < MIN_EDGE_LENGTH + 1.0e-08 ) // generate from exponential
   {
-    if ( length[current] < MIN_EDGE_LENGTH + 1.0e-08 ) // generate from exponential
-    {
-      double lambda = 1.0 / (MIN_EDGE_LENGTH) ;
-      exponential_distribution<double> rexp(lambda);
-      length[current] = rexp(rng);
-      logProposalDensity += log(lambda) - lambda*length[current];
-    }
-    else // generate from gamma
-    {
-      double logl,dlogl,ddlogl;
-      calculate(length[current],alignment,qmatrix,logl,dlogl,ddlogl);
-      double lambda = -1 * length[current] * ddlogl;
-      double alpha = length[current]*lambda;
-      gamma_distribution<double> rgamma(alpha,1.0 / lambda);
-      length[current] = rgamma(rng);
-      // if(isnan(length))
-      // 	cerr << "found nan bl with alpha: " << alpha << " and lambda: " << lambda << endl;
-      logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length[current]) - lambda*length[current];
-    }
+    double lambda = 1.0 / (MIN_EDGE_LENGTH) ;
+    exponential_distribution<double> rexp(lambda);
+    length[current] = rexp(rng);
+    logProposalDensity += log(lambda) - lambda*length[current];
+  }
+  else // generate from gamma
+  {
+    double logl,dlogl,ddlogl;
+    calculate(length[current],alignment,qmatrix,logl,dlogl,ddlogl);
+    double lambda = -1 * length[current] * ddlogl;
+    double alpha = length[current]*lambda;
+    gamma_distribution<double> rgamma(alpha,1.0 / lambda);
+    length[current] = rgamma(rng);
+    // if(isnan(length))
+    // 	cerr << "found nan bl with alpha: " << alpha << " and lambda: " << lambda << endl;
+    logProposalDensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(length[current]) - lambda*length[current];
   }
 //  cerr << "Setting edge " << number << " length to " << length << endl;
   // still to do: generate a random length
@@ -1262,29 +1265,47 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
   calculate(qmatrix);
 }
 
-// assumes tree already has some decent starting values for all edges
-// can improve efficiency by not calculating with full recursion when not needed, but worry about that later
-//
-void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edge* parent,double& logProposalDensity,bool onlyMLE)
+void Node::subtreeMLELengths(Alignment& alignment,QMatrix& qmatrix,Edge* parent)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e != edges.end(); ++e )
+  {
+    if ( *e != parent )
+      getNeighbor(*e)->subtreeMLELengths(alignment,qmatrix,*e);
+  }
+  //  get random length for parent edge
+  if ( parent != NULL ) // call edge command on parent
+  {
+    parent->callMLELength(alignment,qmatrix);
+  }
+}
+
+void Node::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,Edge* parent,double& logProposalDensity)
 {
 //  cerr << "node::randomEdges called on" << number << endl;
   // first call on all children
   for ( vector<Edge*>::iterator e=edges.begin(); e != edges.end(); ++e )
   {
     if ( *e != parent )
-      getNeighbor(*e)->randomEdges(alignment,qmatrix,rng,*e, logProposalDensity,onlyMLE);
+      getNeighbor(*e)->randomEdges(alignment,qmatrix,rng,*e, logProposalDensity);
   }
   //  get random length for parent edge
   if ( parent != NULL ) // call edge command on parent
   {
-    parent->randomLength(alignment,qmatrix,rng,logProposalDensity,onlyMLE);
+    parent->randomLength(alignment,qmatrix,rng,logProposalDensity);
   }
 }
 
-void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity,bool onlyMLE)
+void Tree::mleLengths(Alignment& alignment,QMatrix& qmatrix)
 {
-  int debug=0;
+  clearProbMaps(); //we need this here, otherwise it does not work
+  // compute transition matrices for all edges using provisional edge lengths
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    (*e)->calculate(qmatrix);
+  root->subtreeMLELengths(alignment,qmatrix,NULL);
+}
 
+void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
+{
   // clear probability maps from all nodes for fresh calculation, and clear mapParent for every node
   clearProbMaps(); //we need this here, otherwise it does not work
   // compute transition matrices for all edges using provisional edge lengths
@@ -1292,7 +1313,7 @@ void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,dou
     (*e)->calculate(qmatrix);
 //  cerr << "root = " << root->getNumber() << endl;
   // traverse tree and find MLE's for each edge
-  root->randomEdges(alignment,qmatrix,rng,NULL,logProposalDensity,onlyMLE);
+  root->randomEdges(alignment,qmatrix,rng,NULL,logProposalDensity);
 }
 
 void Node::setLevel(Edge* parent)
@@ -1766,419 +1787,537 @@ double Tree::logPriorExp(double mean)
   return edges.size()*log(lambda) - lambda*sum;
 }
 
-
-// based on generateBranchLengths in BranchLengths/Code/test/tree.C
-void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool jointMLE, double eta, bool weightMean)
+void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, double eta, Edge* parent)
 {
-  int debug=0;
-  // clear probability maps from all nodes for fresh calculation
-  clearProbMaps();
-  // compute transition matrices for all edges using provisional edge lengths
-  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
-    (*e)->calculate(qmatrix);
-  list<Node*> nodeList;
-  postorderCherryNodeList(nodeList);
-  //depthFirstNodeList(nodeList);
-  setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
-
-  // if(VERBOSE)
-  //   {
-      cout << "Starting generateBL. Postorder Node List:";
-      for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-	cout << " " << (*p)->getNumber();
-      cout << endl << flush;
-//    }
-
-  list<Node*>::iterator p=nodeList.begin();
-
-  while ( true )
+  mapParent = NULL;
+  if ( leaf )
+    return;
+  Node* left; // left child node
+  Node* right; // right child node
+  Node* other; // if root, third child; if not root, parent
+  Edge* leftEdge;
+  Edge* rightEdge;
+  Edge* otherEdge;
+  int childrenProcessed = 0;
+  for ( vector<Edge*>::iterator e=edges.begin(); e!= edges.end(); ++e )
   {
-    Node* x;
-    Node* y;
-    Node* z;
-    Node* par; //clau: parent of x,y
-    Node* par2; //to check
-
-    cerr << "Node *p: " << (*p)->getNumber() << endl;
-    if( (*p) == root )
-      //if ( (*p)->getNodeParent() == root )
+    if ( (*e) != parent )
     {
-      if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
+      Node* n = getNeighbor(*e);
+      n->generateBranchLengths(alignment,qmatrix,rng,logdensity,eta,*e);
+      if ( childrenProcessed == 0 )
       {
-	cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
-	cerr << root->getActiveChild(0)->getNumber() << endl;
-	cerr << (*p)->getNumber() << endl;
-	throw 20;
+	left = n;
+	leftEdge = *e;
+	++childrenProcessed;
       }
-      // par = root;
-      // x = *p++;
-      // y = *p++;
-      // z = *p;
-      par = root;
-      x = par->getEdge(0)->getOtherNode(par);
-      y = par->getEdge(1)->getOtherNode(par);
-      z = par->getEdge(2)->getOtherNode(par);
-    }
-    else if ( (*p)->getNodeParent() == root ) //clau: if p parent is root, just skip
-    {
-      x = *p++;
-      continue;
-    }
-    else //clau: p parent not root, and p not root
-    {
-      x = *p++; //it means take *p and move right
-      y = *p;
-      par = x->getNodeParent();
-      par2 = y->getNodeParent();
-      if( par->getNumber() != par2->getNumber() )
-	continue;
-      z = par->getNodeParent();
-      y = *p++;
-    }
-    cerr << "Node x: " << x->getNumber() << endl;
-    cerr << "Node y: " << y->getNumber() << endl;
-    cerr << "Node z: " << z->getNumber() << endl;
-    cerr << "Node par: " << par->getNumber() << endl;
-
-    // clear prob maps recursively through entire tree
-    // there is a smarter way to do this for only part of the tree, depending on order of edges
-    // worry about increased efficiency later
-    //clearProbMaps(); //we don't need this with new approach
-
-    if ( par==root )
-    {
-      if(VERBOSE)
-	cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
-      x-> clearProbMapsSmart(x->getEdgeParent());
-      y-> clearProbMapsSmart(y->getEdgeParent());
-      z-> clearProbMapsSmart(z->getEdgeParent()); //edge parent of par to go in opposite direction
-
-      // this is computed inside mleLength3D, get rid of this
-      // compute probabilities at subtrees x,y,z
-      // for ( int k=0; k<alignment.getNumSites(); ++k )
-      // 	{
-      // 	  x->calculate(k,alignment,x->getEdgeParent());//,true);
-      // 	  y->calculate(k,alignment,y->getEdgeParent());//,true);
-      // 	  z->calculate(k,alignment,z->getEdgeParent());//,true);
-      // 	}
-
-      bool converge = true;
-      Vector3d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength(),z->getEdgeParent()->getLength());
-      // if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
-      // 	cerr << "found nan bl in generateBranchLengths, initial BL" << endl;
-      if(jointMLE)
-	t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge);
-
-      double logfoo;
-      x->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
-      y->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
-      z->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
-
-      if(!converge)
-	cout << "Newton-Raphson did not converge" << endl;
-      double prop_logl = 0;
-      Vector3d prop_gradient;
-      Matrix3d prop_hessian;
-      partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
-      Vector3d mu = t;
-      cerr << "Hessian: " << endl;
-      cerr << prop_hessian << endl;
-      Matrix3d cov = (-1) * prop_hessian.inverse();
-      checkCov3d(cov);
-      	// XXX replace mle mu with weighted average of mle and prior mean
-	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
-	// use weights proportional to 1 / variance of each estimate
-
-      if(weightMean)
-	{
-	  double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
-	  mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
-	  mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
-	  mu(2) = ( (PRIOR_MEAN) * cov(2,2) + mu(2)*priorVariance ) / (priorVariance + cov(2,2));
-	}
-      t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
-      //t = multivariateNormal(mu,cov,rng, logdensity, eta);
-      // if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
-      // 	cerr << "found nan bl in generateBranchLengths, after multivariate gamma BL" << endl;
-
-      x->getEdgeParent()->setLength( t[0] );
-      y->getEdgeParent()->setLength( t[1] );
-      z->getEdgeParent()->setLength( t[2] );
-      x->getEdgeParent()->calculate(qmatrix);
-      y->getEdgeParent()->calculate(qmatrix);
-      z->getEdgeParent()->calculate(qmatrix);
-      break;
-    }
-    else //par not root
+      else if ( childrenProcessed == 1)
       {
-	if(VERBOSE)
-	  cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
-	x-> clearProbMapsSmart(x->getEdgeParent());
-	y-> clearProbMapsSmart(y->getEdgeParent());
-	z-> clearProbMapsSmart(par->getEdgeParent()); //edge parent of par to go in opposite direction
-
-	// this is done inside mleLength2D, get rid of this now
-	// compute probabilities at subtrees x,y,z
-	// for ( int k=0; k<alignment.getNumSites(); ++k )
-	//   {
-	//     x->calculate(k,alignment,x->getEdgeParent());//,true);
-	//     y->calculate(k,alignment,y->getEdgeParent());//,true);
-	//     z->calculate(k,alignment,par->getEdgeParent());//,true); //edge parent of par to go in opposite direction
-	//   }
-
-	Vector2d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength());
-	cerr << "branch lengths before joint MLE: " << t.transpose() << endl;
-	bool converge;
-	if(jointMLE)
-	  t = mleLength2D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
-	double logl=0;
-	Vector2d gradient;
-	Matrix2d hessian;
-	double lz0 = par->getEdgeParent()->getLength(); //kept fixed throughout
-	partialPathCalculations2D(t,lz0,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,logl,gradient,hessian);//,true);
-	cerr << "Gradient: " << gradient.transpose() << endl;
-	cerr << "Hessian: " << endl;
-	cerr << hessian << endl;
-
-	for(int ii=0; ii<2; ++ii)
-	{
-	  double logfoo;
-	  x->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
-	  y->getEdgeParent()->randomLength(alignment,qmatrix,rng,logfoo,true);
-	  t(0) = x->getEdgeParent()->getLength();
-	  t(1) = y->getEdgeParent()->getLength();
-	  cerr << "branch lengths after MLE pass: " << x->getEdgeParent()->getNumber() << " " << y->getEdgeParent()->getNumber() << " " << t.transpose() << endl;
-	}
-
-	double prop_logl=0;
-	Vector2d prop_gradient;
-	Matrix2d prop_hessian;
-	double lz = par->getEdgeParent()->getLength(); //kept fixed throughout
-	partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
-	Vector2d mu = t;
-	cerr << "Gradient: " << prop_gradient.transpose() << endl;
-	cerr << "Hessian: " << endl;
-	cerr << prop_hessian << endl;
-	Matrix2d cov = (-1) * prop_hessian.inverse();
-	checkCov2d(cov,false);
-	// XXX replace mle mu with weighted average of mle and prior mean
-	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
-	// use weights proportional to 1 / variance of each estimate
-	if(weightMean)
-	{
-	  double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
-	  mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
-	  mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
-	}
-	t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
-	//	t = multivariateNormal(mu,cov,rng, logdensity,eta);
-	x->getEdgeParent()->setLength( t[0] );
-	y->getEdgeParent()->setLength( t[1] );
-	x->getEdgeParent()->calculate(qmatrix);
-	y->getEdgeParent()->calculate(qmatrix);
-	par->clearMapParent();
+	right = n;
+	rightEdge = *e;
+	++childrenProcessed;
       }
+      else // must be the root
+      {
+	other = n;
+	otherEdge = *e;
+      }
+    }
+    else // not the root
+    {
+      other = getNeighbor(*e); // parent node
+      otherEdge = *e; // parent edge
+    }
+  }
+  if ( parent != NULL ) // non-root case
+  {
+    left->clearProbMapsSmart(leftEdge);
+    right->clearProbMapsSmart(rightEdge);
+    other->clearProbMapsSmart(otherEdge);
+    Vector2d t(leftEdge->getLength(),rightEdge->getLength());
+//    cerr << "branch lengths before joint MLE: " << t.transpose() << endl;
+    double logl=0;
+    Vector2d gradient;
+    Matrix2d hessian;
+    partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,logl,gradient,hessian);
+    cerr << "Gradient: " << gradient.transpose() << endl;
+    cerr << "Hessian: " << endl;
+    cerr << hessian << endl;
+
+    for ( int ii=0; ii<2; ++ii) // extra MLE passes prior to generation
+    {
+      leftEdge->callMLELength(alignment,qmatrix);
+      rightEdge->callMLELength(alignment,qmatrix);
+      t(0) = leftEdge->getLength();
+      t(1) = rightEdge->getLength();
+      cerr << "branch lengths after MLE pass: " << leftEdge->getNumber() << " " << rightEdge->getNumber() << " " << t.transpose() << endl;
+    }
+    
+    double prop_logl=0;
+    Vector2d prop_gradient;
+    Matrix2d prop_hessian;
+    partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,logl,gradient,hessian);
+    Vector2d mu = t;
+    cerr << "Gradient: " << prop_gradient.transpose() << endl;
+    cerr << "Hessian: " << endl;
+    cerr << prop_hessian << endl;
+    Matrix2d cov = (-1) * prop_hessian.inverse();
+    checkCov2d(cov,false);
+    t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
+    leftEdge->setLength( t(0) );
+    rightEdge->setLength( t(1) );
+    leftEdge->calculate(qmatrix);
+    rightEdge->calculate(qmatrix);
+  }
+
+  else // root case
+  {
+    left->clearProbMapsSmart(leftEdge);
+    right->clearProbMapsSmart(rightEdge);
+    other->clearProbMapsSmart(otherEdge);
+    Vector3d t(leftEdge->getLength(),rightEdge->getLength(),otherEdge->getLength());
+    leftEdge->callMLELength(alignment,qmatrix);
+    rightEdge->callMLELength(alignment,qmatrix);
+    otherEdge->callMLELength(alignment,qmatrix);
+    double prop_logl = 0;
+    Vector3d prop_gradient;
+    Matrix3d prop_hessian;
+    partialPathCalculations3D(t,alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,prop_logl,prop_gradient,prop_hessian);
+    Vector3d mu = t;
+    cerr << "Hessian: " << endl;
+    cerr << prop_hessian << endl;
+    Matrix3d cov = (-1) * prop_hessian.inverse();
+    checkCov3d(cov);
+    t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
+    leftEdge->setLength( t(0) );
+    rightEdge->setLength( t(1) );
+    otherEdge->setLength( t(2) );
+    leftEdge->calculate(qmatrix);
+    rightEdge->calculate(qmatrix);
+    otherEdge->calculate(qmatrix);
   }
 }
 
-// modified to do 2D MLE instead of 3D
-Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
+void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, double eta)
 {
-//  cout << "Entering mleLength2D";
-//  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
-  int iter=0;
-  Vector2d curr(ex->getLength(),ey->getLength());
-  double lz = ez->getLength(); //kept fixed throughout
-  //  cout << "Initial bl curr: " << curr.transpose() << endl;
-  double curr_logl;
-  Vector2d curr_gradient;
-  Matrix2d curr_hessian;
-  partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
-  cerr << "Initial gradient: " << curr_gradient.transpose() << endl;
-  cerr << "Initial hessian: " << endl << curr_hessian << endl;
-  Vector2d prop = curr;
-  double prop_logl = curr_logl;
-  Vector2d prop_gradient = curr_gradient;
-  Matrix2d prop_hessian = curr_hessian;
-  Vector2d delta = curr - prop;
-  bool keepZero1 = false; //whether to keep that entry at 0
-  bool keepZero2 = false;
-
-  // find starting point: we want a good prop
-  do
-  {
-    curr = prop;
-    partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
-    // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
-    // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
-    // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
-    if ( ++iter > 100 )
-      mleError(converge);
-    delta = curr_hessian.inverse() * curr_gradient;
-    if(keepZero1)
-      delta[0] = 0;
-    if(keepZero2)
-      delta[1] = 0;
-    prop = curr - delta;
-    if(curr[0] > TOL && curr[1] > TOL)
-      {
-	while ( prop[0] < 0 || prop[1] < 0)
-	  {
-//	    cout << "found negative with big curr, will shrink delta" << endl;
-	    if(prop[0] < 0)
-	      delta[0] = 0.5* delta[0];
-	    if(prop[1] < 0)
-	      delta[1] = 0.5* delta[1];
-	    prop = curr - delta;
-	  }
-      }
-    //    cerr << "Delta " << delta.transpose() << endl;
-    if(prop[0] < 0 && curr[0] < TOL)
-      {
-//	cout << "found negative for 1st element with curr small, will set to zero" << endl;
-    	prop[0] = MIN_EDGE_LENGTH;
-	keepZero1 = true;
-      }
-    if(prop[1] < 0 && curr[1] < TOL)
-      {
-//	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
-    	prop[1] = MIN_EDGE_LENGTH;
-	keepZero2 = true;
-      }
-//    cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
-
-    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
-    if ( ++iter > 100 )
-      mleError(converge);
-    if(!keepZero1 && !keepZero2)
-      {
-	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
-	  {
-//	    cout << "found bigger step" << endl;
-	    if(keepZero1)
-		delta[0] = 0;
-	    if(keepZero2)
-		delta[1] = 0;
-	    delta = 0.5 *delta;
-	    prop = curr - delta;
-	    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
-	    if ( ++iter > 100 )
-	      mleError(converge);
-	  }
-      }
-  } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
- cout << "Finally converged to" << endl;
- cout << "Gradient " << endl << prop_gradient.transpose() << endl;
- cout << "prop: " << prop.transpose() << endl;
- cout << "Hessian: " << endl << prop_hessian << endl;
-  return prop;
+  clearProbMaps();
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    (*e)->calculate(qmatrix);
+  root->generateBranchLengths(alignment,qmatrix,rng,logdensity,eta,NULL);
 }
 
+// based on generateBranchLengths in BranchLengths/Code/test/tree.C
+// void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, bool jointMLE, double eta, bool weightMean)
+// {
+//   int debug=0;
+//   // clear probability maps from all nodes for fresh calculation
+//   clearProbMaps();
+//   // compute transition matrices for all edges using provisional edge lengths
+//   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+//     (*e)->calculate(qmatrix);
+//   list<Node*> nodeList;
+//   postorderCherryNodeList(nodeList);
+//   //depthFirstNodeList(nodeList);
+//   setActiveChildrenAndNodeParents(); //need to keep this to have getParentEdge ok
 
-Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
-{
-//  cout << "Entering mleLength3D";
-//  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
-  int iter=0;
-  Vector3d curr(ex->getLength(),ey->getLength(),ez->getLength());
-  //  cout << "Initial bl curr: " << curr.transpose() << endl;
-  double curr_logl;
-  Vector3d curr_gradient;
-  Matrix3d curr_hessian;
-  partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
-  Vector3d prop = curr;
-  double prop_logl = curr_logl;
-  Vector3d prop_gradient = curr_gradient;
-  Matrix3d prop_hessian = curr_hessian;
-  Vector3d delta = curr - prop;
-  bool keepZero1 = false; //whether to keep that entry at 0
-  bool keepZero2 = false;
-  bool keepZero3 = false;
+//   // if(VERBOSE)
+//   //   {
+//       cout << "Starting generateBL. Postorder Node List:";
+//       for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+// 	cout << " " << (*p)->getNumber();
+//       cout << endl << flush;
+// //    }
 
-  // find starting point: we want a good prop
-  do
-  {
-    curr = prop;
-    partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
-    // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
-    // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
-    // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
-    if ( ++iter > 100 )
-      mleError(converge);
-    delta = curr_hessian.inverse() * curr_gradient;
-    if(keepZero1)
-      delta[0] = 0;
-    if(keepZero2)
-      delta[1] = 0;
-    if(keepZero3)
-      delta[2] = 0;
-    prop = curr - delta;
-    if(curr[0] > TOL && curr[1] > TOL && curr[2] > TOL)
-      {
-	while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
-	  {
-//	    cout << "found negative with big curr, will shrink delta" << endl;
-	    if(prop[0] < 0)
-	      delta[0] = 0.5* delta[0];
-	    if(prop[1] < 0)
-	      delta[1] = 0.5* delta[1];
-	    if(prop[2] < 0)
-	      delta[2] = 0.5* delta[2];
-	    prop = curr - delta;
-	  }
-      }
-    //    cerr << "Delta " << delta.transpose() << endl;
-    if(prop[0] < 0 && curr[0] < TOL)
-      {
-//	cout << "found negative for 1st element with curr small, will set to zero" << endl;
-    	prop[0] = MIN_EDGE_LENGTH;
-	keepZero1 = true;
-      }
-    if(prop[1] < 0 && curr[1] < TOL)
-      {
-//	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
-    	prop[1] = MIN_EDGE_LENGTH;
-	keepZero2 = true;
-      }
-    if(prop[2] < 0 && curr[2] < TOL)
-      {
-//	cout << "found negative for 3rd element with curr small, will set to zero" << endl;
-    	prop[2] = MIN_EDGE_LENGTH;
-	keepZero3 = true;
-      }
-//    cout << "prop befofe partialPathCalculations3D: " << prop.transpose() << endl;
+//   list<Node*>::iterator p=nodeList.begin();
 
-    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
-    if ( ++iter > 100 )
-      mleError(converge);
-    if(!keepZero1 && !keepZero2 && !keepZero3)
-      {
-	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
-	  {
-//	    cout << "found bigger step" << endl;
-	    if(keepZero1)
-		delta[0] = 0;
-	    if(keepZero2)
-		delta[1] = 0;
-	    if(keepZero3)
-		delta[2] = 0;
-	    delta = 0.5 *delta;
-	    prop = curr - delta;
-	    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
-	    if ( ++iter > 100 )
-	      mleError(converge);
-	  }
-      }
-  } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
+//   while ( true )
+//   {
+//     Node* x;
+//     Node* y;
+//     Node* z;
+//     Node* par; //clau: parent of x,y
+//     Node* par2; //to check
+
+//     cerr << "Node *p: " << (*p)->getNumber() << endl;
+//     if( (*p) == root )
+//       //if ( (*p)->getNodeParent() == root )
+//     {
+//       if ( root->getActiveChildrenSize() != 3) //clau: need root to have 3 children
+//       {
+// 	cerr << "yeah, write the general code...." << root->getActiveChildrenSize() << endl;
+// 	cerr << root->getActiveChild(0)->getNumber() << endl;
+// 	cerr << (*p)->getNumber() << endl;
+// 	throw 20;
+//       }
+//       // par = root;
+//       // x = *p++;
+//       // y = *p++;
+//       // z = *p;
+//       par = root;
+//       x = par->getEdge(0)->getOtherNode(par);
+//       y = par->getEdge(1)->getOtherNode(par);
+//       z = par->getEdge(2)->getOtherNode(par);
+//     }
+//     else if ( (*p)->getNodeParent() == root ) //clau: if p parent is root, just skip
+//     {
+//       x = *p++;
+//       continue;
+//     }
+//     else //clau: p parent not root, and p not root
+//     {
+//       x = *p++; //it means take *p and move right
+//       y = *p;
+//       par = x->getNodeParent();
+//       par2 = y->getNodeParent();
+//       if( par->getNumber() != par2->getNumber() )
+// 	continue;
+//       z = par->getNodeParent();
+//       y = *p++;
+//     }
+//     cerr << "Node x: " << x->getNumber() << endl;
+//     cerr << "Node y: " << y->getNumber() << endl;
+//     cerr << "Node z: " << z->getNumber() << endl;
+//     cerr << "Node par: " << par->getNumber() << endl;
+
+//     // clear prob maps recursively through entire tree
+//     // there is a smarter way to do this for only part of the tree, depending on order of edges
+//     // worry about increased efficiency later
+//     //clearProbMaps(); //we don't need this with new approach
+
+//     if ( par==root )
+//     {
+//       if(VERBOSE)
+// 	cout << "Setting branch lengths for x,y,z " << x->getNumber() << " " << y->getNumber() << " " << z->getNumber() << endl;
+//       x-> clearProbMapsSmart(x->getEdgeParent());
+//       y-> clearProbMapsSmart(y->getEdgeParent());
+//       z-> clearProbMapsSmart(z->getEdgeParent()); //edge parent of par to go in opposite direction
+
+//       // this is computed inside mleLength3D, get rid of this
+//       // compute probabilities at subtrees x,y,z
+//       // for ( int k=0; k<alignment.getNumSites(); ++k )
+//       // 	{
+//       // 	  x->calculate(k,alignment,x->getEdgeParent());//,true);
+//       // 	  y->calculate(k,alignment,y->getEdgeParent());//,true);
+//       // 	  z->calculate(k,alignment,z->getEdgeParent());//,true);
+//       // 	}
+
+//       bool converge = true;
+//       Vector3d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength(),z->getEdgeParent()->getLength());
+//       // if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
+//       // 	cerr << "found nan bl in generateBranchLengths, initial BL" << endl;
+//       if(jointMLE)
+// 	t = mleLength3D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, z->getEdgeParent(), qmatrix, converge);
+
+//       double logfoo;
+//       x->getEdgeParent()->callMLELength(alignment,qmatrix);
+//       y->getEdgeParent()->callMLELength(alignment,qmatrix);
+//       z->getEdgeParent()->callMLELength(alignment,qmatrix);
+
+//       if(!converge)
+// 	cout << "Newton-Raphson did not converge" << endl;
+//       double prop_logl = 0;
+//       Vector3d prop_gradient;
+//       Matrix3d prop_hessian;
+//       partialPathCalculations3D(t,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,z->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
+//       Vector3d mu = t;
+//       cerr << "Hessian: " << endl;
+//       cerr << prop_hessian << endl;
+//       Matrix3d cov = (-1) * prop_hessian.inverse();
+//       checkCov3d(cov);
+//       	// XXX replace mle mu with weighted average of mle and prior mean
+// 	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
+// 	// use weights proportional to 1 / variance of each estimate
+
+//       if(weightMean)
+// 	{
+// 	  double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
+// 	  mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
+// 	  mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
+// 	  mu(2) = ( (PRIOR_MEAN) * cov(2,2) + mu(2)*priorVariance ) / (priorVariance + cov(2,2));
+// 	}
+//       t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
+//       //t = multivariateNormal(mu,cov,rng, logdensity, eta);
+//       // if(isnan(t[0]) || isnan(t[1]) || isnan(t[2]))
+//       // 	cerr << "found nan bl in generateBranchLengths, after multivariate gamma BL" << endl;
+
+//       x->getEdgeParent()->setLength( t[0] );
+//       y->getEdgeParent()->setLength( t[1] );
+//       z->getEdgeParent()->setLength( t[2] );
+//       x->getEdgeParent()->calculate(qmatrix);
+//       y->getEdgeParent()->calculate(qmatrix);
+//       z->getEdgeParent()->calculate(qmatrix);
+//       break;
+//     }
+//     else //par not root
+//       {
+// 	if(VERBOSE)
+// 	  cout << "Setting branch lengths for x,y " << x->getNumber() << " " << y->getNumber() << endl;
+// 	x-> clearProbMapsSmart(x->getEdgeParent());
+// 	y-> clearProbMapsSmart(y->getEdgeParent());
+// 	z-> clearProbMapsSmart(par->getEdgeParent()); //edge parent of par to go in opposite direction
+
+// 	// this is done inside mleLength2D, get rid of this now
+// 	// compute probabilities at subtrees x,y,z
+// 	// for ( int k=0; k<alignment.getNumSites(); ++k )
+// 	//   {
+// 	//     x->calculate(k,alignment,x->getEdgeParent());//,true);
+// 	//     y->calculate(k,alignment,y->getEdgeParent());//,true);
+// 	//     z->calculate(k,alignment,par->getEdgeParent());//,true); //edge parent of par to go in opposite direction
+// 	//   }
+
+// 	Vector2d t(x->getEdgeParent()->getLength(),y->getEdgeParent()->getLength());
+// 	cerr << "branch lengths before joint MLE: " << t.transpose() << endl;
+// 	bool converge;
+// 	if(jointMLE)
+// 	  t = mleLength2D(alignment,x,x->getEdgeParent(), y, y->getEdgeParent(), z, par->getEdgeParent(), qmatrix, converge);
+// 	double logl=0;
+// 	Vector2d gradient;
+// 	Matrix2d hessian;
+// 	double lz0 = par->getEdgeParent()->getLength(); //kept fixed throughout
+// 	partialPathCalculations2D(t,lz0,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,logl,gradient,hessian);//,true);
+// 	cerr << "Gradient: " << gradient.transpose() << endl;
+// 	cerr << "Hessian: " << endl;
+// 	cerr << hessian << endl;
+
+// 	for(int ii=0; ii<2; ++ii)
+// 	{
+// 	  double logfoo;
+// 	  x->getEdgeParent()->callMLELength(alignment,qmatrix);
+// 	  y->getEdgeParent()->callMLELength(alignment,qmatrix);
+// 	  t(0) = x->getEdgeParent()->getLength();
+// 	  t(1) = y->getEdgeParent()->getLength();
+// 	  cerr << "branch lengths after MLE pass: " << x->getEdgeParent()->getNumber() << " " << y->getEdgeParent()->getNumber() << " " << t.transpose() << endl;
+// 	}
+
+// 	double prop_logl=0;
+// 	Vector2d prop_gradient;
+// 	Matrix2d prop_hessian;
+// 	double lz = par->getEdgeParent()->getLength(); //kept fixed throughout
+// 	partialPathCalculations2D(t,lz,alignment,x,x->getEdgeParent(),y,y->getEdgeParent(),z,par->getEdgeParent(),qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
+// 	Vector2d mu = t;
+// 	cerr << "Gradient: " << prop_gradient.transpose() << endl;
+// 	cerr << "Hessian: " << endl;
+// 	cerr << prop_hessian << endl;
+// 	Matrix2d cov = (-1) * prop_hessian.inverse();
+// 	checkCov2d(cov,false);
+// 	// XXX replace mle mu with weighted average of mle and prior mean
+// 	// use PRIOR_MEAN as the mean and sd of the exponential prior edge length
+// 	// use weights proportional to 1 / variance of each estimate
+// 	if(weightMean)
+// 	{
+// 	  double priorVariance = (PRIOR_MEAN * PRIOR_MEAN);
+// 	  mu(0) = ( (PRIOR_MEAN) * cov(0,0) + mu(0)*priorVariance ) / (priorVariance + cov(0,0));
+// 	  mu(1) = ( (PRIOR_MEAN) * cov(1,1) + mu(1)*priorVariance ) / (priorVariance + cov(1,1));
+// 	}
+// 	t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
+// 	//	t = multivariateNormal(mu,cov,rng, logdensity,eta);
+// 	x->getEdgeParent()->setLength( t[0] );
+// 	y->getEdgeParent()->setLength( t[1] );
+// 	x->getEdgeParent()->calculate(qmatrix);
+// 	y->getEdgeParent()->calculate(qmatrix);
+// 	par->clearMapParent();
+//       }
+//   }
+// }
+
+// modified to do 2D MLE instead of 3D
+// Vector2d Tree::mleLength2D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
+// {
+// //  cout << "Entering mleLength2D";
+// //  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+//   int iter=0;
+//   Vector2d curr(ex->getLength(),ey->getLength());
+//   double lz = ez->getLength(); //kept fixed throughout
+//   //  cout << "Initial bl curr: " << curr.transpose() << endl;
+//   double curr_logl;
+//   Vector2d curr_gradient;
+//   Matrix2d curr_hessian;
+//   partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
+//   cerr << "Initial gradient: " << curr_gradient.transpose() << endl;
+//   cerr << "Initial hessian: " << endl << curr_hessian << endl;
+//   Vector2d prop = curr;
+//   double prop_logl = curr_logl;
+//   Vector2d prop_gradient = curr_gradient;
+//   Matrix2d prop_hessian = curr_hessian;
+//   Vector2d delta = curr - prop;
+//   bool keepZero1 = false; //whether to keep that entry at 0
+//   bool keepZero2 = false;
+
+//   // find starting point: we want a good prop
+//   do
+//   {
+//     curr = prop;
+//     partialPathCalculations2D(curr,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
+//     // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
+//     // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+//     // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+//     if ( ++iter > 100 )
+//       mleError(converge);
+//     delta = curr_hessian.inverse() * curr_gradient;
+//     if(keepZero1)
+//       delta[0] = 0;
+//     if(keepZero2)
+//       delta[1] = 0;
+//     prop = curr - delta;
+//     if(curr[0] > TOL && curr[1] > TOL)
+//       {
+// 	while ( prop[0] < 0 || prop[1] < 0)
+// 	  {
+// //	    cout << "found negative with big curr, will shrink delta" << endl;
+// 	    if(prop[0] < 0)
+// 	      delta[0] = 0.5* delta[0];
+// 	    if(prop[1] < 0)
+// 	      delta[1] = 0.5* delta[1];
+// 	    prop = curr - delta;
+// 	  }
+//       }
+//     //    cerr << "Delta " << delta.transpose() << endl;
+//     if(prop[0] < 0 && curr[0] < TOL)
+//       {
+// //	cout << "found negative for 1st element with curr small, will set to zero" << endl;
+//     	prop[0] = MIN_EDGE_LENGTH;
+// 	keepZero1 = true;
+//       }
+//     if(prop[1] < 0 && curr[1] < TOL)
+//       {
+// //	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
+//     	prop[1] = MIN_EDGE_LENGTH;
+// 	keepZero2 = true;
+//       }
+// //    cout << "prop befofe partialPathCalculations2D: " << prop.transpose() << endl;
+
+//     partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
+//     if ( ++iter > 100 )
+//       mleError(converge);
+//     if(!keepZero1 && !keepZero2)
+//       {
+// 	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
+// 	  {
+// //	    cout << "found bigger step" << endl;
+// 	    if(keepZero1)
+// 		delta[0] = 0;
+// 	    if(keepZero2)
+// 		delta[1] = 0;
+// 	    delta = 0.5 *delta;
+// 	    prop = curr - delta;
+// 	    partialPathCalculations2D(prop,lz,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
+// 	    if ( ++iter > 100 )
+// 	      mleError(converge);
+// 	  }
+//       }
+//   } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
 //  cout << "Finally converged to" << endl;
 //  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
 //  cout << "prop: " << prop.transpose() << endl;
-  return prop;
-}
+//  cout << "Hessian: " << endl << prop_hessian << endl;
+//   return prop;
+// }
+
+
+// Vector3d Tree::mleLength3D(Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,bool& converge)
+// {
+// //  cout << "Entering mleLength3D";
+// //  cout << " x=" << nx->getNumber() << " y=" << ny->getNumber() << " z=" << nz->getNumber() << endl;
+//   int iter=0;
+//   Vector3d curr(ex->getLength(),ey->getLength(),ez->getLength());
+//   //  cout << "Initial bl curr: " << curr.transpose() << endl;
+//   double curr_logl;
+//   Vector3d curr_gradient;
+//   Matrix3d curr_hessian;
+//   partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
+//   Vector3d prop = curr;
+//   double prop_logl = curr_logl;
+//   Vector3d prop_gradient = curr_gradient;
+//   Matrix3d prop_hessian = curr_hessian;
+//   Vector3d delta = curr - prop;
+//   bool keepZero1 = false; //whether to keep that entry at 0
+//   bool keepZero2 = false;
+//   bool keepZero3 = false;
+
+//   // find starting point: we want a good prop
+//   do
+//   {
+//     curr = prop;
+//     partialPathCalculations3D(curr,alignment,nx,ex,ny,ey,nz,ez,qmatrix,curr_logl,curr_gradient,curr_hessian);//,true);
+//     // cout << "mleDistance3D Newton-Raphson curr: " << curr.transpose() << endl;
+//     // cout << "mleDistance3D Newton-Raphson gradient: " << curr_gradient.transpose() << endl;
+//     // cout << "mleDistance3D Newton-Raphson inverse hessian: " << endl << curr_hessian.inverse() << endl;
+//     if ( ++iter > 100 )
+//       mleError(converge);
+//     delta = curr_hessian.inverse() * curr_gradient;
+//     if(keepZero1)
+//       delta[0] = 0;
+//     if(keepZero2)
+//       delta[1] = 0;
+//     if(keepZero3)
+//       delta[2] = 0;
+//     prop = curr - delta;
+//     if(curr[0] > TOL && curr[1] > TOL && curr[2] > TOL)
+//       {
+// 	while ( prop[0] < 0 || prop[1] < 0 || prop[2] < 0)
+// 	  {
+// //	    cout << "found negative with big curr, will shrink delta" << endl;
+// 	    if(prop[0] < 0)
+// 	      delta[0] = 0.5* delta[0];
+// 	    if(prop[1] < 0)
+// 	      delta[1] = 0.5* delta[1];
+// 	    if(prop[2] < 0)
+// 	      delta[2] = 0.5* delta[2];
+// 	    prop = curr - delta;
+// 	  }
+//       }
+//     //    cerr << "Delta " << delta.transpose() << endl;
+//     if(prop[0] < 0 && curr[0] < TOL)
+//       {
+// //	cout << "found negative for 1st element with curr small, will set to zero" << endl;
+//     	prop[0] = MIN_EDGE_LENGTH;
+// 	keepZero1 = true;
+//       }
+//     if(prop[1] < 0 && curr[1] < TOL)
+//       {
+// //	cout << "found negative for 2nd element with curr small, will set to zero" << endl;
+//     	prop[1] = MIN_EDGE_LENGTH;
+// 	keepZero2 = true;
+//       }
+//     if(prop[2] < 0 && curr[2] < TOL)
+//       {
+// //	cout << "found negative for 3rd element with curr small, will set to zero" << endl;
+//     	prop[2] = MIN_EDGE_LENGTH;
+// 	keepZero3 = true;
+//       }
+// //    cout << "prop befofe partialPathCalculations3D: " << prop.transpose() << endl;
+
+//     partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
+//     if ( ++iter > 100 )
+//       mleError(converge);
+//     if(!keepZero1 && !keepZero2 && !keepZero3)
+//       {
+// 	while ( prop_gradient.squaredNorm() > curr_gradient.squaredNorm() && delta.squaredNorm() > (TOL*TOL) )
+// 	  {
+// //	    cout << "found bigger step" << endl;
+// 	    if(keepZero1)
+// 		delta[0] = 0;
+// 	    if(keepZero2)
+// 		delta[1] = 0;
+// 	    if(keepZero3)
+// 		delta[2] = 0;
+// 	    delta = 0.5 *delta;
+// 	    prop = curr - delta;
+// 	    partialPathCalculations3D(prop,alignment,nx,ex,ny,ey,nz,ez,qmatrix,prop_logl,prop_gradient,prop_hessian);//,true);
+// 	    if ( ++iter > 100 )
+// 	      mleError(converge);
+// 	  }
+//       }
+//   } while ( delta.squaredNorm() > (TOL*TOL) && prop_gradient.squaredNorm() > (TOL*TOL));
+// //  cout << "Finally converged to" << endl;
+// //  cout << "Gradient " << endl << prop_gradient.transpose() << endl;
+// //  cout << "prop: " << prop.transpose() << endl;
+//   return prop;
+// }
 
 // modified to make t a Vector2d (instead of Vector3d) to keep the length to node z fixed
 // gradient and hessian are 2d as well
-void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector2d& gradient,Matrix2d& hessian)//,bool recurse)
+void Node::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector2d& gradient,Matrix2d& hessian)//,bool recurse)
 {
   Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
   Matrix4d QP1 = qmatrix.getQP(t[0]);
@@ -2243,7 +2382,7 @@ void Tree::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
 }
 
 
-void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector3d& gradient,Matrix3d& hessian)//,bool recurse)
+void Node::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Edge* ex,Node* ny,Edge* ey,Node* nz,Edge* ez,QMatrix& qmatrix,double& logl,Vector3d& gradient,Matrix3d& hessian)//,bool recurse)
 {
   Matrix4d P1 = qmatrix.getTransitionMatrix(t[0]);
   Matrix4d QP1 = qmatrix.getQP(t[0]);
@@ -2321,8 +2460,7 @@ void Tree::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
   nz -> setMapParent(ez);
 }
 
-
-double Tree::vectorProduct(vector<Vector4d> v)
+double Node::vectorProduct(vector<Vector4d> v)
 {
   double sum = 0;
   for ( int i=0; i<4; ++i )
@@ -2337,7 +2475,7 @@ double Tree::vectorProduct(vector<Vector4d> v)
   return sum;
 }
 
-double Tree::vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
+double Node::vectorProduct4D(Vector4d v1, Vector4d v2, Vector4d v3, Vector4d v4)
 {
   vector<Vector4d> v;
   v.push_back(v1);
@@ -2524,17 +2662,17 @@ int Tree::parsimonyScore(Alignment& alignment)
 
 // do 2 MLE passes, and calculate likelihood of tree
 // assumes the tree is unrooted, and has set NJ branch lengths
-double Tree::logLikelihoodScore(Alignment& alignment, QMatrix& model)
-{
-  mt19937_64 rng(1234); //just need one as input, never used when onlyMLE=true
-  double logBL = 0; //just need one as input, never used when onlyMLE=true
-  for ( int i=0; i<2; ++i )
-    {
-      randomEdges(alignment,model,rng,logBL,true);
-    }
-  double logLik = calculate(alignment, model);
-  return logLik;
-}
+// double Tree::logLikelihoodScore(Alignment& alignment, QMatrix& model)
+// {
+//   mt19937_64 rng(1234); //just need one as input, never used when onlyMLE=true
+//   double logBL = 0; //just need one as input, never used when onlyMLE=true
+//   for ( int i=0; i<2; ++i )
+//     {
+//       randomEdges(alignment,model,rng,logBL,true);
+//     }
+//   double logLik = calculate(alignment, model);
+//   return logLik;
+//}
 
 
 
