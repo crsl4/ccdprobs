@@ -23,9 +23,9 @@ void usage(ostream& f)
   f << "    -h || --help                   |  print this help message" << endl;
   f << "    --independent                  |  generates branch lengths independently" << endl;
   f << "    --jointMLE                     |  find joint MLE for branches before generating randomly" << endl;
-  f << "    -p stationary-distribution     |  [ not used ] four relative probabilities for A,C,G,T, comma-separated, no spaces" << endl;
-  f << "    -q symmetric-q-parameters      |  [ not used ] six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces" << endl;
-  f << "    -t topology-string             |  [ not used ] parenthetic tree topology" << endl;
+  f << "    -p stationary-distribution     |  four relative probabilities for A,C,G,T, comma-separated, no spaces; used as starting point for MCMC, or as fixed p if --no-mcmc" << endl;
+  f << "    -q symmetric-q-parameters      |  six relative values for AC,AG,AT,CG,CT,GT, comma-separated, no spaces; used as starting point for MCMC, or as fixed s if --no-mcmc" << endl;
+  f << "    -t topology-string             |  parenthetic tree topology; used as fixed topology to sample only branch lengths and Q" << endl;
   f << "    --no-reweight                  |  do *not* reweight bootstrap sample with weight proportional to exp(-distance), but exp(-parsimony)" << endl;
   f << "    --weight-scale scale           |  scale to compute the distance weights from counts, positive number (200)" << endl;
   f << "    --threads num                  |  number of threads for parallelization, will not check that it does not exceed the total number of cores. If not specified, the total number of available cores is used." << endl;

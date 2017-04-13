@@ -1,3 +1,13 @@
+## with mapParent=NULL at the end
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro-new-2 -r 1000 -b 1000 -s 2099458273 > bistro-new-2.log
+
+## test the new generateBL
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro-new -r 1000 -b 1000 -s 2099458273 > bistro-new.log
+source("../../Scripts/summary.R")
+compareBistro("bistro-new",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")
+
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro-new-fixT -r 1000 -b 1000 -t "(Felis_catus___domestic_cat,(Acinonyx_jubatus___cheetah,(((((Canis_lupus_familiaris___domestic_dog,Canis_lupus___gray_wolf),Canis_latrans___coyote),Cuon_alpinus___dhole),Vulpes_vulpes___red_fox),Nyctereutes_procyonoides___raccoon_dog)),(Neofelis_nebulosa___clouded_leopard,((Uncia_uncia___snow_leopard,Panthera_pardus___leopard),Panthera_tigris___tiger)));" > bistro-new-fixT.log
+
 ## test distance matrices
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o mds -r 1000 -b 100 > mds.log
 

@@ -170,18 +170,18 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 
       for ( int i=0; i<parameters.getNumMLE(); ++i )
 	{
-	  tree.randomEdges(alignment,model,rng,logBL,true);
+	  tree.mleLengths(alignment,model);
 //	  cout << tree.makeTreeNumbers() << endl;
 	}
       if( parameters.getIndependent() )
 	{
 //	  cout << "Branch lengths sampled independently" << endl;
-	  tree.randomEdges(alignment,model,rng,logBL,false);
+	  tree.randomEdges(alignment,model,rng,logBL);
 	}
       else
 	{
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
-	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getJointMLE(), parameters.getEta(), parameters.getWeightMean());
+	  tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getEta());
 	}
 //      cout << tree.makeTreeNumbers() << endl;
       treebl << tree.makeTreeNumbers() << endl;

@@ -2,10 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- acabar de checar q el orden este bien en test
-- checar las alphas y lambdas ahora, no deben haber cosas raras esta vez
-
-- grid of branch lengths on likelihood when we stop, to try to understand what is happening, first we need to fix the NR problem
+- run bistro on sim-16, sim-catsdogs, sim-whales and make plots
 
 
 - Write up manuscript, and figure out simulation study for small datasets:
@@ -13,6 +10,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 ## Later:
+**need to fix the problem with branch lengths before doing this:**
 - how often do we have the bad alpha cases in the bl?
 - add prints to see if the weird big alphas are linked to L(0,0): do we want a minimum variance? weird negative var! add checks for the vc matrix: tiny v, and v<0; why alpha==1; add a check for positive definite (determinant)=> what to do? make the correlation coefficient = 1 or -1 depending on the sign of s: sigma1*sigma2
 r s
@@ -31,68 +29,8 @@ cats mean tree = true tree
 - sim whales fixed tree: 0.1%, long BL, bl 54.53=20!!
 
 
-## Current problems:
-- individual MLE cambia del joint MLE:
-branch lengths before joint MLE: 0.050790 0.028995
-Initial gradient:  -602.892870 -1312.026804
-Initial hessian:
--8979.288156   948.334247
-  948.334247   862.319441
-branch lengths after joint MLE:  0.050529 46.345215
-Gradient: -0.000000 -0.000000
-Hessian:
--14671.025746      0.000000
-     0.000000      0.000000
-But we still have weird hessians, which lead to weird cov (non positive matrices)
-- When finding the individual MLE, the first derivative is 0, but when using the same individual MLE in the joint likelihood, then the gradient is far from zero, why?
-When we optimized t1, we had t2 at something else!
-Do we care?
-Also, see these BL:
-MLE BL: 0.005544
-1st derivative: -0.000000
-2nd derivative: -118928.778204
-MLE BL: 0.046195
-1st derivative: 0.000000
-2nd derivative: -28237.935574
-branch lengths before joint MLE: 0.005544 0.046195
-Initial gradient: 257.686841 900.635353
-Initial hessian:
--152586.908387   -1237.719476
-  -1237.719476  -48395.345476
-branch lengths after joint MLE: 0.007418 0.077757
-Gradient: 0.000000 0.000000
-Hessian:
--103429.536925    -363.135084
-   -363.135084  -16626.654090
-   -------------------------
-   MLE BL: 0.025094
-   1st derivative: -0.000000
-   2nd derivative: -50764.555167
-   MLE BL: 0.032610
-   1st derivative: -0.000000
-   2nd derivative: -39232.473999
-branch lengths before joint MLE: 0.025094 0.032610
-Initial gradient: -1036.520865 -1394.911543
-Initial hessian:
--4077.546622  1122.497826
- 1122.497826   999.863442
-branch lengths after joint MLE:  0.024296 48.201786
-Gradient: -0.000000 -0.000000
-Hessian:
--23281.606224      0.000000
-     0.000000      0.000000
-
 ## Check with Bret
-- problem 1: individual MLE does not match joint MLE, do we care?
-- problem 2: if we use the individual MLE, we get hessians with very big numbers => cov with very small numbers, and unstable => positive definite problems
-- problem 3: if we use the joint MLE, the NR is a nightmare, and we don't fix the hessian problems => hessian close to zero, flat lik, problems!
-- problem 4: if we use the individual MLE, we are not in the joint MLE, so the fisher info does not behave well:
-branch lengths before joint MLE: 0.050160 0.028767
-Gradient:  -609.960221 -1331.223637
-Hessian:
--9282.820332   979.369411
-  979.369411   886.695211
-
+- fix generateBranchLengths
 
 
 

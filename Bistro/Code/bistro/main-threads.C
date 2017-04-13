@@ -198,11 +198,11 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        cout << coreID << " " << k << "th tree" << endl << flush;
        tree.print(cout);
        cout << tree.makeTreeNumbers() << endl << flush;
-       list<Node*> nodeList;
-       tree.postorderCherryNodeList(nodeList);
-       cout << "Postorder Node List:";
-       for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
-	 cout << " " << (*p)->getNumber();
+       // list<Node*> nodeList;
+       // tree.postorderCherryNodeList(nodeList);
+       // cout << "Postorder Node List:";
+       // for ( list<Node*>::iterator p=nodeList.begin(); p!= nodeList.end(); ++p )
+       // 	 cout << " " << (*p)->getNumber();
        cout << endl << flush;
      }
 
@@ -211,13 +211,11 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        tree.mleLengths(alignment,model);
      }
 
-     tree.print(cerr);
-     tree.printDerivatives(cerr,alignment,model);
-     
      if(VERBOSE)
      {
        cout << "After MLE passes: " << endl << flush;
        tree.print(cout);
+       tree.printDerivatives(cout,alignment,model);
        cout << tree.makeTreeNumbers() << endl << flush;
        cout << endl << flush;
      }
@@ -225,8 +223,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      double logBL = 0;
 
      if( parameters.getIndependent() )
-     {
-//	  cout << "Branch lengths sampled independently" << endl;
+     {//	  cout << "Branch lengths sampled independently" << endl;
        tree.randomEdges(alignment,model,rng,logBL);
      }
      else

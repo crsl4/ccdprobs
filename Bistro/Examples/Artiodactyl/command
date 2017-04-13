@@ -1,3 +1,7 @@
+## test new generateBL
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-new -r 1000 -b 1000 > bistro-new.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o test -r 5 -b 100 --threads 1 -s 179262012 > test.log
+
 ## test positive definite matrix
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o test -r 100 -b 100 --threads 1 > test.log
 

@@ -30,7 +30,7 @@ void checkCov2d(Matrix2d cov, bool called)
       cerr << "the function was called from checkCov3d" << endl;
     exit(1);
   }
-  else
+  else if( VERBOSE )
   {
     if( cov(0,0) < TOL || cov(1,1) < TOL )
     {
@@ -61,7 +61,7 @@ void checkCov3d(Matrix3d cov)
     cerr << "Covariance matrix not positive definite in checkCov3d" << endl << cov << endl;
     exit(1);
   }
-  else
+  else if( VERBOSE )
   {
     if( cov(0,0) < TOL || cov(1,1) < TOL || cov(2,2) < TOL)
     {
@@ -1211,10 +1211,13 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
       upperlimit = prop;
     }
   } while ( fabs(curr - prop) > 1.0e-8);
-  cerr << "in mleLength: individual NR" << endl;
-  cerr << "MLE BL: " << prop << endl;
-  cerr << "1st derivative: " << prop_dlogl << endl;
-  cerr << "2nd derivative: " << prop_ddlogl << endl;
+  if(VERBOSE)
+  {
+    cout << "in mleLength: individual NR" << endl;
+    cout << "MLE BL: " << prop << endl;
+    cout << "1st derivative: " << prop_dlogl << endl;
+    cout << "2nd derivative: " << prop_ddlogl << endl;
+  }
   return prop;
 }
 
@@ -1789,8 +1792,9 @@ double Tree::logPriorExp(double mean)
 
 void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, double eta, Edge* parent)
 {
-  cerr << "Calling generateBranchLengths on node " << number << endl;
-								
+  if(VERBOSE)
+    cout << "Calling generateBranchLengths on node " << number << endl;
+
   mapParent = NULL;
   if ( leaf )
     return;
@@ -1832,9 +1836,12 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
   }
 
-  cerr << "left node is " << left->getNumber() << endl;
-  cerr << "right node is " << right->getNumber() << endl;
-  cerr << "other node is " << other->getNumber() << endl;
+  if(VERBOSE)
+  {
+    cout << "left node is " << left->getNumber() << endl;
+    cout << "right node is " << right->getNumber() << endl;
+    cout << "other node is " << other->getNumber() << endl;
+  }
 
   if ( parent != NULL ) // non-root case
   {
@@ -1842,32 +1849,39 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     right->clearProbMapsSmart(rightEdge);
     other->clearProbMapsSmart(otherEdge);
     Vector2d t(leftEdge->getLength(),rightEdge->getLength());
-//    cerr << "branch lengths before joint MLE: " << t.transpose() << endl;
+    if(VERBOSE)
+      cout << "branch lengths before MLE passes: " << t.transpose() << endl;
     double logl=0;
     Vector2d gradient;
     Matrix2d hessian;
     partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,logl,gradient,hessian);
-    cerr << "Gradient: " << gradient.transpose() << endl;
-    cerr << "Hessian: " << endl;
-    cerr << hessian << endl;
-
+    if(VERBOSE)
+    {
+      cout << "Gradient: " << gradient.transpose() << endl;
+      cout << "Hessian: " << endl;
+      cout << hessian << endl;
+    }
     for ( int ii=0; ii<2; ++ii) // extra MLE passes prior to generation
     {
       leftEdge->callMLELength(alignment,qmatrix);
       rightEdge->callMLELength(alignment,qmatrix);
       t(0) = leftEdge->getLength();
       t(1) = rightEdge->getLength();
-      cerr << "branch lengths after MLE pass: " << leftEdge->getNumber() << " " << rightEdge->getNumber() << " " << t.transpose() << endl;
+      if(VERBOSE)
+	cout << "branch lengths after MLE pass: " << leftEdge->getNumber() << " " << rightEdge->getNumber() << " " << t.transpose() << endl;
     }
-    
+
     double prop_logl=0;
     Vector2d prop_gradient;
     Matrix2d prop_hessian;
     partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,prop_logl,prop_gradient,prop_hessian);
     Vector2d mu = t;
-    cerr << "Gradient: " << prop_gradient.transpose() << endl;
-    cerr << "Hessian: " << endl;
-    cerr << prop_hessian << endl;
+    if(VERBOSE)
+    {
+      cout << "Gradient: " << prop_gradient.transpose() << endl;
+      cout << "Hessian: " << endl;
+      cout << prop_hessian << endl;
+    }
     Matrix2d cov = (-1) * prop_hessian.inverse();
     checkCov2d(cov,false);
     t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
@@ -1891,8 +1905,11 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     Matrix3d prop_hessian;
     partialPathCalculations3D(t,alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,prop_logl,prop_gradient,prop_hessian);
     Vector3d mu = t;
-    cerr << "Hessian: " << endl;
-    cerr << prop_hessian << endl;
+    if(VERBOSE)
+    {
+      cout << "Hessian: " << endl;
+      cout << prop_hessian << endl;
+    }
     Matrix3d cov = (-1) * prop_hessian.inverse();
     checkCov3d(cov);
     t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
@@ -1903,6 +1920,16 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     rightEdge->calculate(qmatrix);
     otherEdge->calculate(qmatrix);
   }
+  if(VERBOSE)
+  {
+    cout << "left node is " << left->getNumber() << endl;
+    cout << "right node is " << right->getNumber() << endl;
+    cout << "other node is " << other->getNumber() << endl;
+    cout << "left node map parent is " << left->getMapParent()->getNumber() << endl;
+    cout << "right node map parent is " << right->getMapParent()->getNumber() << endl;
+    cout << "other node map parent is " << other->getMapParent()->getNumber() << endl;
+  }
+
 }
 
 void Tree::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_64& rng, double& logdensity, double eta)
