@@ -4,7 +4,7 @@
 #define MIN_EDGE_LENGTH 0.00001
 #define MAX_EDGE_LENGTH 10
 #define TOL 1.0e-6
-#define VERBOSE false
+#define VERBOSE true
 #define PRIOR_MEAN 0.1
 #define LAMBDA 0.19
 
@@ -80,6 +80,7 @@ public:
   Matrix4d getTransitionMatrix() { return transitionMatrix; }
   void mleError(bool&);
   void calculate(double,Alignment&,QMatrix&,double&,double&,double&);
+  void printLikMinLength(ostream&, Alignment&, QMatrix&);
   double mleLength(Alignment&,QMatrix&,bool&);
   void callMLELength(Alignment&,QMatrix&);
   void randomLength(Alignment&,QMatrix&,mt19937_64&,double&);

@@ -2,9 +2,6 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- run bistro on sim-16, sim-catsdogs, sim-whales and make plots
-
-
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
@@ -30,8 +27,15 @@ cats mean tree = true tree
 
 
 ## Check with Bret
-- fix generateBranchLengths
-
+- covariance problem? when fixing BL at 1e-05 (not every time)
+- cats and dogs 0.2% (same as before), fixed tree 26% (14% before)
+- sim16 1500: cov neg def (before 1.23%, long BL)
+- sim16 1500 indep: 0.65% (before 0.65%)
+- sim16 fix tree: 11% (before 0.51%)
+- sim cats dogs 1500: cov problem (before 0.5%, long BL)
+- sim cats dogs fixed tree: cov problem (before 1.16%, long BL)
+- sim whales 1500: cov neg (before 0.14%, true tree only sampled once)
+- sim whales fixed tree: cov neg
 
 
 ## Jordan

@@ -1018,6 +1018,20 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   nodes[1] -> setMapParent(this);
 }
 
+void Edge::printLikMinLength(ostream& f,Alignment& alignment,QMatrix& qmatrix)
+{
+  f << "likelihood around MIN_EDGE_LENGTH" << endl;
+  f << "t, logl, dlogl, ddlogl" << endl;
+  for(int i=1;i<9;++i)
+  {
+    double curr = (MIN_EDGE_LENGTH*i)/4;
+    double curr_logl,curr_dlogl,curr_ddlogl;
+    calculate(curr,alignment,qmatrix,curr_logl,curr_dlogl,curr_ddlogl);
+    f << curr << ", " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
+  }
+}
+
+
 // necsito anhadir los pasos de NR en individual branches y despues comparar con lo q sale cuando se evalua el likelihood jointly
 double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 {
@@ -1142,6 +1156,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
     if ( prop < MIN_EDGE_LENGTH )
     {
       prop = MIN_EDGE_LENGTH;
+      printLikMinLength(cout, alignment, qmatrix);
       return prop;
     }
   }

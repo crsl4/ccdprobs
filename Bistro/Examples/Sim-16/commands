@@ -1,3 +1,13 @@
+## with smaller MIN LENGTH
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o temp2 -r 100 -b 10 --threads 1 -s 2003894300 > temp2.log
+
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o temp -r 100 -b 10 --threads 1 -s 2003894300 > temp.log
+
+## after new generateBL
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro2 -r 1000 -b 1000 -s 2003894300 > bistro2.log
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro2-ind -r 1000 -b 1000 -s 2003894300 --independent > bistro2-ind.log
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro1-fix2 -r 1000 -b 1000 -s 2003894300 -t "((((A,B),(C,D)),((E,F),(G,H))),(((((((I,J),K),L),M),N),O),P));" > bistro2-fixT.log
+
 ## test distance matrix
 ../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o mds -r 10 -b 100 > mds.log
 

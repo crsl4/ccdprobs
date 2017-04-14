@@ -1,3 +1,9 @@
+## after new generateBL
+../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro2-cats -r 1000 -b 1000 > bistro2-cats.log
+../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro2-cats-fixT -r 1000 -b 1000 -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" > bistro2-cats-fixT.log
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro2-whales -r 1000 -b 1000 > bistro2-whales.log
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro1-whales-fixT -r 1000 -b 1000 -t "(1,2,((3,(((4,5),14),((6,7),((((8,9),11),(10,12)),13)))),(15,((((16,17),((18,19),(20,21))),((24,((25,26),((27,28),(29,30)))),31)),(22,23)))));" > bistro1-whales-fixT.log
+
 ## testing cov positive definite
 ../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o test -r 100 -b 100 --no-mcmc --threads 1 > test.log
 ../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o test -r 100 -b 100 --no-mcmc > test.log
@@ -8,7 +14,7 @@
 ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o mds-cats -r 10 -b 100 > mds-cats.log
 ../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o mds-whales -r 10 -b 100 > mds-whales.log
 
-- sim-cats dogs 1500 bistro, mb
+## sim-cats dogs 1500 bistro, mb
 ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro1-cats -r 1000 -b 1000 > bistro1-cats.log
 mb sim-cats-dogs-nsites1500.nex
 (then moved output files to Examples/Simulations)
