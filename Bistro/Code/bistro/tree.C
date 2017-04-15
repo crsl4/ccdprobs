@@ -1022,13 +1022,21 @@ void Edge::printLikMinLength(ostream& f,Alignment& alignment,QMatrix& qmatrix)
 {
   f << "likelihood around MIN_EDGE_LENGTH" << endl;
   f << "t, logl, dlogl, ddlogl" << endl;
-  for(int i=1;i<9;++i)
+  double dx = 0.00005;
+  for ( int i=0; i<=100; ++i )
   {
-    double curr = (MIN_EDGE_LENGTH*i)/4;
-    double curr_logl,curr_dlogl,curr_ddlogl;
-    calculate(curr,alignment,qmatrix,curr_logl,curr_dlogl,curr_ddlogl);
-    f << curr << ", " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
+    double curr = i*dx;
+    double logl,dlogl,ddlogl;
+    calculate(curr,alignment,qmatrix,logl,dlogl,ddlogl);
+    f << curr << ", " << logl << ", " << dlogl << ", " << ddlogl << endl;
   }
+  // for(int i=1;i<9;++i)
+  // {
+  //   double curr = (MIN_EDGE_LENGTH*i)/4;
+  //   double curr_logl,curr_dlogl,curr_ddlogl;
+  //   calculate(curr,alignment,qmatrix,curr_logl,curr_dlogl,curr_ddlogl);
+  //   f << curr << ", " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
+  // }
 }
 
 
