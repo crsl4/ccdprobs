@@ -1,0 +1,128 @@
+---
+title: "Truncated Normal Proposal"
+author: "Bret Larget"
+date: "4/15/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+require(ggplot2)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r density-plot, fig.height=2}
+x0 = 0.7
+x1 = seq(-4,x0,0.01)
+x2 = seq(x0,4,0.01)
+x3 = seq(-4,4,0.01)
+df = data.frame(
+  x = c(x1,x2),
+  y = c( rep(0,length(x1)), dnorm(x2) )
+)
+df2 = data.frame(
+  x=x3,
+  y=dnorm(x3)
+)
+rm(x1,x2,x3)
+ggplot(df, aes(x=x,y=y)) +
+  geom_hline(yintercept=0) +
+  geom_line(aes(x=x,y=y),data=df2,color="gray") +
+  geom_line(color="blue") +
+  geom_segment(aes(x=-1,xend=0,y=dnorm(-1),yend=dnorm(-1)),
+               arrow=arrow(ends="both",type="closed",angle=20,length=unit(0.04,"npc")),
+               size=0.1) +
+  geom_segment(aes(x=0,xend=0,y=0,yend=dnorm(0)),color="gray",linetype="dotted") +
+  annotate("text",label="sigma",parse=TRUE,x=-0.5,y=dnorm(-1)*0.9) +
+  scale_x_continuous(breaks=c(0,x0),labels=c(expression(mu),expression(x[0]))) +
+  xlab('') +
+  theme_bw() +
+  theme(axis.text.x=element_text(size=12)) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  theme(axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  ylab('')
+```
+
+## Truncated normal density proposal.
+We wish to find a density function proportional to the right tail of a normal distribution in order to match a likelihood function which is defined only on positive values and the log of the likelihood is very well approximated by a parabola.
+Relating to the graph above,
+the gray curve is a $\text{Normal}(\mu,\sigma^2)$ density $g(x)$,
+but we seek a distribution $F$ with density $f(x)$ proportional to $g(x) 1_{\{x>x_0\}}$.
+We will set $x_0=0$.
+We wish to find values of $\mu$ and $\sigma$ in order to match specified a specified mean and variance of the distribution $F$.
+We also require an expression for the inverse cdf of $F$ for random number generation.
+
+### Density
+
+The density $f$ has the following expression.
+$$
+f(x) = \frac{1}{(1 - \Phi(z_0))\sigma\sqrt{2\pi}}\;
+\mathrm{e}^{-\frac{1}{2}\big(\frac{x-\mu}{\sigma}\big)^2}, \qquad x > x_0
+$$
+where $\Phi$ is the cdf of the standard normal curve and $z_0 = (x_0-\mu)/\sigma$.
+
+### Cumulative distribution function
+
+The cdf of $F$ has the following expression.
+$$
+F(x) = \frac{\Phi\big(\frac{x-\mu}{\sigma}\big)-\Phi(z_0)}{1-\Phi(z_0)}
+$$
+
+Here is a derivation.
+
+\begin{eqnarray*}
+F(x) & = & 1 - \int_x^\infty \frac{1}{(1 - \Phi(z_0))\sigma\sqrt{2\pi}}\;
+\mathrm{e}^{-\frac{1}{2}\big(\frac{t-\mu}{\sigma}\big)^2} \,\mathrm{d}t \\
+& = & 1 - \frac{1}{1 - \Phi(z_0)}
+\int_{\frac{x-\mu}{\sigma}}^\infty \frac{1}{\sqrt{2\pi}}
+\mathrm{e}^{-\frac{z^2}{2}}\, \mathrm{d}z \\
+& = & 1 - \frac{1 - \Phi(\frac{x-\mu}{\sigma})}{1 - \Phi(z_0)} \\
+& = & \frac{\Phi\big(\frac{x-\mu}{\sigma}\big)-\Phi(z_0)}{1-\Phi(z_0)}, \qquad x > x_0
+\end{eqnarray*}
+
+### Random Generation
+
+Using the inverse cdf method, we can generate a random variable with distribution $F$
+by the following equation where $U \sim \text{Uniform}(0,1)$.
+$$
+X = \mu + \sigma \Phi^{-1}( 1 - (1-U)(1-\Phi(z_0)))
+$$
+The derivation is straightforward.
+
+### Moments
+
+It remains to find values of $\mu$ and $\sigma$ so that the distribution $F$ has a given mean and standard deviation.
+Define $\mu_X = \mathsf{E}(X)$ and $\sigma_X = \sqrt{ \mathsf{Var}(X) }$
+when $X \sim F$.
+An expression for $\mu_X$ is as follows.
+$$
+\mu_X = \mu + \frac{\sigma}{\sqrt{2\pi}(1 - \Phi(z_0))} \; \mathrm{e}^{-\frac{z_0^2}{2}}
+= \mu + \sigma h(z_0) \qquad \text{where} \ h(z_0) = \frac{\phi(z_0)}{1-\Phi(z_0)}
+$$
+In survival analysis, $h(t)$ is called the *hazard rate* of a probability density.
+
+An expression for $\mathsf{E}(X^2)$ is
+$$
+\mathsf{E}(X^2) = \mu^2 + \sigma^2 +  \frac{(2\mu+z_0)\sigma\mathrm{e}^{-z_0^2/2}}{\sqrt{2\pi}(1-\Phi(z_0))}
+$$
+
+The variance is (should be a simpler expression!)
+$$
+\sigma^2_X = \sigma^2(1-h(z_0)^2) + \sigma z_0 h(z_0)
+$$
+
+### Solving for $\mu$ and $\sigma$
+
+For a given $\mu_X$ and $\sigma^2_X$,
+we want to find values of $\mu$ and $\sigma$ to achieve these moments when $x_0=0$.
+
+Here, $z_0 = (x_0 - \mu)/\sigma = -\mu/\sigma$
+so that $\mu = -z_0\sigma$.
+Reparameterizing in terms of $z_0$ and $\sigma$ may be easier.
+The equations we need to solve for $z_0$ and $\sigma$ are:
+
+\begin{eqnarray*}
+\mu_X & = & \sigma ( h(z_0) - z_0 ) \\
+\sigma_X^2 & = & \sigma^2(1-(h(z_0))^2) + \sigma z_0 h(z_0)
+\end{eqnarray*}
