@@ -1,16 +1,38 @@
 foo = read.csv("foo.csv")
 require(ggplot2)
 ggplot(foo, aes(x=t,y=logl)) +
-  geom_line() +
-  geom_smooth(method="lm",se=FALSE)
+  geom_line()
+#  geom_smooth(method="lm",se=FALSE)
 
 fit = lm(logl ~ t + I(t^2), data=foo)
+fit3 = lm(logl ~ t + I(t^2) + I(t^3), data=foo)
 foo = foo %>%
-  mutate(fitted = fitted(fit))
+  mutate(fitted = fitted(fit)) %>%
+  mutate(fitted3 = fitted(fit3))
+
 ggplot(foo, aes(x=t,y=logl)) +
   geom_line() +
-  geom_line(aes(y=fitted),color="red")
+#  geom_line(aes(y=fitted),color="red") +
+#  geom_line(aes(y=fitted3),color="gold") +
+  ylim(c(max(foo$logl)-5,max(foo$logl)+0.5)) +
+  theme_bw()
 
+foo = foo %>%
+  mutate(maxlogl = max(logl)) %>%
+  mutate(y1 = exp(logl-maxlogl)) %>%
+  mutate(y1 = y1/sum(y1)) %>%
+  mutate(y2 = exp(fitted-maxlogl)) %>%
+  mutate(y2 = y2/sum(y2)) %>%
+  mutate(y3 = exp(fitted3-maxlogl)) %>%
+  mutate(y3 = y3/sum(y3)) %>%
+  select(-maxlogl)
+
+ggplot(foo, aes(x=t)) +
+  geom_line(aes(y=y1), color="black") +
+#  geom_line(aes(y=y2), color="red") +
+#  geom_line(aes(y=y3), color="gold") +
+  geom_hline(yintercept=0)
+  
 ggplot(foo, aes(x=t,y=dlogl)) +
   geom_line()
 

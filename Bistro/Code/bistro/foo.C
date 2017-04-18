@@ -5,25 +5,13 @@
 #include <string>
 #include <sstream>
 
+#include <boost/math/distributions/normal.hpp>
+
 using namespace std;
 
 int main()
 {
-  stringstream s;
-  s << "thisIsAString" << endl;
-  string foo;
-  s >> foo;
-  s << foo;
-
-  cout << foo << endl;
-
-  foo.clear();
-
-  cout << foo << endl;
-
-  s >> foo;
-
-  cout << foo << endl;
-  
+  for ( int i=0; i< 30; ++i )
+    cout << setw(2) << i << " " << erfc(double(i)) << endl;
   return 0;
 }

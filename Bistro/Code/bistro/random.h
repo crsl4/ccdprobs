@@ -18,6 +18,6 @@ Vector2d multivariateGamma2D(Vector2d,Matrix2d,mt19937_64&, double&, double);
 VectorXd multivariateNormal(VectorXd, MatrixXd, mt19937_64&, double&, double);
 void calculateAlphaLambda(double, double, double, double&, double&);
 void calculateMuSigma(double, double, double, double, double, double, double&, double&);
-double randomHalfNormal(double, double, double,mt19937_64&);
+double randomHalfNormal(double, double, double,double&,mt19937_64&);
 double halfNormalGamma(Edge*, Alignment&, QMatrix&, double&,mt19937_64&);
 #endif

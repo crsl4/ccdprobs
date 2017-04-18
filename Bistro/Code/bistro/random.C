@@ -140,59 +140,87 @@ VectorXd multivariateNormal(VectorXd mu,MatrixXd vc,mt19937_64& rng, double& log
   return mu + L * v;
 }
 
-void calculateMuSigma(double t0, double t1, double t2, double y0, double y1, double y2, double& mu, double& sigma)
+void calculateMuSigma(double t0, double t1, double t2, double y0, double y1, double y2, double& mu, double& sigma2)
 {
   cerr << "t0,t1,t2,y0,y1,y2: " << t0 << "," << t1 << "," << t2 << "," << y0 << "," << y1 << "," << y2 << endl; 
   double u01 = y0-y1;
-  double v01 = t0*t0-t1*t1;
-  double w01 = t0-t1;
+  double v10 = t1*t1-t0*t0;
+  double w10 = t1-t0;
   double u12 = y1-y2;
-  double v12 = t1*t1-t2*t2;
-  double w12 = t1-t2;
-  mu = (v12*u01-v01*u12)/(2*(u01*w12-w01*u12));
-  double sigma2 = w01*w12*(t2-t0)/(2*(u12*w01-u01*(t2-t0)));
-  if ( sigma2 < 0 )
-  {
-    cerr << "found sigma2 negative in calculate mu and sigma from three points" << endl;
-    exit(1);
-  }
-  sigma = sqrt(sigma2);
+  double v21 = t2*t2-t1*t1;
+  double w21 = t2-t1;
+  mu = (v10*u12-v21*u01)/(2*(w10*u12-w21*u01));
+  sigma2 = w10*w21*(t2-t0)/(2*(u12*w10-u01*w21));
+  // if ( sigma2 < 0 )
+  // {
+  //   cerr << "found sigma2 negative in calculate mu and sigma from three points" << endl;
+  //   cerr << mu << "," << sigma2 << endl;
+  //   exit(1);
+  // }
+  // sigma = sqrt(sigma2);
 }
 
-double randomHalfNormal(double mu, double sigma, double x0,mt19937_64& rng)
+double normalTailArea(double z)
+{
+  return 0.5 * erfc(z/sqrt(2.0));
+}
+
+double randomHalfNormal(double mu, double sigma, double x0,double& logdensity,mt19937_64& rng)
 {
   cerr << "in random half normal, with mu: " << mu << ", sigma " << sigma << endl;
   double z0 = (x0-mu)/sigma;
   uniform_real_distribution<> runif(0, 1);
   cerr << "z0: " << z0 << endl;
   cerr << "erfc(z0): " << erfc(z0) << endl;
-  double a = 1 - (1-runif(rng))*erfc(z0);
+  double tailArea = normalTailArea(z0);
+  double a = 1 - (1-runif(rng))*tailArea;
   cerr << "a= " << a << endl;
   boost::math::normal rnorm(0.0, 1.0);
   double q = quantile(rnorm, a);
+  logdensity += -log(tailArea) - log(sigma) - (0.5)*log(2*M_PI) - (0.5)*q*q;
   return mu + sigma*q;
 }
 
 // half normal or gamma depending on the length
+// using exponential when z0 > 8
 double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& logdensity,mt19937_64& rng)
 {
   double t = e->getLength();
   if( t < MIN_EDGE_LENGTH + TOL ) //half normal
   {
-    double x1 = 0.01;
-    double x2 = 0.02;
-    double x3 = 0.03;
+    double x1 = 0.001;
+    double x2 = 0.002;
+    double x3 = 0.003;
     double y1,y2,y3;
     double dlogl,ddlogl;
     e->calculate(x1,alignment,qmatrix,y1,dlogl,ddlogl);
     e->calculate(x2,alignment,qmatrix,y2,dlogl,ddlogl);
     e->calculate(x3,alignment,qmatrix,y3,dlogl,ddlogl);
     double mu;
+    double sigma2;
+//    cerr << "t = " << t << endl;
+//    e->printLikMinLength(cerr,alignment,qmatrix);
+    calculateMuSigma(x1,x2,x3,y1,y2,y3,mu,sigma2);
     double sigma;
-    calculateMuSigma(x1,x2,x3,y1,y2,y3,mu,sigma);
-    double s = randomHalfNormal(mu,sigma,0.0,rng);
-    cerr << "found half normal case, t: " << t << ", mu: " << mu << ", sigma: " << sigma << ", sampled: " << s << endl;
-    exit(1);
+    double z0;
+    double s;
+    if ( sigma2 > 0 )
+    {
+      sigma = sqrt(sigma2);
+      z0 = -mu/sigma;
+    }
+    
+    if ( sigma2 > 0 && z0 < 8 && mu < 0 )
+    {
+      s = randomHalfNormal(mu,sigma,0.0,logdensity,rng);
+      cerr << "found half normal case, t: " << t << ", mu: " << mu << ", sigma: " << sigma << ", sampled: " << s << endl;
+    }
+    else
+    {
+      double lambda = (y3-y1) / (x3-x1);
+      s = gamma(1.0, 1.0 / lambda ,rng);
+      logdensity += log(lambda) - lambda*s;
+    }
     return s;
   }
   else //gamma

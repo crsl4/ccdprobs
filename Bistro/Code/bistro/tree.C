@@ -1164,7 +1164,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
     if ( prop < MIN_EDGE_LENGTH )
     {
       prop = MIN_EDGE_LENGTH;
-      printLikMinLength(cout, alignment, qmatrix);
+//      printLikMinLength(cout, alignment, qmatrix);
       return prop;
     }
   }
