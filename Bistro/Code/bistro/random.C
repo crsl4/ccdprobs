@@ -140,32 +140,23 @@ VectorXd multivariateNormal(VectorXd mu,MatrixXd vc,mt19937_64& rng, double& log
   return mu + L * v;
 }
 
-void calculateMuSigma(double x1, double x2, double x3, double y1, double y2, double y3, double& mu, double& sigma)
+void calculateMuSigma(double t0, double t1, double t2, double y0, double y1, double y2, double& mu, double& sigma)
 {
-  cerr << "x1,x2,x3,y1,y2,y3: " << x1 << "," << x2 << "," << x3 << "," << y1 << "," << y2 << "," << y3 << endl; 
-  double u12 = x2*x2-x1*x1;
-  double v12 = x2-x1;
-  double w12 = y2-y1;
-  double u13 = x3*x3-x1*x1;
-  double v13 = x3-x1;
-  double w13 = y3-y1;
-  double a = (w13-(w12*v13/v12))/(u13-(u12*v13/v12));
-  double b = (w12-a*u12)/v12;
-  double c = y1-a*x1*x1-b*x1;
-  cerr << "a,b,c" << a << "," << b << "," << c << endl;
-  if( a == 0 )
-  {
-    cerr << "error when finding mu and sigma for half normal" << endl;
-    exit(1);
-  }
-  double sigma2 = (-1)/(2*a);
+  cerr << "t0,t1,t2,y0,y1,y2: " << t0 << "," << t1 << "," << t2 << "," << y0 << "," << y1 << "," << y2 << endl; 
+  double u01 = y0-y1;
+  double v01 = t0*t0-t1*t1;
+  double w01 = t0-t1;
+  double u12 = y1-y2;
+  double v12 = t1*t1-t2*t2;
+  double w12 = t1-t2;
+  mu = (v12*u01-v01*u12)/(2*(u01*w12-w01*u12));
+  double sigma2 = w01*w12*(t2-t0)/(2*(u12*w01-u01*(t2-t0)));
   if ( sigma2 < 0 )
   {
-    cerr << "error when finding mu and sigma for half normal: negative sigma2" << endl;
+    cerr << "found sigma2 negative in calculate mu and sigma from three points" << endl;
     exit(1);
   }
   sigma = sqrt(sigma2);
-  mu = b*sigma2;
 }
 
 double randomHalfNormal(double mu, double sigma, double x0,mt19937_64& rng)
