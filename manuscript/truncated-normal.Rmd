@@ -126,3 +126,43 @@ The equations we need to solve for $z_0$ and $\sigma$ are:
 \mu_X & = & \sigma ( h(z_0) - z_0 ) \\
 \sigma_X^2 & = & \sigma^2(1-(h(z_0))^2) + \sigma z_0 h(z_0)
 \end{eqnarray*}
+
+### Identifying the parabola on the loglikelihood
+
+For given three points in the loglikelihood: $(x_1,y_1),(x_2,y_2),(x_3,y_3)$, we want to identify the three parameters that define the parabola: $ax^2+bx+c=y$.
+
+\begin{eqnarray*}
+ax_1^2+bx_1+c & = & y_1 \\
+ax_2^2+bx_2+c & = & y_2 \\
+ax_3^2+bx_3+c & = & y_3
+\end{eqnarray*}
+
+Let $u_{12}=x_2^2-x_1^2,v_{12}=x_2-x_1,w_{12}=y_2-y_1,u_{13}=x_3^2-x_1^2, v_{13}=x_3-x_1, w_{13}=y_3-y_1$, then we can write:
+
+\begin{eqnarray*}
+a & = & \frac{w_{13}-\frac{w_{12}v_{13}}{v_{12}}}{u_{13}-\frac{u_{12}v_{13}}{v_{12}}} \\
+b & = & \frac{w_{12}-au_{12}}{v_{12}} \\
+c & = & y_1-ax_1^2-bx_1
+\end{eqnarray*}
+
+For the normal density, we have that $f(x) \prop \exp(-\frac{1}{2\sigma^2}(x-\mu))$. Thus, the parabola in terms of $\mu$ and $\sigma^2$ is given by $(-1/\sigma^2)x^2+\mu/\sigma^2x-\mu^2/2\sigma^2$.
+\begin{eqnarray*}
+a & = & \frac{-1}{2\sigma^2} \\
+b & = & \frac{\mu}{\sigma^2} \\
+c & = & \frac{\mu^2}{2\sigma^2}
+\end{eqnarray*}
+
+But if we have only two parameters: $\mu, \sigma^2$, instead of three, we only need two points:
+\begin{eqnarray*}
+y & = & (-1/\sigma^2)x^2+\mu/\sigma^2x-\mu^2/2\sigma^2\\ 
+a & = & \frac{-1}{2\sigma^2} \\
+b & = & \mu \\
+y & = & ax^2 - abx +ab^2
+\end{eqnarray*}
+
+By solving the equation for two points $(x_1,y_1),(x_2,y_2)$, we get:
+\begin{eqnarray*}
+a & = & \frac{y_1}{x_1^2-bx_1+b^2} \\
+b & = & \frac{-v \pm \sqrt{v^2-4uw}}{2u}
+\end{eqnarray*}
+for $u=y_1-y_2, v=-y_1x_2+y_2x_1, w=y_1x_2^2-y_2x_1^2$.

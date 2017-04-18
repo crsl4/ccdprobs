@@ -2,11 +2,16 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- need to sample from the normal and test
+
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 ## Later:
+- if MLE is close to zero, then pick three points (0.001,0.002,0.003) and get a parabola. Then extrapolate the parabola to the identify the range in which the maxlogl(0) and maxlogl(0)-3 live. This is a range in x. Take 5 points in this range, evaluate the logl again, and compute the mean to then estimate alpha for the pareto
+- another way would be to get a theoretical mean from a density that looks like this: f(x)=k*exp(-ax^2-bx-c), x>=0, use three points to get the values of the density and then get a theoretical mean for this density, and then use a pareto with the same mean. We need to find theoretically the mean of f(x)
+- we could sample pareto, or actually, normal with the inverse method with the numerical cdf (erfc in cmath, or the boost version)
 **need to fix the problem with branch lengths before doing this:**
 - how often do we have the bad alpha cases in the bl?
 - add prints to see if the weird big alphas are linked to L(0,0): do we want a minimum variance? weird negative var! add checks for the vc matrix: tiny v, and v<0; why alpha==1; add a check for positive definite (determinant)=> what to do? make the correlation coefficient = 1 or -1 depending on the sign of s: sigma1*sigma2
@@ -24,10 +29,7 @@ s t
 cats mean tree = true tree
 - sim whales 1500: 0.14%: true tree only sampled once, it is not even the one with w=0.8: comparison plot, most sampled tree is different from true tree; mean tree tiny difference from true tree
 - sim whales fixed tree: 0.1%, long BL, bl 54.53=20!!
-
-
-## Check with Bret
-- covariance problem? when fixing BL at 1e-05 (not every time)
+new:
 - cats and dogs 0.2% (same as before), fixed tree 26% (14% before)
 - sim16 1500: cov neg def (before 1.23%, long BL)
 - sim16 1500 indep: 0.65% (before 0.65%)
@@ -36,6 +38,11 @@ cats mean tree = true tree
 - sim cats dogs fixed tree: cov problem (before 1.16%, long BL)
 - sim whales 1500: cov neg (before 0.14%, true tree only sampled once)
 - sim whales fixed tree: cov neg
+
+
+## Check with Bret
+- if mu1 or mu2 are too small, we do something different: sample the small one with half normal. if neither are too small, we try the joint gamma. but in this case, we can also run into alpha==1 if num ~0.0, so we still need to leave this check
+
 
 
 ## Jordan

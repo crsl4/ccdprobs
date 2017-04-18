@@ -1872,18 +1872,18 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     right->clearProbMapsSmart(rightEdge);
     other->clearProbMapsSmart(otherEdge);
     Vector2d t(leftEdge->getLength(),rightEdge->getLength());
-    if(VERBOSE)
-      cout << "branch lengths before MLE passes: " << t.transpose() << endl;
-    double logl=0;
-    Vector2d gradient;
-    Matrix2d hessian;
-    partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,logl,gradient,hessian);
-    if(VERBOSE)
-    {
-      cout << "Gradient: " << gradient.transpose() << endl;
-      cout << "Hessian: " << endl;
-      cout << hessian << endl;
-    }
+    // if(VERBOSE)
+    //   cout << "branch lengths before MLE passes: " << t.transpose() << endl;
+    // double logl=0;
+    // Vector2d gradient;
+    // Matrix2d hessian;
+    // partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,logl,gradient,hessian);
+    // if(VERBOSE)
+    // {
+    //   cout << "Gradient: " << gradient.transpose() << endl;
+    //   cout << "Hessian: " << endl;
+    //   cout << hessian << endl;
+    // }
     for ( int ii=0; ii<2; ++ii) // extra MLE passes prior to generation
     {
       leftEdge->callMLELength(alignment,qmatrix);
@@ -1893,21 +1893,28 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       if(VERBOSE)
 	cout << "branch lengths after MLE pass: " << leftEdge->getNumber() << " " << rightEdge->getNumber() << " " << t.transpose() << endl;
     }
-
-    double prop_logl=0;
-    Vector2d prop_gradient;
-    Matrix2d prop_hessian;
-    partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,prop_logl,prop_gradient,prop_hessian);
-    Vector2d mu = t;
-    if(VERBOSE)
-    {
-      cout << "Gradient: " << prop_gradient.transpose() << endl;
-      cout << "Hessian: " << endl;
-      cout << prop_hessian << endl;
+    if(t(0) < MIN_EDGE_LENGTH + TOL || t(1) < MIN_EDGE_LENGTH + TOL )
+    { 
+      t(0) = halfNormalGamma(leftEdge,alignment,qmatrix,logdensity, rng);
+      t(1) = halfNormalGamma(rightEdge,alignment,qmatrix,logdensity, rng);
     }
-    Matrix2d cov = (-1) * prop_hessian.inverse();
-    checkCov2d(cov,false);
-    t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
+    else // sample from joint gamma
+    {
+      double prop_logl=0;
+      Vector2d prop_gradient;
+      Matrix2d prop_hessian;
+      partialPathCalculations2D(t,otherEdge->getLength(),alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,prop_logl,prop_gradient,prop_hessian);
+      Vector2d mu = t;
+      if(VERBOSE)
+      {
+	cout << "Gradient: " << prop_gradient.transpose() << endl;
+	cout << "Hessian: " << endl;
+	cout << prop_hessian << endl;
+      }
+      Matrix2d cov = (-1) * prop_hessian.inverse();
+      checkCov2d(cov,false);
+      t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
+    }
     leftEdge->setLength( t(0) );
     rightEdge->setLength( t(1) );
     leftEdge->calculate(qmatrix);

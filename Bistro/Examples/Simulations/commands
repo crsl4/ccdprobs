@@ -1,3 +1,5 @@
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o test -r 100 -b 100 --no-mcmc --threads 1 -s 3876363019 > test.log
+
 ## after new generateBL
 ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro2-cats -r 1000 -b 1000 > bistro2-cats.log
 ../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o bistro2-cats-fixT -r 1000 -b 1000 -t "(cheetah,((((snow_leopard,leopard),tiger),clouded_leopard),(red_fox,(((coyote,(gray_wolf,dog)),dhole),raccoon_dog))),cat);" > bistro2-cats-fixT.log

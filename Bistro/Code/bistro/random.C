@@ -8,6 +8,7 @@
 
 #include "random.h"
 #include <cmath> // cbrt, tgamma
+#include <boost/math/distributions/normal.hpp>
 
 using namespace std;
 using namespace Eigen;
@@ -97,29 +98,29 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
 {
   Vector2d bl;
   Matrix2d L( vc.llt().matrixL() );
-  // ------------ T1 ------------------
+// ------------ T1 ------------------
   double alpha1;
   double lambda1;
   double mu0;
   if( mu[0] < MIN_EDGE_LENGTH + TOL)
-      mu0 = MIN_EDGE_LENGTH;
+    mu0 = MIN_EDGE_LENGTH;
   else
-      mu0 = mu[0];
+    mu0 = mu[0];
   calculateAlphaLambda(mu0,L(0,0),eta,alpha1,lambda1);
   bl[0] = gamma(alpha1,1.0 / lambda1,rng); //c++ gamma has different parametrization
-
+  
   // ------------ T2 ------------------
   double z1 = (bl[0] - (alpha1/lambda1)) / L(0,0);
-  //  double z1 = (bl[0] - mu[0]) / L(0,0);
+  //double z1 = (bl[0] - mu[0]) / L(0,0);
   //double z1 = (bl[0] - mu0) / L(0,0);
   double num = mu[1] + L(1,0)*z1;
   double alpha2;
   double lambda2;
   if( num < MIN_EDGE_LENGTH + TOL)
-      num = MIN_EDGE_LENGTH;
+    num = MIN_EDGE_LENGTH;
   calculateAlphaLambda(num,L(1,1),eta,alpha2,lambda2);
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization
-
+  
   logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1] - lgamma(alpha1) - lgamma(alpha2);
   return bl;
 }
@@ -137,4 +138,81 @@ VectorXd multivariateNormal(VectorXd mu,MatrixXd vc,mt19937_64& rng, double& log
   logdensity -= v.dot(v);
 
   return mu + L * v;
+}
+
+void calculateMuSigma(double x1, double x2, double x3, double y1, double y2, double y3, double& mu, double& sigma)
+{
+  cerr << "x1,x2,x3,y1,y2,y3: " << x1 << "," << x2 << "," << x3 << "," << y1 << "," << y2 << "," << y3 << endl; 
+  double u12 = x2*x2-x1*x1;
+  double v12 = x2-x1;
+  double w12 = y2-y1;
+  double u13 = x3*x3-x1*x1;
+  double v13 = x3-x1;
+  double w13 = y3-y1;
+  double a = (w13-(w12*v13/v12))/(u13-(u12*v13/v12));
+  double b = (w12-a*u12)/v12;
+  double c = y1-a*x1*x1-b*x1;
+  cerr << "a,b,c" << a << "," << b << "," << c << endl;
+  if( a == 0 )
+  {
+    cerr << "error when finding mu and sigma for half normal" << endl;
+    exit(1);
+  }
+  double sigma2 = (-1)/(2*a);
+  if ( sigma2 < 0 )
+  {
+    cerr << "error when finding mu and sigma for half normal: negative sigma2" << endl;
+    exit(1);
+  }
+  sigma = sqrt(sigma2);
+  mu = b*sigma2;
+}
+
+double randomHalfNormal(double mu, double sigma, double x0,mt19937_64& rng)
+{
+  cerr << "in random half normal, with mu: " << mu << ", sigma " << sigma << endl;
+  double z0 = (x0-mu)/sigma;
+  uniform_real_distribution<> runif(0, 1);
+  cerr << "z0: " << z0 << endl;
+  cerr << "erfc(z0): " << erfc(z0) << endl;
+  double a = 1 - (1-runif(rng))*erfc(z0);
+  cerr << "a= " << a << endl;
+  boost::math::normal rnorm(0.0, 1.0);
+  double q = quantile(rnorm, a);
+  return mu + sigma*q;
+}
+
+// half normal or gamma depending on the length
+double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& logdensity,mt19937_64& rng)
+{
+  double t = e->getLength();
+  if( t < MIN_EDGE_LENGTH + TOL ) //half normal
+  {
+    double x1 = 0.01;
+    double x2 = 0.02;
+    double x3 = 0.03;
+    double y1,y2,y3;
+    double dlogl,ddlogl;
+    e->calculate(x1,alignment,qmatrix,y1,dlogl,ddlogl);
+    e->calculate(x2,alignment,qmatrix,y2,dlogl,ddlogl);
+    e->calculate(x3,alignment,qmatrix,y3,dlogl,ddlogl);
+    double mu;
+    double sigma;
+    calculateMuSigma(x1,x2,x3,y1,y2,y3,mu,sigma);
+    double s = randomHalfNormal(mu,sigma,0.0,rng);
+    cerr << "found half normal case, t: " << t << ", mu: " << mu << ", sigma: " << sigma << ", sampled: " << s << endl;
+    exit(1);
+    return s;
+  }
+  else //gamma
+  {
+    double logl,dlogl,ddlogl;
+    e->calculate(t,alignment,qmatrix,logl,dlogl,ddlogl);
+    double lambda = -1 * t * ddlogl;
+    double alpha = t*lambda;
+    gamma_distribution<double> rgamma(alpha,1.0 / lambda);
+    t = rgamma(rng);
+    logdensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(t) - lambda*t;
+    return t;
+  }
 }
