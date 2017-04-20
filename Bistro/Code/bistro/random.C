@@ -221,6 +221,12 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
       s = randomHalfNormal(mu,sigma,0.0,logdensity,rng);
       if(VERBOSE)
 	cerr << "found half normal case, t: " << t << ", mu: " << mu << ", sigma: " << sigma << ", sampled: " << s << endl;
+      if ( mu > 0 )
+      {
+	cerr << "t = " << t << ", mu = " << endl;
+	e->printLikMinLength(cerr,alignment,qmatrix);
+//	exit(1);
+      }
     }
     else
     {
