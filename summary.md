@@ -3,9 +3,10 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
 - put Q matrix to use in a separate file, not just in the log file
-- we want to study the splits in whales, we need to rerun with the sorted file and study smap, splits and mrbayes tstat (need to rerun mrbayes): use the previous scripts as well, also in a rmd file?
-- count how many times we do the half normal, how many times we do the alpha1==1 in the joint gamma case
+- we want to study the splits in whales (bistro4), we need to rerun with the sorted file and study smap, splits and mrbayes tstat (need to rerun mrbayes): use the previous scripts as well, also in a rmd file?
+
 - do a rmd file to summarize results better, what is the problem with distance weights!? what is the problem with bl? (use Rstudio): check conclusions below. first rerun to see things are fixed now with alpha problem
+- add print of | (maybe main can do this)
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -15,25 +16,20 @@ Bret Larget, Claudia Solis-Lemus (2016)
 - if MLE is close to zero, then pick three points (0.001,0.002,0.003) and get a parabola. Then extrapolate the parabola to the identify the range in which the maxlogl(0) and maxlogl(0)-3 live. This is a range in x. Take 5 points in this range, evaluate the logl again, and compute the mean to then estimate alpha for the pareto
 - another way would be to get a theoretical mean from a density that looks like this: f(x)=k*exp(-ax^2-bx-c), x>=0, use three points to get the values of the density and then get a theoretical mean for this density, and then use a pareto with the same mean. We need to find theoretically the mean of f(x)
 - we could sample pareto, or actually, normal with the inverse method with the numerical cdf (erfc in cmath, or the boost version)
-
-
-
-
-
-## Check with Bret
-- checked that we include all constants in logdensity
-- z0< 5? now 7
 - run many cases: no long BL anymore (we can still improve BL with the alpha==1 case, maybe), ccdprobs the problem now (whales)
   - sim cats dogs 1500: 2.76% (before 0.5%, long BL)
   [1] "Most frequently sampled tree is NOT equal to the true tree: (1,((((2,3),5),4),(6,(((7,(8,9)),10),11))),12); 0.2"
   [1] "true tree sampled: 174 times"
   - sim cats dogs fixed tree: 16.9% (before 1.16%)
-  - sim whales 1500: 0.5% (before 0.14%, true tree only sampled once)
+  - sim whales 1500: 0.5%,0.12% (before 0.14%, true tree only sampled once)
   [1] "Most frequently sampled tree is NOT equal to the true tree: (1,2,((3,(((4,5),6),((7,8),(((9,10),((12,13),14)),11)))),(15,((((16,17),((18,19),(20,21))),(((22,(23,24)),((25,26),(27,28))),29)),(30,31))))); 0.01"
   [1] "true tree sampled: 0 times" (what is the mean tree?)
   - sim whales fixed tree: 8%
-- removed mu < 0 from condition to use half normal: is his derivation correct now?
-- if mu1 or mu2 are too small, we do something different: sample the small one with half normal. if neither are too small, we try the joint gamma. but in this case, we can also run into alpha==1 if num ~0.0, so we still need to leave this check
+  - cats and dogs with fixed mean tree: 16%
+  - whales with fixed mean tree: 7.8%
+
+
+## Check with Bret
 
 
 
@@ -50,8 +46,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
   - Compare performance of bistro with different scales
 
 ## Known problems
-- Problem with long branches: only use joint BL density if there is a long branch (ESS is better with independent BL if there is not a long BL)
-- Biased and spread proposal densities for Q in some causes
+- BL sampling looks good for now, but we could still improve it by studying how many cases fall into the half normal or alpha==1 cases. Specially, we need to study the alpha==1 cases that are joint gamma, but num small, so we are forcing alpha to be >1
 - Bootstrap sample of trees does not provide a good estimate of clade distribution:
   - Idea: Use a "center tree" and distance to this tree as weights
 

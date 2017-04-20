@@ -1,0 +1,5 @@
+[ID: 4294040427]
+run	arithmetic_mean	harmonic_mean	values_discarded
+1	-1.411830e+04	-1.414967e+04	no
+2	-1.411901e+04	-1.414988e+04	no
+all	-1.411860e+04	-1.414978e+04	no
