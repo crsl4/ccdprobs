@@ -1,0 +1,24 @@
+translate
+       1 Felis_catus___domestic_cat,
+       2 Acinonyx_jubatus___cheetah,
+       3 Neofelis_nebulosa___clouded_leopard,
+       4 Uncia_uncia___snow_leopard,
+       5 Panthera_pardus___leopard,
+       6 Panthera_tigris___tiger,
+       7 Canis_lupus_familiaris___domestic_dog,
+       8 Canis_lupus___gray_wolf,
+       9 Canis_latrans___coyote,
+      10 Cuon_alpinus___dhole,
+      11 Vulpes_vulpes___red_fox,
+      12 Nyctereutes_procyonoides___raccoon_dog;
+1.00000000 1.00000000 {4-5}
+1.00000000 1.00000000 {4-6}
+1.00000000 1.00000000 {3-6}
+1.00000000 1.00000000 {7-8}
+1.00000000 1.00000000 {7-9}
+1.00000000 1.00000000 {7-10}
+1.00000000 1.00000000 {7-11}
+1.00000000 1.00000000 {7-12}
+1.00000000 1.00000000 {3-12}
+1.00000000 1.00000000 {2-12}
+1.00000000 1.00000000 {1-12}
