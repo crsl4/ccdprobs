@@ -20,6 +20,25 @@
 using namespace std;
 using namespace Eigen;
 
+void checkBL(VectorXd t)
+{
+  bool err = false;
+  for(int i=0; i<t.size(); ++i)
+  {
+    if(t(i) < 0)
+    {
+      err = true;
+      break;
+    }
+  }
+  if( err )
+  {
+    cerr << "Error: found negative branch length: " << t.transpose() << endl;
+    exit(1);
+  }
+}
+
+
 void checkCov2d(Matrix2d cov, bool called)
 {
   double det = cov.determinant();
@@ -1895,11 +1914,15 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     }
     if(t(0) < MIN_EDGE_LENGTH + TOL || t(1) < MIN_EDGE_LENGTH + TOL )
     { 
+      if(VERBOSE)
+	cerr << "entering half normal/gamma case: 2D" << endl;
       t(0) = halfNormalGamma(leftEdge,alignment,qmatrix,logdensity, rng);
       t(1) = halfNormalGamma(rightEdge,alignment,qmatrix,logdensity, rng);
     }
     else // sample from joint gamma
     {
+      if(VERBOSE)
+	cerr << "entering joint gamma case: 2D" << endl;
       double prop_logl=0;
       Vector2d prop_gradient;
       Matrix2d prop_hessian;
@@ -1915,6 +1938,7 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       checkCov2d(cov,false);
       t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
     }
+    checkBL(t);
     leftEdge->setLength( t(0) );
     rightEdge->setLength( t(1) );
     leftEdge->calculate(qmatrix);
@@ -1927,22 +1951,38 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
     right->clearProbMapsSmart(rightEdge);
     other->clearProbMapsSmart(otherEdge);
     Vector3d t(leftEdge->getLength(),rightEdge->getLength(),otherEdge->getLength());
-    leftEdge->callMLELength(alignment,qmatrix);
-    rightEdge->callMLELength(alignment,qmatrix);
-    otherEdge->callMLELength(alignment,qmatrix);
-    double prop_logl = 0;
-    Vector3d prop_gradient;
-    Matrix3d prop_hessian;
-    partialPathCalculations3D(t,alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,prop_logl,prop_gradient,prop_hessian);
-    Vector3d mu = t;
-    if(VERBOSE)
+    for ( int ii=0; ii<2; ++ii) // extra MLE passes prior to generation
     {
-      cout << "Hessian: " << endl;
-      cout << prop_hessian << endl;
+      leftEdge->callMLELength(alignment,qmatrix);
+      rightEdge->callMLELength(alignment,qmatrix);
+      otherEdge->callMLELength(alignment,qmatrix);
+      t(0) = leftEdge->getLength();
+      t(1) = rightEdge->getLength();
+      t(2) = otherEdge->getLength();
     }
-    Matrix3d cov = (-1) * prop_hessian.inverse();
-    checkCov3d(cov);
-    t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
+    if(t(0) < MIN_EDGE_LENGTH + TOL || t(1) < MIN_EDGE_LENGTH + TOL || t(2) < MIN_EDGE_LENGTH + TOL )
+    { 
+      t(0) = halfNormalGamma(leftEdge,alignment,qmatrix,logdensity, rng);
+      t(1) = halfNormalGamma(rightEdge,alignment,qmatrix,logdensity, rng);
+      t(2) = halfNormalGamma(otherEdge,alignment,qmatrix,logdensity, rng);
+    }
+    else
+    {
+      double prop_logl = 0;
+      Vector3d prop_gradient;
+      Matrix3d prop_hessian;
+      partialPathCalculations3D(t,alignment,left,leftEdge,right,rightEdge,other,otherEdge,qmatrix,prop_logl,prop_gradient,prop_hessian);
+      Vector3d mu = t;
+      if(VERBOSE)
+      {
+	cout << "Hessian: " << endl;
+	cout << prop_hessian << endl;
+      }
+      Matrix3d cov = (-1) * prop_hessian.inverse();
+      checkCov3d(cov);
+      t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
+    }
+    checkBL(t);
     leftEdge->setLength( t(0) );
     rightEdge->setLength( t(1) );
     otherEdge->setLength( t(2) );

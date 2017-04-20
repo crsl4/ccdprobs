@@ -40,7 +40,7 @@ void calculateAlphaLambda(double mu, double v, double eta, double& alpha, double
     alpha = eta*alpha;
     lambda = eta*lambda;
   }
-  cout << "almv, " << alpha << ", " << lambda << ", " << mu << ", " << v << endl;
+  //cout << "almv, " << alpha << ", " << lambda << ", " << mu << ", " << v << endl;
 }
 
 double gamma(double alpha, double b, mt19937_64& rng)
@@ -142,7 +142,8 @@ VectorXd multivariateNormal(VectorXd mu,MatrixXd vc,mt19937_64& rng, double& log
 
 void calculateMuSigma(double t0, double t1, double t2, double y0, double y1, double y2, double& mu, double& sigma2)
 {
-  cerr << "t0,t1,t2,y0,y1,y2: " << t0 << "," << t1 << "," << t2 << "," << y0 << "," << y1 << "," << y2 << endl; 
+  if(VERBOSE)
+    cerr << "t0,t1,t2,y0,y1,y2: " << t0 << "," << t1 << "," << t2 << "," << y0 << "," << y1 << "," << y2 << endl; 
   double u01 = y0-y1;
   double v10 = t1*t1-t0*t0;
   double w10 = t1-t0;
@@ -167,14 +168,17 @@ double normalTailArea(double z)
 
 double randomHalfNormal(double mu, double sigma, double x0,double& logdensity,mt19937_64& rng)
 {
-  cerr << "in random half normal, with mu: " << mu << ", sigma " << sigma << endl;
   double z0 = (x0-mu)/sigma;
   uniform_real_distribution<> runif(0, 1);
-  cerr << "z0: " << z0 << endl;
-  cerr << "erfc(z0): " << erfc(z0) << endl;
   double tailArea = normalTailArea(z0);
   double a = 1 - (1-runif(rng))*tailArea;
-  cerr << "a= " << a << endl;
+  if(VERBOSE)
+  {
+    cerr << "in random half normal, with mu: " << mu << ", sigma " << sigma << endl;
+    cerr << "z0: " << z0 << endl;
+    cerr << "erfc(z0): " << erfc(z0) << endl;
+    cerr << "a= " << a << endl;
+  }
   boost::math::normal rnorm(0.0, 1.0);
   double q = quantile(rnorm, a);
   logdensity += -log(tailArea) - log(sigma) - (0.5)*log(2*M_PI) - (0.5)*q*q;
@@ -201,6 +205,8 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
 //    cerr << "t = " << t << endl;
 //    e->printLikMinLength(cerr,alignment,qmatrix);
     calculateMuSigma(x1,x2,x3,y1,y2,y3,mu,sigma2);
+    if(VERBOSE)
+      cerr << "mu: " << mu << ",. sigma2: " << sigma2 << endl;
     double sigma;
     double z0;
     double s;
@@ -210,15 +216,19 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
       z0 = -mu/sigma;
     }
     
-    if ( sigma2 > 0 && z0 < 8 && mu < 0 )
+    if ( sigma2 > 0 && z0 < 7)// && mu < 0 )
     {
       s = randomHalfNormal(mu,sigma,0.0,logdensity,rng);
-      cerr << "found half normal case, t: " << t << ", mu: " << mu << ", sigma: " << sigma << ", sampled: " << s << endl;
+      if(VERBOSE)
+	cerr << "found half normal case, t: " << t << ", mu: " << mu << ", sigma: " << sigma << ", sampled: " << s << endl;
     }
     else
     {
       double lambda = (y3-y1) / (x3-x1);
+      lambda = (-1)*lambda;
       s = gamma(1.0, 1.0 / lambda ,rng);
+      if(VERBOSE)
+	cerr << "found exponential case, t: " << t << ", lambda= " << lambda << ", sampled: " << s << endl;
       logdensity += log(lambda) - lambda*s;
     }
     return s;
@@ -231,6 +241,8 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
     double alpha = t*lambda;
     gamma_distribution<double> rgamma(alpha,1.0 / lambda);
     t = rgamma(rng);
+    if(VERBOSE)
+      cerr << "found gamma case, t: " << t << ", alpha: " << alpha << ", lambda: " << lambda << ", sampled: " << t << endl;
     logdensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(t) - lambda*t;
     return t;
   }

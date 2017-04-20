@@ -2,7 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- need to sample from the normal and test
+- count how many times we do the half normal, how many times we do the alpha1==1 in the joint gamma case
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -20,16 +20,6 @@ s t
 - test with weightMean option
 - do a rmd file to summarize result better, what is the problem with distance weights!? what is the problem with bl? (use Rstudio): check conclusions below. first rerun to see things are fixed now with alpha problem
 *** 2 problems: long BL, true tree sampled only once in whales
-- sim16 1500: 1.23%: long BL, some true BL outside of densities
-- sim16 1500 indep: 0.65%
-- sim16 fix tree: 0.51%
-- sim16 500: 0.15%
-- sim cats dogs 1500: 0.5%, long BL, but plots well centered, most sampled tree is different from true tree
-- sim cats dogs fixed tree: 1.16%, long BL, but plots well centered
-cats mean tree = true tree
-- sim whales 1500: 0.14%: true tree only sampled once, it is not even the one with w=0.8: comparison plot, most sampled tree is different from true tree; mean tree tiny difference from true tree
-- sim whales fixed tree: 0.1%, long BL, bl 54.53=20!!
-new:
 - cats and dogs 0.2% (same as before), fixed tree 26% (14% before)
 - sim16 1500: cov neg def (before 1.23%, long BL)
 - sim16 1500 indep: 0.65% (before 0.65%)
@@ -41,6 +31,14 @@ new:
 
 
 ## Check with Bret
+- checked that we include all constants in logdensity
+- z0< 5? now 7
+- run many cases, let's check them:
+  - sim cats dogs 1500: 2.76% (before 0.5%, long BL)
+  - sim cats dogs fixed tree: 16.9% (before 1.16%)
+  - sim whales 1500: 0.5% (before 0.14%, true tree only sampled once)
+  - sim whales fixed tree: 8%
+- removed mu < 0 from condition to use half normal: is his derivation correct now?
 - if mu1 or mu2 are too small, we do something different: sample the small one with half normal. if neither are too small, we try the joint gamma. but in this case, we can also run into alpha==1 if num ~0.0, so we still need to leave this check
 
 
