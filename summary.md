@@ -2,7 +2,10 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- put Q matrix to use in a separate file, not just in the log file
+- we want to study the splits in whales, we need to rerun with the sorted file and study smap, splits and mrbayes tstat (need to rerun mrbayes): use the previous scripts as well, also in a rmd file?
 - count how many times we do the half normal, how many times we do the alpha1==1 in the joint gamma case
+- do a rmd file to summarize results better, what is the problem with distance weights!? what is the problem with bl? (use Rstudio): check conclusions below. first rerun to see things are fixed now with alpha problem
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -12,31 +15,22 @@ Bret Larget, Claudia Solis-Lemus (2016)
 - if MLE is close to zero, then pick three points (0.001,0.002,0.003) and get a parabola. Then extrapolate the parabola to the identify the range in which the maxlogl(0) and maxlogl(0)-3 live. This is a range in x. Take 5 points in this range, evaluate the logl again, and compute the mean to then estimate alpha for the pareto
 - another way would be to get a theoretical mean from a density that looks like this: f(x)=k*exp(-ax^2-bx-c), x>=0, use three points to get the values of the density and then get a theoretical mean for this density, and then use a pareto with the same mean. We need to find theoretically the mean of f(x)
 - we could sample pareto, or actually, normal with the inverse method with the numerical cdf (erfc in cmath, or the boost version)
-**need to fix the problem with branch lengths before doing this:**
-- how often do we have the bad alpha cases in the bl?
-- add prints to see if the weird big alphas are linked to L(0,0): do we want a minimum variance? weird negative var! add checks for the vc matrix: tiny v, and v<0; why alpha==1; add a check for positive definite (determinant)=> what to do? make the correlation coefficient = 1 or -1 depending on the sign of s: sigma1*sigma2
-r s
-s t
-- test with weightMean option
-- do a rmd file to summarize result better, what is the problem with distance weights!? what is the problem with bl? (use Rstudio): check conclusions below. first rerun to see things are fixed now with alpha problem
-*** 2 problems: long BL, true tree sampled only once in whales
-- cats and dogs 0.2% (same as before), fixed tree 26% (14% before)
-- sim16 1500: cov neg def (before 1.23%, long BL)
-- sim16 1500 indep: 0.65% (before 0.65%)
-- sim16 fix tree: 11% (before 0.51%)
-- sim cats dogs 1500: cov problem (before 0.5%, long BL)
-- sim cats dogs fixed tree: cov problem (before 1.16%, long BL)
-- sim whales 1500: cov neg (before 0.14%, true tree only sampled once)
-- sim whales fixed tree: cov neg
+
+
+
 
 
 ## Check with Bret
 - checked that we include all constants in logdensity
 - z0< 5? now 7
-- run many cases, let's check them:
+- run many cases: no long BL anymore (we can still improve BL with the alpha==1 case, maybe), ccdprobs the problem now (whales)
   - sim cats dogs 1500: 2.76% (before 0.5%, long BL)
+  [1] "Most frequently sampled tree is NOT equal to the true tree: (1,((((2,3),5),4),(6,(((7,(8,9)),10),11))),12); 0.2"
+  [1] "true tree sampled: 174 times"
   - sim cats dogs fixed tree: 16.9% (before 1.16%)
   - sim whales 1500: 0.5% (before 0.14%, true tree only sampled once)
+  [1] "Most frequently sampled tree is NOT equal to the true tree: (1,2,((3,(((4,5),6),((7,8),(((9,10),((12,13),14)),11)))),(15,((((16,17),((18,19),(20,21))),(((22,(23,24)),((25,26),(27,28))),29)),(30,31))))); 0.01"
+  [1] "true tree sampled: 0 times" (what is the mean tree?)
   - sim whales fixed tree: 8%
 - removed mu < 0 from condition to use half normal: is his derivation correct now?
 - if mu1 or mu2 are too small, we do something different: sample the small one with half normal. if neither are too small, we try the joint gamma. but in this case, we can also run into alpha==1 if num ~0.0, so we still need to leave this check
