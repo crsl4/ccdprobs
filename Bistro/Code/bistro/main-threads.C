@@ -472,6 +472,9 @@ int main(int argc, char* argv[])
   map<string,double> topologyToWeightMap;
   map<string,double> topologyToDistanceWeightMap;
 
+  if( parameters.getWeightScale() == 0)
+    parameters.setWeightScale(200);
+
 // --------------------------------------- Bootstrap of topologies from ccdprobs -----------------------
   if( parameters.getTopology().empty() ) //only do bootstrap if not fixed topology as input
   {
