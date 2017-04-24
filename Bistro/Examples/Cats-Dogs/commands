@@ -1,3 +1,9 @@
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro3 -r 1000 -b 1000 > bistro3.log
+## In R:
+source("../../Scripts/summary.R")
+compareBistroMB("bistro3",mb="cats-dogs-2")
+
+
 ## run bistro on mean tree
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro-meanTree -r 1000 -b 1000 -t (1,2,((3,((4,5),6)),(((((7,8),9),10),11),12))); > bistro-meanTree.log
 

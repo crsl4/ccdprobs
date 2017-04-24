@@ -108,7 +108,7 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     mu0 = mu[0];
   calculateAlphaLambda(mu0,L(0,0),eta,alpha1,lambda1);
   bl[0] = gamma(alpha1,1.0 / lambda1,rng); //c++ gamma has different parametrization
-  
+
   // ------------ T2 ------------------
   double z1 = (bl[0] - (alpha1/lambda1)) / L(0,0);
   //double z1 = (bl[0] - mu[0]) / L(0,0);
@@ -120,7 +120,7 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     num = MIN_EDGE_LENGTH;
   calculateAlphaLambda(num,L(1,1),eta,alpha2,lambda2);
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization
-  
+
   logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1] - lgamma(alpha1) - lgamma(alpha2);
   return bl;
 }
@@ -143,7 +143,7 @@ VectorXd multivariateNormal(VectorXd mu,MatrixXd vc,mt19937_64& rng, double& log
 void calculateMuSigma(double t0, double t1, double t2, double y0, double y1, double y2, double& mu, double& sigma2)
 {
   if(VERBOSE)
-    cerr << "t0,t1,t2,y0,y1,y2: " << t0 << "," << t1 << "," << t2 << "," << y0 << "," << y1 << "," << y2 << endl; 
+    cerr << "t0,t1,t2,y0,y1,y2: " << t0 << "," << t1 << "," << t2 << "," << y0 << "," << y1 << "," << y2 << endl;
   double u01 = y0-y1;
   double v10 = t1*t1-t0*t0;
   double w10 = t1-t0;
@@ -215,7 +215,7 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
       sigma = sqrt(sigma2);
       z0 = -mu/sigma;
     }
-    
+
     if ( sigma2 > 0 && z0 < 7)// && mu < 0 )
     {
       s = randomHalfNormal(mu,sigma,0.0,logdensity,rng);
@@ -223,8 +223,8 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
 	cerr << "found half normal case, t: " << t << ", mu: " << mu << ", sigma: " << sigma << ", sampled: " << s << endl;
       if ( mu > 0 )
       {
-	cerr << "t = " << t << ", mu = " << endl;
-	e->printLikMinLength(cerr,alignment,qmatrix);
+	cout << "t = " << t << ", mu = " << endl;
+	e->printLikMinLength(cout,alignment,qmatrix);
 //	exit(1);
       }
     }

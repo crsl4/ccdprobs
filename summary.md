@@ -2,35 +2,17 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- put Q matrix to use in a separate file, not just in the log file
-- we want to study the splits in whales (bistro4), we need to rerun with the sorted file and study smap, splits and mrbayes tstat (need to rerun mrbayes): use the previous scripts as well, also in a rmd file?
-
-- do a rmd file to summarize results better, what is the problem with distance weights!? what is the problem with bl? (use Rstudio): check conclusions below. first rerun to see things are fixed now with alpha problem
-- add print of | (maybe main can do this)
-
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
-## Later:
-- if MLE is close to zero, then pick three points (0.001,0.002,0.003) and get a parabola. Then extrapolate the parabola to the identify the range in which the maxlogl(0) and maxlogl(0)-3 live. This is a range in x. Take 5 points in this range, evaluate the logl again, and compute the mean to then estimate alpha for the pareto
-- another way would be to get a theoretical mean from a density that looks like this: f(x)=k*exp(-ax^2-bx-c), x>=0, use three points to get the values of the density and then get a theoretical mean for this density, and then use a pareto with the same mean. We need to find theoretically the mean of f(x)
-- we could sample pareto, or actually, normal with the inverse method with the numerical cdf (erfc in cmath, or the boost version)
-- run many cases: no long BL anymore (we can still improve BL with the alpha==1 case, maybe), ccdprobs the problem now (whales)
-  - sim cats dogs 1500: 2.76% (before 0.5%, long BL)
-  [1] "Most frequently sampled tree is NOT equal to the true tree: (1,((((2,3),5),4),(6,(((7,(8,9)),10),11))),12); 0.2"
-  [1] "true tree sampled: 174 times"
-  - sim cats dogs fixed tree: 16.9% (before 1.16%)
-  - sim whales 1500: 0.5%,0.12% (before 0.14%, true tree only sampled once)
-  [1] "Most frequently sampled tree is NOT equal to the true tree: (1,2,((3,(((4,5),6),((7,8),(((9,10),((12,13),14)),11)))),(15,((((16,17),((18,19),(20,21))),(((22,(23,24)),((25,26),(27,28))),29)),(30,31))))); 0.01"
-  [1] "true tree sampled: 0 times" (what is the mean tree?)
-  - sim whales fixed tree: 8%
-  - cats and dogs with fixed mean tree: 16%
-  - whales with fixed mean tree: 7.8%
-
 
 ## Check with Bret
-
+- saved Q to file now *.q, not just logfile
+- see whales case, what is the PP in mrbayes tstat, smap? problem with very close branch lengths, not a bistro problem; confused why distance is small, but distance weight is small too
+- cats and dogs is ok, but MAP bistro tree != MAP mb tree
+- very nice results with simulated 16 taxa
+- found seed in sim-16 with a lot of mu>0 cases, we can rerun to see the table of loglik: problem again here with BL: long BL, I think related to mu>0 cases
 
 
 ## Jordan
@@ -47,8 +29,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## Known problems
 - BL sampling looks good for now, but we could still improve it by studying how many cases fall into the half normal or alpha==1 cases. Specially, we need to study the alpha==1 cases that are joint gamma, but num small, so we are forcing alpha to be >1
-- Bootstrap sample of trees does not provide a good estimate of clade distribution:
-  - Idea: Use a "center tree" and distance to this tree as weights
+- weights by distance to mean tree seem to work fine, except in the case of very short branches (but this is the same problem with all bayesian approaches)
 
 ## Theoretical things for the future
 - Prove crude SE is close (smaller than) real SE with the formula
@@ -63,6 +44,7 @@ input split into tree if they are compatible. The score of a split is the square
 - Test if first branches to estimate are poor in comparison to deep branches: to test without randomize, we need to call sort canonical before sampling branch lengths
 - Add proposal to mcmc to loop over internal nodes, and slide the two neighboring edges
 - Use Paul Lewis measure of information from sample as well as ESS
+- If MLE is close to zero, then pick three points (0.001,0.002,0.003) and get a parabola. Then extrapolate the parabola to the identify the range in which the maxlogl(0) and maxlogl(0)-3 live. This is a range in x. Take 5 points in this range, evaluate the logl again, and compute the mean to then estimate alpha for the pareto: this is instead of what we are doing for the truncated normal
 
 ## Code improvements
 

@@ -1,3 +1,11 @@
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro3 -r 1000 -b 1000 -s 2993630992 > bistro3.log
+../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o bistro3-fixT -r 1000 -b 1000 -t "(1,2,((3,4),(((5,6),(7,8)),(((((((9,10),11),12),13),14),15),16))));" > bistro3-fixT.log
+
+## In R:
+source("../../Scripts/summary.R")
+compareBistroMB("bistro3",mb="sim-16-nsites1500",truetree="(A:0.0025,B:0.0025,((C:0.0025,D:0.0025):0.0025,(((E:0.0125,F:0.0125):0.0125,(G:0.0125,H:0.0125):0.0125):0.0625,(((((((I:0.0125,J:0.0125):0.0125,K:0.025):0.0125,L:0.0375):0.0125,M:0.05):0.0125,N:0.0625):0.0125,O:0.075):0.0125,P:0.0875):0.0125):0.0325):0.0025);",trueq=c(0.3,0.3,0.1,0.3,0.1,0.3,0.1,0.1,0.3,0.1))
+
+
 ## with smaller MIN LENGTH
 ../../Code/bistro/bistro -f ../../Data/sim-16-nsites1500.fasta -o temp2 -r 100 -b 10 --threads 1 -s 2003894300 > temp2.log
 

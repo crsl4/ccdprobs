@@ -1,14 +1,18 @@
 ../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro5-whales -r 1000 -b 1000 --onlyBootstrap > bistro5-whales.log
-../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro4-whales -r 1000 -b 1000 --no-mcmc > bistro4-whales.log
+
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro4-whales -r 1000 -b 1000 > bistro4-whales.log
 mb sim-whales-nsites1500-sorted.nex
 (then moved output files to Examples/Simulations)
-../../Code/badger/mb2badger sim-whales-nsites1500.nex.run1.t
-../../Code/badger/mb2badger sim-whales-nsites1500.nex.run2.t
-cp sim-whales-nsites1500.nex.run1.p sim-whales-nsites1500.run1.p
-cp sim-whales-nsites1500.nex.run2.p sim-whales-nsites1500.run2.p
+../../Code/badger/mb2badger sim-whales-nsites1500-sorted.nex.run1.t
+../../Code/badger/mb2badger sim-whales-nsites1500-sorted.nex.run2.t
+cp sim-whales-nsites1500-sorted.nex.run1.p sim-whales-nsites1500-sorted.run1.p
+cp sim-whales-nsites1500-sorted.nex.run2.p sim-whales-nsites1500-sorted.run2.p
 also, need to remove the first line of the run1.p and run2.p files:
-saved into sim-whales-nsites1500.run1.p
+saved into sim-whales-nsites1500-sorted.run1.p
 
+## In R:
+source("../../Scripts/summary.R")
+compareBistroMB("bistro4-whales",truetree="(1:0.0231136,2:0.0372603,((3:0.094114,(((4:0.025742,5:0.022279):0.0249355,14:0.0685793):0.00162364,((6:0.027438,7:0.0173734):0.0210568,((((8:0.0170381,9:0.0189656):0.0173591,11:0.0375513):0.00117174,(10:0.0324844,12:0.0337327):0.00110449):0.000772143,13:0.0327726):0.00476205):0.00772679):0.014146):0.00534651,(15:0.101767,((((16:0.0503164,17:0.0470883):0.0368309,((18:0.0110323,19:0.00505243):0.02207,(20:0.0116344,21:0.0071754):0.0214576):0.0500723):0.0548426,((24:0.0799893,((25:0.0553201,26:0.0455578):0.0283923,((27:0.0766089,28:0.0689195):0.00240495,(29:0.0489559,30:0.0222969):0.0290598):0.00387214):0.00247192):0.0113158,31:0.12489):0.0064916):0.00406787,(22:0.0938027,23:0.0901243):0.00790296):0.00718762):0.0331146):0.064614);",trueq=c(0.231333,0.225334,0.173454,0.369879,0.151508,0.198957,0.0548603,0.0118846,0.578106,0.00468519))
 
 ## after half normal
 ../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500.fasta -o bistro3-whales -r 1000 -b 1000  > bistro3-whales.log

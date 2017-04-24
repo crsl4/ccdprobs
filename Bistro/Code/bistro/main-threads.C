@@ -144,6 +144,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    {
      if(indStart == 0)
      {
+       cerr << '|';
        if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
 	 cerr << '*';
        if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
@@ -451,6 +452,7 @@ int main(int argc, char* argv[])
   model_init.setMcmcVarQP(q_init.getMcmcVarQP());
   cerr << endl << " done." << endl;
 
+
 // will use the starting estimate of Q for the bootstrap:
 //  QMatrix model_init(convert(p_init),s_pairwise);
 
@@ -728,6 +730,12 @@ int main(int argc, char* argv[])
   QMatrix model(model_init.getStationaryP(),model_init.getSymmetricQP());
   model.setMcmcVarP(model_init.getMcmcVarP());
   model.setMcmcVarQP(model_init.getMcmcVarQP());
+
+  string QFile = parameters.getOutFileRoot() + ".q";
+  ofstream qstream(QFile.c_str());
+  qstream << "Pi: " << model.getStationaryP().transpose() << endl;
+  qstream << "S: " << model.getSymmetricQP().transpose() << endl;
+
 
   if ( parameters.getNumRandom() > 0 )
   {
