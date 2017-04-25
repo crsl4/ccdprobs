@@ -140,11 +140,13 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    if(VERBOSE)
      cout << "inside randomTrees, scaleP: " << scaleP << " scaleQP: " << scaleQP << endl;
 
+   if ( indStart == 0 )
+     cerr << '|';
+   
    for ( int k=indStart; k<indEnd; ++k )
    {
      if(indStart == 0)
      {
-       cerr << '|';
        if ( indEnd > 99 && (k+1) % (indEnd / 100) == 0 )
 	 cerr << '*';
        if ( indEnd > 9 && (k+1) % (indEnd / 10) == 0 )
