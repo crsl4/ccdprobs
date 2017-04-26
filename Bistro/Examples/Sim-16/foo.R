@@ -1,4 +1,4 @@
-foo = read.csv("foo.csv")
+foo = read.csv("foo2.csv")
 require(ggplot2)
 ggplot(foo, aes(x=t,y=logl)) +
   geom_line()
@@ -29,8 +29,8 @@ foo = foo %>%
 
 ggplot(foo, aes(x=t)) +
   geom_line(aes(y=y1), color="black") +
-#  geom_line(aes(y=y2), color="red") +
-#  geom_line(aes(y=y3), color="gold") +
+  geom_line(aes(y=y2), color="red") +
+  geom_line(aes(y=y3), color="gold") +
   geom_hline(yintercept=0)
   
 ggplot(foo, aes(x=t,y=dlogl)) +

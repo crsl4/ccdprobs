@@ -540,35 +540,34 @@ compareBistroMB = function(stem, mb=NULL, truetree=NULL, trueq=NULL){
     require(corrplot)
 
     ## changing taxon names to numbers in true tree:
-
     ttree = read.tree(text=truetree)
-    con = file(paste0(stem,"-pars.smap"), "r")
-    dict = vector(mode="list", length=length(ttree$tip.label))
-    nm = rep(NA,length(ttree$tip.label))
-    i = 1
-    while ( TRUE ) {
-        line = readLines(con, n = 1)
-        if( grepl("translate",line) )
-            next
-        v = strsplit(line, "\\s+")[[1]]
-        v = v[v != ""]
-        if( grepl(";", line) ){
-            v[2] = strsplit(v[2],";")[[1]]
-            nm[i] = v[2]
-            dict[i] = v[1]
-            break
-        }else{
-            v[2] = strsplit(v[2],",")[[1]]
-            nm[i] = v[2]
-            dict[i] = v[1]
-            i = i+1
-        }
-    }
-    close(con)
-    names(dict)=nm
+##    con = file(paste0(stem,"-pars.smap"), "r")
+##    dict = vector(mode="list", length=length(ttree$tip.label))
+##    nm = rep(NA,length(ttree$tip.label))
+##    i = 1
+##    while ( TRUE ) {
+##        line = readLines(con, n = 1)
+##        if( grepl("translate",line) )
+##            next
+##        v = strsplit(line, "\\s+")[[1]]
+##        v = v[v != ""]
+##        if( grepl(";", line) ){
+##            v[2] = strsplit(v[2],";")[[1]]
+##            nm[i] = v[2]
+##            dict[i] = v[1]
+##            break
+##        }else{
+##            v[2] = strsplit(v[2],",")[[1]]
+##            nm[i] = v[2]
+##            dict[i] = v[1]
+##            i = i+1
+##        }
+##    }
+##    close(con)
+##    names(dict)=nm
 
-    for(i in 1:length(ttree$tip.label))
-        ttree$tip.label[i] = dict[[ttree$tip.label[i]]]
+##    for(i in 1:length(ttree$tip.label))
+##        ttree$tip.label[i] = dict[[ttree$tip.label[i]]]
 
     nedg <- dim(ttree$edge)[1] # total number of edges
     ntax <- length(ttree$tip.label) # total number of taxa
