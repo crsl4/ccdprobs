@@ -2,12 +2,10 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- check test in art, and add/commit the changes in files names
-- put scripts summarizeOut.r into bistro so that we have comparable output files to MrBayes; give same extensions:
-  - pstat: rates
-- separate c++ file to read a list of trees (mb), calculate the mean tree and the distances; compare bistro mean tree with mb consensus tree: do MDL stuff for chosen 100 trees
-
-- run with passer-aligned, and datasets
+- add to main-distances.C the thing on reading mb and bistro trees
+- test that it compiles; test it to get the matrices (with bret do the mdl)
+- run with passer-aligned, sim-whales, cats-dogs, whales (bistro and new distance function)
+- do R script to compare the output files from mrbayes and bistro: trprobs, tstat, pstat, vstat (later)
 
 
 - Write up manuscript, and figure out simulation study for small datasets:
@@ -16,11 +14,11 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- changed output files extensions to match mrbayes: trprobs, tstat (splits)
+- changed output files extensions to match mrbayes: trprobs, tstat (splits), pstat (rates)
 - summarize branch lengths inside bistro: I know how in julia, ideas for c++:
   - vstat: BL
-
-
+- distances file to read mrbayes and bistro trees and compute distance matrix to do mdl; problem: findMean tree file needs alignment! this is burdensome, but also can cause errors if the fasta and nexus files have different translate tables
+- using random shuffle to sample 100 trees
 
 ## Jordan
 - Create bootstrap sample of trees for different datasets:

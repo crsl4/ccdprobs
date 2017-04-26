@@ -120,5 +120,5 @@ end
 dig = 6
 dataBL = DataFrame(bl=splits, mean=round(column1,dig), var=round(column2,dig), std=round(column3,dig), CILower=round(column4,dig), CIUpper=round(column5,dig), median=round(column6,dig), sampleMean=round(column7,dig), sampleStd=round(column8,dig))
 println("$dataBL")
-writetable("$folder$bistroroot.vstat",dataBL, separator='\t')
+writetable("$folder${bistroroot}-jl.vstat",dataBL, separator='\t')
 

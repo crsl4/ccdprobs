@@ -34,6 +34,8 @@ private:
   bool enteredS;
   bool doMCMC;
   int numMCMC;
+  string mbfile; //for main-distances.C
+  string bistrofile; //for main-distances.C
 public:
   Parameter()
   {
@@ -107,6 +109,10 @@ public:
   void setDoMCMC(bool b) { doMCMC = b; }
   int getNumMCMC() { return numMCMC; }
   void setNumMCMC(int x) { numMCMC = x; }
+  string getMBfile() const { return mbfile; }
+  void setMBfile(string x) { mbfile = x; }
+  string getBistrofile() const { return bistrofile; }
+  void setBistrofile(string x) { bistrofile = x; }
 };
 
 #endif

@@ -92,7 +92,7 @@ VectorXd dirichletProposalDensityScale(VectorXd x,double scale,double& logPropos
 
 // arguments made reference to avoid copying in each thread
 template<typename T>
-void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap)
+void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap, vector<vector<double>>& pi, vector<vector<double>>& rates)
 {
   string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
   ofstream f(outFile.c_str());
@@ -180,6 +180,9 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      if( parameters.getFixedQ() ) // not used anymore
        logQ = 0;
      QMatrix model(p_star,s_star);
+
+     pi.push_back(convert(p_star));
+     rates.push_back(convert(s_star));
 
      double logTopologyProbability=0;
      string treeString = ccd.randomTree(rng,logTopologyProbability);
@@ -782,6 +785,8 @@ int main(int argc, char* argv[])
     vector< multimap<string,double> > topologymm(cores); //vector of multimaps
     vector< vector<double> > logwt0(cores);
     vector<double> maxLogW(cores); //vector of maxlogweight
+    vector< vector< vector<double> > > pi0(cores); //vector of vector of pi1,pi2,pi3,pi4
+    vector< vector< vector<double> > > rates0(cores); //vector of vector of s1,s2,s3,s4,s5,s6
     cerr << "jointMLE " << parameters.getJointMLE() << endl;
     cerr << "fixedQ " << parameters.getFixedQ() << endl;
     cerr << "eta " << parameters.getEta() << endl;
@@ -790,9 +795,9 @@ int main(int argc, char* argv[])
     {
       cerr << "core = " << i << endl;
       if ( !parameters.getReweight() )
-	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]),ref(rates0[i])));
       else
-	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdDist, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i])));
+	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdDist, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]), ref(rates0[i])));
     }
 
     for(auto &t : threads){
@@ -805,33 +810,77 @@ int main(int argc, char* argv[])
     // combine all maxlogweight
     double maxLogWeight = maxLogW[0];
     for(int i=1; i<cores; ++i)
-      {
-	if(maxLogW[i] > maxLogWeight)
-	  maxLogWeight = maxLogW[i];
-      }
+    {
+      if(maxLogW[i] > maxLogWeight)
+	maxLogWeight = maxLogW[i];
+    }
     cerr << "maxLogWeight: " << maxLogWeight << endl;
 
     // combine vector of all logwt
     vector<double> logwt(numRandom,0);
     int k = 0;
     for( vector< vector<double> >::iterator p=logwt0.begin(); p != logwt0.end(); ++p)
+    {
+      for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
       {
-	for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
-	  {
-	    logwt[k] = *q;
-	    ++k;
-	  }
+	logwt[k] = *q;
+	++k;
       }
+    }
+
+    // print pi0
+    // int cc = 1;
+    // for( vector<vector< vector<double> > >::iterator p=pi0.begin(); p != pi0.end(); ++p)
+    // {
+    //   cerr << "core " << cc << endl;
+    //   ++cc;
+    //   for(vector<vector<double>>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+    //   {
+    // 	cerr << convert(*q).transpose() << endl;
+    //   }
+    // }
+
+    // combine vector of pi
+    vector<vector<double>> pi;
+    for( vector<vector< vector<double> > >::iterator p=pi0.begin(); p != pi0.end(); ++p)
+    {
+      for(vector<vector<double>>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+      {
+	pi.push_back(*q);
+      }
+    }
+
+    k = 0;
+    for(vector<vector<double>>::iterator p=pi.begin(); p != pi.end(); ++p)
+    {
+      cerr << k << " " << convert(*p).transpose() << endl;
+      ++k;
+    }
+
+    // for(int k=0; k<numRandom; ++k)
+    // {
+    //   cerr << convert(pi[k]).transpose() << endl;
+    // }
+
+    // combine vector of rates
+    vector<vector<double>> rates;
+    for( vector<vector< vector<double> > >::iterator p=rates0.begin(); p != rates0.end(); ++p)
+    {
+      for(vector<vector<double>>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+      {
+	rates.push_back(*q);
+      }
+    }
 
     // combine topology maps to one
     multimap<string,double> topologyToLogweightMMap;
     for ( vector< multimap<string,double>>::iterator p=topologymm.begin(); p!=topologymm.end(); ++p) //for every multimap in topologymm
+    {
+      for ( multimap<string,double >::iterator q=(*p).begin(); q!= (*p).end(); ++q) // traverse this multimap (*p)
       {
-	for ( multimap<string,double >::iterator q=(*p).begin(); q!= (*p).end(); ++q) // traverse this multimap (*p)
-	  {
-	    topologyToLogweightMMap.insert( pair<string,double>(q->first,q->second) ) ;
-	  }
+	topologyToLogweightMMap.insert( pair<string,double>(q->first,q->second) ) ;
       }
+    }
 
     vector<double> wt(numRandom,0);
     double sum=0;
@@ -851,6 +900,56 @@ int main(int argc, char* argv[])
     cerr << "ESS = " << fixed << setprecision(2) << 1.0/essInverse << ", or "
 	 << setprecision(2) << 100.0 / essInverse / numRandom << " percent." << endl;
 
+    // computing weighted averages of rates and pi
+    vector<double> meanpi(4,0);
+    vector<double> meanrates(6,0);
+    vector<double> sqsumpi(4,0);
+    vector<double> sqsumrates(6,0);
+    for(int k = 0; k < numRandom; ++k)
+    {
+      for(int i = 0; i < 4; ++i)
+      {
+	meanpi[i] += pi[k][i]*wt[k];
+	sqsumpi[i] += pi[k][i]*pi[k][i]*wt[k];
+      }
+      for(int i = 0; i < 6; ++i)
+      {
+	meanrates[i] += rates[k][i]*wt[k];
+	sqsumrates[i] += rates[k][i]*rates[k][i]*wt[k];
+      }
+    }
+
+
+    // writing pstat output file (with pi and rates)
+    string ratesFile = parameters.getOutFileRoot() + ".pstat";
+    ofstream ratesStream(ratesFile.c_str());
+    ratesStream << "Parameter Mean StdDev" << endl;
+    ratesStream << "s(A<->C) " << fixed << setprecision(4) << meanrates[0];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumrates[0]-meanrates[0]*meanrates[0]) << endl;
+    ratesStream << "s(A<->G) " << fixed << setprecision(4) << meanrates[1];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumrates[1]-meanrates[1]*meanrates[1]) << endl;
+    ratesStream << "s(A<->T) " << fixed << setprecision(4) << meanrates[2];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumrates[2]-meanrates[2]*meanrates[2]) << endl;
+    ratesStream << "s(C<->G) " << fixed << setprecision(4) << meanrates[3];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumrates[3]-meanrates[3]*meanrates[3]) << endl;
+    ratesStream << "s(C<->T) " << fixed << setprecision(4) << meanrates[4];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumrates[4]-meanrates[4]*meanrates[4]) << endl;
+    ratesStream << "s(G<->T) " << fixed << setprecision(4) << meanrates[5];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumrates[5]-meanrates[5]*meanrates[5]) << endl;
+    ratesStream << "pi(A)    " << fixed << setprecision(4) << meanpi[0];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumpi[0]-meanpi[0]*meanpi[0]) << endl;
+    ratesStream << "pi(C)    " << fixed << setprecision(4) << meanpi[1];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumpi[1]-meanpi[1]*meanpi[1]) << endl;
+    ratesStream << "pi(G)    " << fixed << setprecision(4) << meanpi[2];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumpi[2]-meanpi[2]*meanpi[2]) << endl;
+    ratesStream << "pi(T)    " << fixed << setprecision(4) << meanpi[3];
+    ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumpi[3]-meanpi[3]*meanpi[3]) << endl;
+    ratesStream.close();
+    // cerr << "mean pi: " << fixed << setprecision(4) << convert(meanpi).transpose() << endl;
+    // cerr << "mean s: " << fixed << setprecision(4) << convert(meanrates).transpose() << endl;
+    // cerr << "sq sum pi: " << fixed << setprecision(4) << convert(sqsumpi).transpose() << endl;
+    // cerr << "sq sum rates: " << fixed << setprecision(4) << convert(sqsumrates).transpose() << endl;
+
     // substract max from multimap
     for ( multimap<string,double >::iterator p=topologyToLogweightMMap.begin(); p!= topologyToLogweightMMap.end(); ++p) {
       p->second -= maxLogWeight; // need to test this
@@ -868,33 +967,28 @@ int main(int argc, char* argv[])
       topologyToUnnormalizedWeightMap[ p->first ] = sumWt;
     }
 
+    // writing tstat splits file
     CCDProbs<double> splits(topologyToUnnormalizedWeightMap,taxaNumbers,taxaNames);
     string splitsWeightsFile = parameters.getOutFileRoot() + ".tstat";
     ofstream splitsWt(splitsWeightsFile.c_str());
     splits.writeCladeCountOrdered(splitsWt, essInverse);
     splitsWt.close();
 
+    // writing trprobs output file
     string topologyPPFile = parameters.getOutFileRoot() + ".trprobs";
     ofstream topPP(topologyPPFile.c_str());
-
     vector< pair<string,double> > v;
     copy(topologyToUnnormalizedWeightMap.begin(), topologyToUnnormalizedWeightMap.end(), back_inserter(v));
     sort(v.begin(), v.end(), comparePairStringDouble);
     double prob;
     double se;
     topPP << "tree prob crudeSE(ESS=" << fixed << setprecision(2) << 1.0/essInverse << ")" << endl;
-
     for (vector<pair<string,double>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i ) {
       prob = i->second / sum;
       se = sqrt(prob * (1-prob) * essInverse);
       topPP << (i->first) << " " << fixed << setprecision(4) << prob << " " << se << endl;
     }
 
-    // for ( map<string,double >::iterator p=topologyToUnnormalizedWeightMap.begin(); p!= topologyToUnnormalizedWeightMap.end(); ++p) {
-    //   prob = (p->second)/sum;
-    //   se = sqrt(prob * (1-prob) * essInverse);
-    //   topPP << (p->first) << fixed << setprecision(4) << prob << " " << se << endl;
-    // }
   }
 
   milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
@@ -905,12 +999,12 @@ int main(int argc, char* argv[])
   // cout << "Jukes-Cantor distances: " << (ms3.count() - ms2.count())/1000 << "seconds" << endl;
   // cout << "Getting initial JC NJ tree: " << (ms4.count() - ms3.count())/1000 << "seconds" << endl;
   // cout << "Setting NJ branch lengths on tree: " << (ms5.count() - ms4.count())/1000 << "seconds" << endl;
-  cout << "MCMC: " << (ms6.count() - ms5.count())/1000 << "seconds" << endl;
+  cout << "MCMC: " << (ms6.count() - ms5.count())/1000 << " seconds" << endl;
 //  cout << "GTR distance matrix: " << (ms7.count() - ms6.count())/1000 << "seconds" << endl;
-  cout << "Bootstrap: " << (ms8.count() - ms7.count())/1000 << "seconds" << endl;
+  cout << "Bootstrap: " << (ms8.count() - ms7.count())/1000 << " seconds" << endl;
 //  cout << ms9.count() - ms8.count() << endl;
-  cout << "Estimate ccdprobs from bootstrap: " << (ms10.count() - ms9.count())/1000 << "seconds" << endl;
-  cout << "Importance sampling: " << (ms11.count() - ms10.count())/1000 << "seconds" << endl;
+  cout << "Estimate ccdprobs from bootstrap: " << (ms10.count() - ms9.count())/1000 << " seconds" << endl;
+  cout << "Importance sampling: " << (ms11.count() - ms10.count())/1000 << " seconds" << endl;
 
   return 0;
 }

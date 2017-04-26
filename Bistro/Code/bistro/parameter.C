@@ -36,6 +36,8 @@ void usage(ostream& f)
   f << "    --onlyBootstrap                |  only does the bootstrap sample of trees (false)" << endl;
   f << "    --no-mcmc                      |  do not use MCMC to estimate Q" << endl;
   f << "    -m num                         |  nonnegative integer number of MCMC cycles (1000), update Q and all edge lengths" << endl;
+  f << "    --mb file file                 |  [not used in bistro] mrbayes file after mb2badger (.tre) for distances" << endl;
+  f << "    --bistrofile file              |  [not used in bistro] bistro file (.treeBL) for distances" << endl;
   exit(1);
 }
 
@@ -318,6 +320,34 @@ void Parameter::processCommandLine(int argc,char* argv[])
       else
       {
         cerr << "Error: flag `--threads' not followed by a postive value" << endl;
+        usage(cerr);
+      }
+    }
+    else if ( strcmp(argv[k],"--mbfile") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> mbfile;
+      }
+      else
+      {
+        cerr << "Error: flag `--mbfile' not followed by a filename string" << endl;
+        usage(cerr);
+      }
+    }
+    else if ( strcmp(argv[k],"--bistrofile") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> bistrofile;
+      }
+      else
+      {
+        cerr << "Error: flag `--bistrofile' not followed by a filename string" << endl;
         usage(cerr);
       }
     }
