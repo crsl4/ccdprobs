@@ -819,7 +819,6 @@ int main(int argc, char* argv[])
 	for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
 	  {
 	    logwt[k] = *q;
-	    //cerr << "logwt[" << k << "]= " << logwt[k] << endl;
 	    ++k;
 	  }
       }
@@ -838,9 +837,7 @@ int main(int argc, char* argv[])
     double sum=0;
     for ( int k=0; k<numRandom; ++k )
     {
-      //      cerr << "logwt[k]: " << logwt[k] << "for k= " << k << endl;
       wt[k] = exp(logwt[k] - maxLogWeight);
-      //cerr << "wt[k]: " << wt[k] << endl;
       sum += wt[k];
     }
     double essInverse=0;
@@ -872,12 +869,12 @@ int main(int argc, char* argv[])
     }
 
     CCDProbs<double> splits(topologyToUnnormalizedWeightMap,taxaNumbers,taxaNames);
-    string splitsWeightsFile = parameters.getOutFileRoot() + ".splits";
+    string splitsWeightsFile = parameters.getOutFileRoot() + ".tstat";
     ofstream splitsWt(splitsWeightsFile.c_str());
     splits.writeCladeCountOrdered(splitsWt, essInverse);
     splitsWt.close();
 
-    string topologyPPFile = parameters.getOutFileRoot() + ".topPP";
+    string topologyPPFile = parameters.getOutFileRoot() + ".trprobs";
     ofstream topPP(topologyPPFile.c_str());
 
     vector< pair<string,double> > v;

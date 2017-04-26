@@ -58,9 +58,13 @@ computeEntropy = function(stem){
 }
 
 
-plotBistro = function(bistro) {
+plotBistro = function(bistro,filterData=FALSE) {
     require(ggplot2)
     require(viridis)
+    require(dplyr)
+    if(filterData){
+        bistro = bistro %>% filter(logWt > max(logWt)-20)
+    }
     temp.tree = as.character(bistro$tree)
     tab = with(bistro, rev(sort(table(tree))))
     if ( length(levels(bistro$tree)) > 6 ) {
@@ -81,16 +85,26 @@ plotBistro = function(bistro) {
     my.plot = ggplot(bistro,aes(x=logl+logPrior,y=logQ+logTop+logBL,color=w,shape=Tree)) +
         geom_point() +
             scale_color_viridis() +
-                ##coord_fixed() +
                     theme(legend.position="top")
+    if(filterData){
+        my.plot = my.plot + coord_fixed()
+    }
+    lim = range(bistro$logQ+bistro$logTop+bistro$logBL)
+    my.plot = my.plot +
+        geom_abline(intercept=seq(lim[1], lim[2]),
+                    slope=1,
+                    colour="white")
     plot(my.plot)
     return(invisible(my.plot))
 }
 
-plotBistro2 = function(bistro) {
+plotBistro2 = function(bistro,filterData=FALSE) {
   require(dplyr)
   require(ggplot2)
   require(viridis)
+  if(filterData){
+      bistro = bistro %>% filter(logWt > max(logWt)-20)
+  }
   temp.tree = as.character(bistro$tree)
   tab = with(bistro, rev(sort(table(tree))))
   if ( length(levels(bistro$tree)) > 6 ) {
@@ -113,8 +127,15 @@ plotBistro2 = function(bistro) {
   my.plot = ggplot(bistro,aes(x=logProposal,y=logTarget-logProposal,color=w,shape=Tree)) +
     geom_point() +
     scale_color_viridis() +
-    ##coord_fixed() +
     theme(legend.position="top")
+  if(filterData){
+      my.plot = my.plot + coord_fixed()
+  }
+  lim = range(bistro$logQ+bistro$logTop+bistro$logBL)
+  my.plot = my.plot +
+      geom_abline(intercept=seq(lim[1], lim[2]),
+                  slope=1,
+                  colour="white")
   plot(my.plot)
   return(invisible(my.plot))
 }

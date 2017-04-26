@@ -2,17 +2,24 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- check test in art, and add/commit the changes in files names
+- put scripts summarizeOut.r into bistro so that we have comparable output files to MrBayes; give same extensions:
+  - pstat: rates
+- separate c++ file to read a list of trees (mb), calculate the mean tree and the distances; compare bistro mean tree with mb consensus tree: do MDL stuff for chosen 100 trees
+
+- run with passer-aligned, and datasets
+
+
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 
 ## Check with Bret
-- saved Q to file now *.q, not just logfile
-- see whales case, what is the PP in mrbayes tstat, smap? problem with very close branch lengths, not a bistro problem; confused why distance is small, but distance weight is small too
-- cats and dogs is ok, but MAP bistro tree != MAP mb tree
-- very nice results with simulated 16 taxa
-- found seed in sim-16 with a lot of mu>0 cases, we can rerun to see the table of loglik: problem again here with BL: long BL, I think related to mu>0 cases
+- changed output files extensions to match mrbayes: trprobs, tstat (splits)
+- summarize branch lengths inside bistro: I know how in julia, ideas for c++:
+  - vstat: BL
+
 
 
 ## Jordan

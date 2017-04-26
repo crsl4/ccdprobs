@@ -108,8 +108,10 @@ I think that the problem with this dataset is the very short branches around 10,
 ## Cats and dogs
 - Cats and dogs with fixed mean tree: `ESS 16%`
 - not fixed tree: `ESS 2.4%` (without choosing the root wisely for the long branch)
+
 Mean tree:
 `(1,2,((3,((4,5),6)),(((((7,8),9),10),11),12)));`
+
 Bistro tree:
 ```
 (1,2,((3,((4,5),6)),(((((7,8),9),10),12),11))); 0.4286
@@ -121,7 +123,7 @@ MrBayes tree:
 (((11,(12,(10,(9,(8,7))))),2),((6,(5,4)),3),1); 0.786589
 (2,((11,(12,(10,(9,(8,7))))),((6,(5,4)),3)),1); 0.140961
 ```
-The mean (bistro) tree is the second mb tree; the second bistro tree is the first mb tree.
+The mean (bistro) tree is the second mb tree; the second bistro tree is the first mb tree. But the 1st tree in bistro matches the tree 
 
 ### Simulated cats and dogs
 - sim cats dogs 1500: `ESS 2.76%`

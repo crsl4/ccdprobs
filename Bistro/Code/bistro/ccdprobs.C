@@ -35,7 +35,7 @@ bool operator< (const CladePair& c1,const CladePair& c2)
 }
 
 void Clade::print(ostream& f) const {
-    
+
   string comma = "";
 
   dynamic_bitset<unsigned char>::size_type first = clade.find_first();
@@ -245,14 +245,14 @@ void RootedTree::print(ostream& f)
 void RootedTree::printClades(ostream& f)
 {
   for ( vector<Clade>::iterator p = clades.begin(); p != clades.end(); ++p) {
-    (*p).print(f); 
+    (*p).print(f);
     f << " ";
   }
-}    
+}
 
 /*
 Tree CCDProbs::rtop(mt19937_64& rng)
 {
-  
+
 }
 */
