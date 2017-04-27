@@ -1,3 +1,6 @@
+## with new output files
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro4 -r 1000 -b 1000 > bistro4.log
+
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro3 -r 1000 -b 1000 > bistro3.log
 ## In R:
 source("../../Scripts/summary.R")

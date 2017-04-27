@@ -1,4 +1,5 @@
-../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro5-whales -r 1000 -b 1000 --onlyBootstrap > bistro5-whales.log
+## after new output files
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro5-whales -r 1000 -b 1000 > bistro5-whales.log
 
 ../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o bistro4-whales -r 1000 -b 1000 > bistro4-whales.log
 mb sim-whales-nsites1500-sorted.nex

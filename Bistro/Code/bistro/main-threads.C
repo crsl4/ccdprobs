@@ -852,18 +852,6 @@ int main(int argc, char* argv[])
       }
     }
 
-    k = 0;
-    for(vector<vector<double>>::iterator p=pi.begin(); p != pi.end(); ++p)
-    {
-      cerr << k << " " << convert(*p).transpose() << endl;
-      ++k;
-    }
-
-    // for(int k=0; k<numRandom; ++k)
-    // {
-    //   cerr << convert(pi[k]).transpose() << endl;
-    // }
-
     // combine vector of rates
     vector<vector<double>> rates;
     for( vector<vector< vector<double> > >::iterator p=rates0.begin(); p != rates0.end(); ++p)
