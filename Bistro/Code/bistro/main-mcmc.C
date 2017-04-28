@@ -67,7 +67,7 @@ VectorXd dirichletProposalDensity(VectorXd x,double scale,double& logProposalDen
 // we calculate the scale inside
 // E(yi) = alpha_i/sum{alpha_i}=x_i (because sum{x_i}=1)
 // Var(yi) = alpha_i*(sum{alpha_i}-alpha_i)/(sum{alpha_i})^2*(sum{alpha_i}+1)
-// if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi 
+// if alpha_i=scale*x_i => Var(yi) = xi*(1-xi)/(scale+1) = vi => scale = xi(1-xi)/vi
 VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposalDensity,mt19937_64& rng)
 {
   //  cout << "vector x: " << x.transpose() << endl;
@@ -80,7 +80,7 @@ VectorXd dirichletProposalDensityScale(VectorXd x,VectorXd v,double& logProposal
   for ( int i=0; i<x.size(); ++i )
     scale += x(i)*(1-x(i))/v(i);
   scale /= x.size(); //we need to use the same scale or we create bias
-  cout << "Scale: " << scale << endl;  
+  cout << "Scale: " << scale << endl;
   for ( int i=0; i<x.size(); ++i )
   {
     alpha(i) = scale*x(i) + 1;
@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
 // Read in initial tree topology
   Tree tree(parameters.getTopology(), alignment);
   tree.setInitialEdgeLengths(0.1);
-  
+
   milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   // Initialize random number generator
@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
   string parFile = parameters.getOutFileRoot() + ".par";
   ofstream treeStream(treeFile.c_str());
   ofstream parStream(parFile.c_str());
-    
+
   cerr << "burn-in:" << endl;
   tree.mcmc(q_init,alignment,parameters.getNumMCMC()/10,alignment.getNumSites(),rng,treeStream,parStream, true);
   cerr << endl << " done." << endl;
@@ -288,6 +288,6 @@ int main(int argc, char* argv[])
 
   treeStream.close();
   parStream.close();
-  
+
   return 0;
 }

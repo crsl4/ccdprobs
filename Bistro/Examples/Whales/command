@@ -1,5 +1,6 @@
 ## new output files
 ../../Code/bistro/bistro -f ../../Data/whales.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
+../../Code/bistro/bistro -f ../../Data/whales.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
 
 
 ## test distance matrices

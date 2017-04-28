@@ -1,8 +1,7 @@
 // Bret Larget and Claudia Solis-Lemus
 // distances -f fasta --mbfile mb.tre --bistrofile bistro.treeBL -s seed
-
-#define MCMC_Q_BURN 100
-#define MCMC_Q_SAMPLE 1000
+// for now we assume that the fasta file (used in bistro) and the nexus file
+// (used in mrbayes) have the same translate table
 
 #include <iostream>
 #include <iomanip>
