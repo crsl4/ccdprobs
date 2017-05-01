@@ -1,2 +1,13 @@
+## fixed tree run
+../../Code/bistro/bistro -f ../../Data/passer-aligned.fasta -o bistro-fixed1 -r 1000 -b 1000 -t "(1,2,(((3,4),6),(((((5,9),14),((((11,19),(18,20)),17),(15,16))),(7,8)),(10,(12,13)))));" > bistro-fixed1.log
+
+## bmcmc
+../../Code/bistro/bmcmc -f ../../Data/passer-aligned.fasta -o bistro-mcmc1 -r 10000 -b 1000 -t "(1,2,(((3,4),6),(((((5,9),14),((((11,19),(18,20)),17),(15,16))),(7,8)),(10,(12,13)))));" > bistro-mcmc1.log
+
 ## new output files
 ../../Code/bistro/bistro -f ../../Data/passer-aligned.fasta -o bistro1 -r 1000 -b 1000 > bistro1.log
+
+## get the topology string
+sed -E "s/:[0-9].[0-9]+//g;" run1.meanTree
+## output
+(1,2,(((3,4),6),(((((5,9),14),((((11,19),(18,20)),17),(15,16))),(7,8)),(10,(12,13)))));
