@@ -2,11 +2,19 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- do R script to compare the output files from mrbayes and bistro: trprobs, tstat, pstat, vstat (later)
+- whales with fix tree
+- add a --onlyMCMC option to bistro
+- compare rates: density plots for mrbayes transformed to s, and bistro proposals and bistro weighted (if ESS is big)
+- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes
+- for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
+  - we need to create new object CCDprobsBL, in which the cladeCount is counting weight, but now will be counting weighted branch length
+
 - add to main-distances.C the thing on reading mb and bistro trees
 - test that it compiles; test it to get the matrices (with bret do the mdl)
 - run with passer-aligned, sim-whales, cats-dogs, whales (new distance function)
 
+- diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
+  - (1,(3,2)7)10, the parent edge of 7 has clade 3,2
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -14,13 +22,22 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- changed output files extensions to match mrbayes: trprobs, tstat (splits), pstat (rates): need R script to compare with MrBayes, what types of plots? cats-dogs, whales, sim-whales, passer-aligned
-- summarize branch lengths inside bistro: I know how in julia, ideas for c++:
-  - vstat: BL
-- distances file to read mrbayes and bistro trees and compute distance matrix to do mdl; problem: findMean tree file needs alignment! this is burdensome, but also can cause errors if the fasta and nexus files have different translate tables
-- using random shuffle to sample 100 trees
+- only-mcmc option, instead of bmcmc
 
 ## Jordan
+### Final steps:
+1. Clean up and add comments to the changes you made to files in `Bistro/Code/bistro`. Also, put the boost folder and everything that you needed to compile bistro in Ubuntu.
+2. Put the scripts that you created to parse the output in the `Bistro/Scripts` folder with a README file on how to use them
+3. Fork the ccdprobs repository on Github (you need a Github account for this), and replace your local version of ccdprobs with the cloned version from your repository:
+`git clone https://github.com/YOUR_USERNAME/ccdprobs.git`
+Make sure to backup your Bistro/Code/bistro folder, and all the files you added to `Bistro/Scripts`
+4. Replace your files in the ccdprobs file, and do:
+```
+git add .
+git commit -m "message explaining your changes"
+git push
+```
+
 - Create bootstrap sample of trees for different datasets:
   - Compare bootstrap frequencies of trees and clades to MrBayes PP (with plots):
     - artiodactyl

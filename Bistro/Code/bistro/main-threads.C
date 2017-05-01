@@ -142,7 +142,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 
    if ( indStart == 0 )
      cerr << '|';
-   
+
    for ( int k=indStart; k<indEnd; ++k )
    {
      if(indStart == 0)
@@ -404,19 +404,30 @@ int main(int argc, char* argv[])
   {
     cerr << "Running MCMC to estimate Q matrix ..." << endl;
 
+    string treeFile = parameters.getOutFileRoot() + ".tre";
+    string parFile = parameters.getOutFileRoot() + ".par";
+    ofstream treeStream(treeFile.c_str());
+    ofstream parStream(parFile.c_str());
+
     // burnin
     cerr << "burn-in:" << endl;
     unsigned int mcmcGenerations = parameters.getNumMCMC();
     unsigned int mcmcBurn =  mcmcGenerations / 10;
-    starttree.mcmc(q_init,alignment,mcmcBurn,alignment.getNumSites(),rng,true);
+    starttree.mcmc(q_init,alignment,mcmcBurn,alignment.getNumSites(),rng,treeStream,parStream,true);
     cerr << endl << " done." << endl;
 
     // mcmc to get final Q
     cerr << "sampling:" << endl;
-    starttree.mcmc(q_init,alignment,mcmcGenerations,alignment.getNumSites(),rng,false);
+    starttree.mcmc(q_init,alignment,mcmcGenerations,alignment.getNumSites(),rng,treeStream,parStream,false);
     cerr << endl << " done." << endl;
+    treeStream.close();
+    parStream.close();
   }
   cerr << "After MCMC block" << endl;
+
+  if(parameters.getOnlyMCMC())
+    return 0;
+
 
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
 // save to file)

@@ -1913,7 +1913,7 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
 	cout << "branch lengths after MLE pass: " << leftEdge->getNumber() << " " << rightEdge->getNumber() << " " << t.transpose() << endl;
     }
     if(t(0) < MIN_EDGE_LENGTH + TOL || t(1) < MIN_EDGE_LENGTH + TOL )
-    { 
+    {
       if(VERBOSE)
 	cerr << "entering half normal/gamma case: 2D" << endl;
       t(0) = halfNormalGamma(leftEdge,alignment,qmatrix,logdensity, rng);
@@ -1961,7 +1961,7 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       t(2) = otherEdge->getLength();
     }
     if(t(0) < MIN_EDGE_LENGTH + TOL || t(1) < MIN_EDGE_LENGTH + TOL || t(2) < MIN_EDGE_LENGTH + TOL )
-    { 
+    {
       t(0) = halfNormalGamma(leftEdge,alignment,qmatrix,logdensity, rng);
       t(1) = halfNormalGamma(rightEdge,alignment,qmatrix,logdensity, rng);
       t(2) = halfNormalGamma(otherEdge,alignment,qmatrix,logdensity, rng);
@@ -2976,6 +2976,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,doub
     if ( printOutput )
     {
       parStream << stats.getCurrLogLikelihood() << " " << Q.getStationaryP().transpose() << " " << Q.getSymmetricQP().transpose() << endl;
+      reroot(1);
       sortCanonical();
       treeStream << makeTreeNumbers() << endl;
     }

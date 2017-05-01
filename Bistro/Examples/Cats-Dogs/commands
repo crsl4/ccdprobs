@@ -1,5 +1,7 @@
 ## with new output files
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro4 -r 1000 -b 1000 > bistro4.log
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bmcmc -m 10000 --only-mcmc -t  "(1,2,((3,((4,5),6)),(((((7,8),9),10),11),12)));" > bmcmc.log
+
 
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro3 -r 1000 -b 1000 > bistro3.log
 ## In R:
@@ -8,7 +10,12 @@ compareBistroMB("bistro3",mb="cats-dogs-2")
 
 
 ## run bistro on mean tree
-../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro-meanTree -r 1000 -b 1000 -t (1,2,((3,((4,5),6)),(((((7,8),9),10),11),12))); > bistro-meanTree.log
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro-meanTree -r 1000 -b 1000 -t "(1,2,((3,((4,5),6)),(((((7,8),9),10),11),12)));" > bistro-meanTree.log
+../../Code/bistro/bmcmc -f ../../Data/cats-dogs.fasta -o mcmc2 -m 10000 -t "(1,2,((3,((4,5),6)),(((((7,8),9),10),11),12)));" > mcmc2.log
+
+source("../../Scripts/summary.R")
+compareBistro("bistro-meanTree",besttree="(1,(2,(((((7,8),9),10),11),12)),(3,((4,5),6)));",bmcmc="mcmc2")
+
 
 
 ## with mapParent=NULL at the end

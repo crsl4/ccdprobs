@@ -38,6 +38,7 @@ void usage(ostream& f)
   f << "    -m num                         |  nonnegative integer number of MCMC cycles (1000), update Q and all edge lengths" << endl;
   f << "    --mb file file                 |  [not used in bistro] mrbayes file after mb2badger (.tre) for distances" << endl;
   f << "    --bistrofile file              |  [not used in bistro] bistro file (.treeBL) for distances" << endl;
+  f << "    --only-mcmc                    |  only does the MCMC for a fixed tree (false)" << endl;
   exit(1);
 }
 
@@ -264,6 +265,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--onlyBootstrap") == 0 )
     {
       onlyBootstrap = true;
+    }
+    else if ( strcmp(argv[k],"--only-mcmc") == 0 )
+    {
+      onlyMCMC = true;
     }
     else if ( strcmp(argv[k],"--fixedQ") == 0 )
     {
