@@ -72,6 +72,26 @@ vector<string> sampleTrees(vector<string> trees, int sampleSize, int seed)
   return newtrees;
 }
 
+vector<string> readFile(istream& f, const string& name, int skip)
+{
+  string str;
+  vector<string> trees;
+  for(int i=0;i<skip;i++)
+    if(!getline(f,str)) {
+      cerr << "Error: " << (name=="-" ? "Standard input" : ("Input file " + name))
+	   << " contains " << (i==skip-1 ? "exactly" : "fewer than ") << skip << " lines." << endl;
+      exit(1);
+    }
+  if(getline(f,str)) {
+    do {
+      trees.push_back(str);
+    }
+    while(getline(f,str));
+  }
+  return trees;
+}
+
+
 int main(int argc, char* argv[])
 {
   // Read command line and process parameters
@@ -94,10 +114,26 @@ int main(int argc, char* argv[])
     parameters.setSeed(rd());
   }
 
+// need to add here the parameter for skip
 
-  // here we need to read the trees in the two files
-  vector<string> mbtrees;
-  vector<string> bistrotrees;
+  // here we read the trees in the two files
+  string mbname = parameters.getMBfile();
+  ifstream f(mbname.c_str());
+  if(!f) {
+    cerr << "Error: Could not open " << mbname << endl;
+    exit(1);
+  }
+  f.close();
+  vector<string> mbtrees = readFile(f,mbname,skip);
+
+  string bistroname = parameters.getBistrofile();
+  ifstream f(bistroname.c_str());
+  if(!f) {
+    cerr << "Error: Could not open " << bistroname << endl;
+    exit(1);
+  }
+  f.close();
+  vector<string> bistrotrees = readFile(f,bistroname,skip);
 
   // mean tree
   CladeGraph MBcladeGraph;

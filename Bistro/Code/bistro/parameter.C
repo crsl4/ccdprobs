@@ -36,7 +36,7 @@ void usage(ostream& f)
   f << "    --onlyBootstrap                |  only does the bootstrap sample of trees (false)" << endl;
   f << "    --no-mcmc                      |  do not use MCMC to estimate Q" << endl;
   f << "    -m num                         |  nonnegative integer number of MCMC cycles (1000), update Q and all edge lengths" << endl;
-  f << "    --mb file file                 |  [not used in bistro] mrbayes file after mb2badger (.tre) for distances" << endl;
+  f << "    --mbfile file                  |  [not used in bistro] mrbayes file after mb2badger (.tre) for distances" << endl;
   f << "    --bistrofile file              |  [not used in bistro] bistro file (.treeBL) for distances" << endl;
   f << "    --only-mcmc                    |  only does the MCMC for a fixed tree (false)" << endl;
   exit(1);

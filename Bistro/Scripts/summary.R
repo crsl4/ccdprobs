@@ -853,3 +853,96 @@ compareBistroMB = function(stem, mb=NULL, truetree=NULL, trueq=NULL){
     }
     dev.off()
 }
+
+
+
+############################################################################################
+## Clean functions
+
+## for mb we need the stem.run1.p, after deleting the first row in run1.p
+readDataBistroRates = function(stem,mb=NULL, bmcmc=NULL)
+{
+    ## reading bistro output
+    source("../../Scripts/readBistro.r")
+    bistro = readBistro(stem)
+    ## Get sampled rates from Bistro
+    bistro2 = subset(bistro,select=c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6","w"))
+    N.bistro2 = nrow(bistro2)
+
+    if(!is.null(mb)){
+        ## now mrbayes rates
+        foo1 = read.table(paste0(mb,".run1.p"), header=TRUE)
+        foo2 = read.table(paste0(mb,".run2.p"), header=TRUE)
+        foo = rbind(foo1[-(1:2001),],foo2[-(1:2001),])
+        foo$sAC = with(foo, r.A...C. * pi.A. * pi.C.)
+        foo$sAG = with(foo, r.A...G. * pi.A. * pi.G.)
+        foo$sAT = with(foo, r.A...T. * pi.A. * pi.T.)
+        foo$sCG = with(foo, r.C...G. * pi.C. * pi.G.)
+        foo$sCT = with(foo, r.C...T. * pi.C. * pi.T.)
+        foo$sGT = with(foo, r.G...T. * pi.G. * pi.T.)
+        s = with(foo,sAC+sAG+sAT+sCG+sCT+sGT)
+        foo$sAC = foo$sAC/s
+        foo$sAG = foo$sAG/s
+        foo$sAT = foo$sAT/s
+        foo$sCG = foo$sCG/s
+        foo$sCT = foo$sCT/s
+        foo$sGT = foo$sGT/s
+        n = length(foo$Gen)
+        if ( n > 1000 ) ## only sample 1000 for plots
+            foo = foo[sample(1:nrow(foo2),1000,replace=FALSE),]
+        foo2 = subset(foo,select=c("pi.A.","pi.C.","pi.G.","pi.T.","sAC","sAG","sAT","sCG","sCT","sGT"))
+        names(foo2) = c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6")
+        foo2$w = NA
+
+        df2 = rbind(bistro2,foo2)
+        N.bistro2 = nrow(bistro2)
+        N.mb2 = nrow(foo2)
+        df2$set = factor( c(rep("Bistro",N.bistro2),rep("MrBayes",N.mb2)) )
+    }else{
+        df2 = bistro2
+        df2$set = factor( c(rep("Bistro",N.bistro2)))
+    }
+    if(!is.null(bmcmc)){
+        foo2 = read.table(paste0(bmcmc,".par"))
+        n = nrow(foo2)
+        burn = round(n/11)
+        foo2 = foo2[-(1:burn),-1]
+        if ( n > 1000 ) ## only sample 1000 for plots
+            foo2 = foo2[sample(1:nrow(foo2),1000,replace=FALSE),]
+        names(foo2) = c("pi1","pi2","pi3","pi4","s1","s2","s3","s4","s5","s6")
+        N.mb2 = nrow(foo2)
+        foo2$w = NA
+        foo2$set = rep("bmcmc",N.mb2)
+        df2 = rbind(df2,foo2)
+    }
+    return(df2)
+}
+
+## df2 from readDataBistroRates
+plotBistroRates = function(df2,stem="bistro", trueq=NULL)
+{
+    if(!is.null(trueq) && length(trueq) != 10)
+        stop("input vector q with true values does not have 10 elements: 4 pi, 6 s")
+    labs = levels(df2$set)
+    pdf(paste0(stem,"-rates-density.pdf"))
+    vpal = viridis(3,end=0.8)
+    for(i in 1:(ncol(df2)-2)){
+        means = c(0,0,0)
+        for(j in 1:length(labs)){
+            means[j] = mean( drop(as.matrix(filter(df2,set==labs[j]) %>% select(i))) )
+        }
+        q = ggplot(df2,aes(x=df2[,i],col=set))+geom_density() +
+            scale_color_manual(values=vpal) +
+                geom_vline(xintercept=means[1],color=vpal[1]) +
+                        ggtitle(paste(names(df2)[i])) +
+                            theme_bw()
+        if(!is.null(trueq))
+            q = q + geom_vline(xintercept=trueq[i],color="black")
+        if(length(labs)>1)
+            q = q + geom_vline(xintercept=means[2],color=vpal[2])
+        if(length(labs)>2)
+            q = q + geom_vline(xintercept=means[3],color=vpal[3])
+        plot(q)
+    }
+    dev.off()
+}

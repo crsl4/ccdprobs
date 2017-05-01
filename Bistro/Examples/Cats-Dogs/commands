@@ -1,6 +1,9 @@
 ## with new output files
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro4 -r 1000 -b 1000 > bistro4.log
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bmcmc -m 10000 --only-mcmc -t  "(1,2,((3,((4,5),6)),(((((7,8),9),10),11),12)));" > bmcmc.log
+o
+source("../../Scripts/summary.R")
+compareBistro("bistro-meanTree",bmcmc="bmcmc", besttree="(1,2,((3,((4,5),6)),(((((7,8),9),10),11),12)));")
 
 
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro3 -r 1000 -b 1000 > bistro3.log

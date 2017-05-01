@@ -27,19 +27,19 @@ LDLIBS = -lpthread
 # CFLAGS = -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-declarations -g -v -da -Q
 # LDLIBS = -lpthread
 
-all: bistro bmcmc
+all: bistro #bmcmc
 
 bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h cladegraph.h $(OBJS)
 	$(CC) $(CFLAGS) -o bistro main-threads.C $(OBJS) $(LDLIBS)
 
-bmcmc: main-mcmc.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
-	$(CC) $(CFLAGS) -o bmcmc main-mcmc.C $(OBJS) $(LDLIBS)
+#bmcmc: main-mcmc.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
+#	$(CC) $(CFLAGS) -o bmcmc main-mcmc.C $(OBJS) $(LDLIBS)
 
 # bccd: main-ccd.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
 # 	$(CC) $(CFLAGS) -o bccd main-ccd.C $(OBJS) $(LDLIBS)
 
 clean:
-	-rm -f $(OBJS) bistro bmcmc
+	-rm -f $(OBJS) bistro #bmcmc
 
 ccdprobs.o: ccdprobs.C alias.h ccdprobs.h
 	$(CC) $(CFLAGS) -c ccdprobs.C

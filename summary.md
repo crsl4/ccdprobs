@@ -2,19 +2,17 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- whales with fix tree
-- add a --onlyMCMC option to bistro
-- compare rates: density plots for mrbayes transformed to s, and bistro proposals and bistro weighted (if ESS is big)
-- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes
-- for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
-  - we need to create new object CCDprobsBL, in which the cladeCount is counting weight, but now will be counting weighted branch length
-
-- add to main-distances.C the thing on reading mb and bistro trees
+- finish main-distances.C the thing on reading mb and bistro trees
 - test that it compiles; test it to get the matrices (with bret do the mdl)
 - run with passer-aligned, sim-whales, cats-dogs, whales (new distance function)
 
+- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes
+
+- for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
+  - we need to create new object CCDprobsBL, in which the cladeCount is counting weight, but now will be counting weighted branch length
+
 - diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
-  - (1,(3,2)7)10, the parent edge of 7 has clade 3,2
+
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -22,7 +20,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- only-mcmc option, instead of bmcmc
+- whales fixed tree: ESS 10%
 
 ## Jordan
 ### Final steps:
