@@ -123,7 +123,7 @@ MrBayes tree:
 (((11,(12,(10,(9,(8,7))))),2),((6,(5,4)),3),1); 0.786589
 (2,((11,(12,(10,(9,(8,7))))),((6,(5,4)),3)),1); 0.140961
 ```
-The mean (bistro) tree is the second mb tree; the second bistro tree is the first mb tree. But the 1st tree in bistro matches the tree 
+The mean (bistro) tree is the second mb tree; the second bistro tree is the first mb tree. But the 1st tree in bistro matches the tree
 
 ### Simulated cats and dogs
 - sim cats dogs 1500: `ESS 2.76%`
@@ -151,3 +151,21 @@ compareBistroMB("bistro3",mb="sim-16-nsites1500",truetree="(A:0.0025,B:0.0025,((
 [1] "Most frequently sampled tree is equal to the true tree: 0.79"
 [1] "true tree sampled: 786 times"
 ```
+## Whales
+- Fixed tree (mean tree): ESS 10%
+- Not fixed tree: ESS 1%
+
+# Comparison of distance matrix between MrBayes trees and Bistro
+
+## Simulates Whales
+First, we need to run `mb2badger` on MrBayes output:
+```
+mb sim-whales-nsites1500-sorted.nex
+../../Code/badger/mb2badger sim-whales-nsites1500-sorted.nex.run1.t
+```
+Now, we will run the `distances` executable:
+```
+cd Bistro/Examples/Simulations
+
+```
+- `bistro5-whales.treeBL`

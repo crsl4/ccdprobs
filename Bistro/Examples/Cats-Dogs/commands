@@ -1,3 +1,8 @@
+## distance
+../../Code/badger/mb2badger cats-dogs-2.nex.run1.t
+../../Code/badger/mb2badger cats-dogs-2.nex.run2.t
+../../Code/bistro/distances -f ../../Data/cats-dogs.fasta --mbfile cats-dogs-2.nex.run1.tre --bistrofile bistro4---0-249.treeBL
+
 ## with new output files
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro4 -r 1000 -b 1000 > bistro4.log
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bmcmc -m 10000 --only-mcmc -t  "(1,2,((3,((4,5),6)),(((((7,8),9),10),11),12)));" > bmcmc.log

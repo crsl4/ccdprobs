@@ -39,6 +39,7 @@ void usage(ostream& f)
   f << "    --mbfile file                  |  [not used in bistro] mrbayes file after mb2badger (.tre) for distances" << endl;
   f << "    --bistrofile file              |  [not used in bistro] bistro file (.treeBL) for distances" << endl;
   f << "    --only-mcmc                    |  only does the MCMC for a fixed tree (false)" << endl;
+  f << "    --skip int                     |  [not used in bistro] number of trees to skip in mrbayes (0)" << endl;
   exit(1);
 }
 
@@ -310,7 +311,21 @@ void Parameter::processCommandLine(int argc,char* argv[])
       }
       else
       {
-        cerr << "Error: flag `--eta' not followed by a postive value" << endl;
+        cerr << "Error: flag `--eta' not followed by a positive value" << endl;
+        usage(cerr);
+      }
+    }
+    else if ( strcmp(argv[k],"--skip") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> skip;
+      }
+      else
+      {
+        cerr << "Error: flag `--skip' not followed by a positive integer" << endl;
         usage(cerr);
       }
     }

@@ -2,14 +2,10 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- finish main-distances.C the thing on reading mb and bistro trees
-- test that it compiles; test it to get the matrices (with bret do the mdl)
-- run with passer-aligned, sim-whales, cats-dogs, whales (new distance function)
-
-- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes
+- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
-  - we need to create new object CCDprobsBL, in which the cladeCount is counting weight, but now will be counting weighted branch length
+  - we need to create new object CCDprobsBL, in which the cladeCount is counting weight, but now will be counting weighted branch length; but we need to modify RootedTree and RootedNode because now it does not keep track of parent edge
 
 - diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
 
@@ -20,7 +16,17 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- whales fixed tree: ESS 10%
+- whales fixed tree: ESS 10%, what is the problem with passer?
+- distances function: cannot use seed with random shuffle
+- distances function: how to combine files in c++?
+- distances function: error at the end?
+```
+distances(1378,0x7fff7a864000) malloc: *** error for object 0x7fc2fec8dd70: pointer being freed was not allocated
+*** set a breakpoint in malloc_error_break to debug
+Abort trap: 6
+```
+- now we have distance matrix: simulated whales, cats dogs,
+- to summarize branch lengths, we need to modify the rootedtree because RootedNode does not keep track of parent edge
 
 ## Jordan
 ### Final steps:

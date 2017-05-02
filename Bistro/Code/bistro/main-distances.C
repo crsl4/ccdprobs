@@ -1,5 +1,8 @@
 // Bret Larget and Claudia Solis-Lemus
-// distances -f fasta --mbfile mb.tre --bistrofile bistro.treeBL -s seed
+// distances -f fasta --mbfile mb.tre --bistrofile bistro---0-249.treeBL -s seed --skip int
+// fixit: we want to give the root, not each filename
+// the code will combine mb.run1.tre and mb.run2.tre (gotten after mb2badger),
+// and it will also combine bistro---*.treeBL
 // for now we assume that the fasta file (used in bistro) and the nexus file
 // (used in mrbayes) have the same translate table
 
@@ -58,30 +61,33 @@ void distanceMatrix(MatrixXd& mat,Tree mtree, vector<string> trees, Alignment al
     mat(i,trees.size()) = d;
     mat(trees.size(),i) = d;
   }
-  cerr << "Found " << badTrees << " for the pairwise distance matrix" << endl;
-  cerr << "Tree distance matrix: " << endl << endl;
-  cerr << mat << endl;
+  cerr << "Found " << badTrees << " bad trees for the computation of pairwise distance matrix" << endl;
+  // cerr << "Tree distance matrix: " << endl << endl;
+  // cerr << mat << endl;
 }
 
-vector<string> sampleTrees(vector<string> trees, int sampleSize, int seed)
+vector<string> sampleTrees(vector<string> trees, int sampleSize, int seed,mt19937_64& rng)
 {
-  random_shuffle ( trees.begin(), trees.end(), seed );
+  random_shuffle( trees.begin(), trees.end()); //fixit: not using seed
   vector<string>::const_iterator first = trees.begin();
   vector<string>::const_iterator last = trees.begin() + sampleSize - 1;
   vector<string> newtrees(first, last);
   return newtrees;
 }
 
-vector<string> readFile(istream& f, const string& name, int skip)
+vector<string> readFile(istream& f, const string& name, int skip, bool skipTrees)
 {
   string str;
   vector<string> trees;
-  for(int i=0;i<skip;i++)
-    if(!getline(f,str)) {
-      cerr << "Error: " << (name=="-" ? "Standard input" : ("Input file " + name))
-	   << " contains " << (i==skip-1 ? "exactly" : "fewer than ") << skip << " lines." << endl;
-      exit(1);
-    }
+  if(skipTrees)
+  {
+    for(int i=0;i<skip;i++)
+      if(!getline(f,str)) {
+	cerr << "Error: " << (name=="-" ? "Standard input" : ("Input file " + name))
+	     << " contains " << (i==skip-1 ? "exactly" : "fewer than ") << skip << " lines." << endl;
+	exit(1);
+      }
+  }
   if(getline(f,str)) {
     do {
       trees.push_back(str);
@@ -113,8 +119,8 @@ int main(int argc, char* argv[])
     random_device rd;
     parameters.setSeed(rd());
   }
-
-// need to add here the parameter for skip
+  mt19937_64 rng(parameters.getSeed());
+  int skip = parameters.getSkip();
 
   // here we read the trees in the two files
   string mbname = parameters.getMBfile();
@@ -123,23 +129,33 @@ int main(int argc, char* argv[])
     cerr << "Error: Could not open " << mbname << endl;
     exit(1);
   }
+  vector<string> mbtrees = readFile(f,mbname,skip,true);
+  cerr << "Read MrBayes file: " << mbname << endl;
+  cerr << "read " << mbtrees.size() << " trees" << endl;
   f.close();
-  vector<string> mbtrees = readFile(f,mbname,skip);
+
 
   string bistroname = parameters.getBistrofile();
-  ifstream f(bistroname.c_str());
-  if(!f) {
+  ifstream f2(bistroname.c_str());
+  if(!f2) {
     cerr << "Error: Could not open " << bistroname << endl;
     exit(1);
   }
-  f.close();
-  vector<string> bistrotrees = readFile(f,bistroname,skip);
+  vector<string> bistrotrees = readFile(f2,bistroname,skip,false);
+  cerr << "Read Bistro file: " << bistroname << endl;
+  cerr << "read " << bistrotrees.size() << " trees" << endl;
+  f2.close();
+
 
   // mean tree
   CladeGraph MBcladeGraph;
   CladeGraph BistrocladeGraph;
+  cerr << "Computing MrBayes mean tree" << endl;
   MBcladeGraph.findMeanTree(mbtrees,alignment); //warning: this will fail is fasta and nexus files have different translate table
+  cerr << "done." << endl;
+  cerr << "Computing Bistro mean tree" << endl;
   BistrocladeGraph.findMeanTree(bistrotrees,alignment);
+  cerr << "done." << endl;
   string MBmeanTree = MBcladeGraph.getMeanTree();
   string BistromeanTree = BistrocladeGraph.getMeanTree();
   cerr << "MB meanTree = " << MBmeanTree << endl;
@@ -147,31 +163,41 @@ int main(int argc, char* argv[])
 
   // now we need to choose a sample of 100 from the mbtrees and bistrotrees
   int sampleSize = 100;
-  vector<string> newBistroTrees;
+  cerr << "Getting random sample of " << sampleSize << " trees" << endl;
+  vector<string> newBistrotrees;
   if(bistrotrees.size() > sampleSize)
-    newBistroTrees = sampleTrees(bistrotrees, sampleSize, parameters.getSeed());
+    newBistrotrees = sampleTrees(bistrotrees, sampleSize, parameters.getSeed(),rng);
   else
-    newBistroTrees = bistrotrees;
-  vector<string> newMBTrees;
+    newBistrotrees = bistrotrees;
+  vector<string> newMBtrees;
   if(mbtrees.size() > sampleSize)
-    newMBTrees = sampleTrees(mbtrees, sampleSize, parmeters.getSeed());
+    newMBtrees = sampleTrees(mbtrees, sampleSize, parameters.getSeed(),rng);
   else
-    newMBTrees = mbtrees;
+    newMBtrees = mbtrees;
 
   Tree mbtree(MBmeanTree,alignment);
   Tree bistrotree(BistromeanTree,alignment);
   MatrixXd MBtreeDistanceMatrix = MatrixXd::Zero(sampleSize+1,sampleSize+1);
   MatrixXd BistrotreeDistanceMatrix = MatrixXd::Zero(sampleSize+1,sampleSize+1);
-  distanceMatrix(MBtreeDistanceMatrix,mbtree,newMbtrees,alignment);
+  cerr << "Distance for MrBayes trees" << endl;
+  distanceMatrix(MBtreeDistanceMatrix,mbtree,newMBtrees,alignment);
+  cerr << "done." << endl;
+  cerr << "Distance for Bistro trees" << endl;
   distanceMatrix(BistrotreeDistanceMatrix,bistrotree,newBistrotrees,alignment);
+  cerr << "done." << endl;
+
   string mbdistances = parameters.getMBfile() + ".distances";
+  cerr << "Writing MrBayes matrix to file " << mbdistances << endl;
   ofstream mbstream(mbdistances.c_str());
   mbstream << MBtreeDistanceMatrix << endl;
   mbstream.close();
+  cerr << "done." << endl;
   string bistrodistances = parameters.getBistrofile() + ".distances";
+  cerr << "Writing Bistro matrix to file " << bistrodistances << endl;
   ofstream bistrostream(bistrodistances.c_str());
   bistrostream << BistrotreeDistanceMatrix << endl;
   bistrostream.close();
+  cerr << "done." << endl;
 }
 
 
