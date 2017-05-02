@@ -2,6 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- is the malloc error from the sample of trees? test with 2 bistro files
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:

@@ -32,7 +32,7 @@ using namespace std;
 using namespace std::chrono;
 using namespace Eigen;
 
-void distanceMatrix(MatrixXd& mat,Tree mtree, vector<string> trees, Alignment alignment)
+void distanceMatrix(MatrixXd& mat,Tree& mtree, vector<string> trees, Alignment alignment)
 {
   int badTrees = 0;
   for ( int i = 0; i<trees.size(); ++i)
