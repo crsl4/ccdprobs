@@ -5,8 +5,7 @@ require(ggplot2)
 require(viridis)
 require(dplyr)
 
-##d = matrix(scan("mds.mat"),101,101)
-d = matrix(scan("bistro4---0-249.treeBL.distances"),101,101)
+d = matrix(scan("mds.mat"),101,101)
 out = cmdscale(d,k=2)
 
 top = read.table("mds.bootstrap",header=FALSE)
