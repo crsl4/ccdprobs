@@ -4,22 +4,17 @@ Bret Larget, Claudia Solis-Lemus (2016)
 ## To do now
 - leave `runningBistro.jl` running
 - check the mean tree for all dataset runs, and leave the same script running, but now with fixed tree
-- modify main-distances so that it also writes the list of trees used to file
-- check if bad trees before passing to function
-- do distance matrix with 50 from mb and 50 from bistro to get one matrix with all (with the two mean trees at the end)
 
-- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
-
   - tree function:
     - create an empty clade to pass to the root (or NULL)
-
   - node(parent egde, map, weight, clade)
   - if you are a leaf: add my number to the clade, return
-  - not a leaf: create a clade, and pass it to my children, when it gets the clade back, that is the key to the map (add to the map with the parent edge BL); then add the created clade to the clade that got past
+  - not a leaf: create a clade, and pass it to my children, when it gets the clade back, that is the key to the map (add to the map with the parent edge BL*weight); then add the created clade to the clade that got past
 
 - map(clade, vector<pair(bl, w)>)
 
+- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 - diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
 
 
@@ -30,6 +25,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## Check with Bret
 - distances function: cannot use seed with random shuffle
+- distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb
 
 
 ## Jordan
