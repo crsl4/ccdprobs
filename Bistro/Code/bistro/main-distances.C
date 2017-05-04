@@ -58,8 +58,10 @@ void distanceMatrix(MatrixXd& mat,Tree& mtree, vector<string> trees, Alignment a
       mat(j,i) = dd;
     }
     double d = mtree.distance(treei);
-    mat(i,trees.size()) = d;
-    mat(trees.size(),i) = d;
+    // cerr << "distance to mean tree at i,trees.size: " << i << "," << trees.size() << endl;
+    // cerr << "distance: " << d << endl;
+    mat(i,trees.size()+1) = d;
+    mat(trees.size()+1,i) = d;
   }
   cerr << "Found " << badTrees << " bad trees for the computation of pairwise distance matrix" << endl;
   // cerr << "Tree distance matrix: " << endl << endl;
@@ -177,6 +179,8 @@ int main(int argc, char* argv[])
 
   Tree mbtree(MBmeanTree,alignment);
   Tree bistrotree(BistromeanTree,alignment);
+  double dm = mbtree.distance(&bistrotree);
+  cerr << "Distance between mean trees: " << dm << endl;
   MatrixXd MBtreeDistanceMatrix = MatrixXd::Zero(sampleSize+1,sampleSize+1);
   MatrixXd BistrotreeDistanceMatrix = MatrixXd::Zero(sampleSize+1,sampleSize+1);
   cerr << "Distance for MrBayes trees" << endl;

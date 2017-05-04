@@ -2,11 +2,23 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- is the malloc error from the sample of trees? test with 2 bistro files
-- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
+- leave `runningBistro.jl` running
+- check the mean tree for all dataset runs, and leave the same script running, but now with fixed tree
+- modify main-distances so that it also writes the list of trees used to file
+- check if bad trees before passing to function
+- do distance matrix with 50 from mb and 50 from bistro to get one matrix with all (with the two mean trees at the end)
 
+- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
-  - we need to create new object CCDprobsBL, in which the cladeCount is counting weight, but now will be counting weighted branch length; but we need to modify RootedTree and RootedNode because now it does not keep track of parent edge
+
+  - tree function:
+    - create an empty clade to pass to the root (or NULL)
+
+  - node(parent egde, map, weight, clade)
+  - if you are a leaf: add my number to the clade, return
+  - not a leaf: create a clade, and pass it to my children, when it gets the clade back, that is the key to the map (add to the map with the parent edge BL); then add the created clade to the clade that got past
+
+- map(clade, vector<pair(bl, w)>)
 
 - diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
 
@@ -17,17 +29,8 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- whales fixed tree: ESS 10%, what is the problem with passer?
 - distances function: cannot use seed with random shuffle
-- distances function: how to combine files in c++?
-- distances function: error at the end?
-```
-distances(1378,0x7fff7a864000) malloc: *** error for object 0x7fc2fec8dd70: pointer being freed was not allocated
-*** set a breakpoint in malloc_error_break to debug
-Abort trap: 6
-```
-- now we have distance matrix: simulated whales, cats dogs,
-- to summarize branch lengths, we need to modify the rootedtree because RootedNode does not keep track of parent edge
+
 
 ## Jordan
 ### Final steps:
