@@ -985,18 +985,24 @@ void Tree::mleError(bool& converge)
 
 void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl)
 {
+  if(isnan(t))
+  {
+    cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
+    cerr << "Error here: branch length nan" << endl;
+    exit(1);
+  }
   Matrix4d P = qmatrix.getTransitionMatrix( t );
   Matrix4d QP = qmatrix.getQP( t );
   Matrix4d QQP = qmatrix.getQQP( t );
   int numSites = alignment.getNumSites();
 
   if(false)
-    {
-      cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
-      cout << "P =" << endl << P << endl << endl;
-      cout << "QP =" << endl << QP << endl << endl;
-      cout << "QQP =" << endl << QQP << endl << endl;
-    }
+  {
+    cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
+    cout << "P =" << endl << P << endl << endl;
+    cout << "QP =" << endl << QP << endl << endl;
+    cout << "QQP =" << endl << QQP << endl << endl;
+  }
 
   logl = 0;
   dlogl = 0;
@@ -1008,11 +1014,11 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
     nodes[0]->calculate(k,alignment,this);//,true); // sets pattern for this site
     nodes[1]->calculate(k,alignment,this);//,true);
     if(false)
-      {
-	cout << "Nodes: " << nodes[0]->getNumber() << ", " << nodes[1]->getNumber() << endl;
-	// cout << nodes[0]->getPattern() << endl;
-	// cout << nodes[1]->getPattern() << endl;
-      }
+    {
+      cout << "Nodes: " << nodes[0]->getNumber() << ", " << nodes[1]->getNumber() << endl;
+      // cout << nodes[0]->getPattern() << endl;
+      // cout << nodes[1]->getPattern() << endl;
+    }
     pair<double,Vector4d> pa = nodes[0]->getProb(); //patternToProbMap[current][nodes[0]->getPattern()];
     pair<double,Vector4d> pb = nodes[1]->getProb(); //patternToProbMap[current][nodes[1]->getPattern()];
     if(false)
@@ -1032,6 +1038,12 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
     ddlogl += (f0*f2 - f1*f1)/(f0*f0);
     if(false)
       cout << "logl: " << logl << endl;
+  }
+  if( isnan(logl) || isnan(dlogl) || isnan(ddlogl) )
+  {
+    cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
+    cerr << "Error here: logl, dlogl, ddlogl nan: " << logl << "," << dlogl << "," << ddlogl << endl;
+    exit(1);
   }
   nodes[0] -> setMapParent(this); //here we are resetting and traversing every time, maybe we could avoid this
   nodes[1] -> setMapParent(this);
@@ -1069,30 +1081,9 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   // trying to avoid really bad large initial values
   if ( curr > 1 )
     curr = 1.0;
-
-//  cerr << "Edge::mleLength, initial length = " << length << endl;;
-
-  /*
-  if ( number == 2 )
-  {
-    ofstream f("edge2.txt");
-    f << "t logl dlogl ddlogl" << endl;
-    for ( int i=1; i<=2000; ++i )
-    {
-      double t,logl,dlogl,ddlogl;
-      t = i* 0.001;
-      calculate(t,alignment,qmatrix,logl,dlogl,ddlogl);
-      f << t << " " << logl << " " << dlogl << " " << ddlogl << endl;
-    }
-    f.close();
-  }
-  */
   // try to find two spanning points
   double curr_logl,curr_dlogl,curr_ddlogl;
   calculate(curr,alignment,qmatrix,curr_logl,curr_dlogl,curr_ddlogl);
-
-//  cerr << "curr,logl,dlogl,ddlogl = " << curr << ", " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
-
   double prop = curr;
   double prop_logl = curr_logl;
   double prop_dlogl = curr_dlogl;
@@ -1160,7 +1151,7 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
       }
     } while ( prop_dlogl > TOL && (prop_logl > curr_logl) );
   }
-  else
+  else //curr_dlogl < -TOL
   {
     do
     {
@@ -1187,6 +1178,10 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
       return prop;
     }
   }
+  if( isnan(curr) || isnan(prop) || isnan(curr_dlogl) || isnan(prop_dlogl) )
+  {
+    cerr << "Warning: nan found" << endl;
+  }
   double lowerlimit;
   double upperlimit;
   if(prop_dlogl > TOL && curr_dlogl < -TOL)
@@ -1201,9 +1196,14 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   }
   else
   {
-    cerr << "Warning: something wrong here. prop and curr should have different sign in derivative" << endl;
-    cerr << "prop and dlogl: " << prop << ", " << prop_dlogl << endl;
-    cerr << "curr and dlogl: " << curr << ", " << curr_dlogl << endl;
+    if(VERBOSE)
+    {
+      cerr << "Warning: something wrong here. prop and curr should have different sign in derivative" << endl;
+      cerr << "prop and dlogl: " << prop << ", " << prop_dlogl << endl;
+      cerr << "curr and dlogl: " << curr << ", " << curr_dlogl << endl;
+    }
+    lowerlimit = MIN_EDGE_LENGTH;
+    upperlimit = MAX_EDGE_LENGTH;
   }
 
   // switch to protected Newton-Raphson
@@ -1216,13 +1216,12 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
   {
     curr = prop;
     calculate(curr,alignment,qmatrix,curr_logl,curr_dlogl,curr_ddlogl);
-//    cerr << "curr,logl,dlogl,ddlogl = " << curr << ", " << curr_logl << ", " << curr_dlogl << ", " << curr_ddlogl << endl;
-
     if ( ++iter > 100 )
     {
       cerr << "Warning: too many iterations in protected Newton-Raphson";
       length[current] = curr;
       mleError(converge);
+      return curr;
     }
     double delta = -curr_dlogl / curr_ddlogl;
     prop = curr + delta;

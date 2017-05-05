@@ -2,8 +2,13 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- leave `runningBistro.jl` running
 - check the mean tree for all dataset runs, and leave the same script running, but now with fixed tree
+- run mrbayes in 036 and 041 to check if they have problem with nan
+- add to results:
+  - 024 finished (ESS with and without fixed tree)
+  - 043 finished (ESS with and without fixed tree)
+  - 027 did not even finished without fixed tree
+  - 036,041 had nan without fixed tree
 
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
   - tree function:
@@ -26,6 +31,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 ## Check with Bret
 - distances function: cannot use seed with random shuffle
 - distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb
+- 036, 041 all nan BL!!
 
 
 ## Jordan
