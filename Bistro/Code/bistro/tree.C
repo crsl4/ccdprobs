@@ -1936,6 +1936,8 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       Matrix2d cov = (-1) * prop_hessian.inverse();
       checkCov2d(cov,false);
       t = multivariateGamma2D(mu,cov,rng, logdensity,eta);
+      leftEdge->addSampler(1,0,0);
+      rightEdge->addSampler(1,0,0);
     }
     checkBL(t);
     leftEdge->setLength( t(0) );
@@ -1980,6 +1982,9 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
       Matrix3d cov = (-1) * prop_hessian.inverse();
       checkCov3d(cov);
       t = multivariateGamma3D(mu,cov,rng, logdensity,eta);
+      leftEdge->addSampler(1,0,0);
+      rightEdge->addSampler(1,0,0);
+      otherEdge->addSampler(1,0,0);
     }
     checkBL(t);
     leftEdge->setLength( t(0) );

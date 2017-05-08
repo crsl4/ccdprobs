@@ -219,6 +219,7 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
     if ( sigma2 > 0 && z0 < 7)// && mu < 0 )
     {
       s = randomHalfNormal(mu,sigma,0.0,logdensity,rng);
+      e->addSampler(0,1,0);
       if(VERBOSE)
 	cerr << "found half normal case, t: " << t << ", mu: " << mu << ", sigma: " << sigma << ", sampled: " << s << endl;
       if ( mu > 0 )
@@ -233,6 +234,7 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
       double lambda = (y3-y1) / (x3-x1);
       lambda = (-1)*lambda;
       s = gamma(1.0, 1.0 / lambda ,rng);
+      e->addSampler(0,0,1);
       if(VERBOSE)
 	cerr << "found exponential case, t: " << t << ", lambda= " << lambda << ", sampled: " << s << endl;
       logdensity += log(lambda) - lambda*s;
@@ -247,6 +249,7 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
     double alpha = t*lambda;
     gamma_distribution<double> rgamma(alpha,1.0 / lambda);
     t = rgamma(rng);
+    e->addSampler(1,0,0);
     if(VERBOSE)
       cerr << "found gamma case, t: " << t << ", alpha: " << alpha << ", lambda: " << lambda << ", sampled: " << t << endl;
     logdensity += alpha * log(lambda) - lgamma(alpha) + (alpha-1)*log(t) - lambda*t;

@@ -42,12 +42,16 @@ private:
   Node* nodes[2];
   // things for likelihood calculation
   Matrix4d transitionMatrix;
+  int sampler[3]; //keep track of which BL sampler used:gamma,truncated normal,exp
 public:
   Edge()
   {
     length[0] = 0;
     length[1] = 0;
     current = 0;
+    sampler[0] = 0;
+    sampler[1] = 0;
+    sampler[2] = 0;
   }
   ~Edge()
   {
@@ -57,6 +61,9 @@ public:
   {
     current = 0;
     length[0] = length[1] = x;
+    sampler[0] = 0;
+    sampler[1] = 0;
+    sampler[2] = 0;
   }
   int getNumber() { return number; }
   void setNumber(int x) { number=x; }
@@ -86,6 +93,7 @@ public:
   void randomLength(Alignment&,QMatrix&,mt19937_64&,double&);
   bool isTerminal();
   void switchCurrent() { current = 1 - current; }
+  void addSampler(int x, int y, int z) {sampler[0] += x; sampler[1] += y; sampler[2] += z;}
 };
 
 class Node

@@ -2,13 +2,8 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- check the mean tree for all dataset runs, and leave the same script running, but now with fixed tree
-- run mrbayes in 036 and 041 to check if they have problem with nan
-- add to results:
-  - 024 finished (ESS with and without fixed tree)
-  - 043 finished (ESS with and without fixed tree)
-  - 027 did not even finished without fixed tree
-  - 036,041 had nan without fixed tree
+- diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
+- rerun 024, 043 and passer (fixed tree)
 
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
   - tree function:
@@ -16,11 +11,9 @@ Bret Larget, Claudia Solis-Lemus (2016)
   - node(parent egde, map, weight, clade)
   - if you are a leaf: add my number to the clade, return
   - not a leaf: create a clade, and pass it to my children, when it gets the clade back, that is the key to the map (add to the map with the parent edge BL*weight); then add the created clade to the clade that got past
-
 - map(clade, vector<pair(bl, w)>)
 
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
-- diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
 
 
 - Write up manuscript, and figure out simulation study for small datasets:
@@ -31,7 +24,9 @@ Bret Larget, Claudia Solis-Lemus (2016)
 ## Check with Bret
 - distances function: cannot use seed with random shuffle
 - distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb
-- 036, 041 all nan BL!!
+- 036, 041 all nan BL!! 027 did not run
+- 024 and 043 were successful: but 043 much better results, and less time
+- need to check diagnostics of which BL sampled using
 
 
 ## Jordan

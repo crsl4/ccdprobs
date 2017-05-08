@@ -169,3 +169,19 @@ cd Bistro/Examples/Simulations
 
 ```
 - `bistro5-whales.treeBL`
+
+
+## Datasets
+(from `AbererStamatakisRonquist2016`)
+- Run 5 datasets: `024,027,036,041,043`
+  - `027` had unknown error
+  - `036,041` had `nan` in all branch lengths
+  - `024,043` run without any problem, so we ran with fixed tree as well
+
+- Results `024`:
+  - ESS 0.1% (time ~9hrs)
+  - ESS fixed mean tree 0.41% (time ~8hrs)
+
+- Results `043`:
+  - ESS 0.19% (time ~ 3hrs)
+  - ESS fixed mean tree 13% (time ~3hrs)
