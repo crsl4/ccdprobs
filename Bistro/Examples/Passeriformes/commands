@@ -1,3 +1,7 @@
+## fixed tree again for sampler output file
+../../Code/bistro/bistro -f ../../Data/passer-aligned.fasta -o bistro-fixed3 -r 1000 -b 1000 -t "(1,2,(((3,4),6),(((((5,9),14),((((11,19),(18,20)),17),(15,16))),(7,8)),(10,(12,13)))));" > bistro-fixed3.log
+
+
 ## distances
 ../../Code/badger/mb2badger passer.nex.run1.t
 ../../Code/badger/mb2badger passer.nex.run2.t

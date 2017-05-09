@@ -1,0 +1,40 @@
+translate
+       1 Loboparadisaea sericea ornithine,
+       2 Cnemophilus loriae ornithine,
+       3 Oedistoma pygmaeum ornithine,
+       4 Toxorhamphus poliopterus ornithine,
+       5 Coracina atriceps ornithine,
+       6 Melanocharis versteri ornithine,
+       7 Bombycilla garrulus ornithine,
+       8 Parus major ornithine,
+       9 Pericrocotus cinnamomeus ornithine,
+      10 Callaeas cinerea ornithine,
+      11 Monarcha melanopsis ornithine,
+      12 Hylophilus ochraceiceps ornithine,
+      13 Vireo olivaceus ornithine,
+      14 Oriolus xanthornus ornithine,
+      15 Gymnorhina tibicen ornithine,
+      16 Batis poensis ornithine,
+      17 Rhipidura rufifrons ornithine,
+      18 Lanius collaris ornithine,
+      19 Dicrurus bracteatus ornithine,
+      20 Corvus corone ornithine;
+1.00000000          1 [ {3-4} , {3} ]
+1.00000000          1 [ {3-4,6} , {3-4} ]
+1.00000000          1 [ {7-8} , {7} ]
+1.00000000          1 [ {5,9} , {5} ]
+1.00000000          1 [ {12-13} , {12} ]
+1.00000000          1 [ {10,12-13} , {10} ]
+1.00000000          1 [ {5,9,14} , {5,9} ]
+1.00000000          1 [ {15-16} , {15} ]
+1.00000000          1 [ {11,19} , {11} ]
+1.00000000          1 [ {18,20} , {18} ]
+1.00000000          1 [ {11,18-20} , {11,19} ]
+1.00000000          1 [ {11,17-20} , {17} ]
+1.00000000          1 [ {11,15-20} , {15-16} ]
+1.00000000          1 [ {5,9,11,14-20} , {5,9,14} ]
+1.00000000          1 [ {5,7-9,11,14-20} , {7-8} ]
+1.00000000          1 [ {5,7-20} , {10,12-13} ]
+1.00000000          1 [ {3-20} , {3-4,6} ]
+1.00000000          1 [ {2-20} , {2} ]
+1.00000000          1 [ {1-20} , {1} ]
