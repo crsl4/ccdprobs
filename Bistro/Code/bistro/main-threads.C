@@ -102,6 +102,10 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
   ofstream treeblsort(treeBLFileSort.c_str());
    f << "tree logl logTop logBL logPrior logQ logWt pi1 pi2 pi3 pi4 s1 s2 s3 s4 s5 s6" << endl;
 
+   // BL sampler
+   string samplerFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".sampler";
+   ofstream samplerStream(samplerFile.c_str());
+   samplerStream << "tree gamma truncated-normal exponential" << endl;
    // debug variable
    int count = 0;
 
@@ -237,6 +241,9 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      {
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
        tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getEta());
+       // need to print info about sampler
+       samplerStream << tree.makeTreeNumbers() << " ";
+       tree.printSamplerInfo(samplerStream);
      }
 
      if(VERBOSE)
@@ -278,9 +285,10 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      //add to the multimap for the topology the logweight
      topologyToLogweightMMap.insert( pair<string,double>(top,logWeight) ) ;
    }
-
+   f.close();
    treebl.close();
    treeblsort.close();
+   samplerStream.close();
 }
 
 int main(int argc, char* argv[])

@@ -3119,3 +3119,16 @@ void Tree::printDerivatives(ostream& f,Alignment& alignment,QMatrix& model)
     f << setw(2) << (*e)->getNumber() << " " << (*e)->getLength() << " " << logl << " " << dlogl << " " << ddlogl << endl;
   }
 }
+
+void Tree::printSamplerInfo(ostream& f)
+{
+  vector<int> s(3,0);
+  for ( vector<Edge*>::iterator e=edges.begin(); e!= edges.end(); ++e )
+  {
+    vector<int> tmp = (*e)->getSampler();
+    s[0] += tmp[0];
+    s[1] += tmp[1];
+    s[2] += tmp[2];
+  }
+  f << s[0] << " " << s[1] << " " << s[2] << endl;
+}

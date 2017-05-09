@@ -94,6 +94,7 @@ public:
   bool isTerminal();
   void switchCurrent() { current = 1 - current; }
   void addSampler(int x, int y, int z) {sampler[0] += x; sampler[1] += y; sampler[2] += z;}
+  vector<int> getSampler() {vector<int> v(3); v[0]=sampler[0]; v[1]=sampler[1]; v[2]=sampler[2]; return v;}
 };
 
 class Node
@@ -290,6 +291,7 @@ public:
   void mcmcUpdateS(int,MCMCStats&,QMatrix&,Alignment&,double,mt19937_64&);
   void mcmcUpdateEdges(int,MCMCStats&,QMatrix&,Alignment&,mt19937_64&);
   void printDerivatives(ostream&,Alignment&,QMatrix&);
+  void printSamplerInfo(ostream&);
 };
 
 class MCMCStats

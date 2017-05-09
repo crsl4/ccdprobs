@@ -2,7 +2,6 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
 - rerun 024, 043 and passer (fixed tree)
 
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
@@ -14,7 +13,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 - map(clade, vector<pair(bl, w)>)
 
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
-
+- improve diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -26,7 +25,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 - distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb
 - 036, 041 all nan BL!! 027 did not run
 - 024 and 043 were successful: but 043 much better results, and less time
-- need to check diagnostics of which BL sampled using
+- need to check diagnostics of which BL sampled using: added a simpler version in which we only add the info per tree (no clade info): check info in 024, 043
 
 
 ## Jordan
