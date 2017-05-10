@@ -23,7 +23,7 @@ translate
       22 Gtinamou,
       23 ECtinamou,
       24 Crypturellus;
-mb-clade prob crudeSE(ESS=4.07) clade
+mb-clade prob crudeSE(ESS=7.97) clade
 .***.................... 1.00000000 0.00000000 {2-4}
 .....**................. 1.00000000 0.00000000 {6-7}
 ....***................. 1.00000000 0.00000000 {5-7}

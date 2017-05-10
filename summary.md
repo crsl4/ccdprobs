@@ -2,7 +2,9 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- rerun 024, 043 and passer (fixed tree)
+- study 024, 043, passer
+- do pca and try to identify what is the 2nd pc, is it correlated to something?
+- study why 36,41 had all nan BL, why 27 crashed?
 
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
   - tree function:
@@ -23,9 +25,6 @@ Bret Larget, Claudia Solis-Lemus (2016)
 ## Check with Bret
 - distances function: cannot use seed with random shuffle
 - distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb
-- 036, 041 all nan BL!! 027 did not run
-- 024 and 043 were successful: but 043 much better results, and less time
-- need to check diagnostics of which BL sampled using: added a simpler version in which we only add the info per tree (no clade info): check info in 024, 043
 
 
 ## Jordan
