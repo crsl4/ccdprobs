@@ -2,10 +2,10 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- study 024, 043, passer
+- passer: make plots comparing to bmcmc
 - do pca and try to identify what is the 2nd pc, is it correlated to something?
-- study why 36,41 had all nan BL, why 27 crashed?
 
+- study why 36,41 had all nan BL, why 27 crashed?
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
   - tree function:
     - create an empty clade to pass to the root (or NULL)
@@ -23,6 +23,8 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
+- strange thing bistro027: isnan not working!
+- plots for 024 (ESS fixT 0.41%) 043 (ESS fixT 13%), I don't understand the difference
 - distances function: cannot use seed with random shuffle
 - distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb
 

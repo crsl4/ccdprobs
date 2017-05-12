@@ -985,10 +985,14 @@ void Tree::mleError(bool& converge)
 
 void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl)
 {
+  if(VERBOSE)
+    cerr << "Edge::calculate on t: " << t << " is nan? " << isnan(t) << endl;
   if(isnan(t))
   {
     cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
     cerr << "Error here: branch length nan" << endl;
+    cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
+    cout << "Error here: branch length nan" << endl;
     exit(1);
   }
   Matrix4d P = qmatrix.getTransitionMatrix( t );
@@ -1074,10 +1078,10 @@ void Edge::printLikMinLength(ostream& f,Alignment& alignment,QMatrix& qmatrix)
 // necsito anhadir los pasos de NR en individual branches y despues comparar con lo q sale cuando se evalua el likelihood jointly
 double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
 {
-  if(VERBOSE)
-    cout << "starting mleLength" << endl;
   int iter=0;
   double curr = length[current];
+  if(VERBOSE)
+    cout << "starting mleLength on curr " << curr << endl;
   // trying to avoid really bad large initial values
   if ( curr > 1 )
     curr = 1.0;

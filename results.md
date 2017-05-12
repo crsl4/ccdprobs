@@ -170,6 +170,10 @@ cd Bistro/Examples/Simulations
 ```
 - `bistro5-whales.treeBL`
 
+## Passeriformes
+- ESS fixed tree: `2.2%`
+- ESS not fixed tree: `0.69%`
+In this case, the gamma sampler was used 34/38 times (0.89), the truncated normal is used 3/38 times (0.08) and the exponential is used 1/38 (0.03)
 
 ## Datasets
 (from `AbererStamatakisRonquist2016`)
@@ -185,3 +189,5 @@ cd Bistro/Examples/Simulations
 - Results `043`:
   - ESS 0.19% (time ~ 3hrs)
   - ESS fixed mean tree 13% (time ~3hrs)
+
+- It is strange that the performance of bistro (on fixed tree) is so different between `024` and `043`. We checked the `.sampler` file, and in both datasets we are only using the gamma distribution to sample branch lengths (`100%`).
