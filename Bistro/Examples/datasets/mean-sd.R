@@ -109,6 +109,6 @@ triplot = function(df1,df2,aes,color1="blue",color2="red",alpha1=0.1,alpha2=0.1)
     geom_point(data=df1,color=color1,alpha=alpha1) +
     geom_point(data=df2,color=color2,alpha=alpha2) +
     coord_tern() +
-    my_tern_limits(m[2],m[1],m[3])
+   my_tern_limits(m[2],m[1],m[3])
   return(p)
 }
