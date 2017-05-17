@@ -15,20 +15,22 @@ using namespace Eigen;
 
 void checkMuV(double mu, double v)
 {
-  if(mu < 0 || v < 0)
+  if ( mu < 0 || v < 0 )
   {
     cerr << "Error with either mu or v negative: " << mu << ", " << v << endl;
     exit(1);
   }
-  else if( mu < TOL || v < TOL)
+  else if ( mu < TOL || v < TOL )
     cerr << "Warning with either mu or v smaller than TOL: " << mu << ", " << v << endl;
 }
 
+// In original code, v was the sd
+// Now, v is the variance
 void calculateAlphaLambda(double mu, double v, double eta, double& alpha, double& lambda)
 {
   checkMuV(mu,v);
-  alpha = mu*mu / (v * v);
-  lambda = mu / (v * v);
+  alpha = mu*mu / v;
+  lambda = mu / v;
   if(alpha<1)
   {
     //cout << "Entering alpha<1 case" << endl;
@@ -62,7 +64,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       mu0 = MIN_EDGE_LENGTH;
   else
       mu0 = mu[0];
-  calculateAlphaLambda(mu0,L(0,0),eta,alpha1,lambda1);
+  calculateAlphaLambda(mu0,L(0,0)*L(0,0),eta,alpha1,lambda1);
   bl[0] = gamma(alpha1,1.0 / lambda1,rng); //c++ gamma has different parametrization
 
   // ------------ T2 ------------------
@@ -74,7 +76,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   double lambda2;
   if( num < MIN_EDGE_LENGTH + TOL)
       num = MIN_EDGE_LENGTH;
-  calculateAlphaLambda(num,L(1,1),eta,alpha2,lambda2);
+  calculateAlphaLambda(num,L(1,1)*L(1,1),eta,alpha2,lambda2);
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization
 
   // ------------ T3 ------------------
@@ -86,7 +88,7 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
   double lambda3;
   if( num < MIN_EDGE_LENGTH + TOL)
       num = MIN_EDGE_LENGTH;
-  calculateAlphaLambda(num,L(2,2),eta,alpha3,lambda3);
+  calculateAlphaLambda(num,L(2,2)*L(2,2),eta,alpha3,lambda3);
   bl[2] = gamma(alpha3,1.0 / lambda3,rng); //c++ gamma has different parametrization
 
   logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + alpha3*log(lambda3) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1]+(alpha3-1)*log(bl[2])-lambda3*bl[2] - lgamma(alpha1) - lgamma(alpha2) - lgamma(alpha3);
@@ -106,7 +108,7 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     mu0 = MIN_EDGE_LENGTH;
   else
     mu0 = mu[0];
-  calculateAlphaLambda(mu0,L(0,0),eta,alpha1,lambda1);
+  calculateAlphaLambda(mu0,L(0,0)*L(0,0),eta,alpha1,lambda1);
   bl[0] = gamma(alpha1,1.0 / lambda1,rng); //c++ gamma has different parametrization
 
   // ------------ T2 ------------------
@@ -118,7 +120,7 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
   double lambda2;
   if( num < MIN_EDGE_LENGTH + TOL)
     num = MIN_EDGE_LENGTH;
-  calculateAlphaLambda(num,L(1,1),eta,alpha2,lambda2);
+  calculateAlphaLambda(num,L(1,1)*L(1,1),eta,alpha2,lambda2);
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization
 
   logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1] - lgamma(alpha1) - lgamma(alpha2);
