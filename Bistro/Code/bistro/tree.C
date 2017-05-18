@@ -555,6 +555,7 @@ Vector4d translate(char base)
   case 'x' :
   case 'n' :
   case '-' :
+  case '?' :
     condProbs(0) = condProbs(1) = condProbs(2) = condProbs(3) = 1;
     break;
   }
@@ -1027,14 +1028,14 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
     pair<double,Vector4d> pa = nodes[0]->getProb(); //patternToProbMap[current][nodes[0]->getPattern()];
     pair<double,Vector4d> pb = nodes[1]->getProb(); //patternToProbMap[current][nodes[1]->getPattern()];
     if(VERBOSE)
-      cout << pa.second.transpose() << " // " << pb.second.transpose() << endl;
+      cout << "pa,pb " << pa.second.transpose() << " // " << pb.second.transpose() << endl;
     Vector4d va = pa.second;
     Vector4d vq = qmatrix.getStationaryP();
     for ( int i=0; i<4; ++i )
       va(i) *= vq(i);
     Vector4d vb = pb.second;
     if(VERBOSE)
-      cerr << va.transpose() << " // " << vb.transpose() << endl;
+      cout << "va,vb " << va.transpose() << " // " << vb.transpose() << endl;
     double f0 = (va.asDiagonal() * P * vb.asDiagonal()).sum();
     double f1 = (va.asDiagonal() * QP * vb.asDiagonal()).sum();
     double f2 = (va.asDiagonal() * QQP * vb.asDiagonal()).sum();
