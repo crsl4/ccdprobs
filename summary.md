@@ -2,10 +2,17 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- passer: make plots comparing to bmcmc
-- do pca and try to identify what is the 2nd pc, is it correlated to something?
+- finish 027, leave running at night 027 fixed tree
+- study nan in 036 and 041
+- fix error in compile bistro in darwin
+- change to average scale first and test all datasets again (on fixed tree): run this in darwin
 
-- study why 36,41 had all nan BL, why 27 crashed?
+- need a mixture of dirichlet: two components? how to get the weights? we want a mixture dirichlet that matches the mcmc mean and variance (and orientation=correlation?)
+https://projecteuclid.org/euclid.aos/1176345991#ui-tabs-1
+https://en.wikipedia.org/wiki/Dirichlet_process
+- how do the triplot looks like for actual dirichlets? how do we get the football shape?
+
+
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
   - tree function:
     - create an empty clade to pass to the root (or NULL)
@@ -23,8 +30,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- strange thing bistro027: isnan not working!
-- plots for 024 (ESS fixT 0.41%) 043 (ESS fixT 13%), I don't understand the difference
+- changed baseFrequencies and averagePairwiseS, check
 - distances function: cannot use seed with random shuffle
 - distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb
 

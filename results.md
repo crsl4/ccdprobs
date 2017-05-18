@@ -191,3 +191,37 @@ In this case, the gamma sampler was used 34/38 times (0.89), the truncated norma
   - ESS fixed mean tree 13% (time ~3hrs)
 
 - It is strange that the performance of bistro (on fixed tree) is so different between `024` and `043`. We checked the `.sampler` file, and in both datasets we are only using the gamma distribution to sample branch lengths (`100%`).
+
+# Generalized Dirichlet
+
+I think the natural thing to do is to use
+
+X_i ~ Gamma(alpha_i, lambda_i)  (Note lambda_i may not equal lambda_j).
+
+Let Y_i  = X_i / S  where S = sum(X_i)
+
+There is a literature on the distribution of S in this general case. Maybe there is one for the vector of Y_i too.
+
+I am not sure how to fit this, but if we cannot make the mean scale work, this is the direction I think we should try.
+
+-Bret
+
+------------------------
+I have an expression for the density of x_1,...,x_k when
+
+x_i = y_i/sum(y_j)
+
+and y_i ~ iid Gamma(alpha_i,lambda_i).
+
+So, we have a density and can generate random variables from it. But I am getting stuck trying to find a closed expression for the mean (and hence the variance too), so I am not quite sure how we could find good alpha and lambda values to try to match the empirical values.
+
+As described, the parameters are not identifiable, but requiring the lambda parameters to have mean 1 (or maybe sum to one?) would make it work.
+
+-Bret
+
+------------------------------
+I was able to use the mean and variances from the MCMC for the s from the 024 data set. I used these to calculate alpha and lambda for each component. I then generated random gammas using these variables and renormalized for proposed s values. This is a generalized Dirichlet, but not like the literature. Not sure if it is new or not, but I have not found it in the literature. The triplots for these generated s values match the ones from MCMC very well.
+
+I will try to code this for an alternative approach and see if this helps.
+
+-Bret

@@ -989,6 +989,7 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
     cerr << "Edge::calculate on t: " << t << " is nan? " << isnan(t) << endl;
   if(isnan(t))
   {
+    cerr << "branch length is nan" << endl;
     cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
     cerr << "Error here: branch length nan" << endl;
     cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
@@ -1000,7 +1001,7 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   Matrix4d QQP = qmatrix.getQQP( t );
   int numSites = alignment.getNumSites();
 
-  if(false)
+  if(VERBOSE)
   {
     cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
     cout << "P =" << endl << P << endl << endl;
@@ -1013,7 +1014,7 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   ddlogl = 0;
   for ( int k=0; k<numSites; ++k )
   {
-    if(false)
+    if(VERBOSE)
       cout << "k=" << k << endl;
     nodes[0]->calculate(k,alignment,this);//,true); // sets pattern for this site
     nodes[1]->calculate(k,alignment,this);//,true);
@@ -1025,26 +1026,29 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
     }
     pair<double,Vector4d> pa = nodes[0]->getProb(); //patternToProbMap[current][nodes[0]->getPattern()];
     pair<double,Vector4d> pb = nodes[1]->getProb(); //patternToProbMap[current][nodes[1]->getPattern()];
-    if(false)
+    if(VERBOSE)
       cout << pa.second.transpose() << " // " << pb.second.transpose() << endl;
     Vector4d va = pa.second;
     Vector4d vq = qmatrix.getStationaryP();
     for ( int i=0; i<4; ++i )
       va(i) *= vq(i);
     Vector4d vb = pb.second;
-//    cerr << va.transpose() << " // " << vb.transpose() << endl;
+    if(VERBOSE)
+      cerr << va.transpose() << " // " << vb.transpose() << endl;
     double f0 = (va.asDiagonal() * P * vb.asDiagonal()).sum();
     double f1 = (va.asDiagonal() * QP * vb.asDiagonal()).sum();
     double f2 = (va.asDiagonal() * QQP * vb.asDiagonal()).sum();
-//    cerr << "f0,f1,f2 = " << f0 << ", " << f1 << ", " << f2 << endl;
+    if(VERBOSE)
+      cout << "f0,f1,f2 = " << f0 << ", " << f1 << ", " << f2 << endl;
     logl += pa.first + pb.first + log( f0 );
     dlogl += f1/f0;
     ddlogl += (f0*f2 - f1*f1)/(f0*f0);
-    if(false)
+    if(VERBOSE)
       cout << "logl: " << logl << endl;
   }
   if( isnan(logl) || isnan(dlogl) || isnan(ddlogl) )
   {
+    cerr << "logl or dlogl or ddlogl are nan" << endl;
     cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
     cerr << "Error here: logl, dlogl, ddlogl nan: " << logl << "," << dlogl << "," << ddlogl << endl;
     exit(1);

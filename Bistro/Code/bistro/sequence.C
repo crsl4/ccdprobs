@@ -24,7 +24,7 @@ string trim(const string& str)
 
 bool baseNotUncertain(char a)
 {
-  return ( (a=='a') || (a=='c') || (a=='g') || (a=='t') );
+  return ( (a=='a') || (a=='c') || (a=='g') || (a=='t') || (a=='u'));
 }
 
 int baseToInt(char a)
@@ -35,8 +35,9 @@ int baseToInt(char a)
   case 'c' : return 1;
   case 'g' : return 2;
   case 't' : return 3;
+  case 'u' : return 3;
   default :
-    cerr << "Error: baseToInt called on character that is not 'a', 'c', 'g', or 't'." << endl;
+    cerr << "Error: baseToInt called on character that is not 'a', 'c', 'g', 't', or 'u'." << endl;
     exit(1);
   }
 }
@@ -169,7 +170,13 @@ vector<double> Alignment::baseFrequencies()
     pi[2] = m->second / (double)(total);
   m = counts.find('t');
   if ( m == counts.end() )
-    pi[3] = 0;
+  {
+    m = counts.find('u');
+    if ( m == counts.end() )
+      pi[3] = 0;
+    else
+      pi[3] = m->second / (double)(total);
+  }
   else
     pi[3] = m->second / (double)(total);
 

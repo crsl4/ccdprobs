@@ -400,11 +400,14 @@ int main(int argc, char* argv[])
   q_init.setMcmcVarQP(vs0);
 
 // ------------------------------ Put MLE branch lengths to tree -------------------------
+  cout << "Putting MLE Branch Lengths" << endl;
+  cout << "p: " << q_init.getStationaryP() << endl;
+  cout << "s: " << q_init.getSymmetricQP() << endl;
+  cout << "Q: " << q_init.getQ() << endl;
   for ( int i=0; i<4; ++i )
   {
     starttree.mleLengths(alignment,q_init);
   }
-  cout << "MLE Branch Lengths" << endl;
   cout << starttree.makeTreeNumbers() << endl;
 
 // MCMC
