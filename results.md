@@ -178,13 +178,22 @@ In this case, the gamma sampler was used 34/38 times (0.89), the truncated norma
 ## Datasets
 (from `AbererStamatakisRonquist2016`)
 - Run 5 datasets: `024,027,036,041,043`
-  - `027` had unknown error
-  - `036,041` had `nan` in all branch lengths
+  - `027` had an error with `nan` because of U instead of T, fixed!
+  - `036,041` had `nan` in all branch lengths because of `?` in sequence, fixed!
   - `024,043` run without any problem, so we ran with fixed tree as well
 
 - Results `024`:
   - ESS 0.1% (time ~9hrs)
   - ESS fixed mean tree 0.41% (time ~8hrs)
+
+- Results `027`:
+  - ESS fixed mean tree 8% (time ~1.5hrs)
+
+- Results `036`:
+  - ESS fixed mean tree 16% (time ~2.5hrs)
+
+- Results `041`:
+  - ESS fixed mean tree 7% (time ~2hrs)
 
 - Results `043`:
   - ESS 0.19% (time ~ 3hrs)

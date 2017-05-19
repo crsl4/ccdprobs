@@ -2,8 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- finish 027, leave running at night 027 fixed tree
-- study nan in 036 and 041
+- run bmcmc for 027,036,041 and compare plots on fixed tree, just to be sure the BL and rates look ok
 - fix error in compile bistro in darwin
 - change to average scale first and test all datasets again (on fixed tree): run this in darwin
 
