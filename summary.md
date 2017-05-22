@@ -3,15 +3,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
 - run bmcmc for 027,036,041 and compare plots on fixed tree, just to be sure the BL and rates look ok
-- fix error in compile bistro in darwin
-- change to average scale first and test all datasets again (on fixed tree): run this in darwin
-
-- need a mixture of dirichlet: two components? how to get the weights? we want a mixture dirichlet that matches the mcmc mean and variance (and orientation=correlation?)
-https://projecteuclid.org/euclid.aos/1176345991#ui-tabs-1
-https://en.wikipedia.org/wiki/Dirichlet_process
-- how do the triplot looks like for actual dirichlets? how do we get the football shape?
-
-
+- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
   - tree function:
     - create an empty clade to pass to the root (or NULL)
@@ -20,8 +12,13 @@ https://en.wikipedia.org/wiki/Dirichlet_process
   - not a leaf: create a clade, and pass it to my children, when it gets the clade back, that is the key to the map (add to the map with the parent edge BL*weight); then add the created clade to the clade that got past
 - map(clade, vector<pair(bl, w)>)
 
-- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
-- improve diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
+- update manuscript with generalized dirichlet: add info from mathematica
+
+- fix error in compile bistro in darwin
+- change to average scale first and test all datasets again (on fixed tree): run this in darwin
+
+- appell hypergeometric function, to give theoretical justification to the mean and variance of generalized dirichlet
+
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -29,7 +26,8 @@ https://en.wikipedia.org/wiki/Dirichlet_process
 
 
 ## Check with Bret
-- changed baseFrequencies and averagePairwiseS, check
+- strange thing that the bmcmc files were not saved properly (could be my computer)
+- strange logBL=inf in bistro041
 - distances function: cannot use seed with random shuffle
 - distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb
 

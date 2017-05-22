@@ -187,12 +187,15 @@ In this case, the gamma sampler was used 34/38 times (0.89), the truncated norma
   - ESS fixed mean tree 0.41% (time ~8hrs)
 
 - Results `027`:
+  - ESS 0.13%
   - ESS fixed mean tree 8% (time ~1.5hrs)
 
 - Results `036`:
+  - ESS 0.1%
   - ESS fixed mean tree 16% (time ~2.5hrs)
 
 - Results `041`:
+  - ESS 0.12%
   - ESS fixed mean tree 7% (time ~2hrs)
 
 - Results `043`:
