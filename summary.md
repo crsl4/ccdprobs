@@ -2,9 +2,14 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- change listTrees in distances to write only topology
+- rerun distance for artiodactyl, cats-dogs, whales, datasets 024, 043: problem than bistro mean != mb mean?
+- rerun 041 to trace inf problem in logBL
 - update manuscript with generalized dirichlet: add info from mathematica
-- appell hypergeometric function, to give theoretical justification to the mean and variance of generalized dirichlet
-- find inf problem in 041
+- for every split in bootstrap trees, average length against the frequency
+
+
+
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
   - tree function:
@@ -14,21 +19,13 @@ Bret Larget, Claudia Solis-Lemus (2016)
   - not a leaf: create a clade, and pass it to my children, when it gets the clade back, that is the key to the map (add to the map with the parent edge BL*weight); then add the created clade to the clade that got past
 - map(clade, vector<pair(bl, w)>)
 
-
-- fix error in compile bistro in darwin
-- change to average scale first and test all datasets again (on fixed tree): run this in darwin
-
-
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
 
 
 ## Check with Bret
-- strange thing that the bmcmc files were not saved properly (could be my computer)
-- strange logBL=inf in bistro041
 - distances function: cannot use seed with random shuffle
-- distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb: mds2.R, in Scripts
 
 
 ## Jordan

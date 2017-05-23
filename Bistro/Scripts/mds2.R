@@ -38,19 +38,21 @@ mds.phylo.combined = function(d,top,k=2,lambda=200)
   mds = cmdscale(d,k=k)
   if ( k >= 2 )
   {
-      ## names(top) = "top"
-      ## temp.trees = as.character(top$top)
-      ## tab = rev(sort(table(temp.trees)))
-      ## if ( nrow(tab) > 6 ){
-      ##     top.trees = names(tab)[1:5]
-      ##     temp.trees[ !(top$top %in% top.trees) ] = "other"
-      ## }
-      df = data.frame(x=mds[,1], y=mds[,2], w=exp(-lambda*d[,n]),##top=temp.trees,
+      names(top) = "top"
+      temp.trees = as.character(top$top)
+      tab = rev(sort(table(temp.trees)))
+      if ( nrow(tab) > 6 ){
+          top.trees = names(tab)[1:5]
+          temp.trees[ !(top$top %in% top.trees) ] = "other"
+      }
+      df = data.frame(x=mds[,1], y=mds[,2], w=exp(-lambda*d[,n]),top=temp.trees,
           who = c(rep("bistro",(n-2)/2),rep("mb",(n-2)/2),"mean.bistro","mean.mb"))
       ggplot(filter(df,w>0), aes(x=x,y=y,color=w,shape=who)) +
           geom_point() +
-              scale_color_viridis() +
-                  theme_bw()
+#              scale_color_viridis() +
+                  geom_point(data=df[n-1,],color="red") +
+                      geom_point(data=df[n,],color="red") +
+                          theme_bw()
   }
 }
 
