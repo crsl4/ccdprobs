@@ -208,7 +208,7 @@ Unlike in the previous setting, we compute the weights with the
 % \begin{align*}
 % P(Z=y_j) &= \frac{w_0(y_j)}{\sum_{i=1}^m w_0(y_i)}.
 % \end{align*}
-% Then, $Z \xrightarrow{d} X$, as $m \rightarrow \infty$ \citep{Ross1997}. 
+% Then, $Z \xrightarrow{d} X$, as $m \rightarrow \infty$ \citep{Ross1997}.
 % \end{myProposition}
 
 This unnormalized case is different from the normalized importance
@@ -275,7 +275,7 @@ Let $X$ denote the DNA sequences as input data.
 We want to generate independent samples from the posterior
 distribution $p(\theta|X)$ (the $f(x)$ density in section
 \ref{background}). Thus, we need to find a density $g(\theta|X)$ such
-that we can generate samples from $g$ instead of $p$. 
+that we can generate samples from $g$ instead of $p$.
 
 The success of importance sampling relies on choosing a $g$ that is
 close enough to the density of interest: centered in the same place
@@ -291,8 +291,8 @@ g(\theta|X) &= g_1(\mathbf{Q})g_2(T|\mathbf{Q})g_3(t|T,\mathbf{Q})
 \end{align*}
 
 \subsection*{Density for $\mathbf{Q}$}
-First, we generate a rate matrix $\mathbf{Q}$ by generating separately
-a vector of base frequencies $\pi\sim
+The rate matrix $\mathbf{Q}$ is obtained from two components: a vector
+of base frequencies $\pi\sim
 Dirichlet(\alpha_1,\alpha_2,\alpha_3,\alpha_4)$ and the vector of
 rates $s\sim
 Dirichlet(\beta_1,\beta_2.\beta_3,\beta_4,\beta_5,\beta_6)$. To choose
@@ -302,19 +302,20 @@ by the observed base frequencies and $s$ by the observed pairwise
 counts would yield biased estimates. Estimating $Q$ for a fixed
 initial topology with branch lengths would also yield biased
 estimates. This is due to the fact that we need an estimate of $Q$
-\textit{averaged} over different topologies and branch lengths.
-We provide a partial solution by using MCMC on the fixed
-Neighbor-Joining (NJ) tree (from Jukes-Cantor distances) to sample branch
-lengths and $Q$. We then use the sample of $Q$ to provide estimates of
-center and variance for the Dirichlet densities.
+\textit{averaged} over different topologies and branch lengths.  We
+provide a partial solution by using MCMC on the fixed Neighbor-Joining
+(NJ) tree (from Jukes-Cantor distances) to sample branch lengths and
+$Q$. We then use the sample of $Q$ to provide estimates of center and
+variance for the Dirichlet densities.
 
 \begin{algorithm}
 \caption{Parameters of the proposal density for $\mathbf{Q}$}
 \begin{enumerate}
 \item{Obtain the NJ tree from the JC distances}
-\item{Use MCMC on that fixed to obtain estimates of mean and variance
-    for $\pi$: $(\hat{\pi}_1,\hat{\pi}_2,\hat{\pi}_3,\hat{\pi}_4)$ and
-    $s$: $(\hat{s}_1,\hat{s}_2,\hat{s}_3,\hat{s}_4,\hat{s}_5,\hat{s}_6)$}
+\item{Use MCMC on that fixed tree to obtain estimates of mean and
+    variance for $\pi$:
+    $(\hat{\pi}_1,\hat{\pi}_2,\hat{\pi}_3,\hat{\pi}_4)$ and $s$:
+    $(\hat{s}_1,\hat{s}_2,\hat{s}_3,\hat{s}_4,\hat{s}_5,\hat{s}_6)$}
 \item{Compute the parameters of the proposal Dirichlet densities:
     $\alpha_i=c_p\hat{\pi}_i$ for $i=1,2,3,4$ and
     $\beta_j=c_s\hat{s}_j$ for $j=1,2,3,4,5,6$, where $c_p,c_s$
@@ -328,6 +329,93 @@ $s\sim Dirichlet$, and then construct $\mathbf{Q}$ like this:
 q_{ij} &= \frac{s_{ij}}{2\pi_i} \\
 q_{ii} &= -\sum_i q_{ij}
 \end{align*}
+
+\subsubsection*{Symmetric Generalized Dirichlet}
+The Dirichlet distribution is a very commonly used probability distribution
+on sets of positive random variables constrained to sum to one.
+The random variables $X_1,\ldots,X_k$ are said to have a Dirichlet distribution
+when they have the joint density
+\begin{align*}
+f(x_1,\ldots,x_k) &= \frac{\Gamma(\alpha_1 + \cdots + \alpha_k)}{\prod_{i=1}^k \Gamma(\alpha_i)} \prod_{i=1}^k x_i^{\alpha_i - 1},\\ &\qquad \text{where $x_i > 0$ for all $i$ and $\sum_{i=1}^k x_i = 1$}
+\end{align*}
+where the parameters $\alpha_i > 0$ for $i=1,\ldots,k$.
+
+Each random variable $X_i$ has a marginal
+$\text{Beta}(\alpha_i,\theta-\alpha_i)$ distribution where $\theta =
+\sum_{i=1}^k \alpha_i$.  It follows that $X_i$ has mean
+$\mathsf{E}(X_i) = \alpha_i/\theta$ and variance $\mathsf{Var}(X_i) =
+\alpha_i(\theta-\alpha_i) / ( \theta^2(\theta+1) )$.  A consequence is
+that when attempting to select a Dirichlet distribution to match the
+distribution of a given set of random variables constrained to equal
+one, while it is possible to select the parameters $\{\alpha_i\}$ to
+match the marginal means by letting $\alpha_i$ be proportional to the
+desired marginal mean, there remains only a single scale factor which
+determines all of the marginal variances.  We seek a generalization
+which a larger parameterization that is flexible enough to match, at
+least approximately, the means and variances of each marginal
+distribution.
+
+We know of another generalization of the Dirichlet distribution
+(described \falta{reference}) that is different than what we propose
+here in that it is asymmetric in the indices of the random variables
+and has the property that some correlations may be positive.
+
+\subsubsection*{Generation of symmetric generalized Dirichlet random variables}
+
+To generate random variables $X_1,\ldots,X_k \sim
+\text{Dirichlet}(\alpha_1,\ldots,\alpha_k)$, one simply generates
+independent random variables $Y_i \sim \text{Gamma}(\alpha_1,\lambda)$
+for $i=i,\ldots,k$ and any arbitrary $\lambda>0$ (typically
+$\lambda=1$) and letting $X_i = Y_i / \sum_{j=1}^k Y_j$.  This
+suggests that by allowing the value of $\lambda$ to vary with $i$ that
+we may be able to create a distribution on positive random variables
+constrained to sum to one with the desired flexibility in the first
+and second moments.
+
+\subsubsection*{A Generalized Dirichlet Distribution}
+
+Define the symmetric generalized Dirichlet distribution on
+$X_1,\ldots,X_n$ to be the distribution of $(X_1,\ldots,X_k)$ where
+$X_i = Y_i \big/ \sum_{j=1}^k Y_j$ for $i=1,\ldots,k$ where the random
+variables $\{Y_i\}$ are mutually independent and $Y_i \sim
+\text{Gamma}(\alpha_i,\lambda_i)$.  As the distribution of the
+$\{X_i\}$ would be the same if all $\{Y_i\}$ were multiplied by a
+common constant, we add the constraint that $\sum_{i=1}^k \lambda_i =
+k$ so that the average values of the $\{\lambda_i\}$ parameters is
+one.  \falta{(check if setting mean of $1/\lambda_i$ to be one is more
+  convenient)}.
+
+It is known \falta{(references)} that the distribution of the sum $S =
+\sum_{i=1}^k Y_i$ may be written as an infinite mixture of Gamma
+densities.  However, the joint density of $X_1,\ldots,X_k)$ has a
+closed form solution.
+\begin{align*}
+  f(x_1,\ldots,x_k) &= \frac{\Gamma\big(\sum_{i=1}^k
+    \alpha_i\big)\big(\prod_{i=1}^k
+    \lambda_i^{\alpha_i}\big)}{\prod_{i=1}^k \Gamma(\alpha_i)}
+  \times \frac{\prod_{i=1}^k x_i^{\alpha_i - 1}}{\big(\sum_{i=1}^k
+    \lambda_i x_i\big)^{\sum_{i=1}^k \alpha_i}},\\ &\qquad \text{where
+    $x_i > 0$ for all $i$ and $\sum_{i=1}^k x_i = 1$}
+\end{align*}
+\falta{The derivation is shown in the appendix.}
+
+I have not been able to derive closed form solutions for the marginal
+means and variances, but the means are close (if not exactly equal to)
+$(\alpha_i/\lambda_i) \big/ \sum_{j=1}^k (\alpha_j/\lambda_j)$.
+
+\subsubsection*{Parameter Estimation}
+
+Suppose that a probability density $g$ on the $k$-dimensional simplex
+has marginal mean $\{\mu_i\}$ and marginal variances $\{v_i\}$.  We do
+the following.
+$$
+\alpha_i = \frac{\mu_i^2(1-\mu_i)}{v_i}
+$$
+$$
+\lambda_i = \frac{\mu_i(1-\mu_i)}{v_i} \Bigg/ \sum_{j=1}^k \frac{\mu_j(1-\mu_j)}{kv_j}
+$$
+By construction, the mean of the $\{\lambda_i\}$ is one.
+\falta{I need to provide some more theoretical evidence that these parameter estimates work.}
 
 
 \subsection*{Density for $T$ given $\mathbf{Q}$}
@@ -384,7 +472,7 @@ branch at a time using the likelihood function
 \begin{align*}
 L(t) &= \prod_k \sum_x \sum_y \pi_x P_{xy}(t)P(A_k|x)P(B_k|y)
 \end{align*}
-where the product is over sites, the two sum are over the state of the
+where the product is over sites, the two sums are over the state of the
 internal nodes $x$ and $y$, $P_{xy}(t)$ is the transition probability
 from $x$ to $y$ in time length $t$ given by the GTR model, and
 $P(A_k|x), P(B_k|y)$ are the probability of the subtrees given the
@@ -427,7 +515,7 @@ and covariance matrix $\Sigma$
 \begin{enumerate}
 \item{Obtain the Cholesky decomposition $\Sigma=LL^T$, with $L$ a
     lower triangular matrix}
-\item{Generate $T_1 \sim Gamma(\alpha_1, \lambda_1)$ with 
+\item{Generate $T_1 \sim Gamma(\alpha_1, \lambda_1)$ with
 \begin{align*}
 \alpha_1 &= \frac{\mu_1^2}{L_{11}^2} & \lambda_1 &= \frac{\mu_1}{L_{11}^2}
 \end{align*}}
@@ -441,7 +529,61 @@ and covariance matrix $\Sigma$
 \end{algorithm}
 
 For the importance sampling scheme, we simply traverse the tree and
-sample the branch lengths of sister edges $(t_1,t_2) \sim Joint Gamma$.
+sample the branch lengths of sister edges $(t_1,t_2) \sim Joint
+Gamma$.
+
+\subsubsection*{Truncated normal case}
+When the MLE of a branch length is close to zero, the likelihood
+function is not convex as a Gamma distribution.  In these cases, we
+wish to find a density function proportional to the right tail of a
+normal distribution in order to match a likelihood function which is
+defined only on positive values and the log of the likelihood is very
+well approximated by a parabola. We will use a truncated normal at
+$x_0=0$ (see Figure \ref{trun-norm}). We wish to find values of $\mu$
+and $\sigma$ in order to match specified a specified mean and variance
+of the distribution $F$.  We also require an expression for the
+inverse cdf of $F$ for random number generation.
+\begin{figure}
+\centering
+\includegraphics[scale=0.35]{figures/truncated-normal.pdf}
+\caption{Truncated normal}
+\label{trun-norm}
+\end{figure}
+
+The density $f$ has the following expression.
+$$
+f(x) = \frac{1}{(1 - \Phi(z_0))\sigma\sqrt{2\pi}}\;
+\mathrm{e}^{-\frac{1}{2}\big(\frac{x-\mu}{\sigma}\big)^2}, \qquad x >
+x_0
+$$
+where $\Phi$ is the cdf of the standard normal curve and $z_0 = (x_0-\mu)/\sigma$.
+
+The cdf of $F$ has the following expression.
+$$
+F(x) =
+\frac{\Phi\big(\frac{x-\mu}{\sigma}\big)-\Phi(z_0)}{1-\Phi(z_0)}
+$$
+
+Here is a derivation:
+\begin{eqnarray*}
+F(x) & = & 1 - \int_x^\infty \frac{1}{(1 - \Phi(z_0))\sigma\sqrt{2\pi}}\;
+\mathrm{e}^{-\frac{1}{2}\big(\frac{t-\mu}{\sigma}\big)^2} \,\mathrm{d}t \\
+& = & 1 - \frac{1}{1 - \Phi(z_0)}
+\int_{\frac{x-\mu}{\sigma}}^\infty \frac{1}{\sqrt{2\pi}}
+\mathrm{e}^{-\frac{z^2}{2}}\, \mathrm{d}z \\
+& = & 1 - \frac{1 - \Phi(\frac{x-\mu}{\sigma})}{1 - \Phi(z_0)} \\
+& = & \frac{\Phi\big(\frac{x-\mu}{\sigma}\big)-\Phi(z_0)}{1-\Phi(z_0)}, \qquad x > x_0
+\end{eqnarray*}
+
+Using the inverse cdf method, we can generate a random variable with distribution $F$
+by the following equation where $U \sim \text{Uniform}(0,1)$.
+$$
+X = \mu + \sigma \Phi^{-1}( 1 - (1-U)(1-\Phi(z_0)))
+$$
+The derivation is straightforward.
+
+Finally, whenever $z_0>7$, we use an exponential distribution, instead
+of truncated normal because of numerical issues.
 
 \subsection*{Computation of the weights}
 We computed the likelihood of the data given the drawn $\theta = (\mathbf{Q}, T,
@@ -478,7 +620,8 @@ problems
 - correlation of branch lengths: if all three branches are equal size,
 then almost uncorrelated, but if one if long, the other two are correlated
 - dimensionality
-- clade distribution
+- clade distribution: if bistro mean and mb mean are far apart, our
+clade distribution will not be good (use mds plots to show)
 
 \bibliography{/Users/Clauberry/Documents/phylo/bibtex/bistro.bib}
 

@@ -261,6 +261,11 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        cout << "calculating the final loglik now without clearing map" << endl;
      double logLik = tree.calculate(alignment, model);
      double logWeight = logBranchLengthPriorDensity + logLik - logBL - logTopologyProbability - logQ;
+     if( logBL > 1000000 )
+     {
+       cerr << "found inf logBL" << endl;
+       exit(1);
+     }
      if ( VERBOSE )
      {
        cout << "logBranchLengthPriorDensity = " << logBranchLengthPriorDensity << endl;

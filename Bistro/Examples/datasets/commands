@@ -1,3 +1,6 @@
+## debug inf in 041: this will use more than 10Gb!!
+../../Code/bistro/bistro -f ../../Data/datasets/041.fasta -o bistro041 -r 100 -b 1000 -s 660134859 --threads 1 --no-mcmc > bistro041.log
+
 ## distances
 ../../Code/badger/mb2badger 024.nex.run1.t
 ../../Code/bistro/distances -f ../../Data/datasets/024.fasta --mbfile 024.nex.run1.tre --bistrofile bistro024---0-249.treeBL

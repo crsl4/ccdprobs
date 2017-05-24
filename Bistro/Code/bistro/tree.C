@@ -986,7 +986,7 @@ void Tree::mleError(bool& converge)
 
 void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl)
 {
-  if(VERBOSE)
+  if(false)
     cerr << "Edge::calculate on t: " << t << " is nan? " << isnan(t) << endl;
   if(isnan(t))
   {

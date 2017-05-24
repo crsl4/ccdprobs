@@ -2,11 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- rerun 041 to trace inf problem in logBL
-- update manuscript with generalized dirichlet: add info from mathematica
-- for every split in bootstrap trees, average length against the frequency
-
-
+- for every split in bootstrap trees, average length against the frequency (in julia)
 
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 - for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
@@ -24,7 +20,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## Check with Bret
 - distances function: cannot use seed with random shuffle
-
+- we need a good real life example to compare to mrbayes: what do we want to present?
 
 ## Jordan
 ### Final steps:
