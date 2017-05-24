@@ -253,3 +253,13 @@ But if we look in the `treeBL`, the branch lengths do not seem to be weird in an
 ```
 ((39:0.0371741,((((37:0.0653909,(((12:0.0431819,20:0.0689953):0.0164853,(30:0.0723324,29:0.1372519):0.0324667):0.0034364,(((19:0.0916155,28:0.0554377):0.0197495,27:0.0488757):0.0176752,21:0.0907134):0.0078632):0.0165991):0.0020457,((34:0.0900311,35:0.0718004):0.0333207,(14:0.0338025,36:0.0521658):0.0171395):0.0025286):0.0099271,((((40:0.0648464,33:0.0695947):0.0196077,((11:0.0790237,15:0.0635204):0.0279725,23:0.0656730):0.0158994):0.0008214,(((3:0.0490240,10:0.0663798):0.0388326,(4:0.1115355,(41:0.0784227,7:0.0525318):0.0149854):0.0239091):0.0038172,((26:0.0223549,18:0.0431359):0.0183500,(6:0.0966291,25:0.0469873):0.0106713):0.0167755):0.0039002):0.0021800,((22:0.0838966,13:0.0358311):0.0186856,(8:0.0762191,(32:0.0770553,31:0.0482529):0.0022179):0.0155292):0.0008749):0.0011405):0.0039442,((38:0.0530934,17:0.0359830):0.0109768,(16:0.0572615,1:0.0697440):0.0298572):0.0076620):0.0000552):0.0025057,(9:0.0707964,24:0.0432450):0.0072144,(2:0.0693594,5:0.0714157):0.0027924);
 ```
+
+## Distance matrix (plot `combined.pdf`)
+
+- Artiodactyl: MB and Bistro cloud are intersected, mean trees are close.
+- Cats and dogs: separate clouds for different topologies, MB and Bistro separate clouds, distant means
+- Whales: MB and bistro different clouds, not separated by topology, distant means
+- 043: MB bimodal, different cloud for bistro, distant means
+- 024: Bisto does not agree with any mb tree, MB trimodal, distant means
+
+**Conclusion** The pull towards the mean tree does not work because bistro mean tree tends to be different (and far) from MB mean tree.

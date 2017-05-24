@@ -1,3 +1,11 @@
+## distances
+../../Code/badger/mb2badger 024.nex.run1.t
+../../Code/bistro/distances -f ../../Data/datasets/024.fasta --mbfile 024.nex.run1.tre --bistrofile bistro024---0-249.treeBL
+
+../../Code/badger/mb2badger 043.nex.run1.t
+../../Code/bistro/distances -f ../../Data/datasets/043.fasta --mbfile 043.nex.run1.tre --bistrofile bistro043---0-249.treeBL
+
+
 ## summarize
 ## had to manually remove the last line of the bmcmc files (.par), because it was overwritten and weird:
 ## (master) $ wc -l bmcmc*.par

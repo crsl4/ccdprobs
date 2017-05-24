@@ -207,8 +207,11 @@ int main(int argc, char* argv[])
   string mblist = parameters.getMBfile() + ".listTrees";
   cerr << "Writing MrBayes trees used to file " << mblist << endl;
   ofstream mbst(mblist.c_str());
-  for(unsigned int i=0; i<newMBtrees.size(); i++)    
-    mbst << newMBtrees[i] << endl;
+  for(unsigned int i=0; i<newMBtrees.size(); i++)
+  {
+    Tree treei(newMBtrees[i], alignment);    
+    mbst << treei.makeTopologyNumbers() << endl;
+  }
   mbst.close();
   cerr << "done." << endl;
 
@@ -222,7 +225,10 @@ int main(int argc, char* argv[])
   cerr << "Writing Bistro trees used to file " << bistrolist << endl;
   ofstream bistrost(bistrolist.c_str());
   for(unsigned int i=0; i<newBistrotrees.size(); i++)    
-    bistrost << newBistrotrees[i] << endl;
+  {
+    Tree treei(newBistrotrees[i], alignment);    
+    bistrost << treei.makeTopologyNumbers() << endl;
+  }
   bistrost.close();
   cerr << "done." << endl;
 
@@ -243,11 +249,12 @@ int main(int argc, char* argv[])
   cerr << "Writing combined trees used to file " << comblist << endl;
   ofstream combst(comblist.c_str());
   for(unsigned int i=0; i<combinedtrees.size(); i++)    
-    combst << combinedtrees[i] << endl;
+  {
+    Tree treei(combinedtrees[i], alignment);    
+    combst << treei.makeTopologyNumbers() << endl;
+  }
   combst.close();
   cerr << "done." << endl;
-
-
 }
 
 

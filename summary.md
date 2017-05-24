@@ -2,8 +2,6 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- change listTrees in distances to write only topology
-- rerun distance for artiodactyl, cats-dogs, whales, datasets 024, 043: problem than bistro mean != mb mean?
 - rerun 041 to trace inf problem in logBL
 - update manuscript with generalized dirichlet: add info from mathematica
 - for every split in bootstrap trees, average length against the frequency
