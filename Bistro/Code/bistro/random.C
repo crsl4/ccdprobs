@@ -90,9 +90,14 @@ Vector3d multivariateGamma3D(Vector3d mu,Matrix3d vc,mt19937_64& rng, double& lo
       num = MIN_EDGE_LENGTH;
   calculateAlphaLambda(num,L(2,2)*L(2,2),eta,alpha3,lambda3);
   bl[2] = gamma(alpha3,1.0 / lambda3,rng); //c++ gamma has different parametrization
-  if(VERBOSE)
-    cout << alpha1 << "," << alpha2 << "," << alpha3 << "," << lambda1 << "," << lambda2 << "," << lambda3 << endl;
   logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + alpha3*log(lambda3) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1]+(alpha3-1)*log(bl[2])-lambda3*bl[2] - lgamma(alpha1) - lgamma(alpha2) - lgamma(alpha3);
+  if( logdensity > 1000000 )
+  {
+    cerr << "found inf logBL" << endl;
+    cout << "found inf logBL" << endl;
+    cout << alpha1 << "," << alpha2 << "," << alpha3 << "," << lambda1 << "," << lambda2 << "," << lambda3 << endl;
+    exit(1);
+  }
   return bl;
 }
 
@@ -123,10 +128,15 @@ Vector2d multivariateGamma2D(Vector2d mu,Matrix2d vc,mt19937_64& rng, double& lo
     num = MIN_EDGE_LENGTH;
   calculateAlphaLambda(num,L(1,1)*L(1,1),eta,alpha2,lambda2);
   bl[1] = gamma(alpha2,1.0 / lambda2,rng); //c++ gamma has different parametrization
-  if(VERBOSE)
-    cout << alpha1 << "," << alpha2 << "," << lambda1 << "," << lambda2 << endl;
 
   logdensity += alpha1*log(lambda1) + alpha2*log(lambda2) + (alpha1-1)*log(bl[0])-lambda1*bl[0]+(alpha2-1)*log(bl[1])-lambda2*bl[1] - lgamma(alpha1) - lgamma(alpha2);
+  if( logdensity > 1000000 )
+  {
+    cerr << "found inf logBL" << endl;
+    cout << "found inf logBL" << endl;
+    cout << alpha1 << "," << alpha2 << "," << lambda1 << "," << lambda2 << endl;
+    exit(1);
+  }
   return bl;
 }
 
@@ -188,6 +198,13 @@ double randomHalfNormal(double mu, double sigma, double x0,double& logdensity,mt
   boost::math::normal rnorm(0.0, 1.0);
   double q = quantile(rnorm, a);
   logdensity += -log(tailArea) - log(sigma) - (0.5)*log(2*M_PI) - (0.5)*q*q;
+  if( logdensity > 1000000 )
+  {
+    cerr << "found inf logBL" << endl;
+    cout << "found inf logBL" << endl;
+    cout << mu << "," << sigma << "," << tailArea << endl;
+    exit(1);
+  }
   return mu + sigma*q;
 }
 
@@ -244,6 +261,13 @@ double halfNormalGamma(Edge* e, Alignment& alignment, QMatrix& qmatrix, double& 
       if(VERBOSE)
 	cerr << "found exponential case, t: " << t << ", lambda= " << lambda << ", sampled: " << s << endl;
       logdensity += log(lambda) - lambda*s;
+      if( logdensity > 1000000 )
+      {
+	cerr << "found inf logBL" << endl;
+	cout << "found inf logBL" << endl;
+	cout << lambda << endl;
+	exit(1);
+      }
     }
     return s;
   }

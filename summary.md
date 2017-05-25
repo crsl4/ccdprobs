@@ -2,16 +2,11 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- for every split in bootstrap trees, average length against the frequency (in julia)
+- terminar map clade weighted bl, hacerlo mejor una funcion donde se pasan dos vectores: trees, weights para repetirlo con bootstrap
+- for every split in bootstrap trees, average length against the frequency: use same functions as before
 
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
-- for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
-  - tree function:
-    - create an empty clade to pass to the root (or NULL)
-  - node(parent egde, map, weight, clade)
-  - if you are a leaf: add my number to the clade, return
-  - not a leaf: create a clade, and pass it to my children, when it gets the clade back, that is the key to the map (add to the map with the parent edge BL*weight); then add the created clade to the clade that got past
-- map(clade, vector<pair(bl, w)>)
+
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without

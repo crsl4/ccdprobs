@@ -92,7 +92,7 @@ VectorXd dirichletProposalDensityScale(VectorXd x,double scale,double& logPropos
 
 // arguments made reference to avoid copying in each thread
 template<typename T>
-void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap, vector<vector<double>>& pi, vector<vector<double>>& rates)
+void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap, vector<vector<double>>& pi, vector<vector<double>>& rates, vector<string>& trees)
 {
   string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
   ofstream f(outFile.c_str());
@@ -251,7 +251,9 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        cout << "After generating branch lengths: " << endl;
        cout << tree.makeTreeNumbers() << endl;
      }
-     treebl << tree.makeTreeNumbers() << endl;
+     string tt = tree.makeTreeNumbers();
+     treebl << tt << endl;
+     trees.push_back( tt );
      double logBranchLengthPriorDensity = tree.logPriorExp( (PRIOR_MEAN) );
      // if(VERBOSE)
      // 	cout << "calculating the final loglik now before clearing map" << endl;
@@ -813,6 +815,7 @@ int main(int argc, char* argv[])
     vector<thread> threads;
     vector< multimap<string,double> > topologymm(cores); //vector of multimaps
     vector< vector<double> > logwt0(cores);
+    vector< vector<string> > trees0(cores);
     vector<double> maxLogW(cores); //vector of maxlogweight
     vector< vector< vector<double> > > pi0(cores); //vector of vector of pi1,pi2,pi3,pi4
     vector< vector< vector<double> > > rates0(cores); //vector of vector of s1,s2,s3,s4,s5,s6
@@ -824,9 +827,9 @@ int main(int argc, char* argv[])
     {
       cerr << "core = " << i << endl;
       if ( !parameters.getReweight() )
-	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]),ref(rates0[i])));
+	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]),ref(rates0[i]),ref(trees0[i])));
       else
-	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdDist, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]), ref(rates0[i])));
+	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdDist, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]), ref(rates0[i]),ref(trees0[i])));
     }
 
     for(auto &t : threads){
@@ -857,17 +860,17 @@ int main(int argc, char* argv[])
       }
     }
 
-    // print pi0
-    // int cc = 1;
-    // for( vector<vector< vector<double> > >::iterator p=pi0.begin(); p != pi0.end(); ++p)
-    // {
-    //   cerr << "core " << cc << endl;
-    //   ++cc;
-    //   for(vector<vector<double>>::iterator q=(*p).begin(); q != (*p).end(); ++q)
-    //   {
-    // 	cerr << convert(*q).transpose() << endl;
-    //   }
-    // }
+    // combine vector of all trees
+    vector<string> trees(numRandom,0);
+    k = 0;
+    for( vector< vector<string> >::iterator p=trees0.begin(); p != trees0.end(); ++p)
+    {
+      for(vector<string>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+      {
+	trees[k] = *q;
+	++k;
+      }
+    }
 
     // combine vector of pi
     vector<vector<double>> pi;
@@ -962,10 +965,16 @@ int main(int argc, char* argv[])
     ratesStream << "pi(T)    " << fixed << setprecision(4) << meanpi[3];
     ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumpi[3]-meanpi[3]*meanpi[3]) << endl;
     ratesStream.close();
-    // cerr << "mean pi: " << fixed << setprecision(4) << convert(meanpi).transpose() << endl;
-    // cerr << "mean s: " << fixed << setprecision(4) << convert(meanrates).transpose() << endl;
-    // cerr << "sq sum pi: " << fixed << setprecision(4) << convert(sqsumpi).transpose() << endl;
-    // cerr << "sq sum rates: " << fixed << setprecision(4) << convert(sqsumrates).transpose() << endl;
+
+    // computing map clade to weighted branch lengths
+    map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> cladeToWeightBranchLengthMap;
+    for ( int k=0; k<numRandom; ++k )
+    {
+      Tree t(trees[k],alignment);
+      t.weightedBL(cladeToWeightBranchLengthMap,wt[k]);
+    }
+
+// faltan aqui funciones del map, y print results to file
 
     // substract max from multimap
     for ( multimap<string,double >::iterator p=topologyToLogweightMMap.begin(); p!= topologyToLogweightMMap.end(); ++p) {

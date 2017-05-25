@@ -3141,3 +3141,33 @@ void Tree::printSamplerInfo(ostream& f)
   }
   f << s[0] << " " << s[1] << " " << s[2] << endl;
 }
+
+
+void Node::weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& cladeToWeightBranchLengthMap, Clade& clade, Edge* parent, double weight)
+{
+//  cerr << "calling weightBL on node: " << getNumber() << endl;
+  if ( leaf )
+  {
+    clade.add(number);
+  }
+  else
+  {
+    for ( vector<Edge*>::iterator e=edges.begin(); e!= edges.end(); ++e )
+    {
+      if ( (*e) != parent )
+      {
+	Clade tempClade(clade.size());
+	getNeighbor(*e)->weightedBL(cladeToWeightBranchLengthMap,tempClade,*e,weight);
+	clade.add(tempClade);
+      }
+    }
+  }
+  if ( parent != NULL )
+    cladeToWeightBranchLengthMap[clade.get()].push_back(pair<double,double>(weight,parent->getLength()));
+}
+
+void Tree::weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& cladeToWeightBranchLengthMap, double weight)
+{
+  Clade clade1(numTaxa);
+  root->weightedBL(cladeToWeightBranchLengthMap,clade1,NULL,weight);
+}

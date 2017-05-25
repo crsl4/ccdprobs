@@ -4,7 +4,7 @@
 #define MIN_EDGE_LENGTH 0.00001
 #define MAX_EDGE_LENGTH 10
 #define TOL 1.0e-6
-#define VERBOSE true
+#define VERBOSE false
 #define PRIOR_MEAN 0.1
 #define LAMBDA 0.19
 
@@ -199,6 +199,7 @@ public:
   void partialPathCalculations3D(Vector3d ,Alignment& ,Node* ,Edge* ,Node* ,Edge* ,Node* ,Edge* ,QMatrix& ,double& ,Vector3d& ,Matrix3d&);
   double vectorProduct(vector<Vector4d>);
   double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
+  void weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>&, Clade&, Edge*, double);
 };
 
 class Tree
@@ -292,6 +293,7 @@ public:
   void mcmcUpdateEdges(int,MCMCStats&,QMatrix&,Alignment&,mt19937_64&);
   void printDerivatives(ostream&,Alignment&,QMatrix&);
   void printSamplerInfo(ostream&);
+  void weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>&, double);
 };
 
 class MCMCStats
