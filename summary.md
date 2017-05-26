@@ -2,11 +2,9 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- terminar map clade weighted bl, hacerlo mejor una funcion donde se pasan dos vectores: trees, weights para repetirlo con bootstrap
-- for every split in bootstrap trees, average length against the frequency: use same functions as before
-
+- wrap up new functions for BL clades
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
-
+- simulation study?
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -14,6 +12,10 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
+- cladeToWeightBLMap done, we need function for quantiles of `pair<double,double>`
+- Artiodactyl, see test.bootstrapClade file, do we need the trees in a certain canonical order when we call Clade? weird thing when we create a Clade (printClade...)
+- sometimes segmentation fault in meanVariance; `bistro(1933,0x7fff73c0b000) malloc: *** error for object 0x7fed49d09820: incorrect checksum for freed object - object was probably modified after being freed.
+*** set a breakpoint in malloc_error_break to debug`
 - distances function: cannot use seed with random shuffle
 - we need a good real life example to compare to mrbayes: what do we want to present?
 
