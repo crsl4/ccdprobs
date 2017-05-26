@@ -132,6 +132,7 @@ plotBistro2 = function(bistro,filterData=FALSE) {
       my.plot = my.plot + coord_fixed()
   }
   lim = range(bistro$logQ+bistro$logTop+bistro$logBL)
+  print(lim)
   my.plot = my.plot +
       geom_abline(intercept=seq(lim[1], lim[2]),
                   slope=1,

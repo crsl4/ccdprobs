@@ -2,20 +2,9 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- passer: make plots comparing to bmcmc
-- do pca and try to identify what is the 2nd pc, is it correlated to something?
-
-- study why 36,41 had all nan BL, why 27 crashed?
-- for branch lengths (vstat), check the ccdprobs constructor that takes a map string, double and finds clades:
-  - tree function:
-    - create an empty clade to pass to the root (or NULL)
-  - node(parent egde, map, weight, clade)
-  - if you are a leaf: add my number to the clade, return
-  - not a leaf: create a clade, and pass it to my children, when it gets the clade back, that is the key to the map (add to the map with the parent edge BL*weight); then add the created clade to the clade that got past
-- map(clade, vector<pair(bl, w)>)
-
+- wrap up new functions for BL clades
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
-- improve diagnostics: keep track of the number of times each proposal is used: truncated normal, exp, gamma for each split (map Clade, vector(1,2,3))
+- simulation study?
 
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -23,11 +12,12 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- strange thing bistro027: isnan not working!
-- plots for 024 (ESS fixT 0.41%) 043 (ESS fixT 13%), I don't understand the difference
+- cladeToWeightBLMap done, we need function for quantiles of `pair<double,double>`
+- Artiodactyl, see test.bootstrapClade file, do we need the trees in a certain canonical order when we call Clade? weird thing when we create a Clade (printClade...)
+- sometimes segmentation fault in meanVariance; `bistro(1933,0x7fff73c0b000) malloc: *** error for object 0x7fed49d09820: incorrect checksum for freed object - object was probably modified after being freed.
+*** set a breakpoint in malloc_error_break to debug`
 - distances function: cannot use seed with random shuffle
-- distances (now with trees) for whales, cats dogs and sim-whales; with combined for bistro and mb
-
+- we need a good real life example to compare to mrbayes: what do we want to present?
 
 ## Jordan
 ### Final steps:

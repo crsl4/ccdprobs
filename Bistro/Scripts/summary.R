@@ -151,11 +151,10 @@ compareBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));", bmcmc="mcmc1")
     m.mb = matrix(0,N.mb,length(tree$edge.length))
     colnames(m.mb) = paste("b",tree$edge[,2],tree$edge[,1],sep=".")
 
-    for ( i in 1:N.mb )
-        {
-            tree = read.tree(text=tre.mb[i])
-            m.mb[i,] = tree$edge.length
-        }
+    for ( i in 1:N.mb ){
+        tree = read.tree(text=tre.mb[i])
+        m.mb[i,] = tree$edge.length
+    }
 
     ## now do bistro
     source("../../Scripts/readBistro.r")
@@ -281,6 +280,7 @@ compareBistro = function(stem, mb=FALSE, besttree="(1,2,(3,4));", bmcmc="mcmc1")
     else
         {
             foo2 = read.table(paste0(bmcmc,".par"))
+            n = nrow(foo2)
             burn = round(n/11)
             foo2 = foo2[-(1:burn),-1]
             if ( n > 1000 )

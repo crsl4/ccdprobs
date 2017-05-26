@@ -154,7 +154,7 @@ c & = & \frac{\mu^2}{2\sigma^2}
 
 But if we have only two parameters: $\mu, \sigma^2$, instead of three, we only need two points:
 \begin{eqnarray*}
-y & = & (-1/\sigma^2)x^2+\mu/\sigma^2x-\mu^2/2\sigma^2\\ 
+y & = & (-1/\sigma^2)x^2+\mu/\sigma^2x-\mu^2/2\sigma^2\\
 a & = & \frac{-1}{2\sigma^2} \\
 b & = & \mu \\
 y & = & ax^2 - abx +ab^2

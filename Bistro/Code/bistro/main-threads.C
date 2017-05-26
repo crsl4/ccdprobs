@@ -92,7 +92,7 @@ VectorXd dirichletProposalDensityScale(VectorXd x,double scale,double& logPropos
 
 // arguments made reference to avoid copying in each thread
 template<typename T>
-void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap, vector<vector<double>>& pi, vector<vector<double>>& rates)
+void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, double& maxLogWeight, CCDProbs<T> ccd, mt19937_64& rng, Alignment& alignment, MatrixXd& gtrDistanceMatrix, QMatrix& q_init, Parameter& parameters, multimap<string,double>& topologyToLogweightMMap, vector<vector<double>>& pi, vector<vector<double>>& rates, vector<string>& trees)
 {
   string outFile = parameters.getOutFileRoot() + "---" + to_string(indStart) + "-" + to_string(indEnd-1) + ".out";
   ofstream f(outFile.c_str());
@@ -251,7 +251,9 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        cout << "After generating branch lengths: " << endl;
        cout << tree.makeTreeNumbers() << endl;
      }
-     treebl << tree.makeTreeNumbers() << endl;
+     string tt = tree.makeTreeNumbers();
+     treebl << tt << endl;
+     trees.push_back( tt );
      double logBranchLengthPriorDensity = tree.logPriorExp( (PRIOR_MEAN) );
      // if(VERBOSE)
      // 	cout << "calculating the final loglik now before clearing map" << endl;
@@ -261,6 +263,11 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        cout << "calculating the final loglik now without clearing map" << endl;
      double logLik = tree.calculate(alignment, model);
      double logWeight = logBranchLengthPriorDensity + logLik - logBL - logTopologyProbability - logQ;
+     if( logBL > 1000000 )
+     {
+       cerr << "found inf logBL" << endl;
+       exit(1);
+     }
      if ( VERBOSE )
      {
        cout << "logBranchLengthPriorDensity = " << logBranchLengthPriorDensity << endl;
@@ -289,6 +296,62 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    treebl.close();
    treeblsort.close();
    samplerStream.close();
+}
+
+map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> createCladeToWeightBranchLengthMap(vector<string> trees,vector<double> wt, Alignment& alignment)
+{
+  cerr << "inside create clade map" << endl;
+  cerr << "trees.size() " <<  trees.size() << " wt.size " << wt.size() << endl;
+  if( trees.size() != wt.size() )
+  {
+    cerr << "Trees vector and weights vector should have the same length" << endl;
+    exit(1);
+  }
+  map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> cladeToWeightBranchLengthMap;
+  for ( int k=0; k<trees.size(); ++k )
+  {
+    cerr << "k= " << k << endl;
+    Tree t(trees[k],alignment);
+    t.weightedBL(cladeToWeightBranchLengthMap,wt[k]);
+  }
+  cerr << "exit for" << endl;
+  return cladeToWeightBranchLengthMap;
+}
+
+vector<double> meanVariance(vector<pair<double,double>> v)
+{
+  cerr << "enters meanVar" << endl;
+  double sum = 0;
+  double sum2 = 0;
+  vector<double> res(2,0);
+  int n = v.size();
+  for ( vector<pair<double,double>>::iterator t = v.begin(); t!=v.end(); ++t )
+  {
+    cerr << sum << "," << t->first << "," << t->second << endl;
+    sum += (t->first) * (t->second);
+    sum2 += (t->first) * (t->second) * (t->second);
+  }
+  res[1] = sum/n;
+  res[2] = sum2/n - (sum/n)*(sum/n);
+  return res;
+}
+
+void printCladeToWeightBLsummary(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> m, ostream& f)
+{
+  cerr << "enters print clade" << endl;
+  f << "Clade weighted-mean-BL weighted-sd-BL" << endl;
+  for( map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>::iterator it = m.begin(); it != m.end(); ++it)
+  {
+    cerr << "enters for " << endl;
+//    Clade c(it->first);
+    cerr << "create Clade " << it->first << endl;
+    vector<double> res = meanVariance(it->second);
+    cerr << "after meanVariance" << endl;
+//    c.print(f);
+    f << it->first << " ";
+    f << setw(10) << setprecision(8) << fixed << " " << res[1] << " " << sqrt(res[2]) << endl;
+  }
+  cerr << "after for" << endl;
 }
 
 int main(int argc, char* argv[])
@@ -400,11 +463,14 @@ int main(int argc, char* argv[])
   q_init.setMcmcVarQP(vs0);
 
 // ------------------------------ Put MLE branch lengths to tree -------------------------
+  cout << "Putting MLE Branch Lengths" << endl;
+  cout << "p: " << q_init.getStationaryP() << endl;
+  cout << "s: " << q_init.getSymmetricQP() << endl;
+  cout << "Q: " << q_init.getQ() << endl;
   for ( int i=0; i<4; ++i )
   {
     starttree.mleLengths(alignment,q_init);
   }
-  cout << "MLE Branch Lengths" << endl;
   cout << starttree.makeTreeNumbers() << endl;
 
 // MCMC
@@ -582,18 +648,16 @@ int main(int argc, char* argv[])
 
     cerr << endl << "    ... done." << endl;
 
-    // mean tree
+    // mean tree from bootstrap string
     CladeGraph cladeGraph;
     cladeGraph.findMeanTree(bootstrapStrings,alignment);
     meanTree = cladeGraph.getMeanTree();
     cerr << "meanTree = " << meanTree << endl;
     cout << "meanTree = " << meanTree << endl;
-
     string meanTreeFile = parameters.getOutFileRoot() + ".meanTree";
     ofstream meanTreeFileStream(meanTreeFile.c_str());
     meanTreeFileStream << meanTree << endl;
     meanTreeFileStream.close();
-//    cerr << "written mean tree to a file ok" << endl;
 
     // calculate distance from trees to mean tree
     Tree mtree(meanTree,alignment);
@@ -601,10 +665,8 @@ int main(int argc, char* argv[])
     int badTrees = 0;
     for ( vector<string>::iterator t = bootstrapStrings.begin(); t!=bootstrapStrings.end(); ++t )
     {
-//      cerr << "bootstrap tree: " << (*t) << endl;
-      // check if tree string contains nan
       string foo = *t;
-      if ( foo.find("nan") != string::npos )
+      if ( foo.find("nan") != string::npos ) // check if tree string contains nan
       {
 	++badTrees;
 	continue;
@@ -624,9 +686,6 @@ int main(int argc, char* argv[])
       delete boottree;
     }
     bootstrapTreesDist.close();
-
-//    for ( map<string,double>::iterator m=topologyToDistanceWeightMap.begin(); m != topologyToDistanceWeightMap.end(); ++m )
-//      cerr << "topology to distance weight, tree: " << (*m).first << " distance weight: " << (*m).second << endl;
 
     if ( badTrees > 0 )
       cerr << "Warning: found " << badTrees << " bootstrap trees with nan edge lengths." << endl;
@@ -667,43 +726,14 @@ int main(int argc, char* argv[])
     }
     cerr << "after writing to files" << endl;
 
-    // computing tree distance matrix, only if there are fewer than 100 bootstrap trees (fixit: sample)
-    if( parameters.getNumBootstrap() < 101 )
-    {
-      cerr << "Fewer than 100 bootstrap trees, so we will compute the tree distance matrix" << endl;
-      Tree mtree(meanTree,alignment);
-      MatrixXd treeDistanceMatrix = MatrixXd::Zero(parameters.getNumBootstrap()+1,parameters.getNumBootstrap()+1);
-      for ( int i = 0; i<bootstrapStrings.size(); ++i)
-      {
-	string fooi = bootstrapStrings[i];
-	if ( fooi.find("nan") != string::npos )
-	{
-	  ++badTrees;
-	  continue;
-	}
-	Tree* treei = new Tree(fooi, alignment);
-	for ( int j = i+1; j<bootstrapStrings.size(); ++j)
-	{
-	  string fooj = bootstrapStrings[j];
-	  if ( fooj.find("nan") != string::npos )
-	  {
-	    ++badTrees;
-	    continue;
-	  }
-	  Tree* treej = new Tree(fooj, alignment);
-	  double dd = treei->distance(treej);
-	  treeDistanceMatrix(i,j) = dd;
-	  treeDistanceMatrix(j,i) = dd;
-	}
-	double d = mtree.distance(treei);
-	treeDistanceMatrix(i,bootstrapStrings.size()) = d;
-	treeDistanceMatrix(bootstrapStrings.size(),i) = d;
-      }
-      cerr << "Found " << badTrees << " for the pairwise distance matrix" << endl;
-//      cerr << treeDistanceMatrix << endl;
-      cout << "Tree distance matrix: " << endl << endl;
-      cout << treeDistanceMatrix << endl;
-    }
+    // summarizing branch lengths for bootstrap trees
+    vector<double> ww(bootstrapStrings.size(),1.0);
+    map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> bootstrapCladeToWeightBLMap = createCladeToWeightBranchLengthMap(bootstrapStrings,ww,alignment);
+    cerr << "exists create" << endl;
+    string bootstrapCladeBLFile = parameters.getOutFileRoot() + ".bootstrapCladeBL";
+    ofstream bootstrapCladeBLStream(bootstrapCladeBLFile.c_str());
+    printCladeToWeightBLsummary(bootstrapCladeToWeightBLMap, bootstrapCladeBLStream);
+
   }
   else // topology input, so only one tree in the map
   {
@@ -813,6 +843,7 @@ int main(int argc, char* argv[])
     vector<thread> threads;
     vector< multimap<string,double> > topologymm(cores); //vector of multimaps
     vector< vector<double> > logwt0(cores);
+    vector< vector<string> > trees0(cores);
     vector<double> maxLogW(cores); //vector of maxlogweight
     vector< vector< vector<double> > > pi0(cores); //vector of vector of pi1,pi2,pi3,pi4
     vector< vector< vector<double> > > rates0(cores); //vector of vector of s1,s2,s3,s4,s5,s6
@@ -824,9 +855,9 @@ int main(int argc, char* argv[])
     {
       cerr << "core = " << i << endl;
       if ( !parameters.getReweight() )
-	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]),ref(rates0[i])));
+	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]),ref(rates0[i]),ref(trees0[i])));
       else
-	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdDist, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]), ref(rates0[i])));
+	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdDist, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]), ref(rates0[i]),ref(trees0[i])));
     }
 
     for(auto &t : threads){
@@ -856,19 +887,20 @@ int main(int argc, char* argv[])
 	++k;
       }
     }
+    cerr << "successfully combined all logwt" << endl;
 
-    // print pi0
-    // int cc = 1;
-    // for( vector<vector< vector<double> > >::iterator p=pi0.begin(); p != pi0.end(); ++p)
-    // {
-    //   cerr << "core " << cc << endl;
-    //   ++cc;
-    //   for(vector<vector<double>>::iterator q=(*p).begin(); q != (*p).end(); ++q)
-    //   {
-    // 	cerr << convert(*q).transpose() << endl;
-    //   }
-    // }
-
+    // combine vector of all trees
+    vector<string> trees(numRandom,0);
+    k = 0;
+    for( vector< vector<string> >::iterator p=trees0.begin(); p != trees0.end(); ++p)
+    {
+      for(vector<string>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+      {
+	trees[k] = *q;
+	++k;
+      }
+    }
+    cerr << "successfully combined all trees" << endl;
     // combine vector of pi
     vector<vector<double>> pi;
     for( vector<vector< vector<double> > >::iterator p=pi0.begin(); p != pi0.end(); ++p)
@@ -962,10 +994,14 @@ int main(int argc, char* argv[])
     ratesStream << "pi(T)    " << fixed << setprecision(4) << meanpi[3];
     ratesStream << " " << fixed << setprecision(4) << sqrt(sqsumpi[3]-meanpi[3]*meanpi[3]) << endl;
     ratesStream.close();
-    // cerr << "mean pi: " << fixed << setprecision(4) << convert(meanpi).transpose() << endl;
-    // cerr << "mean s: " << fixed << setprecision(4) << convert(meanrates).transpose() << endl;
-    // cerr << "sq sum pi: " << fixed << setprecision(4) << convert(sqsumpi).transpose() << endl;
-    // cerr << "sq sum rates: " << fixed << setprecision(4) << convert(sqsumrates).transpose() << endl;
+
+    // computing map clade to weighted branch lengths
+    map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> cladeToWeightBLMap = createCladeToWeightBranchLengthMap(trees,wt,alignment);
+    // summarizing branch lengths for trees
+    string cladeBLFile = parameters.getOutFileRoot() + ".vstat";
+    ofstream cladeBLStream(cladeBLFile.c_str());
+    printCladeToWeightBLsummary(cladeToWeightBLMap, cladeBLStream);
+
 
     // substract max from multimap
     for ( multimap<string,double >::iterator p=topologyToLogweightMMap.begin(); p!= topologyToLogweightMMap.end(); ++p) {
