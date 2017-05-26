@@ -436,6 +436,14 @@ int main(int argc, char* argv[])
   if(parameters.getOnlyMCMC())
     return 0;
 
+// calculations for new generalized Dirichlet
+
+  Vector4d alphaForGenDirichletPi;
+  Vector4d lambdaForGenDirichletPi;
+  VectorXd alphaForGenDirichletS;
+  VectorXd lambdaForGenDirichletS;
+  q_init.calculateAlphaLambdaForGenDirichlet(alphaForGenDirichletPi,lambdaForGenDirichletPi,alphaForGenDirichletS,lambdaForGenDirichletS);
+
 
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
 // save to file)

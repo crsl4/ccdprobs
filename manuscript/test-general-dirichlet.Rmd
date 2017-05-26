@@ -1,0 +1,65 @@
+---
+title: "Untitled"
+author: "Bret Larget"
+date: "5/26/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Test Generalized Dirichlet Distribution
+
+1. Generate random $\alpha$ and $\lambda$.
+2. Generate gamma random variables and renormalize.
+3. Calculate marginal means and variances.
+4. Use formula to find estimated $\alpha$ and $\lambda$.
+5. Compare to originals.
+
+```{r test}
+## x is an n by k matrix where row sums are one and elements are positive
+estimate = function(x)
+{
+  m = apply(x,2,mean)
+  v = apply(x,2,var)
+  lambda = m*(1-m)/v
+  alpha = m*lambda
+  lambda = lambda/mean(lambda)
+  return(data.frame(alpha,lambda))
+}
+
+parameters = function(k=4,mean.a=2000,shape=2)
+{
+  alpha = rgamma(k,shape,shape/mean.a)
+  lambda = rgamma(k,shape,shape)
+  lambda = lambda/mean(lambda)
+  return(data.frame(alpha,lambda))
+}
+
+generate = function(p,n=1000)
+{
+  k = ncol(p)
+  print(p)
+  x = with(p, matrix(rgamma(n*k,rep(alpha,each=n),rep(lambda,each=n)),n,k) )
+  s = apply(x,1,sum)
+  for ( i in 1:n )
+    x[i,] = x[i,] / s[i]
+  return(x)
+}
+```
+
+## Run the test
+
+```{r run}
+f = function(k)
+{
+  p = parameters(k)
+  x = generate(p)
+  p.hat = estimate(x)
+  return(data.frame(alpha=p$alpha,lambda=p$lambda,alpha.hat=p.hat$alpha,lambda.hat=p.hat$lambda))
+}
+
+f(4)
+
+```

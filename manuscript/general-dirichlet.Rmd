@@ -103,8 +103,8 @@ and has the property that some correlations may be positive.
 ### Generation of random variables
 
 To generate random variables $X_1,\ldots,X_k \sim \text{Dirichlet}(\alpha_1,\ldots,\alpha_k)$,
-one simply generates independent random variables $Y_i \sim \text{Gamma}(\alpha_1,\lambda)$
-for $i=i,\ldots,k$ and any arbitrary $\lambda>0$ (typically $\lambda=1$)
+one simply generates independent random variables $Y_i \sim \text{Gamma}(\alpha_i,\lambda)$
+for $i=1,\ldots,k$ and any arbitrary $\lambda>0$ (typically $\lambda=1$)
 and letting $X_i = Y_i / \sum_{j=1}^k Y_j$.
 This suggests that by allowing the value of $\lambda$ to vary with $i$
 that we may be able to create a distribution on positive random variables
