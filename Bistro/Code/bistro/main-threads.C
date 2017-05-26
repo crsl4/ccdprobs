@@ -298,7 +298,8 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    samplerStream.close();
 }
 
-map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> createCladeToWeightBranchLengthMap(vector<string> trees,vector<double> wt, Alignment& alignment)
+void createCladeToWeightBranchLengthMap(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& cladeToWeightBranchLengthMap,
+					vector<string> trees,vector<double> wt, Alignment& alignment)
 {
   cerr << "inside create clade map" << endl;
   cerr << "trees.size() " <<  trees.size() << " wt.size " << wt.size() << endl;
@@ -307,7 +308,6 @@ map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> createCladeToWeig
     cerr << "Trees vector and weights vector should have the same length" << endl;
     exit(1);
   }
-  map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> cladeToWeightBranchLengthMap;
   for ( int k=0; k<trees.size(); ++k )
   {
     cerr << "k= " << k << endl;
@@ -315,10 +315,9 @@ map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> createCladeToWeig
     t.weightedBL(cladeToWeightBranchLengthMap,wt[k]);
   }
   cerr << "exit for" << endl;
-  return cladeToWeightBranchLengthMap;
 }
 
-vector<double> meanVariance(vector<pair<double,double>> v)
+vector<double> meanVariance(vector<pair<double,double>>& v)
 {
   cerr << "enters meanVar" << endl;
   double sum = 0;
@@ -331,12 +330,12 @@ vector<double> meanVariance(vector<pair<double,double>> v)
     sum += (t->first) * (t->second);
     sum2 += (t->first) * (t->second) * (t->second);
   }
-  res[1] = sum/n;
-  res[2] = sum2/n - (sum/n)*(sum/n);
+  res[0] = sum/n;
+  res[1] = sum2/n - (sum/n)*(sum/n);
   return res;
 }
 
-void printCladeToWeightBLsummary(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> m, ostream& f)
+void printCladeToWeightBLsummary(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& m, ostream& f)
 {
   cerr << "enters print clade" << endl;
   f << "Clade weighted-mean-BL weighted-sd-BL" << endl;
@@ -508,7 +507,7 @@ int main(int argc, char* argv[])
   Vector4d lambdaForGenDirichletPi;
   VectorXd alphaForGenDirichletS;
   VectorXd lambdaForGenDirichletS;
-  q_init.calculateAlphaLambdaForGenDirichlet(alphaForGenDirichletPi,lambdaForGenDirichletPi,alphaForGenDirichletS,lambdaForGenDirichletS);
+//  q_init.calculateAlphaLambdaForGenDirichlet(alphaForGenDirichletPi,lambdaForGenDirichletPi,alphaForGenDirichletS,lambdaForGenDirichletS);
 
 
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
@@ -728,7 +727,8 @@ int main(int argc, char* argv[])
 
     // summarizing branch lengths for bootstrap trees
     vector<double> ww(bootstrapStrings.size(),1.0);
-    map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> bootstrapCladeToWeightBLMap = createCladeToWeightBranchLengthMap(bootstrapStrings,ww,alignment);
+    map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> bootstrapCladeToWeightBLMap;
+    createCladeToWeightBranchLengthMap(bootstrapCladeToWeightBLMap,bootstrapStrings,ww,alignment);
     cerr << "exists create" << endl;
     string bootstrapCladeBLFile = parameters.getOutFileRoot() + ".bootstrapCladeBL";
     ofstream bootstrapCladeBLStream(bootstrapCladeBLFile.c_str());
@@ -878,26 +878,30 @@ int main(int argc, char* argv[])
 
     // combine vector of all logwt
     vector<double> logwt(numRandom,0);
-    int k = 0;
-    for( vector< vector<double> >::iterator p=logwt0.begin(); p != logwt0.end(); ++p)
     {
-      for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+      int k = 0;
+      for( vector< vector<double> >::iterator p=logwt0.begin(); p != logwt0.end(); ++p)
       {
-	logwt[k] = *q;
-	++k;
+	for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+	{
+	  logwt[k] = *q;
+	  ++k;
+	}
       }
     }
     cerr << "successfully combined all logwt" << endl;
 
     // combine vector of all trees
-    vector<string> trees(numRandom,0);
-    k = 0;
+    cerr << "numRandom = " << numRandom << endl;
+    
+    vector<string> trees;
+    cerr << "---" << endl;
     for( vector< vector<string> >::iterator p=trees0.begin(); p != trees0.end(); ++p)
     {
+      cerr << "+++" << endl;
       for(vector<string>::iterator q=(*p).begin(); q != (*p).end(); ++q)
       {
-	trees[k] = *q;
-	++k;
+	trees.push_back(*q);
       }
     }
     cerr << "successfully combined all trees" << endl;
@@ -996,7 +1000,8 @@ int main(int argc, char* argv[])
     ratesStream.close();
 
     // computing map clade to weighted branch lengths
-    map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> cladeToWeightBLMap = createCladeToWeightBranchLengthMap(trees,wt,alignment);
+    map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> cladeToWeightBLMap;
+    createCladeToWeightBranchLengthMap(cladeToWeightBLMap,trees,wt,alignment);
     // summarizing branch lengths for trees
     string cladeBLFile = parameters.getOutFileRoot() + ".vstat";
     ofstream cladeBLStream(cladeBLFile.c_str());
