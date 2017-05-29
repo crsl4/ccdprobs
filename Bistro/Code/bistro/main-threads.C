@@ -301,8 +301,6 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 void createCladeToWeightBranchLengthMap(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& cladeToWeightBranchLengthMap,
 					vector<string> trees,vector<double> wt, Alignment& alignment)
 {
-  cerr << "inside create clade map" << endl;
-  cerr << "trees.size() " <<  trees.size() << " wt.size " << wt.size() << endl;
   if( trees.size() != wt.size() )
   {
     cerr << "Trees vector and weights vector should have the same length" << endl;
@@ -310,7 +308,6 @@ void createCladeToWeightBranchLengthMap(map<dynamic_bitset<unsigned char>,vector
   }
   for ( int k=0; k<trees.size(); ++k )
   {
-    cerr << "k= " << k << endl;
     Tree t(trees[k],alignment);
     t.weightedBL(cladeToWeightBranchLengthMap,wt[k]);
   }
@@ -319,38 +316,34 @@ void createCladeToWeightBranchLengthMap(map<dynamic_bitset<unsigned char>,vector
 
 vector<double> meanVariance(vector<pair<double,double>>& v)
 {
-  cerr << "enters meanVar" << endl;
   double sum = 0;
   double sum2 = 0;
-  vector<double> res(2,0);
-  int n = v.size();
+  double sumw = 0;
+  vector<double> res(3,0);
   for ( vector<pair<double,double>>::iterator t = v.begin(); t!=v.end(); ++t )
   {
-    cerr << sum << "," << t->first << "," << t->second << endl;
+//    cerr << sum << "," << sum2 << "," << t->first << "," << t->second << endl;
     sum += (t->first) * (t->second);
     sum2 += (t->first) * (t->second) * (t->second);
+    sumw += (t->first);
   }
-  res[0] = sum/n;
-  res[1] = sum2/n - (sum/n)*(sum/n);
+  res[0] = sumw;
+  res[1] = sum;
+  res[2] = sum2 - sum*sum;
   return res;
 }
 
 void printCladeToWeightBLsummary(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& m, ostream& f)
 {
-  cerr << "enters print clade" << endl;
-  f << "Clade weighted-mean-BL weighted-sd-BL" << endl;
+  f << "Clade weight weighted-mean-BL weighted-sd-BL" << endl;
   for( map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>::iterator it = m.begin(); it != m.end(); ++it)
   {
-    cerr << "enters for " << endl;
-//    Clade c(it->first);
-    cerr << "create Clade " << it->first << endl;
+    Clade c(it->first);
     vector<double> res = meanVariance(it->second);
-    cerr << "after meanVariance" << endl;
-//    c.print(f);
-    f << it->first << " ";
-    f << setw(10) << setprecision(8) << fixed << " " << res[1] << " " << sqrt(res[2]) << endl;
+    c.print(f);
+    f << " " << it->first << " ";
+    f << setw(10) << setprecision(8) << fixed << " " << res[0] << " " << res[1] << " " << sqrt(res[2]) << endl;
   }
-  cerr << "after for" << endl;
 }
 
 int main(int argc, char* argv[])
@@ -726,10 +719,9 @@ int main(int argc, char* argv[])
     cerr << "after writing to files" << endl;
 
     // summarizing branch lengths for bootstrap trees
-    vector<double> ww(bootstrapStrings.size(),1.0);
+    vector<double> ww(bootstrapStrings.size(),1.0/bootstrapStrings.size());
     map<dynamic_bitset<unsigned char>,vector<pair<double,double>>> bootstrapCladeToWeightBLMap;
     createCladeToWeightBranchLengthMap(bootstrapCladeToWeightBLMap,bootstrapStrings,ww,alignment);
-    cerr << "exists create" << endl;
     string bootstrapCladeBLFile = parameters.getOutFileRoot() + ".bootstrapCladeBL";
     ofstream bootstrapCladeBLStream(bootstrapCladeBLFile.c_str());
     printCladeToWeightBLsummary(bootstrapCladeToWeightBLMap, bootstrapCladeBLStream);

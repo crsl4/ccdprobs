@@ -2,22 +2,21 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- wrap up new functions for BL clades
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
-- simulation study?
-
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
   - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
+- Clean up repository for users!!
 
 
 ## Check with Bret
+- see test.vstat and test.tstat, the clades on vstat are not canonical, how to do?
+- weighted mean (conditional on the clade being in the tree? that is, divide by sum weight? not doing this now)
 - cladeToWeightBLMap done, we need function for quantiles of `pair<double,double>`
+- we need a good real life example to compare to mrbayes: what do we want to present? clean up repo
+- show distances matrices for different datasets
 - Artiodactyl, see test.bootstrapClade file, do we need the trees in a certain canonical order when we call Clade? weird thing when we create a Clade (printClade...)
-- sometimes segmentation fault in meanVariance; `bistro(1933,0x7fff73c0b000) malloc: *** error for object 0x7fed49d09820: incorrect checksum for freed object - object was probably modified after being freed.
-*** set a breakpoint in malloc_error_break to debug`
-- distances function: cannot use seed with random shuffle
-- we need a good real life example to compare to mrbayes: what do we want to present?
+
 
 ## Jordan
 ### Final steps:
