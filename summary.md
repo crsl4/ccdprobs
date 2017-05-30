@@ -2,6 +2,8 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- add min/max, 95% region (0.025,0.975), you can use reverse iterators to add from the back (again until 0.025), median; need to sort by bl, sort will sort by the first of the pair: need to change the pair to (bl,weight); renormalize the weights to show the "conditional on being on the tree" (divide by sum of weights): have a c++ code that does the cleanup also (flag on bistro to create summary files or not)
+- run big datasets and study vstat/bootstrapCladeBL files
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 - Write up manuscript, and figure out simulation study for small datasets:
   - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
@@ -10,12 +12,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- see test.vstat and test.tstat, the clades on vstat are not canonical, how to do?
-- weighted mean (conditional on the clade being in the tree? that is, divide by sum weight? not doing this now)
-- cladeToWeightBLMap done, we need function for quantiles of `pair<double,double>`
 - we need a good real life example to compare to mrbayes: what do we want to present? clean up repo
-- show distances matrices for different datasets
-- Artiodactyl, see test.bootstrapClade file, do we need the trees in a certain canonical order when we call Clade? weird thing when we create a Clade (printClade...)
 
 
 ## Jordan

@@ -3168,6 +3168,8 @@ void Node::weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,doubl
 
 void Tree::weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& cladeToWeightBranchLengthMap, double weight)
 {
+  reroot(1);
+  sortCanonical();
   Clade clade1(numTaxa);
   root->weightedBL(cladeToWeightBranchLengthMap,clade1,NULL,weight);
 }

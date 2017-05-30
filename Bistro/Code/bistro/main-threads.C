@@ -335,14 +335,14 @@ vector<double> meanVariance(vector<pair<double,double>>& v)
 
 void printCladeToWeightBLsummary(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& m, ostream& f)
 {
-  f << "Clade weight weighted-mean-BL weighted-sd-BL" << endl;
+  f << "weight weighted-mean-BL weighted-sd-BL clade" << endl;
   for( map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>::iterator it = m.begin(); it != m.end(); ++it)
   {
     Clade c(it->first);
     vector<double> res = meanVariance(it->second);
+    f << setw(10) << setprecision(8) << fixed << " " << res[0] << " " << res[1] << " " << sqrt(res[2]) << " ";
     c.print(f);
-    f << " " << it->first << " ";
-    f << setw(10) << setprecision(8) << fixed << " " << res[0] << " " << res[1] << " " << sqrt(res[2]) << endl;
+    f << endl;
   }
 }
 
