@@ -3163,7 +3163,7 @@ void Node::weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,doubl
     }
   }
   if ( parent != NULL )
-    cladeToWeightBranchLengthMap[clade.get()].push_back(pair<double,double>(weight,parent->getLength()));
+    cladeToWeightBranchLengthMap[clade.get()].push_back(pair<double,double>(parent->getLength(),weight));
 }
 
 void Tree::weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& cladeToWeightBranchLengthMap, double weight)

@@ -311,9 +311,55 @@ void createCladeToWeightBranchLengthMap(map<dynamic_bitset<unsigned char>,vector
     Tree t(trees[k],alignment);
     t.weightedBL(cladeToWeightBranchLengthMap,wt[k]);
   }
-  cerr << "exit for" << endl;
 }
 
+// weighted percentiles for branch lengths (conditional on the split being in the tree)
+vector<double> quantiles(vector<pair<double,double>>& v)
+{
+  vector<double> res(3,0); // 95%CI and median
+  sort(v.begin(),v.end()); //pair: (bl,w), so sort by bl
+  // first we need to normalize the weights
+  double sum = 0;
+  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i ) {
+    sum += (i->second);
+  }
+  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i ) {
+    (i->second) /= sum;
+  }
+  // now we find the 97.5% quantile
+  sum = 0;
+  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i ) 
+  {
+    sum += (i->second);
+    if(sum < 0.025)
+      continue;
+    res[0] = (i->first); //I think that sort sorts from big to small
+    break;
+  }
+  // now we find the 2.5% quantile
+  sum = 0;
+  for (vector<pair<double,double>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i ) 
+  {
+    sum += (i->second);
+    if(sum < 0.025)
+      continue;
+    res[2] = (i->first);
+    break;
+  }
+  // now we find the median
+  sum = 0;
+  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i ) 
+  {
+    sum += (i->second);
+    if(sum < 0.5)
+      continue;
+    res[1] = (i->first);
+    break;
+  }
+  return res;
+}
+
+// weighted mean and std dev for branch lengths (conditional on the split being in the tree)
 vector<double> meanVariance(vector<pair<double,double>>& v)
 {
   double sum = 0;
@@ -324,23 +370,25 @@ vector<double> meanVariance(vector<pair<double,double>>& v)
   {
 //    cerr << sum << "," << sum2 << "," << t->first << "," << t->second << endl;
     sum += (t->first) * (t->second);
-    sum2 += (t->first) * (t->second) * (t->second);
-    sumw += (t->first);
+    sum2 += (t->first) * (t->first) * (t->second);
+    sumw += (t->second);
   }
   res[0] = sumw;
-  res[1] = sum;
-  res[2] = sum2 - sum*sum;
+  res[1] = sum/sumw;
+  res[2] = sum2/sumw - sum*sum/(sumw*sumw);
   return res;
 }
 
 void printCladeToWeightBLsummary(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& m, ostream& f)
 {
-  f << "weight weighted-mean-BL weighted-sd-BL clade" << endl;
+  f << "weight weighted-mean-BL weighted-sd-BL 95%-lower median 95%-upper clade" << endl;
   for( map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>::iterator it = m.begin(); it != m.end(); ++it)
   {
     Clade c(it->first);
     vector<double> res = meanVariance(it->second);
-    f << setw(10) << setprecision(8) << fixed << " " << res[0] << " " << res[1] << " " << sqrt(res[2]) << " ";
+    vector<double> qres = quantiles(it->second);
+    f << setw(10) << setprecision(8) << fixed << " " << res[0] << " " << res[1] << " " << sqrt(res[2]);
+    f << setw(10) << setprecision(8) << fixed << " " << qres[0] << " " << qres[1] << " " << qres[2] << " ";
     c.print(f);
     f << endl;
   }
@@ -839,13 +887,13 @@ int main(int argc, char* argv[])
     vector<double> maxLogW(cores); //vector of maxlogweight
     vector< vector< vector<double> > > pi0(cores); //vector of vector of pi1,pi2,pi3,pi4
     vector< vector< vector<double> > > rates0(cores); //vector of vector of s1,s2,s3,s4,s5,s6
-    cerr << "jointMLE " << parameters.getJointMLE() << endl;
-    cerr << "fixedQ " << parameters.getFixedQ() << endl;
-    cerr << "eta " << parameters.getEta() << endl;
+    // cerr << "jointMLE " << parameters.getJointMLE() << endl;
+    // cerr << "fixedQ " << parameters.getFixedQ() << endl;
+    // cerr << "eta " << parameters.getEta() << endl;
 
     for ( int i=0; i<cores; ++i )
     {
-      cerr << "core = " << i << endl;
+      //cerr << "core = " << i << endl;
       if ( !parameters.getReweight() )
 	threads.push_back(thread(randomTrees<double>,i,startTreeNumber[i], startTreeNumber[i+1], ref(logwt0[i]), ref(maxLogW[i]), ccdParsimony, ref(*(vrng[i])), ref(alignment), ref(gtrDistanceMatrix), ref(model), ref(parameters), ref(topologymm[i]), ref(pi0[i]),ref(rates0[i]),ref(trees0[i])));
       else
@@ -887,10 +935,8 @@ int main(int argc, char* argv[])
     cerr << "numRandom = " << numRandom << endl;
     
     vector<string> trees;
-    cerr << "---" << endl;
     for( vector< vector<string> >::iterator p=trees0.begin(); p != trees0.end(); ++p)
     {
-      cerr << "+++" << endl;
       for(vector<string>::iterator q=(*p).begin(); q != (*p).end(); ++q)
       {
 	trees.push_back(*q);

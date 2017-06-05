@@ -2,13 +2,20 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- add min/max, 95% region (0.025,0.975), you can use reverse iterators to add from the back (again until 0.025), median; need to sort by bl, sort will sort by the first of the pair: need to change the pair to (bl,weight); renormalize the weights to show the "conditional on being on the tree" (divide by sum of weights): have a c++ code that does the cleanup also (flag on bistro to create summary files or not)
+- git push
 - run big datasets and study vstat/bootstrapCladeBL files
+
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
-- Write up manuscript, and figure out simulation study for small datasets:
-  - Rerun many datasets of increasing size with the current state of bistro (fixed tree, so run mrbayes first): Edit bistroOneRep and bistroAllRep: run with fixed topology and without
-  - Create scripts to analyze output files: ESS, correct bl and p in posterior interval, MAP tree = true tree (or average PP for the true tree); do plots
+
 - Clean up repository for users!!
+
+- [biometrics](http://onlinelibrary.wiley.com/journal/10.1111/(ISSN)1541-0420)
+- status quo is mcmc, successful but computationally inefficient (reference ronquist paper)
+- use IS as alternative
+- show methods
+- show examples (improvement in ESS does not translate to improvement in time, we do a lot more computation per tree)
+- discussion: problems, limitations: two components: sample topolgy, and then sample BL. the second one is good, but the other one: there are cases when the shrinking of bootstrap towards the mean is good, in other not
+  - setting priors on pi,s, the dirichlet is fine, but in the posterior is not really dirichlet (and we came up with the generalized dirichlet, maybe a separate paper)
 
 
 ## Check with Bret
