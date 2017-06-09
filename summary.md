@@ -2,8 +2,8 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- git push
-- run big datasets and study vstat/bootstrapCladeBL files
+- generalized dirichlet: study and double check steps: new things: justify moments, what are marginals?
+- run big datasets and study vstat/bootstrapCladeBL files: compare
 
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 

@@ -1,3 +1,7 @@
+## new output files
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro5 -r 1000 -b 1000 > bistro5.log
+
+
 ## distance
 ../../Code/badger/mb2badger cats-dogs-2.nex.run1.t
 ../../Code/badger/mb2badger cats-dogs-2.nex.run2.t

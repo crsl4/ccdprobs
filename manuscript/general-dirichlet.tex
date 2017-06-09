@@ -1,0 +1,281 @@
+---
+title: "A symmetric generalized Dirichlet distribution"
+author: "Bret Larget"
+date: "5/14/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+require(tidyr)
+require(dplyr)
+require(ggplot2)
+require(ggtern)
+knitr::opts_chunk$set(echo = FALSE,cache=TRUE)
+
+my_tern_limits = function (T = 1, L = 1, R = 1, ...) 
+{
+  ret <- list()
+  if (!all(sapply(list(T, L, R), function(x) {
+    length(x) == 1 && is.numeric(x)
+  }))) 
+    stop("Arguments T, L and R must be numeric and scalar", 
+         call. = FALSE)
+  tryCatch({
+    s <- solve(diag(-1, 3, 3) + 1, c(1 - T, 1 - L, 1 - R))
+    o <- function(x) {
+      x[order(x)]
+    }
+    T <- o(c(s[1], T))
+    L = o(c(s[2], L))
+    R = o(c(s[3], R))
+    lims <- list(T, L, R)
+    if (any(sapply(lims, function(x) {
+      diff(x) == 0
+    }))) 
+      stop("Invalid limits, solution produces zero ranges on some scales", 
+           call. = FALSE)
+    if (any(sapply(lims, function(x) {
+      min(x) < 0 | max(x) > 1
+    }))) 
+      warning("Solution to limits produces range outside of [0,1] for some scales", 
+              call. = FALSE)
+    ret <- list(scale_T_continuous(limits = T, ...), scale_L_continuous(limits = L, 
+                                                                        ...), scale_R_continuous(limits = R, ...))
+  }, error = function(e) {
+    warning(e)
+  })
+  invisible(ret)
+}
+
+triplot = function(df1,df2,aes,color1="blue",color2="red",alpha1=0.1,alpha2=0.1)
+{
+  if ( nrow(df1) > 1000 )
+    df1 = df1[sample(1:nrow(df1),size=1000,replace=FALSE),]
+  if ( nrow(df2) > 1000 )
+    df2 = df2[sample(1:nrow(df2),size=1000,replace=FALSE),]
+  df = bind_rows(df1,df2)
+  df = df %>%
+    select_(aes$x,aes$y,aes$z)
+  df = as.matrix(df)
+  rsum = apply(df,1,sum)
+  df = diag(1/rsum) %*% df
+  m = apply(df,2,max)
+  m = m + 0.05 * (1-m)
+  p = ggplot(mapping=aes) +
+    geom_point(data=df1,color=color1,alpha=alpha1) +
+    geom_point(data=df2,color=color2,alpha=alpha2) +
+    coord_tern() +
+    my_tern_limits(m[2],m[1],m[3]) +
+    theme_bw()
+  return(p)
+}
+```
+
+## The Dirichlet Distribution
+
+The Dirichlet distribution is a very commonly used probability distribution
+on sets of positive random variables constrained to sum to one.
+The random variables $X_1,\ldots,X_k$ are said to have a Dirichlet distribution
+when they have the joint density
+$$
+f(x_1,\ldots,x_k) = \frac{\Gamma(\alpha_1 + \cdots + \alpha_k)}{\prod_{i=1}^k \Gamma(\alpha_i)} \prod_{i=1}^k x_i^{\alpha_i - 1}, \qquad \text{where $x_i > 0$ for all $i$ and $\sum_{i=1}^k x_i = 1$}
+$$
+where the parameters $\alpha_i > 0$ for $i=1,\ldots,k$.
+
+Each random variable $X_i$ has a marginal $\text{Beta}(\alpha_i,\theta-\alpha_i)$ distribution
+where $\theta = \sum_{i=1}^k \alpha_i$.
+It follows that $X_i$ has mean $\mathsf{E}(X_i) = \alpha_i/\theta$
+and variance $\mathsf{Var}(X_i) = \alpha_i(\theta-\alpha_i) / ( \theta^2(\theta+1) )$.
+A consequence is that when attempting to select a Dirichlet distribution to match the distribution
+of a given set of random variables constrained to equal one,
+while it is possible to select the parameters $\{\alpha_i\}$ to match the marginal means
+by letting $\alpha_i$ be proportional to the desired marginal mean,
+there remains only a single scale factor which determines all of the marginal variances.
+We seek a generalization which a larger parameterization that is flexible enough to match,
+at least approximately,
+the means and variances of each marginal distribution.
+
+We know of another generalization of the Dirichlet distribution (described HERE)
+that is different than what we propose here
+in that it is asymmetric in the indices of the random variables
+and has the property that some correlations may be positive.
+
+### Generation of random variables
+
+To generate random variables $X_1,\ldots,X_k \sim \text{Dirichlet}(\alpha_1,\ldots,\alpha_k)$,
+one simply generates independent random variables $Y_i \sim \text{Gamma}(\alpha_i,\lambda)$
+for $i=1,\ldots,k$ and any arbitrary $\lambda>0$ (typically $\lambda=1$)
+and letting $X_i = Y_i / \sum_{j=1}^k Y_j$.
+This suggests that by allowing the value of $\lambda$ to vary with $i$
+that we may be able to create a distribution on positive random variables
+constrained to sum to one
+with the desired flexibility in the first and second moments.
+
+## A Generalized Dirichlet Distribution
+
+Define the symmetric generalized Dirichlet distribution on $X_1,\ldots,X_n$
+to be the distribution of $(X_1,\ldots,X_k)$
+where $X_i = Y_i \big/ \sum_{j=1}^k Y_j$ for $i=1,\ldots,k$
+where the random variables $\{Y_i\}$ are mutually independent
+and $Y_i \sim \text{Gamma}(\alpha_i,\lambda_i)$.
+As the distribution of the $\{X_i\}$ would be the same if all $\{Y_i\}$ were multiplied by a common constant,
+we add the constraint that $\sum_{i=1}^k \lambda_i = k$
+so that the average values of the $\{\lambda_i\}$ parameters is one.
+(CHECK IF SETTING MEAN OF $1/\lambda_i$ TO BE ONE IS ANY MORE CONVENIENT).
+
+It is known (REFERENCES) that the distribution of the sum $S = \sum_{i=1}^k Y_i$
+may be written as an infinite mixture of Gamma densities.
+However,
+the joint density of $X_1,\ldots,X_k)$ has a closed form solution.
+$$
+f(x_1,\ldots,x_k) = \frac{\Gamma\big(\sum_{i=1}^k \alpha_i\big)\big(\prod_{i=1}^k \lambda_i^{\alpha_i}\big)}{\prod_{i=1}^k \Gamma(\alpha_i)} \times \frac{\prod_{i=1}^k x_i^{\alpha_i - 1}}{\big(\sum_{i=1}^k \lambda_i x_i\big)^{\sum_{i=1}^k \alpha_i}}, \qquad \text{where $x_i > 0$ for all $i$ and $\sum_{i=1}^k x_i = 1$}
+$$
+The derivation is shown in the appendix.
+
+I have not been able to derive closed form solutions for the marginal means and variances,
+but the means are close (if not exactly equal to) $(\alpha_i/\lambda_i) \big/ \sum_{j=1}^k (\alpha_j/\lambda_j)$.
+
+## Parameter Estimation
+
+Suppose that a probability density $g$ on the $k$-dimensional simplex has marginal mean $\{\mu_i\}$ and marginal variances $\{v_i\}$.
+We do the following.
+$$
+\alpha_i = \frac{\mu_i^2(1-\mu_i)}{v_i}
+$$
+$$
+\lambda_i = \frac{\mu_i(1-\mu_i)}{v_i} \Bigg/ \sum_{j=1}^k \frac{\mu_j(1-\mu_j)}{kv_j}
+$$
+By construction,
+the mean of the $\{\lambda_i\}$ is one.
+
+I need to provide some more theoretical evidence that these parameter estimates work.
+
+## Example
+
+The data set 024 does not work well with Bistro.
+A major issue is that the $Q$ matrix parameters $\pi = \{\pi_i\}$ and $s = \{s_i\}$
+have a Bayesian posterior density determined by MCMC simulation
+that is not well fit by a Dirichlet distribution,
+but we attempt to propose values for $\pi$ and $s$ from Dirichlet distributions nonetheless.
+
+For this data set, here are the empirical means, standard deviations, and variances, of the marginal distributions of $\pi$ and $s$.
+
+```{r, echo=FALSE}
+source("../Bistro/Scripts/readBistro.R")
+#b024 = readBistro("../Bistro/Examples/datasets/bistroFixT024")
+m024 = read.table("../Bistro/Examples/datasets/bmcmc024.par")
+m024 = m024[-(1:1000),]
+
+names(m024) = c("logl",paste0("pi",1:4),paste0("s",1:6))
+
+m024.sum = m024 %>%
+  select(-logl) %>%
+  gather("parameter","value",1:10) %>%
+  group_by(parameter) %>%
+  summarize(n=n(),mean=mean(value),sd=sd(value),var=var(value),scale=mean*(1-mean)/var)
+
+m024.sum
+
+```
+
+Using the formulas above,
+here are the estimated values of $\alpha_i$ and $\lambda_i$ for the $s$ parameters.
+
+```{r, echo=FALSE}
+al.s = m024.sum %>%
+  slice(5:10) %>%
+  mutate(alpha = mean^2 * (1-mean) / var) %>%
+  mutate(lambda = mean * (1-mean) / var) %>%
+  mutate(lambda = lambda / mean(lambda)) %>%
+  select(parameter,alpha,lambda)
+al.s
+```
+
+Using these values,
+I generated 1000 sets of $s$ and compare the means and variances with the empirical values from $s$.
+
+```{r}
+B = 1000
+x.s = matrix(rgamma(B*6,rep(al.s$alpha,each=B),rep(al.s$lambda,each=B)),B,6)
+p.s = diag(1/apply(x.s,1,sum)) %*% x.s
+df.s = as.data.frame(p.s)
+names(df.s) = paste0("s",1:6)
+df.s %>% gather("parameter","value",1:6) %>%
+  group_by(parameter) %>%
+  summarize(n=n(),mean=mean(value),sd=sd(value),var=var(value))
+```
+
+Plots of the simulated $s$ values agree very well with the original sampled values.
+
+```{r, fig.height=2}
+triplot(df.s,m024,aes(x=s1,y=s2,z=s3),alpha1=0.01,alpha2=0.01) + theme_bw()
+triplot(df.s,m024,aes(s1,s2,s3),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s1,s2,s4),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s1,s2,s5),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s1,s2,s6),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s1,s3,s4),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s1,s3,s5),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s1,s3,s6),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s1,s4,s5),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s1,s4,s6),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s2,s3,s4),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s2,s3,s5),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s2,s3,s6),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s2,s4,s5),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s2,s4,s6),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s2,s5,s6),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s3,s4,s5),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s3,s4,s6),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s3,s5,s6),alpha1=0.01,alpha2=0.01)
+triplot(df.s,m024,aes(s4,s5,s6),alpha1=0.01,alpha2=0.01)
+```
+
+## Appendix
+
+Here is a derivation of the density of the symmetric generalized Dirichlet distribution.
+
+The joint density of $(Y_1,\ldots,Y_k)$ where $Y_i \sim \text{Gamma}(\alpha_i,\lambda_i)$ and are mutually independent is
+$$
+f(y_1,\ldots,y_k) = \prod_{i=1}^k \Bigg( \frac{ \lambda_i^{\alpha_i}}{\Gamma(\alpha_i)} y_i^{\alpha_i-1} \mathrm{e}^{-\lambda_i y_i} \Bigg)
+$$
+Let $S = \sum_{i=1}^k Y_i$ and $X_i = Y_i / S$ for $i=1,\ldots,k$.
+Note that $Y_i = SX_i$ for $i=1,\ldots,k-1$ and $Y_k = S(1 - \sum_{i=1}^{k-1} X_i)$.
+We find the joint density of $(S,X_1,\ldots,X_{k-1})$.
+The Jacobian matrix $J = \partial(y_1,\ldots,y_k)/\partial(x_1,\ldots,x_{k-1},s)$
+satisfies
+$$
+J_{ij} = \left\{
+\begin{array}{ll}
+s & \text{if $i=j$, $i<k$} \\
+0 & \text{if $i \neq j$, $i<k$} \\
+x_j & \text{if $i=k$, $j<k$} \\
+-s & \text{if $j=k$, $i<k$} \\
+1 - \sum_{i=1}^{k-1} x_i & \text{if $i=j=k$}
+\end{array}
+\right.
+$$
+To determine the determinant,
+replace the $k$th row by itself minus $x_i/s$ times the $i$th row
+for $i=1,\ldots,k-1$,
+which does not affect the value of the determinant.
+The resulting $k$th row has values 0 in columns $j=1,\ldots,k-1$ and value 1
+in column $k$ and is a diagonal matrix with diagonal elements $s$ in the first $k-1$ rows and 1 in the last row.
+Thus $|\det J| = s^{k-1}$.
+It follows that the joint density of $(X_1,\ldots,X_{k-1},S)$ is
+$$
+f(x_1,\ldots,x_{k-1},s) = s^{k-1} \prod_{i=1}^k \Bigg( \frac{ \lambda_i^{\alpha_i}}{\Gamma(\alpha_i)} (sx_i)^{\alpha_i-1} \mathrm{e}^{-\lambda_i sx_i} \Bigg)
+$$
+where $x_k = 1 - \sum_{i=1}^{k-1} x_i$.
+Rewriting, the joint density is as follows.
+$$
+f(x_1,\ldots,x_{k-1},s) =  \prod_{i=1}^k \Bigg( \frac{ \lambda_i^{\alpha_i}x_i^{\alpha_i-1}}{\Gamma(\alpha_i)} \Bigg)
+s^{\sum_{i=1}^k \alpha_i-1} \mathrm{e}^{-\big(\sum_{i=1}^k \lambda_ix_i\big)s}
+$$
+Holding all of the $x_i$ constant,
+we recognize the gamma density in $s$
+up to constants and can thus integrate out $s$ to find the joint density of the $x_i$.
+$$
+f(x_1,\ldots,x_{k-1}) = \prod_{i=1}^k \Bigg( \frac{ \lambda_i^{\alpha_i}x_i^{\alpha_i-1}}{\Gamma(\alpha_i)} \Bigg) \frac{\Gamma\big(\sum_{i=1}^k \alpha_i\big)}{\big(\sum_{i=1}^k \lambda_i x_i\big)^{\sum_{i=1}^k \alpha_i}}
+$$
+where $x_k = 1 - \sum_{i=1}^{k-1} x_i$.
+Reorganization yields the equation at the bottom of page 1.

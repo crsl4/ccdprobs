@@ -1,3 +1,7 @@
+## new output files
+../../Code/bistro/bistro -f ../../Data/whales.fasta -o bistro2 -r 1000 -b 1000 > bistro2.log
+
+
 ## distance
 ../../Code/badger/mb2badger whales.nex.run1.t
 ../../Code/badger/mb2badger whales.nex.run2.t
