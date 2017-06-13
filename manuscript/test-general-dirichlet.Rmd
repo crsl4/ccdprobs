@@ -39,8 +39,7 @@ parameters = function(k=4,mean.a=2000,shape=2)
 
 generate = function(p,n=1000)
 {
-  k = ncol(p)
-  print(p)
+  k = nrow(p)
   x = with(p, matrix(rgamma(n*k,rep(alpha,each=n),rep(lambda,each=n)),n,k) )
   s = apply(x,1,sum)
   for ( i in 1:n )
@@ -52,12 +51,20 @@ generate = function(p,n=1000)
 ## Run the test
 
 ```{r run}
-f = function(k)
+f = function(k,mean.a=2000,shape=2,n=1000)
 {
-  p = parameters(k)
-  x = generate(p)
+  p = parameters(k,mean.a,shape)
+  mu = p$alpha/p$lambda
+  mu = mu/sum(mu)
+  x = generate(p,n)
   p.hat = estimate(x)
-  return(data.frame(alpha=p$alpha,lambda=p$lambda,alpha.hat=p.hat$alpha,lambda.hat=p.hat$lambda))
+  return(data.frame(alpha=p$alpha,
+                    lambda=p$lambda,
+                    alpha.hat=p.hat$alpha,
+                    lambda.hat=p.hat$lambda,
+                    mu=mu,
+                    m=apply(x,2,mean),
+                    v=apply(x,2,var)))
 }
 
 f(4)

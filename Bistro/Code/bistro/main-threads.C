@@ -109,6 +109,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    // debug variable
    int count = 0;
 
+#if 0
 // calculate the scale for P and QP: fixit, this is done twice, also in main
    double scaleP = 100000000;
    double temp;
@@ -140,9 +141,9 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      if( temp < scaleQP )
        scaleQP = temp;
    }
-
    if(VERBOSE)
      cout << "inside randomTrees, scaleP: " << scaleP << " scaleQP: " << scaleQP << endl;
+#endif
 
    if ( indStart == 0 )
      cerr << '|';
@@ -169,22 +170,30 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        cout << "eta: " << parameters.getEta() << endl;
      }
 
-     VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), parameters.getEta()*otherscale*scaleP, logQ, rng);
-     if ( VERBOSE )
-     {
-       cout << "logQ after p_star = " << logQ << endl;
-       cout << "p_star: " << p_star.transpose() << endl;
-       cout << "scaleP: " << scaleP << endl;
-     }
-     VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), parameters.getEta()*otherscale*scaleQP, logQ, rng);
-     if ( VERBOSE )
-     {
-       cout << "logQ after s_star = " << logQ << endl;
-       cout << "s_star: " << s_star.transpose() << endl;
-       cout << "scaleQP: " << scaleQP << endl;
-     }
-     if( parameters.getFixedQ() ) // not used anymore
-       logQ = 0;
+//     VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), parameters.getEta()*otherscale*scaleP, logQ, rng);
+     Vector4d p_star;
+     Vector6d s_star;
+     q_init.genDirichletProposal(logQ, rng, p_star, s_star);
+     
+     cerr << "+++" << k << endl;
+     cerr << "pi: " << p_star.transpose() << endl;
+     cerr << "s: " << s_star.transpose() << endl;
+     
+     // if ( VERBOSE )
+     // {
+     //   cout << "logQ after p_star = " << logQ << endl;
+     //   cout << "p_star: " << p_star.transpose() << endl;
+     //   cout << "scaleP: " << scaleP << endl;
+     // }
+//     VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), parameters.getEta()*otherscale*scaleQP, logQ, rng);
+     // if ( VERBOSE )
+     // {
+     //   cout << "logQ after s_star = " << logQ << endl;
+     //   cout << "s_star: " << s_star.transpose() << endl;
+     //   cout << "scaleQP: " << scaleQP << endl;
+     // }
+     // if( parameters.getFixedQ() ) // not used anymore
+     //   logQ = 0;
      QMatrix model(p_star,s_star);
 
      pi.push_back(convert(p_star));
@@ -543,14 +552,9 @@ int main(int argc, char* argv[])
     return 0;
 
 // calculations for new generalized Dirichlet
+  q_init.calculateAlphaLambdaForGenDirichlet();
 
-  Vector4d alphaForGenDirichletPi;
-  Vector4d lambdaForGenDirichletPi;
-  VectorXd alphaForGenDirichletS;
-  VectorXd lambdaForGenDirichletS;
-//  q_init.calculateAlphaLambdaForGenDirichlet(alphaForGenDirichletPi,lambdaForGenDirichletPi,alphaForGenDirichletS,lambdaForGenDirichletS);
-
-
+#if 0  
 // calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
 // save to file)
   double scaleP = 100000000;
@@ -582,12 +586,14 @@ int main(int argc, char* argv[])
       scaleQP = temp;
   }
   cout << "Dirichlet for QP scale: " << scaleQP << endl;
-
+#endif
+  
   // Initial Q, either from naive estimate or MCMC on fixed tree with MLE BL
   //QMatrix model_init(parameters.getStationaryP(),parameters.getSymmetricQP());
   QMatrix model_init(q_init.getStationaryP(),q_init.getSymmetricQP());
-  model_init.setMcmcVarP(q_init.getMcmcVarP());
-  model_init.setMcmcVarQP(q_init.getMcmcVarQP());
+  model_init.copyAlphaLambda(q_init);
+//  model_init.setMcmcVarP(q_init.getMcmcVarP());
+//  model_init.setMcmcVarQP(q_init.getMcmcVarQP());
   cerr << endl << " done." << endl;
 
 

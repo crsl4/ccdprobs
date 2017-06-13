@@ -276,3 +276,110 @@ void QMatrix::resetAfterMCMC(MCMCStats& stats,unsigned int numGenerations)
   setMcmcVarP(stats.getSP()/numGenerations);
   setMcmcVarQP(stats.getSS()/numGenerations);
 }
+
+void QMatrix::calculateAlphaLambdaForGenDirichlet()
+{
+  // pi
+  {
+    Vector4d mu = getStationaryP();
+    Vector4d v = getMcmcVarP();
+    double total = 0;
+    int k=mu.size();
+    for ( int i=0; i<k; ++i )
+    {
+      lambdaForGenDirichletPi(i) = mu(i)*(1-mu(i))/v(i);
+      total += lambdaForGenDirichletPi(i);
+      alphaForGenDirichletPi(i) = mu(i)*lambdaForGenDirichletPi(i);
+    }
+    lambdaForGenDirichletPi *= (k/total);
+  }
+  // s
+  {
+    Vector6d mu = getSymmetricQP();
+    Vector6d v = getMcmcVarQP();
+    double total = 0;
+    int k=mu.size();
+    for ( int i=0; i<k; ++i )
+    {
+      lambdaForGenDirichletS(i) = mu(i)*(1-mu(i))/v(i);
+      total += lambdaForGenDirichletS(i);
+      alphaForGenDirichletS(i) = mu(i)*lambdaForGenDirichletS(i);
+    }
+    lambdaForGenDirichletS *= (k/total);
+  }
+  cerr << "alphaPi: " << alphaForGenDirichletPi.transpose() << endl;
+  cerr << "lambdaPi: " << lambdaForGenDirichletPi.transpose() << endl;
+  cerr << "alphaS: " << alphaForGenDirichletS.transpose() << endl;
+  cerr << "lambdaS: " << lambdaForGenDirichletS.transpose() << endl;
+}
+
+void QMatrix::genDirichletProposal(double& logQ,mt19937_64& rng,Vector4d& p_star,Vector6d& s_star)
+{
+  // pi
+  double sum=0;
+  double sumAlpha=0;
+  double sumLambdaX=0;
+  double sumAlphaLogLambda=0;
+  double sumLogGammaAlpha=0;
+  double sumAlphaX=0;
+
+  cerr << "alphaPi: " << alphaForGenDirichletPi.transpose() << endl;
+  cerr << "lambdaPi: " << lambdaForGenDirichletPi.transpose() << endl;
+  cerr << "alphaS: " << alphaForGenDirichletS.transpose() << endl;
+  cerr << "lambdaS: " << lambdaForGenDirichletS.transpose() << endl;
+
+  for ( int i=0; i<4; ++i )
+  {
+    gamma_distribution<double> rgamma(alphaForGenDirichletPi(i),1.0/lambdaForGenDirichletPi(i));
+    p_star(i) = rgamma(rng);
+    cerr << p_star(i) << endl;
+    sum += p_star(i);
+  }
+  p_star /= sum;
+
+  for ( int i=0; i<4; ++i )
+  {
+    sumAlpha += alphaForGenDirichletPi(i);
+    sumLambdaX += lambdaForGenDirichletPi(i)*p_star(i);
+    sumAlphaLogLambda += alphaForGenDirichletPi(i)*log( lambdaForGenDirichletPi(i) );
+    sumLogGammaAlpha += lgamma(alphaForGenDirichletPi(i));
+    sumAlphaX += (alphaForGenDirichletPi(i)-1) * log(p_star(i));
+  }
+  logQ += lgamma(sumAlpha) + sumAlphaLogLambda - sumLogGammaAlpha + sumAlphaX - sumAlpha*log(sumLambdaX);
+
+  // s
+  sum=0;
+  sumAlpha=0;
+  sumLambdaX=0;
+  sumAlphaLogLambda=0;
+  sumLogGammaAlpha=0;
+  sumAlphaX=0;
+  
+  for ( int i=0; i<6; ++i )
+  {
+    gamma_distribution<double> rgamma(alphaForGenDirichletS(i),1.0/lambdaForGenDirichletS(i));
+    s_star(i) = rgamma(rng);
+    cerr << s_star(i) << endl;
+    sum += s_star(i);
+  }
+  s_star /= sum;
+
+  for ( int i=0; i<6; ++i )
+  {
+    sumAlpha += alphaForGenDirichletS(i);
+    sumLambdaX += lambdaForGenDirichletS(i)*s_star(i);
+    sumAlphaLogLambda += alphaForGenDirichletS(i)*log( lambdaForGenDirichletS(i) );
+    sumLogGammaAlpha += lgamma(alphaForGenDirichletS(i));
+    sumAlphaX += (alphaForGenDirichletS(i)-1) * log(s_star(i));
+  }
+  logQ += lgamma(sumAlpha) + sumAlphaLogLambda - sumLogGammaAlpha + sumAlphaX - sumAlpha*log(sumLambdaX);
+}
+
+void QMatrix::copyAlphaLambda(QMatrix& x)
+{
+  alphaForGenDirichletPi = x.getAlphaPi();
+  lambdaForGenDirichletPi = x.getLambdaPi();
+  alphaForGenDirichletS = x.getAlphaS();
+  lambdaForGenDirichletS = x.getLambdaS();
+}
+

@@ -38,6 +38,10 @@ private:
   Matrix4d Q;
   Vector6d mcmcVarQP;
   Vector4d mcmcVarP;
+  Vector4d alphaForGenDirichletPi;
+  Vector4d lambdaForGenDirichletPi;
+  Vector6d alphaForGenDirichletS;
+  Vector6d lambdaForGenDirichletS;
 public:
   void completeConstruction();
   QMatrix(vector<double>,vector<double>); // p and s, assumes sum to 1 and positive
@@ -72,6 +76,13 @@ public:
   void setMcmcVarQP(VectorXd v) { mcmcVarQP = v; }
   void setMcmcVarP(Vector4d v) { mcmcVarP = v; }
   void resetAfterMCMC(MCMCStats&,unsigned int);
+  void calculateAlphaLambdaForGenDirichlet();
+  void genDirichletProposal(double&,mt19937_64&,Vector4d&,Vector6d&);
+  void copyAlphaLambda(QMatrix&);
+  Vector4d getAlphaPi() { return alphaForGenDirichletPi; }
+  Vector4d getLambdaPi() { return lambdaForGenDirichletPi; }
+  Vector6d getAlphaS() { return alphaForGenDirichletS; }
+  Vector6d getLambdaS() { return lambdaForGenDirichletS; }
 };
 
 VectorXd dirichletProposal(VectorXd ,double ,double& ,mt19937_64& );
