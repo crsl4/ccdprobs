@@ -175,10 +175,6 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      Vector6d s_star;
      q_init.genDirichletProposal(logQ, rng, p_star, s_star);
      
-     cerr << "+++" << k << endl;
-     cerr << "pi: " << p_star.transpose() << endl;
-     cerr << "s: " << s_star.transpose() << endl;
-     
      // if ( VERBOSE )
      // {
      //   cout << "logQ after p_star = " << logQ << endl;
@@ -836,6 +832,7 @@ int main(int argc, char* argv[])
   // --------------------- Random sample of trees ------------------------------------
   // using the same model_init (either from initial MCMC or naive estimate)
   QMatrix model(model_init.getStationaryP(),model_init.getSymmetricQP());
+  model.copyAlphaLambda(model_init);
   model.setMcmcVarP(model_init.getMcmcVarP());
   model.setMcmcVarQP(model_init.getMcmcVarQP());
 

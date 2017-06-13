@@ -307,10 +307,6 @@ void QMatrix::calculateAlphaLambdaForGenDirichlet()
     }
     lambdaForGenDirichletS *= (k/total);
   }
-  cerr << "alphaPi: " << alphaForGenDirichletPi.transpose() << endl;
-  cerr << "lambdaPi: " << lambdaForGenDirichletPi.transpose() << endl;
-  cerr << "alphaS: " << alphaForGenDirichletS.transpose() << endl;
-  cerr << "lambdaS: " << lambdaForGenDirichletS.transpose() << endl;
 }
 
 void QMatrix::genDirichletProposal(double& logQ,mt19937_64& rng,Vector4d& p_star,Vector6d& s_star)
@@ -323,16 +319,10 @@ void QMatrix::genDirichletProposal(double& logQ,mt19937_64& rng,Vector4d& p_star
   double sumLogGammaAlpha=0;
   double sumAlphaX=0;
 
-  cerr << "alphaPi: " << alphaForGenDirichletPi.transpose() << endl;
-  cerr << "lambdaPi: " << lambdaForGenDirichletPi.transpose() << endl;
-  cerr << "alphaS: " << alphaForGenDirichletS.transpose() << endl;
-  cerr << "lambdaS: " << lambdaForGenDirichletS.transpose() << endl;
-
   for ( int i=0; i<4; ++i )
   {
     gamma_distribution<double> rgamma(alphaForGenDirichletPi(i),1.0/lambdaForGenDirichletPi(i));
     p_star(i) = rgamma(rng);
-    cerr << p_star(i) << endl;
     sum += p_star(i);
   }
   p_star /= sum;
@@ -359,7 +349,6 @@ void QMatrix::genDirichletProposal(double& logQ,mt19937_64& rng,Vector4d& p_star
   {
     gamma_distribution<double> rgamma(alphaForGenDirichletS(i),1.0/lambdaForGenDirichletS(i));
     s_star(i) = rgamma(rng);
-    cerr << s_star(i) << endl;
     sum += s_star(i);
   }
   s_star /= sum;
