@@ -18,7 +18,7 @@ CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wignored-attributes -Wdeprecated-de
 LDLIBS = -lpthread
 
 # darwin:
-#CC = /s/gcc-5.3.0/bin/g++
+#CC = /s/gcc-5.4.0/bin/g++
 #CFLAGS = -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations
 #LDLIBS = -lpthread
 
