@@ -531,7 +531,7 @@ int main(int argc, char* argv[])
     // burnin
     cerr << "burn-in:" << endl;
     unsigned int mcmcGenerations = parameters.getNumMCMC();
-    unsigned int mcmcBurn =  mcmcGenerations / 10;
+    unsigned int mcmcBurn =  mcmcGenerations / 5; // changed to 5 from 10 on 2017-06-16
     starttree.mcmc(q_init,alignment,mcmcBurn,alignment.getNumSites(),rng,treeStream,parStream,true);
     cerr << endl << " done." << endl;
 
