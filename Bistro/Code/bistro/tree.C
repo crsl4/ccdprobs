@@ -714,6 +714,27 @@ double Tree::calculate(const Alignment& alignment,QMatrix& qmatrix)
   return logLikelihood.sum();
 }
 
+void Node::saveProbMaps(Edge* parent)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  {
+    if ( (*e) != parent )
+      getNeighbor(*e)->saveProbMaps(*e);
+  }
+  // first clear the noncurrent map
+  // then copy current to noncurrent
+  patternToProbMap[1-current].clear();
+  patternToProbMap[1-current] = patternToProbMap[current];
+  mapParent[1-current] = mapParent[current];
+}
+
+// copy current probability map for each node to the noncurrent one
+void Tree::saveProbMaps()
+{
+  root->saveProbMaps(NULL);
+}
+
+
 // same function as always, traverse all the tree and does not worry about mapParent Edge
 void Node::clearProbMaps(Edge* parent)
 {
@@ -724,7 +745,7 @@ void Node::clearProbMaps(Edge* parent)
   }
 //  cout << "clearing prob maps and mapParent for node: " << number << endl << flush;
   patternToProbMap[current].clear();
-  mapParent = NULL;
+  mapParent[current] = NULL;
 }
 
 // same function as always, traverse all the tree and does not worry about mapParent Edge
@@ -745,11 +766,11 @@ void Node::clearProbMapsSmart(Edge* parent)
 	    neighbor->clearProbMapsSmart(*e);
 	}
     }
-  if( mapParent != parent)
+  if( mapParent[current] != parent)
     {
 //      cout << "clearing prob maps and mapParent for node: " << number << endl << flush;
       patternToProbMap[current].clear();
-      mapParent = NULL;
+      mapParent[current] = NULL;
     }
 }
 
@@ -1434,7 +1455,7 @@ void Node::setMapParent(Edge* edge)
 {
   if( leaf )
     {
-      mapParent = edge;
+      mapParent[current] = edge;
       return;
     }
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
@@ -1442,7 +1463,7 @@ void Node::setMapParent(Edge* edge)
     if ( *e != edge )
       getNeighbor(*e)->setMapParent(*e);
   }
-  mapParent = edge;
+  mapParent[current] = edge;
 }
 
 void Node::setActiveChildrenAndNodeParents(Edge* parent)
@@ -1845,7 +1866,7 @@ void Node::generateBranchLengths(Alignment& alignment,QMatrix& qmatrix, mt19937_
   if(VERBOSE)
     cout << "Calling generateBranchLengths on node " << number << endl;
 
-  mapParent = NULL;
+  mapParent[current] = NULL;
   if ( leaf )
     return;
   Node* left; // left child node
@@ -2791,8 +2812,6 @@ int Tree::parsimonyScore(Alignment& alignment)
 //   return logLik;
 //}
 
-
-
 void Tree::clearMapParent()
 {
   for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
@@ -2801,7 +2820,7 @@ void Tree::clearMapParent()
 
 void Node::clearMapParent()
 {
-  mapParent = NULL;
+  mapParent[current] = NULL;
 }
 
 
@@ -2901,6 +2920,47 @@ void Tree::mcmcUpdateQ(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,do
   mcmcUpdateS(i,stats,Q,alignment,scale,rng);
 }
 
+// 2017-06-16: Changing to update edges while traversing tree
+// and be smart about updating probability maps
+// Assume that the current likelihood in stats matches the current probability maps
+void Tree::mcmcUpdateEdges(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,mt19937_64& rng)
+{
+  // now with Q, we want to sample branch lengths
+  saveProbMaps(); // copy the current probability map for each node into the noncurrent one
+  clearProbMaps();
+  {
+    int j = 0;
+    //make tree function
+    for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    {
+      double xxx = (*e)->getLength();
+      double logProposalRatio = 0;
+      uniform_real_distribution<double> runif(0,1);
+      double r = exp(LAMBDA*(runif(rng)-0.5));
+      double yyy = xxx * r;
+      (*e)->setLength(yyy);
+      clearProbMaps();
+      double propLogLikelihood = calculate(alignment,Q); //make faster later
+      double acceptProbability = exp(propLogLikelihood - stats.getCurrLogLikelihood() + log(r));
+      if ( acceptProbability > 1 )
+	acceptProbability = 1;
+      stats.addSumAcceptBL(acceptProbability); // total for all branches
+      if ( runif(rng) < acceptProbability )
+      {
+	(*e)->setLength(yyy);
+	stats.setCurrLogLikelihood(propLogLikelihood);
+      }
+      else
+      {
+	(*e)->setLength(xxx);
+      }
+      stats.addAvgBL(j++,(*e)->getLength());
+    }
+  }
+}
+
+#if 0
+// 2017-06-16: version before messing with it for new MCMC approach
 void Tree::mcmcUpdateEdges(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,mt19937_64& rng)
 {
   // now with Q, we want to sample branch lengths
@@ -2935,6 +2995,7 @@ void Tree::mcmcUpdateEdges(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignmen
     }
   }
 }
+#endif
 
 void MCMCStats::printMCMCSummary(ostream& f,QMatrix& Q,int numEdges,unsigned int numGenerations)
 {
@@ -2972,9 +3033,6 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,doub
   double currentLogLikelihood = calculate(alignment,Q);
   MCMCStats stats(getNumEdges(),currentLogLikelihood);
 
-//  ofstream pstream("p.txt");
-//  ofstream sstream("s.txt");
-
   cerr << '|';
   for ( int i=0; i<numGenerations; ++i )
   {
@@ -2983,8 +3041,6 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,doub
     if ( (numGenerations >= 10) && ( (i+1) % (numGenerations / 10) == 0 ) )
       cerr << '|';
     mcmcUpdateQ(i,stats,Q,alignment,scale,rng);
-//    pstream << Q.getStationaryP().transpose() << endl;
-//    sstream << Q.getSymmetricQP().transpose() << endl;
     mcmcUpdateEdges(i,stats,Q,alignment,rng);
     if ( printOutput )
     {

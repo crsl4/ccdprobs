@@ -111,7 +111,7 @@ private:
   vector<Node*> activeChildren;
   Node* nodeParent;
   Edge* edgeParent;
-  Edge* mapParent; // pointer to parent edge used when creating patternToProbMap, Clau: I think we need this separate from parent
+  Edge* mapParent[2]; // pointer to parent edge used when creating patternToProbMap, Clau: I think we need this separate from parent
   int minNumber; // smallest number in subtree rooted at node
 public:
   map<string,pair<double,Vector4d> > patternToProbMap[2];
@@ -172,6 +172,7 @@ public:
   void randomize(mt19937_64&,Edge*);
   void clearProbMaps(Edge*);
   void clearProbMapsSmart(Edge*);
+  void saveProbMaps(Edge*);
   void depthFirstNodeList(list<Node*>&,Edge*);
   void postorderCherryNodeList(list<Node*>&,Edge*);
   bool isPrunedLeaf(Edge*);
@@ -181,7 +182,7 @@ public:
   void deactivateChild(int i) { activeChildren.erase(activeChildren.begin() + i); }
   void setActiveChildrenAndNodeParents(Edge*);
   void setMapParent(Edge*);
-  Edge* getMapParent() { return mapParent; }
+  Edge* getMapParent() { return mapParent[current]; }
   Node* closeRelative();
   Edge* getEdgeParent() const { return edgeParent; }
   void calculateEdges(QMatrix&);
@@ -249,6 +250,7 @@ public:
   void randomizeBL(mt19937_64&);
   void clearProbMaps();
   void clearProbMapsSmart();
+  void saveProbMaps();
   /* void partialPathCalculations(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,double&,double&,double&,bool); */
   /* double pathLogLikelihood(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool); */
   /* double pathLogLikelihoodDerivative(double,Alignment&,Node*,Edge*,Node*,Edge*,QMatrix&,bool); */
