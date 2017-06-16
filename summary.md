@@ -2,8 +2,8 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- make sure that the changes to generalized dirichlet are all done; test on 024 and others; get rid of the fixed Q stuff; get rid of the dirichlet proposal from main
-- debug new generalized dirichlet problem: need to use model_init, instead of q_init; and change the way q_init is set for no-mcmc case (see below)
+- get rid of the fixed Q stuff; get rid of the dirichlet proposal from main
+- make plot for loglik to see if we have other burnin issues: *.par file (darwin03): compile on darwin03, then change runningBistro to run things in darwin (save the path)
 - output file with stationary pi, s, alpha and lambda for each; the no-mcmc can read a file with output from a previous mcmc
 - generalized dirichlet: study and double check steps: new things: justify moments, what are marginals?
 

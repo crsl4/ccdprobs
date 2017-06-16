@@ -1007,17 +1007,17 @@ void Tree::mleError(bool& converge)
 
 void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl,double& dlogl,double& ddlogl)
 {
-  if(false)
-    cerr << "Edge::calculate on t: " << t << " is nan? " << isnan(t) << endl;
-  if(isnan(t))
-  {
-    cerr << "branch length is nan" << endl;
-    cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
-    cerr << "Error here: branch length nan" << endl;
-    cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
-    cout << "Error here: branch length nan" << endl;
-    exit(1);
-  }
+  // if(false)
+  //   cerr << "Edge::calculate on t: " << t << " is nan? " << isnan(t) << endl;
+  // if(isnan(t))
+  // {
+  //   cerr << "branch length is nan" << endl;
+  //   cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
+  //   cerr << "Error here: branch length nan" << endl;
+  //   cout << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
+  //   cout << "Error here: branch length nan" << endl;
+  //   exit(1);
+  // }
   Matrix4d P = qmatrix.getTransitionMatrix( t );
   Matrix4d QP = qmatrix.getQP( t );
   Matrix4d QQP = qmatrix.getQQP( t );
@@ -1068,13 +1068,13 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
     if(VERBOSE)
       cout << "logl: " << logl << endl;
   }
-  if( isnan(logl) || isnan(dlogl) || isnan(ddlogl) )
-  {
-    cerr << "logl or dlogl or ddlogl are nan" << endl;
-    cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
-    cerr << "Error here: logl, dlogl, ddlogl nan: " << logl << "," << dlogl << "," << ddlogl << endl;
-    exit(1);
-  }
+  // if( isnan(logl) || isnan(dlogl) || isnan(ddlogl) )
+  // {
+  //   cerr << "logl or dlogl or ddlogl are nan" << endl;
+  //   cerr << "Edge:: calculate on edge " << number << " between nodes " << nodes[0]->getNumber() << " and " << nodes[1]->getNumber() << endl << endl << flush;
+  //   cerr << "Error here: logl, dlogl, ddlogl nan: " << logl << "," << dlogl << "," << ddlogl << endl;
+  //   exit(1);
+  // }
   nodes[0] -> setMapParent(this); //here we are resetting and traversing every time, maybe we could avoid this
   nodes[1] -> setMapParent(this);
 }
@@ -1208,10 +1208,10 @@ double Edge::mleLength(Alignment& alignment,QMatrix& qmatrix,bool& converge)
       return prop;
     }
   }
-  if( isnan(curr) || isnan(prop) || isnan(curr_dlogl) || isnan(prop_dlogl) )
-  {
-    cerr << "Warning: nan found" << endl;
-  }
+  // if( isnan(curr) || isnan(prop) || isnan(curr_dlogl) || isnan(prop_dlogl) )
+  // {
+  //   cerr << "Warning: nan found" << endl;
+  // }
   double lowerlimit;
   double upperlimit;
   if(prop_dlogl > TOL && curr_dlogl < -TOL)
