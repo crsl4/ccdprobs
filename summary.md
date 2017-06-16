@@ -2,8 +2,10 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- make sure that the changes to generalized dirichlet are all done; test on 024 and others; get rid of the fixed Q stuff; get rid of the dirichlet proposal from main
+- debug new generalized dirichlet problem: need to use model_init, instead of q_init; and change the way q_init is set for no-mcmc case (see below)
+- output file with stationary pi, s, alpha and lambda for each; the no-mcmc can read a file with output from a previous mcmc
 - generalized dirichlet: study and double check steps: new things: justify moments, what are marginals?
-- run big datasets and study vstat/bootstrapCladeBL files: compare
 
 - compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 
@@ -19,8 +21,18 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
+- compile in darwin
 - we need a good real life example to compare to mrbayes: what do we want to present? clean up repo
-
+```
+[claudia@darwin00] (18)$ make
+/s/gcc-5.3.0/bin/g++ -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations -c parameter.C
+/s/gcc-5.3.0/bin/g++ -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations -c sequence.C
+/s/gcc-5.3.0/bin/g++ -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations -c ccdprobs.C
+In file included from ccdprobs.C:12:0:
+alias.h:15:36: fatal error: boost/dynamic_bitset.hpp: No such file or directory
+compilation terminated.
+make: *** [ccdprobs.o] Error 1
+```
 
 ## Jordan
 ### Final steps:

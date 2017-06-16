@@ -185,14 +185,20 @@ In this case, the gamma sampler was used 34/38 times (0.89), the truncated norma
 - Results `024`:
   - ESS 0.1% (time ~9hrs)
   - ESS fixed mean tree 0.41% (time ~8hrs)
+  - ESS (generalized dirichlet) 0.1%
+  - ESS fixed tree (generalized dirichlet) 4.6%
 
 - Results `027`:
   - ESS 0.13%
   - ESS fixed mean tree 8% (time ~1.5hrs)
+  - ESS (generalized dirichlet) 0.1%
+  - ESS fixed tree (generalized dirichlet) 2.4%
 
 - Results `036`:
   - ESS 0.1%
   - ESS fixed mean tree 16% (time ~2.5hrs)
+  - ESS (generalized dirichlet) 0.1%
+  - ESS fixed mean tree (gen dir) 17%
 
 - Results `041`:
   - ESS 0.12%
@@ -201,8 +207,11 @@ In this case, the gamma sampler was used 34/38 times (0.89), the truncated norma
 - Results `043`:
   - ESS 0.19% (time ~ 3hrs)
   - ESS fixed mean tree 13% (time ~3hrs)
+  - ESS (generalized dirichlet) 0.1%
+  - ESS fixed mean (gen dir) tree 4.8%
 
 - It is strange that the performance of bistro (on fixed tree) is so different between `024` and `043`. We checked the `.sampler` file, and in both datasets we are only using the gamma distribution to sample branch lengths (`100%`). **The reason is rates** The rates sampling is very bad in `024` (not in any of the others). We will implement the generalized dirichlet for this problem.
+- Generalized Dirichlet does gives a better performance in `024`, but a little worse in others
 
 ### Generalized Dirichlet
 
