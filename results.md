@@ -213,6 +213,40 @@ In this case, the gamma sampler was used 34/38 times (0.89), the truncated norma
 - It is strange that the performance of bistro (on fixed tree) is so different between `024` and `043`. We checked the `.sampler` file, and in both datasets we are only using the gamma distribution to sample branch lengths (`100%`). **The reason is rates** The rates sampling is very bad in `024` (not in any of the others). We will implement the generalized dirichlet for this problem.
 - Generalized Dirichlet does gives a better performance in `024`, but a little worse in others
 
+#### After burnin = 200 & generalized dirichlet
+```
+(master) $ grep "ESS = " *bistro*-3-*.log
+birge-bistro-3-024.log:ESS = 1.95, or 0.19 percent.
+birge-bistro-3-027.log:ESS = 1.00, or 0.10 percent.
+birge-bistro-3-036.log:ESS = 1.00, or 0.10 percent.
+birge-bistro-3-043.log:ESS = 1.48, or 0.15 percent.
+birge-bistroFixT-3-024.log:ESS = 70.18, or 7.02 percent.
+birge-bistroFixT-3-027.log:ESS = 85.64, or 8.56 percent.
+birge-bistroFixT-3-036.log:ESS = 245.24, or 24.52 percent.
+birge-bistroFixT-3-043.log:ESS = 181.98, or 18.20 percent.
+bistro-3-024.log:ESS = 1.13, or 0.11 percent.
+bistro-3-027.log:ESS = 1.03, or 0.10 percent.
+bistro-3-036.log:ESS = 1.00, or 0.10 percent.
+bistro-3-043.log:ESS = 1.85, or 0.19 percent.
+bistroFixT-3-024.log:ESS = 437.87, or 43.79 percent.
+bistroFixT-3-027.log:ESS = 44.28, or 4.43 percent.
+bistroFixT-3-036.log:ESS = 84.44, or 8.44 percent.
+bistroFixT-3-043.log:ESS = 191.86, or 19.19 percent.
+
+(master) $ grep "ESS = " *bistro*-whales*.log
+birge-bistro-whales.log:ESS = 1.55, or 0.15 percent.
+birge-bistroFixT-whales.log:ESS = 62.17, or 6.22 percent.
+bistro-whales.log:ESS = 2.91, or 0.29 percent.
+bistroFixT-whales.log:ESS = 76.49, or 7.65 percent.
+
+(master) $ grep "ESS = " *bistro*-cats*.log
+birge-bistro-cats.log:ESS = 3.72, or 0.37 percent.
+birge-bistroFixT-cats.log:ESS = 265.86, or 26.59 percent.
+bistro-cats.log:ESS = 4.51, or 0.45 percent.
+bistroFixT-cats.log:ESS = 46.19, or 4.62 percent.
+```
+
+
 ### Generalized Dirichlet
 
 I think the natural thing to do is to use

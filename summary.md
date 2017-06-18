@@ -3,11 +3,10 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
 - get rid of the fixed Q stuff; get rid of the dirichlet proposal from main
-- make plot for loglik to see if we have other burnin issues: *.par file (darwin03): compile on darwin03, then change runningBistro to run things in darwin (save the path)
+- make plot for loglik to see if we have other burnin issues: .par file (darwin03)
 - output file with stationary pi, s, alpha and lambda for each; the no-mcmc can read a file with output from a previous mcmc
 - generalized dirichlet: study and double check steps: new things: justify moments, what are marginals?
 
-- compare branch lengths: density plot on a fixed tree as usual, but comparing weighted means to mrbayes (separate function like for rates, then put all in one function that calls all of them)
 
 - Clean up repository for users!!
 
@@ -21,18 +20,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- compile in darwin
-- we need a good real life example to compare to mrbayes: what do we want to present? clean up repo
-```
-[claudia@darwin00] (18)$ make
-/s/gcc-5.3.0/bin/g++ -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations -c parameter.C
-/s/gcc-5.3.0/bin/g++ -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations -c sequence.C
-/s/gcc-5.3.0/bin/g++ -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations -c ccdprobs.C
-In file included from ccdprobs.C:12:0:
-alias.h:15:36: fatal error: boost/dynamic_bitset.hpp: No such file or directory
-compilation terminated.
-make: *** [ccdprobs.o] Error 1
-```
+- great variability on ESS fixed tree between birge and darwin runs! but better results now with burnin=200, could be that burnin=200 not good for all, have not checked all plots
 
 ## Jordan
 ### Final steps:
