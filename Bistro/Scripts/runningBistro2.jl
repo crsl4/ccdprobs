@@ -31,8 +31,9 @@ function runBistroFixT(stem,tree)
     end
 end
 
-cd("/u/c/l/claudia/Documents/phylo/projects/CladeDist/ccdprobs/Bistro/Examples/datasets")
+#cd("/u/c/l/claudia/Documents/phylo/projects/CladeDist/ccdprobs/Bistro/Examples/datasets")
 #cd("/Users/Clauberry/Documents/phylo/projects/present/CladeCondProb/ccdprobs/Bistro/Examples/datasets")
+cd("/Users/claudia/Documents/phylo/projects/CladeCondProb/ccdprobs/Bistro/Examples/datasets")
 runBistro("024")
 runBistro("027") ## unknown error
 runBistro("036") ## error with nan (all BL)
@@ -45,7 +46,7 @@ runBistroFixT("036","(1:0.0945772,(((2:0.0865987,3:0.0804564):0.0078181,(((4:0.0
 #runBistroFixT("041","(1:0.0698623,(((((2:0.0532358,5:0.0600098):0.00134072,(9:0.0557752,24:0.051951):0.003123):0.000268665,39:0.038418):1.82897e-05,((((((3:0.060867,10:0.0623977):0.00621817,(4:0.0993504,(7:0.0435617,41:0.0812354):0.00297095):0.00288187):5.67662e-05,((6:0.062371,25:0.0353216):0.00236997,(18:0.0307953,26:0.0361134):0.0112879):0.0019776):7.275e-06,(((11:0.0730779,15:0.0630172):0.00207894,23:0.0714113):0.00278745,(33:0.0547777,40:0.058601):0.00413336):0.000701576):2.4594e-06,((8:0.0604554,(31:0.0618616,32:0.0781933):0.00566385):0.00120628,(13:0.038044,22:0.0653194):0.00253718):7.98958e-05):2.3639e-06,(((((12:0.0494565,20:0.0862858):0.00571773,(29:0.10005,30:0.0648233):0.0063705):0.000449652,(((19:0.0832141,28:0.0741246):0.00372834,27:0.041494):0.00461795,21:0.0659983):0.00123737):0.000444267,37:0.059593):3.13554e-05,((14:0.0481329,36:0.0616415):0.00296463,(34:0.0771512,35:0.065381):0.00775749):0.000247522):2.7826e-06):6.3432e-06):0.000194907,(17:0.0412574,38:0.052239):0.00160217):0.00162703,16:0.058017);")
 runBistroFixT("043","(1,(2,(((((((3,4),((5,6),(7,8))),(((9,10),11),(12,13))),((14,(15,16)),(17,(18,19)))),(((((20,(21,22)),(23,24)),(25,26)),((27,28),(29,30))),((31,32),33))),(34,(35,(36,37)))),((38,39),((40,42),41)))),43);")
 
-cd("/u/c/l/claudia/Documents/phylo/projects/CladeDist/ccdprobs/Bistro/Examples/Whales")
+cd("/Users/claudia/Documents/phylo/projects/CladeCondProb/ccdprobs/Bistro/Examples/Whales")
 println("+++++++++++ running bistro for whales +++++++++++++")
 try
     out = readstring(`../../Code/bistro/bistro -f ../../Data/whales.fasta -o bistro-whales -r 1000 -b 1000`);
@@ -64,7 +65,7 @@ catch
     warn("Error in Bistro for whales")
 end
 
-cd("/u/c/l/claudia/Documents/phylo/projects/CladeDist/ccdprobs/Bistro/Examples/Cats-Dogs")
+cd("/Users/claudia/Documents/phylo/projects/CladeCondProb/ccdprobs/Bistro/Examples/cats-dogs")
 println("+++++++++++ running bistro for cats +++++++++++++")
 try
     out = readstring(`../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro-cats -r 1000 -b 1000`);
