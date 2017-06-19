@@ -25,7 +25,6 @@ private:
   bool reweight;
   double weightScale;
   unsigned int numThreads;
-  bool fixedQ;
   double eta;
   bool rootFix;
   bool weightMean;
@@ -54,7 +53,6 @@ public:
     reweight = true;
     weightScale = 0;
     numThreads = 0;
-    fixedQ = false;
     eta = 1.0;
     rootFix = false;
     weightMean = false;
@@ -95,8 +93,6 @@ public:
   void processCommandLine(int,char* []);
   void setNumThreads(unsigned int b) { numThreads = b; }
   unsigned int getNumThreads() const { return numThreads; }
-  bool getFixedQ() const { return fixedQ; }
-  void setFixedQ(bool b) { fixedQ = b; }
   double getEta() const { return eta; }
   void setEta(double x) { eta = x; }
   bool getRootFix() const { return rootFix; }

@@ -109,42 +109,6 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    // debug variable
    int count = 0;
 
-#if 0
-// calculate the scale for P and QP: fixit, this is done twice, also in main
-   double scaleP = 100000000;
-   double temp;
-   VectorXd x = q_init.getStationaryP();
-   VectorXd v = q_init.getMcmcVarP();
-   if(VERBOSE)
-   {
-     cout << "p in q_init: " << q_init.getStationaryP() << endl;
-     cout << "var(p) in q_init: " << q_init.getMcmcVarP() << endl;
-   }
-   for ( int i=0; i<x.size(); ++i )
-   {
-     temp = x(i)*(1-x(i))/v(i);
-     if(temp < scaleP)
-       scaleP = temp;
-   }
-
-   double scaleQP = 100000000;
-   x = q_init.getSymmetricQP();
-   v = q_init.getMcmcVarQP();
-   if(VERBOSE)
-   {
-     cout << "s in q_init: " << q_init.getSymmetricQP() << endl;
-     cout << "var(s) in q_init: " << q_init.getMcmcVarQP() << endl;
-   }
-   for ( int i=0; i<x.size(); ++i )
-   {
-     temp = x(i)*(1-x(i))/v(i);
-     if( temp < scaleQP )
-       scaleQP = temp;
-   }
-   if(VERBOSE)
-     cout << "inside randomTrees, scaleP: " << scaleP << " scaleQP: " << scaleQP << endl;
-#endif
-
    if ( indStart == 0 )
      cerr << '|';
 
@@ -161,35 +125,16 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        cout << "------------------" << endl;
      // here we need to sample a Q
      double logQ = 0;
-     double otherscale = 1;
-     if( parameters.getFixedQ() )
-       otherscale = 10000000;
      if ( VERBOSE )
      {
        cout << "logQ before p_star = " << logQ << endl;
        cout << "eta: " << parameters.getEta() << endl;
      }
 
-//     VectorXd p_star = dirichletProposalDensityScale(q_init.getStationaryP(), parameters.getEta()*otherscale*scaleP, logQ, rng);
      Vector4d p_star;
      Vector6d s_star;
      q_init.genDirichletProposal(logQ, rng, p_star, s_star);
      
-     // if ( VERBOSE )
-     // {
-     //   cout << "logQ after p_star = " << logQ << endl;
-     //   cout << "p_star: " << p_star.transpose() << endl;
-     //   cout << "scaleP: " << scaleP << endl;
-     // }
-//     VectorXd s_star = dirichletProposalDensityScale(q_init.getSymmetricQP(), parameters.getEta()*otherscale*scaleQP, logQ, rng);
-     // if ( VERBOSE )
-     // {
-     //   cout << "logQ after s_star = " << logQ << endl;
-     //   cout << "s_star: " << s_star.transpose() << endl;
-     //   cout << "scaleQP: " << scaleQP << endl;
-     // }
-     // if( parameters.getFixedQ() ) // not used anymore
-     //   logQ = 0;
      QMatrix model(p_star,s_star);
 
      pi.push_back(convert(p_star));
@@ -891,7 +836,6 @@ int main(int argc, char* argv[])
     vector< vector< vector<double> > > pi0(cores); //vector of vector of pi1,pi2,pi3,pi4
     vector< vector< vector<double> > > rates0(cores); //vector of vector of s1,s2,s3,s4,s5,s6
     // cerr << "jointMLE " << parameters.getJointMLE() << endl;
-    // cerr << "fixedQ " << parameters.getFixedQ() << endl;
     // cerr << "eta " << parameters.getEta() << endl;
 
     for ( int i=0; i<cores; ++i )
