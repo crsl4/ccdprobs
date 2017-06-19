@@ -2,7 +2,6 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- get rid of the fixed Q stuff; get rid of the dirichlet proposal from main
 - make plot for loglik to see if we have other burnin issues: .par file (darwin03)
 - output file with stationary pi, s, alpha and lambda for each; the no-mcmc can read a file with output from a previous mcmc
 - generalized dirichlet: study and double check steps: new things: justify moments, what are marginals?
@@ -10,7 +9,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 - Clean up repository for users!!
 
-- [biometrics](http://onlinelibrary.wiley.com/journal/10.1111/(ISSN)1541-0420)
+- Paper: [biometrics](http://onlinelibrary.wiley.com/journal/10.1111/(ISSN)1541-0420)
 - status quo is mcmc, successful but computationally inefficient (reference ronquist paper)
 - use IS as alternative
 - show methods

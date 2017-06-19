@@ -486,55 +486,27 @@ int main(int argc, char* argv[])
     cerr << endl << " done." << endl;
     treeStream.close();
     parStream.close();
+
+// write mcmc output to a file
+    string mcmcFile = parameters.getOutFileRoot() + ".mcmc.out";
+    cerr << "Writing MCMC output to " << mcmcFile << endl;
+    ofstream mcmcstream(mcmcFile.c_str());
+    mcmcstream << q_init.getStationaryP().transpose() << endl;
+    mcmcstream << q_init.getSymmetricQP().transpose() << endl;
+    mcmcstream << q_init.getMcmcVarP().transpose() << endl;
+    mcmcstream << q_init.getMcmcVarQP().transpose() << endl;
+    mcmcstream.close();
   }
   cerr << "After MCMC block" << endl;
 
   if(parameters.getOnlyMCMC())
     return 0;
 
-// calculations for new generalized Dirichlet
-  q_init.calculateAlphaLambdaForGenDirichlet();
 
-#if 0  
-// calculate the scale for P and QP (just to write it down, because it is calculated in randomTrees, but threads cannot
-// save to file)
-  double scaleP = 100000000;
-  double temp;
-  VectorXd x = q_init.getStationaryP();
-  VectorXd v = q_init.getMcmcVarP();
-  cout << "mean p: " << x.transpose() << endl;
-  cout << "var p: " << v.transpose() << endl;
-
-  for ( int i=0; i<x.size(); ++i )
-  {
-    temp = x(i)*(1-x(i))/v(i);
-    cout << "Scale for p" << i << " is " << temp << endl;
-    if(temp < scaleP)
-      scaleP = temp;
-  }
-  cout << "Dirichlet for P scale: " << scaleP << endl;
-  double scaleQP = 100000000;
-  x = q_init.getSymmetricQP();
-  v = q_init.getMcmcVarQP();
-  cout << "mean s: " << x.transpose() << endl;
-  cout << "var s: " << v.transpose() << endl;
-
-  for ( int i=0; i<x.size(); ++i )
-  {
-    temp = x(i)*(1-x(i))/v(i);
-    cout << "Scale for s" << i << " is " << temp << endl;
-    if( temp < scaleQP )
-      scaleQP = temp;
-  }
-  cout << "Dirichlet for QP scale: " << scaleQP << endl;
-#endif
-  
   // Initial Q, either from naive estimate or MCMC on fixed tree with MLE BL
-  //QMatrix model_init(parameters.getStationaryP(),parameters.getSymmetricQP());
-  QMatrix model_init(q_init.getStationaryP(),q_init.getSymmetricQP());
-  model_init.copyAlphaLambda(q_init);
-//  model_init.setMcmcVarP(q_init.getMcmcVarP());
-//  model_init.setMcmcVarQP(q_init.getMcmcVarQP());
+  QMatrix model_init(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
+// calculations for new generalized Dirichlet
+  model_init.calculateAlphaLambdaForGenDirichlet();
   cerr << endl << " done." << endl;
 
 

@@ -82,6 +82,15 @@ QMatrix::QMatrix(Vector4d p,VectorXd s)
   completeConstruction();
 }
 
+QMatrix::QMatrix(Vector4d p,VectorXd s, Vector4d vp, VectorXd vs)
+{
+  stationaryP = p;
+  symmetricQP = s;
+  completeConstruction();
+  setMcmcVarP(vp);
+  setMcmcVarQP(vs);
+}
+
 Vector4d QMatrix::vectorExp(double t)
 {
   Vector4d x;
