@@ -415,43 +415,64 @@ int main(int argc, char* argv[])
 
   milliseconds ms5 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-  // ---------------------- Estimate Q with base frequencies and pairwise counts -----------------
-  vector<double> p_init = alignment.baseFrequencies();
-  cerr << "Estimated base frequencies: " << p_init.at(0) << "," << p_init.at(1) << "," << p_init.at(2) << "," << p_init.at(3) << endl;
-
-  VectorXd s_pairwise(6);
-  s_pairwise = alignment.averagePairwiseS();
-  cerr << "Estimated rates: " << endl;
-  cerr << s_pairwise.transpose() << endl;
-
-  // checking to see if p and s were initialized at command line
-
   Vector4d p0;
   VectorXd s0(6);
-
-  if ( parameters.getEnteredP() )
-    p0 = convert(parameters.getStationaryP());
-  else
-    p0 = convert(p_init);
-  if ( parameters.getEnteredS() )
-    s0 = convert(parameters.getSymmetricQP());
-  else
-    s0 = s_pairwise;
-
-  QMatrix q_init(p0,s0);
-
-// initial mcmc var (just so that there are not zeros)
   Vector4d vp0;
-  for ( int j=0; j<4; ++j )
-    vp0(j) = p0(j)*(1-p0(j))/alignment.getNumSites();
-
   VectorXd vs0(6);
-  for ( int j=0; j<6; ++j )
-    vs0(j) = s0(j)*(1-s0(j))/alignment.getNumSites();
 
-  q_init.setMcmcVarP(vp0);
-  q_init.setMcmcVarQP(vs0);
-
+  if ( !parameters.getMCMCfile().empty() )
+  {
+    // read file for q_init
+    string mcmcname = parameters.getMCMCfile();
+    cerr << "Reading mcmc output from file " << mcmcname << endl;
+    ifstream mcmcIN(mcmcname.c_str());
+    if(!mcmcIN) 
+    {
+      cerr << "Error: Could not open " << mcmcname << endl;
+      exit(1);
+    }
+    string l;
+    if(getline(mcmcIN,l))
+    {
+      do 
+      {
+	cerr << l << endl;
+	// fixit here: convert the line to Vector4d and VectorXd
+      }
+      while(getline(mcmcIN,l));
+      exit(1);
+    }
+  }
+  else
+  {
+    // ---------------------- Estimate Q with base frequencies and pairwise counts -----------------
+    vector<double> p_init = alignment.baseFrequencies();
+    cerr << "Estimated base frequencies: " << p_init.at(0) << "," << p_init.at(1) << "," << p_init.at(2) << "," << p_init.at(3) << endl;
+    
+    VectorXd s_pairwise(6);
+    s_pairwise = alignment.averagePairwiseS();
+    cerr << "Estimated rates: " << endl;
+    cerr << s_pairwise.transpose() << endl;
+    
+    // checking to see if p and s were initialized at command line
+    if ( parameters.getEnteredP() )
+      p0 = convert(parameters.getStationaryP());
+    else
+      p0 = convert(p_init);
+    if ( parameters.getEnteredS() )
+      s0 = convert(parameters.getSymmetricQP());
+    else
+      s0 = s_pairwise;
+    
+// initial mcmc var (just so that there are not zeros)
+    for ( int j=0; j<4; ++j )
+      vp0(j) = p0(j)*(1-p0(j))/alignment.getNumSites();
+        
+    for ( int j=0; j<6; ++j )
+      vs0(j) = s0(j)*(1-s0(j))/alignment.getNumSites();
+  }
+    
+  QMatrix q_init(p0,s0,vp0,vs0);
 // ------------------------------ Put MLE branch lengths to tree -------------------------
   cout << "Putting MLE Branch Lengths" << endl;
   cout << "p: " << q_init.getStationaryP() << endl;

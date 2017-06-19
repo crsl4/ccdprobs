@@ -4,6 +4,7 @@
 
 ## test new output files
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o test -r 1000 -b 1000 > test.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o test -r 1000 -b 1000 --no-mcmc --mcmc-file test.mcmc.out > test.log
 
 ## test new generateBL
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-new -r 1000 -b 1000 > bistro-new.log

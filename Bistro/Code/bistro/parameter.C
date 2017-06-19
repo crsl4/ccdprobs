@@ -34,10 +34,11 @@ void usage(ostream& f)
   f << "    --weightMean                   |  weight the MLE with prior mean (false)" << endl;
   f << "    --onlyBootstrap                |  only does the bootstrap sample of trees (false)" << endl;
   f << "    --no-mcmc                      |  do not use MCMC to estimate Q" << endl;
+  f << "    --mcmc-file file               |  for --no-mcmc option, you specify the file with mcmc output from previous run" << endl;
   f << "    -m num                         |  nonnegative integer number of MCMC cycles (1000), update Q and all edge lengths" << endl;
+  f << "    --only-mcmc                    |  only does the MCMC for a fixed tree (false)" << endl;
   f << "    --mbfile file                  |  [not used in bistro] mrbayes file after mb2badger (.tre) for distances" << endl;
   f << "    --bistrofile file              |  [not used in bistro] bistro file (.treeBL) for distances" << endl;
-  f << "    --only-mcmc                    |  only does the MCMC for a fixed tree (false)" << endl;
   f << "    --skip int                     |  [not used in bistro] number of trees to skip in mrbayes (0)" << endl;
   exit(1);
 }
@@ -335,6 +336,20 @@ void Parameter::processCommandLine(int argc,char* argv[])
       else
       {
         cerr << "Error: flag `--threads' not followed by a postive value" << endl;
+        usage(cerr);
+      }
+    }
+    else if ( strcmp(argv[k],"--mcmc-file") == 0 )
+    {
+      if ( ++k < argc )
+      {
+        stringstream s;
+        s << argv[k];
+        s >> mcmcfile;
+      }
+      else
+      {
+        cerr << "Error: flag `--mcmc-file' not followed by a filename string" << endl;
         usage(cerr);
       }
     }

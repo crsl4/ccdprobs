@@ -3,7 +3,6 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
 - make plot for loglik to see if we have other burnin issues: .par file (darwin03)
-- output file with stationary pi, s, alpha and lambda for each; the no-mcmc can read a file with output from a previous mcmc
 - generalized dirichlet: study and double check steps: new things: justify moments, what are marginals?
 
 
@@ -20,6 +19,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## Check with Bret
 - great variability on ESS fixed tree between birge and darwin runs! but better results now with burnin=200, could be that burnin=200 not good for all, have not checked all plots
+- transform line to VectorXd
 
 ## Jordan
 ### Final steps:
