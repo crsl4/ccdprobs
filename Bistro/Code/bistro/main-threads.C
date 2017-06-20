@@ -44,6 +44,19 @@ using namespace Eigen;
 //const char* defaults[] = {"0", "100", "0.00001", ".80", "100"};
 //const int skipField=0, numTreesField=1, cthresholdField=2, nthresholdField=3, maxTopsField=4;
 
+vector<double> getDoublesFromSpaceList (string x)
+{
+  stringstream s(x);
+  vector<double> v;
+  double d;
+  while (s.good())
+  {
+    s >> d;
+    v.push_back(d);
+  } 
+  return v;
+}
+
 bool comparePairStringDouble(const pair<string, double>  &p1, const pair<string, double> &p2)
 {
   return p1.second < p2.second;
@@ -432,15 +445,22 @@ int main(int argc, char* argv[])
       exit(1);
     }
     string l;
+    int ii = 1;
     if(getline(mcmcIN,l))
     {
       do 
       {
-	cerr << l << endl;
-	// fixit here: convert the line to Vector4d and VectorXd
+	if(ii == 1)
+	  p0 = convert(getDoublesFromSpaceList(l));
+	else if(ii == 2)
+	  s0 = convert(getDoublesFromSpaceList(l));
+	else if(ii == 3)
+	  vp0 = convert(getDoublesFromSpaceList(l));
+	else if(ii == 4)
+	  vs0 = convert(getDoublesFromSpaceList(l));
+	ii += 1;
       }
       while(getline(mcmcIN,l));
-      exit(1);
     }
   }
   else
@@ -512,10 +532,19 @@ int main(int argc, char* argv[])
     string mcmcFile = parameters.getOutFileRoot() + ".mcmc.out";
     cerr << "Writing MCMC output to " << mcmcFile << endl;
     ofstream mcmcstream(mcmcFile.c_str());
-    mcmcstream << q_init.getStationaryP().transpose() << endl;
-    mcmcstream << q_init.getSymmetricQP().transpose() << endl;
-    mcmcstream << q_init.getMcmcVarP().transpose() << endl;
-    mcmcstream << q_init.getMcmcVarQP().transpose() << endl;
+    Vector4d pi = q_init.getStationaryP();
+    VectorXd s = q_init.getSymmetricQP();
+    Vector4d vpi = q_init.getMcmcVarP();
+    VectorXd vs = q_init.getMcmcVarQP();  
+    // mcmcstream << pi.transpose() << endl;
+    // mcmcstream << s.transpose() << endl;
+    // mcmcstream << vpi.transpose() << endl;
+    // mcmcstream << vs.transpose() << endl;
+    string sep = " ";
+    mcmcstream << pi[0] << sep << pi[1] << sep << pi[2] << sep << pi[3] << endl;
+    mcmcstream << s[0] << sep << s[1] << sep << s[2] << sep << s[3] << sep << s[4] << sep << s[5] << endl;
+    mcmcstream << vpi[0] << sep << vpi[1] << sep << vpi[2] << sep << vpi[3] << endl;
+    mcmcstream << vs[0] << sep << vs[1] << sep << vs[2] << sep << vs[3] << sep << vs[4] << sep << vs[5] << endl;
     mcmcstream.close();
   }
   cerr << "After MCMC block" << endl;

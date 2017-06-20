@@ -19,7 +19,9 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## Check with Bret
 - great variability on ESS fixed tree between birge and darwin runs! but better results now with burnin=200, could be that burnin=200 not good for all, have not checked all plots
-- transform line to VectorXd
+- check code to read lines: there should be easier
+- error with getDoublesFromCommaList function: still does not work with spaces, but why not with the comma file? where to put in parameter.h?
+- his work not in main? to push my code 
 
 ## Jordan
 ### Final steps:

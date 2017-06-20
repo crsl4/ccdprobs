@@ -43,6 +43,7 @@ void usage(ostream& f)
   exit(1);
 }
 
+
 vector<double> getDoublesFromCommaList (string x)
 {
   stringstream s(x);
@@ -66,6 +67,7 @@ vector<double> getDoublesFromCommaList (string x)
   } while (s.good());
   return v;
 }
+
 
 void Parameter::processCommandLine(int argc,char* argv[])
 {

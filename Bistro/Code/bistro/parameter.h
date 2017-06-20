@@ -4,7 +4,9 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <cstring>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -121,5 +123,6 @@ public:
   int getSkip() const { return skip; }
   void setSkip(int n) { skip = n; }
 };
+
 
 #endif
