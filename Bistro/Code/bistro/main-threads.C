@@ -155,6 +155,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
 
      double logTopologyProbability=0;
      string treeString = ccd.randomTree(rng,logTopologyProbability);
+
      Tree tree(treeString,alignment);
      tree.unroot();
 
@@ -166,6 +167,16 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        tree.randomizeBL(rng);
      else
        tree.randomize(rng);
+
+//     cerr << "====== After randomize edges for new tree ======" << endl;
+//     tree.print(cerr);
+//     tree.printMapSizes();
+//     tree.printMapParents();
+     tree.calculate(alignment,model);
+//     cerr << "====== After initial calculation of new tree ======" << endl;
+//     tree.print(cerr);
+//     tree.printMapSizes();
+//     tree.printMapParents();
 
      if(VERBOSE)
      {
@@ -180,10 +191,25 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
        cout << endl << flush;
      }
 
+//     int debug = 0;
+//     tree.print(cerr);
+//     tree.printMapSizes();
+//     tree.printMapParents();
+//     cerr << endl;
+//     cerr << "debug " << ++debug << endl;
+//     tree.calculate(alignment,model);
+//     cerr << "debug " << ++debug << endl;
+
      for ( int i=0; i<parameters.getNumMLE(); ++i )
      {
+//       cerr << "+++++ Before MLE pass " << i << endl;
        tree.mleLengths(alignment,model);
+//       cerr << "+++++ After MLE pass " << i << endl;
+//       tree.print(cerr);
+//       tree.printMapSizes();
+//       tree.printMapParents();
      }
+//     cerr << "debug " << ++debug << endl;
 
      if(VERBOSE)
      {
@@ -203,7 +229,9 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      else
      {
 //	  cout << "Branch lengths sampled jointly in 2D" << endl;
+//       cerr << "------ Before generateBranchLengths ------" << endl;
        tree.generateBranchLengths(alignment,model,rng, logBL, parameters.getEta());
+//       cerr << "------ After generateBranchLengths ------" << endl;
        // need to print info about sampler
        samplerStream << tree.makeTreeNumbers() << " ";
        tree.printSamplerInfo(samplerStream);
@@ -386,13 +414,13 @@ int main(int argc, char* argv[])
   }
   mt19937_64 rng(parameters.getSeed());
   cerr << " done." << endl;
-  cout << "Seed = " << parameters.getSeed() << endl;
+  cout << "Seed = " << parameters.getSeed() << endl << endl;
 
   // -------------- Find Jukes-Cantor pairwise distances and JC tree -----------------------------
   cerr << "Finding initial Jukes-Cantor pairwise distances ...";
   MatrixXd jcDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
   alignment.calculateJCDistances(jcDistanceMatrix);
-  cerr << " done." << endl;
+  cerr << " done." << endl << endl;
   cout << "Jukes-Cantor Distance Matrix:" << endl;
   cout << endl << jcDistanceMatrix << endl << endl;
   milliseconds ms3 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
@@ -409,6 +437,7 @@ int main(int argc, char* argv[])
   cout << jctree.makeTopologyNumbers() << endl << endl;
   cerr << endl << "JC Tree topology:" << endl;
   cerr << jctree.makeTopologyNumbers() << endl << endl;
+
   milliseconds ms4 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   // --------------------------- Use JC tree or input tree, and NJ branch lengths  ---------------
@@ -417,14 +446,14 @@ int main(int argc, char* argv[])
     treetext = parameters.getTopology();
   else
     treetext = jctree.makeTopologyNumbers();
-  cerr << "treetext: " << treetext << endl;
+  cerr << "treetext: " << treetext << endl << endl;
   Tree starttree(treetext,alignment);
   starttree.unroot();
-  cerr << "Start tree: " << starttree.makeTopologyNumbers() << endl;
+  cerr << "Start tree: " << starttree.makeTopologyNumbers() << endl << endl;
   jcDistanceMatrixCopy = jcDistanceMatrix;
   starttree.setNJDistances(jcDistanceMatrixCopy,rng);
   cerr << "Setting NJ distances to tree: " << endl;
-  cerr << starttree.makeTreeNumbers() << endl;
+  cerr << starttree.makeTreeNumbers() << endl << endl;
 
   milliseconds ms5 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
@@ -467,12 +496,12 @@ int main(int argc, char* argv[])
   {
     // ---------------------- Estimate Q with base frequencies and pairwise counts -----------------
     vector<double> p_init = alignment.baseFrequencies();
-    cerr << "Estimated base frequencies: " << p_init.at(0) << "," << p_init.at(1) << "," << p_init.at(2) << "," << p_init.at(3) << endl;
+    cerr << "Estimated base frequencies: " << convert(p_init).transpose() << endl << endl;
     
     VectorXd s_pairwise(6);
     s_pairwise = alignment.averagePairwiseS();
-    cerr << "Estimated rates: " << endl;
-    cerr << s_pairwise.transpose() << endl;
+    cerr << endl << "Estimated rates: " << endl;
+    cerr << s_pairwise.transpose() << endl << endl;
     
     // checking to see if p and s were initialized at command line
     if ( parameters.getEnteredP() )
@@ -495,9 +524,10 @@ int main(int argc, char* argv[])
   QMatrix q_init(p0,s0,vp0,vs0);
 // ------------------------------ Put MLE branch lengths to tree -------------------------
   cout << "Putting MLE Branch Lengths" << endl;
-  cout << "p: " << q_init.getStationaryP() << endl;
-  cout << "s: " << q_init.getSymmetricQP() << endl;
-  cout << "Q: " << q_init.getQ() << endl;
+  cout << "p: " << q_init.getStationaryP().transpose() << endl;
+  cout << "s: " << q_init.getSymmetricQP().transpose() << endl;
+  cout << "Q: " << endl << q_init.getQ() << endl << endl;
+  
   for ( int i=0; i<4; ++i )
   {
     starttree.mleLengths(alignment,q_init);
@@ -515,14 +545,16 @@ int main(int argc, char* argv[])
     ofstream parStream(parFile.c_str());
 
     // burnin
-    cerr << "burn-in:" << endl;
     unsigned int mcmcGenerations = parameters.getNumMCMC();
     unsigned int mcmcBurn =  mcmcGenerations / 5; // changed to 5 from 10 on 2017-06-16
+//    starttree.print(cerr);
+//    cerr << endl;
+    cerr << "burn-in: " << mcmcBurn << " generations." << endl;
     starttree.mcmc(q_init,alignment,mcmcBurn,alignment.getNumSites(),rng,treeStream,parStream,true);
     cerr << endl << " done." << endl;
 
     // mcmc to get final Q
-    cerr << "sampling:" << endl;
+    cerr << "sampling: " << mcmcGenerations << " generations." << endl;
     starttree.mcmc(q_init,alignment,mcmcGenerations,alignment.getNumSites(),rng,treeStream,parStream,false);
     cerr << endl << " done." << endl;
     treeStream.close();
@@ -825,7 +857,7 @@ int main(int argc, char* argv[])
     if( numRandom < cores )
       cores = numRandom; // do not create more threads than trees
     // i want to check that cores not > than hardware_concurrency?
-    cerr << "Generating " << numRandom << " random trees in " << cores << " cores:" << endl;
+    cerr << "Generating " << numRandom << " random trees in " << cores << (cores==1 ? " core:" : " cores:") << endl;
     int div = numRandom / cores;
     int remainder = numRandom % cores;
     vector<int> startTreeNumber(cores);
@@ -1058,6 +1090,11 @@ int main(int argc, char* argv[])
 
   milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
+  int totalTime = (ms11.count() - ms5.count());
+  int seconds = totalTime / 1000;
+  int minutes = seconds / 60;
+  int hours = minutes / 60;
+  
   cout << "Times: " << endl;
   // cout << "Processing command-line arguments: " << (ms1.count() - ms0.count())/1000 << "seconds" << endl;
   // cout << "Reading FASTA: " << (ms2.count() - ms1.count())/1000 << "seconds" << endl;
@@ -1071,5 +1108,13 @@ int main(int argc, char* argv[])
   cout << "Estimate ccdprobs from bootstrap: " << (ms10.count() - ms9.count())/1000 << " seconds" << endl;
   cout << "Importance sampling: " << (ms11.count() - ms10.count())/1000 << " seconds" << endl;
 
+  cout << "Total time: ";
+  if ( hours > 0 )
+    cout << hours << " hours, " << minutes - 60*hours << " minutes, " << seconds - 3600*hours - 60*minutes << " seconds." << endl;
+  else if ( minutes > 0 )
+    cout << minutes << " minutes, " << seconds - 3600*hours - 60*minutes << " seconds." << endl;
+  else
+    cout << seconds << " seconds." << endl;
+    
   return 0;
 }

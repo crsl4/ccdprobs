@@ -180,7 +180,7 @@ vector<double> Alignment::baseFrequencies()
   else
     pi[3] = m->second / (double)(total);
 
-  cerr << "read all counts" << endl;
+//  cerr << "read all counts" << endl;
   return pi;
 }
 
