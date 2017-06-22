@@ -1299,6 +1299,8 @@ void Edge::callMLELength(Alignment& alignment,QMatrix& qmatrix)
   bool converge;
   length[current] = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
   calculate(qmatrix);
+  nodes[0]->setMapParentRecursivelySmart(this);
+  nodes[1]->setMapParentRecursivelySmart(this);
 }
 
 void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
@@ -1332,6 +1334,8 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
 
   // recalculate the transition matrices
   calculate(qmatrix);
+  nodes[0]->setMapParentRecursivelySmart(this);
+  nodes[1]->setMapParentRecursivelySmart(this);
 }
 
 void Node::subtreeMLELengths(Alignment& alignment,QMatrix& qmatrix,Edge* parent)
@@ -1371,6 +1375,7 @@ void Tree::mleLengths(Alignment& alignment,QMatrix& qmatrix)
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     (*e)->calculate(qmatrix);
   root->subtreeMLELengths(alignment,qmatrix,NULL);
+  root->setMapParentRecursivelySmart(NULL);
 }
 
 void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
@@ -1383,6 +1388,7 @@ void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,dou
 //  cerr << "root = " << root->getNumber() << endl;
   // traverse tree and find MLE's for each edge
   root->randomEdges(alignment,qmatrix,rng,NULL,logProposalDensity);
+  root->setMapParentRecursivelySmart(NULL);
 }
 
 void Node::setLevel(Edge* parent)

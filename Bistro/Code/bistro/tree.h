@@ -1,3 +1,4 @@
+// -*-c++-*-
 #ifndef __TREE_H
 #define __TREE_H
 
@@ -186,7 +187,7 @@ public:
   void clearProbMapsSmart(Edge*);
   void clearProbMap()
   {
-//    cerr << "clearing prob maps and mapParent for node " << number << endl << flush;
+    // cerr << "clearing prob maps and mapParent for node " << number << endl << flush;
     patternToProbMap[current].clear();
     mapParent[current] = NULL;
   }
@@ -209,7 +210,10 @@ public:
   }
   void setMapParent(Edge* e)
   {
-//    cerr << "setting map parent for node " << number << " to edge " << e->getNumber() << endl;
+    // if ( e==NULL )
+    //   cerr << "setting map parent for node " << number << " to NULL" << endl;
+    // else
+    //   cerr << "setting map parent for node " << number << " to edge " << e->getNumber() << endl;
     mapParent[current] = e;
   }
   Edge* getMapParent() { return mapParent[current]; }
@@ -327,26 +331,26 @@ public:
   void printDerivatives(ostream&,Alignment&,QMatrix&);
   void printSamplerInfo(ostream&);
   void weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>&, double);
-  void printMapSizes()
-  {
-    cerr << "Map sizes:";
-    for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
-      cerr << " " << (*n)->getMapSize();
-    cerr << endl;
-  }
-  void printMapParents()
-  {
-    cerr << "Map parents:";
-    for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
-    {
-      Edge* foo = (*n)->getMapParent();
-      if ( foo == NULL )
-	cerr << " " << -1;
-      else
-	cerr << " " << foo->getNumber();
-    }
-    cerr << endl;
-  }
+  // void printMapSizes()
+  // {
+  //   cerr << "Map sizes:";
+  //   for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
+  //     cerr << " " << (*n)->getMapSize();
+  //   cerr << endl;
+  // }
+  // void printMapParents()
+  // {
+  //   cerr << "Map parents:";
+  //   for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
+  //   {
+  //     Edge* foo = (*n)->getMapParent();
+  //     if ( foo == NULL )
+  // 	cerr << " " << -1;
+  //     else
+  // 	cerr << " " << foo->getNumber();
+  //   }
+  //   cerr << endl;
+  // }
 };
 
 class MCMCStats
