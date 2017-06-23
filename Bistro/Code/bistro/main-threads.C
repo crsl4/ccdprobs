@@ -1090,10 +1090,10 @@ int main(int argc, char* argv[])
 
   milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
-  int totalTime = (ms11.count() - ms5.count());
-  int seconds = totalTime / 1000;
-  int minutes = seconds / 60;
-  int hours = minutes / 60;
+  unsigned int totalTime = (ms11.count() - ms5.count());
+  unsigned int seconds = totalTime / 1000;
+  unsigned int minutes = seconds / 60;
+  unsigned int hours = minutes / 60;
   
   cout << "Times: " << endl;
   // cout << "Processing command-line arguments: " << (ms1.count() - ms0.count())/1000 << "seconds" << endl;
