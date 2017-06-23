@@ -1,7 +1,7 @@
 ## julia script to convert Phylip file to Fasta/Nexus file
 ## Claudia May 2017
 
-file = "043.phy"
+file = "071.phy"
 f = open(file)
 p = split(file,".")
 fasta = string(p[1],".fasta")

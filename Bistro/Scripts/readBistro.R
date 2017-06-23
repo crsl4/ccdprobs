@@ -252,3 +252,34 @@ getAdjacentEdges = function(tree)
   return( out )
 }
 
+
+plotConvergence = function(stem){
+    require(ggplot2)
+    mcmc_out = read.table(paste0(stem,".par"),header=FALSE)
+    names(mcmc_out) = c("logl",paste0("pi",1:4),paste0("s",1:6))
+    n = length(mcmc_out$logl)
+
+    print(ggplot(mcmc_out,aes(x=1:n,y=logl)) + geom_point())
+
+    print(ggplot(mcmc_out,aes(x=1:n)) +
+        geom_point(aes(y=pi1),col="blue") +
+        geom_point(aes(y=pi2),col="red") +
+        geom_point(aes(y=pi3),col="green") +
+        geom_point(aes(y=pi4),col="yellow"))
+
+    print(ggplot(mcmc_out,aes(x=1:n)) +
+        geom_point(aes(y=s1),col="blue") +
+        geom_point(aes(y=s2),col="red") +
+        geom_point(aes(y=s3),col="green") +
+        geom_point(aes(y=s4),col="yellow") +
+        geom_point(aes(y=s5),col="orange") +
+        geom_point(aes(y=s6),col="purple"))
+}
+
+plotLengthFrequency = function(stem){
+    tab1 = read.table(paste0(stem,".bootstrapCladeBL"),header=TRUE)
+    tab2 = read.table(paste0(stem,".vstat"),header=TRUE)
+    print(ggplot(tab1,aes(x=weighted.mean.BL,y=weight)) + geom_point() +
+        geom_point(data=tab2,color="red") + ggtitle("black=bootstrap, red=IS"))
+
+}
