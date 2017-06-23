@@ -38,7 +38,6 @@ void checkBL(VectorXd t)
   }
 }
 
-
 void checkCov2d(Matrix2d cov, bool called)
 {
   double det = cov.determinant();
@@ -97,7 +96,7 @@ void checkCov3d(Matrix3d cov)
 
 void Node::print(ostream& f)
 {
-  f << setw(3) << number << ": " << name << ": " << level << ": ";
+  f << setw(3) << number << ": " << name << ": ";
   f << "Edges:";
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
   {
@@ -118,7 +117,7 @@ void Edge::print(ostream& f)
 void Tree::print(ostream& f)
 {
   f << makeTopologyNumbers() << endl;
-//  f << treeString << endl;
+  f << "root node is (-1 for NULL) " << ( root == NULL ? -1 : root->getNumber() ) << endl;
   f << "numTaxa = " << numTaxa << ", numNodes = " << getNumNodes() << ", numEdges = " << getNumEdges() << endl;
   f << "Nodes:" << endl;
   for ( int i=0; i<getNumNodes(); ++i )
@@ -583,7 +582,6 @@ void Node::calculateEdges(QMatrix& qmatrix)
   }
 }
 
-
 void Node::setPattern(int site,const Alignment& alignment,Edge* parent)
 {
   pattern.clear();
@@ -618,7 +616,6 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
     if ( m == patternToProbMap[current].end() ) // first time this pattern calculated
     {
       patternToProbMap[current][ pattern ] = pair<double,Vector4d> (0,translate( base ));
-//      cerr << "  " << pattern << " --> " << 0 << "," << translate(base).transpose() << endl;
     }
     return;
   }
@@ -628,8 +625,8 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
     if ( (*e) != parent )
     {
       Node* neighbor = getNeighbor(*e);
-      if( (*e) != neighbor->getMapParent() ) //only calculate for children if *e is not mapParent
-	neighbor->calculateAfterPattern(site,alignment,*e);//,recurse);
+      if ( neighbor->getMapParent() == NULL || (*e) != neighbor->getMapParent() ) //only calculate for children if *e is not mapParent
+	neighbor->calculateAfterPattern(site,alignment,*e);
     }
   }
   // if( VERBOSE)
@@ -652,6 +649,7 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
 	//     cout << "with condProbPair: " << condProbPair.first << ", " << condProbPair.second.transpose() << endl;
 	//   }
         scale += condProbPair.first;
+
         Vector4d partProb = (*e)->getTransitionMatrix() * condProbPair.second;
         for ( int i=0; i<4; ++i )
           tempProb[i] *= partProb(i);
@@ -666,9 +664,8 @@ void Node::calculateAfterPattern(int site,const Alignment& alignment,Edge* paren
   }
 }
 
-
 // assumes patternToProbMap is current
-void Node::calculate(int site,const Alignment& alignment,Edge* parent)//,bool recurse)
+void Node::calculate(int site,const Alignment& alignment,Edge* parent)
 {
   setPattern(site,alignment,parent); // this will clear the pattern of this node, and call setPattern on all the children
   calculateAfterPattern(site,alignment,parent);
@@ -691,7 +688,7 @@ double Tree::calculate(const Alignment& alignment,QMatrix& qmatrix)
   // loop over sites and calculate log-likelihood while traversing the tree
   for ( int k=0; k < alignment.getNumSites(); ++k )
   {
-    root->calculate(k,alignment,NULL);//,true);
+    root->calculate(k,alignment,NULL);
     pair<double,Vector4d> condProbPair = root->getProb();
     logLikelihood(k) = condProbPair.first + log( qmatrix.getStationaryP().dot(condProbPair.second) );
 
@@ -711,6 +708,7 @@ double Tree::calculate(const Alignment& alignment,QMatrix& qmatrix)
     // 	cout << logLikelihood(k) << endl;
     //   }
   }
+  root->rootSetMapParentRecursively();
   return logLikelihood.sum();
 }
 
@@ -734,7 +732,6 @@ void Tree::saveProbMaps()
   root->saveProbMaps(NULL);
 }
 
-
 // same function as always, traverse all the tree and does not worry about mapParent Edge
 void Node::clearProbMaps(Edge* parent)
 {
@@ -743,9 +740,9 @@ void Node::clearProbMaps(Edge* parent)
     if ( (*e) != parent )
       getNeighbor(*e)->clearProbMaps(*e);
   }
-//  cout << "clearing prob maps and mapParent for node: " << number << endl << flush;
-  patternToProbMap[current].clear();
-  mapParent[current] = NULL;
+  if ( !leaf )
+    clearProbMap();
+    
 }
 
 // same function as always, traverse all the tree and does not worry about mapParent Edge
@@ -758,20 +755,18 @@ void Tree::clearProbMaps()
 void Node::clearProbMapsSmart(Edge* parent)
 {
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  {
+    if ( (*e) != parent )
     {
-      if ( (*e) != parent )
-	{
-	  Node* neighbor = getNeighbor(*e);
-	  if( (*e) != neighbor->getMapParent() ) //only keep going for children if *e is not mapParent
-	    neighbor->clearProbMapsSmart(*e);
-	}
+      Node* neighbor = getNeighbor(*e);
+      if( (*e) != neighbor->getMapParent() ) //only keep going for children if *e is not mapParent
+	neighbor->clearProbMapsSmart(*e);
     }
-  if( mapParent[current] != parent)
-    {
-//      cout << "clearing prob maps and mapParent for node: " << number << endl << flush;
-      patternToProbMap[current].clear();
-      mapParent[current] = NULL;
-    }
+  }
+  if ( !leaf && mapParent[current] != parent )
+  {
+    clearProbMap();
+  }
 }
 
 void Tree::clearProbMapsSmart()
@@ -1038,8 +1033,8 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   {
     if(VERBOSE)
       cout << "k=" << k << endl;
-    nodes[0]->calculate(k,alignment,this);//,true); // sets pattern for this site
-    nodes[1]->calculate(k,alignment,this);//,true);
+    nodes[0]->calculate(k,alignment,this); // sets pattern for this site
+    nodes[1]->calculate(k,alignment,this);
     if(false)
     {
       cout << "Nodes: " << nodes[0]->getNumber() << ", " << nodes[1]->getNumber() << endl;
@@ -1075,8 +1070,8 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
   //   cerr << "Error here: logl, dlogl, ddlogl nan: " << logl << "," << dlogl << "," << ddlogl << endl;
   //   exit(1);
   // }
-  nodes[0] -> setMapParent(this); //here we are resetting and traversing every time, maybe we could avoid this
-  nodes[1] -> setMapParent(this);
+  nodes[0]->setMapParentRecursivelySmart(this);
+  nodes[1]->setMapParentRecursivelySmart(this);
 }
 
 void Edge::printLikMinLength(ostream& f,Alignment& alignment,QMatrix& qmatrix)
@@ -1304,6 +1299,8 @@ void Edge::callMLELength(Alignment& alignment,QMatrix& qmatrix)
   bool converge;
   length[current] = mleLength(alignment,qmatrix,converge); // this is the Edge attribute length
   calculate(qmatrix);
+  nodes[0]->setMapParentRecursivelySmart(this);
+  nodes[1]->setMapParentRecursivelySmart(this);
 }
 
 void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
@@ -1337,6 +1334,8 @@ void Edge::randomLength(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,do
 
   // recalculate the transition matrices
   calculate(qmatrix);
+  nodes[0]->setMapParentRecursivelySmart(this);
+  nodes[1]->setMapParentRecursivelySmart(this);
 }
 
 void Node::subtreeMLELengths(Alignment& alignment,QMatrix& qmatrix,Edge* parent)
@@ -1376,6 +1375,7 @@ void Tree::mleLengths(Alignment& alignment,QMatrix& qmatrix)
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     (*e)->calculate(qmatrix);
   root->subtreeMLELengths(alignment,qmatrix,NULL);
+  root->setMapParentRecursivelySmart(NULL);
 }
 
 void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,double& logProposalDensity)
@@ -1388,6 +1388,7 @@ void Tree::randomEdges(Alignment& alignment,QMatrix& qmatrix,mt19937_64& rng,dou
 //  cerr << "root = " << root->getNumber() << endl;
   // traverse tree and find MLE's for each edge
   root->randomEdges(alignment,qmatrix,rng,NULL,logProposalDensity);
+  root->setMapParentRecursivelySmart(NULL);
 }
 
 void Node::setLevel(Edge* parent)
@@ -1451,19 +1452,39 @@ void Tree::postorderCherryNodeList(list<Node*>& nodeList)
   root->postorderCherryNodeList(nodeList,NULL);
 }
 
-void Node::setMapParent(Edge* edge)
+void Node::setMapParentRecursively(Edge* edge)
 {
-  if( leaf )
-    {
-      mapParent[current] = edge;
-      return;
-    }
+  if ( leaf )
+  {
+    setMapParent(edge);
+    return;
+  }
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
   {
     if ( *e != edge )
-      getNeighbor(*e)->setMapParent(*e);
+      getNeighbor(*e)->setMapParentRecursively(*e);
   }
-  mapParent[current] = edge;
+  setMapParent(edge);
+}
+
+void Node::setMapParentRecursivelySmart(Edge* edge)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  {
+    if ( *e != edge )
+      if ( getNeighbor(*e)->getMapParent() != edge )
+	getNeighbor(*e)->setMapParentRecursively(*e);
+  }
+  if ( mapParent[current] != edge )
+    setMapParent(edge);
+}
+
+void Node::rootSetMapParentRecursively()
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  {
+    getNeighbor(*e)->setMapParentRecursively(*e);
+  }
 }
 
 void Node::setActiveChildrenAndNodeParents(Edge* parent)
@@ -2480,9 +2501,9 @@ void Node::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
 
   for ( int k=0; k<numSites; ++k )
   {
-    nx->calculate(k,alignment,ex);//,recurse); // set pattern and put probability in map if not already there
-    ny->calculate(k,alignment,ey);//,recurse);
-    nz->calculate(k,alignment,ez);//,recurse);
+    nx->calculate(k,alignment,ex); // set pattern and put probability in map if not already there
+    ny->calculate(k,alignment,ey);
+    nz->calculate(k,alignment,ez);
     pair<double,Vector4d> px = nx->getProb(); //patternToProbMap[current][nx->getPattern()];
     pair<double,Vector4d> py = ny->getProb(); //patternToProbMap[current][ny->getPattern()];
     pair<double,Vector4d> pz = nz->getProb(); //patternToProbMap[current][nz->getPattern()];
@@ -2514,9 +2535,9 @@ void Node::partialPathCalculations2D(Vector2d t, double lz,Alignment& alignment,
   gradient << dll1, dll2;
   hessian << d2ll_11, d2ll_12, d2ll_12, d2ll_22; //row-wise
 
-  nx -> setMapParent(ex); //here we are resetting and traversing every time, maybe we could avoid this
-  ny -> setMapParent(ey);
-  nz -> setMapParent(ez);
+  nx->setMapParentRecursivelySmart(ex);
+  ny->setMapParentRecursivelySmart(ey);
+  nz->setMapParentRecursivelySmart(ez);
 }
 
 
@@ -2549,9 +2570,9 @@ void Node::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
 
   for ( int k=0; k<numSites; ++k )
   {
-    nx->calculate(k,alignment,ex);//,recurse); // set pattern and put probability in map if not already there
-    ny->calculate(k,alignment,ey);//,recurse);
-    nz->calculate(k,alignment,ez);//,recurse);
+    nx->calculate(k,alignment,ex); // set pattern and put probability in map if not already there
+    ny->calculate(k,alignment,ey);
+    nz->calculate(k,alignment,ez);
     pair<double,Vector4d> px = nx->getProb(); //patternToProbMap[current][nx->getPattern()];
     pair<double,Vector4d> py = ny->getProb(); //patternToProbMap[current][ny->getPattern()];
     pair<double,Vector4d> pz = nz->getProb(); //Patterntoprobmap[current][nz->getPattern()];
@@ -2593,9 +2614,9 @@ void Node::partialPathCalculations3D(Vector3d t,Alignment& alignment,Node* nx,Ed
   gradient << dll1, dll2, dll3;
   hessian << d2ll_11, d2ll_12, d2ll_13, d2ll_12, d2ll_22, d2ll_23, d2ll_13, d2ll_23, d2ll_33; //row-wise
 
-  nx -> setMapParent(ex); //here we are resetting and traversing every time, maybe we could avoid this
-  ny -> setMapParent(ey);
-  nz -> setMapParent(ez);
+  nx->setMapParentRecursivelySmart(ex);
+  ny->setMapParentRecursivelySmart(ey);
+  nz->setMapParentRecursivelySmart(ez);
 }
 
 double Node::vectorProduct(vector<Vector4d> v)
@@ -2818,12 +2839,6 @@ void Tree::clearMapParent()
     (*n)->clearMapParent();
 }
 
-void Node::clearMapParent()
-{
-  mapParent[current] = NULL;
-}
-
-
 bool Node::isPrunedLeaf(Edge* parent)
 {
   if( leaf )
@@ -2920,48 +2935,82 @@ void Tree::mcmcUpdateQ(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,do
   mcmcUpdateS(i,stats,Q,alignment,scale,rng);
 }
 
+#if 1
+//2017-06-21
+// first recurse through all children
+// then, propose a new length for parent edge and either accept it or reject it by Metropolis-Hastings
+// if rejected, restore the maps that changed
+void Node::mcmcUpdateEdges(MCMCStats& stats,QMatrix& Q,Alignment& alignment,mt19937_64& rng,Edge* parent)
+{
+  // call mcmcUpdateEdges on all children
+  for ( vector<Edge*>::iterator e=edges.begin(); e != edges.end(); ++e )
+  {
+    if ( (*e) != parent )
+      getNeighbor(*e)->mcmcUpdateEdges(stats,Q,alignment,rng,*e);
+  }
+  // if root, then we are already done
+  if ( parent == NULL )
+    return;
+  // save the current length of the edge
+  parent->saveLength();
+  // update the edge length of the parent edge
+  double currLength = parent->getLength();
+  uniform_real_distribution<double> runif(0,1);
+  double r = exp(LAMBDA*(runif(rng)-0.5));
+  double propLength = currLength * r;
+  parent->setLength(propLength);
+  parent->calculate(Q);
+  // smart clear prob maps as if neighbor is the root of the tree for likelihood calculation
+  Node* neighbor = getNeighbor(parent);
+  neighbor->clearProbMapsSmart(parent);
+  clearProbMapsSmart(parent);
+  neighbor->clearProbMap();
+  VectorXd logLikelihood;
+  logLikelihood.resize(alignment.getNumSites());
+  for ( int k=0; k<alignment.getNumSites(); ++k)
+  {
+    // calculate tree likelihood as if neighbor of parent is the root.
+    neighbor->calculate(k,alignment,NULL);
+    pair<double,Vector4d> condProbPair = neighbor->getProb();
+    logLikelihood(k) = condProbPair.first + log( Q.getStationaryP().dot(condProbPair.second) );
+  }
+  setMapParentRecursivelySmart(parent);
+  neighbor->setMapParentRecursivelySmart(parent); // correct for all nodes in the subtree except for neighbor
+  neighbor->clearProbMap(); // need to do because the probMap for neighbor is as if it is the root and has no parent edge
+  double propLogLikelihood = logLikelihood.sum();
+  double acceptProbability = exp(propLogLikelihood - stats.getCurrLogLikelihood() + log(r));
+  if ( acceptProbability > 1 )
+    acceptProbability = 1;
+  stats.addSumAcceptBL(acceptProbability); // total for all branches
+  if ( runif(rng) < acceptProbability )
+  {
+    stats.setCurrLogLikelihood(propLogLikelihood);
+  }
+  else
+  {
+    parent->restoreLength();
+    parent->calculate(Q);
+  }
+  stats.addAvgBL(parent->getNumber()-1,parent->getLength());
+}
+
 // 2017-06-16: Changing to update edges while traversing tree
-// and be smart about updating probability maps
 // Assume that the current likelihood in stats matches the current probability maps
-void Tree::mcmcUpdateEdges(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,mt19937_64& rng)
+// This function is called immediately after updating Q, and so the probability maps are all current and correct
+// for the entire tree, but are oriented to the root.
+void Tree::mcmcUpdateEdges(MCMCStats& stats,QMatrix& Q,Alignment& alignment,mt19937_64& rng)
 {
   // now with Q, we want to sample branch lengths
-  saveProbMaps(); // copy the current probability map for each node into the noncurrent one
-  clearProbMaps();
-  {
-    int j = 0;
-    //make tree function
-    for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
-    {
-      double xxx = (*e)->getLength();
-      double logProposalRatio = 0;
-      uniform_real_distribution<double> runif(0,1);
-      double r = exp(LAMBDA*(runif(rng)-0.5));
-      double yyy = xxx * r;
-      (*e)->setLength(yyy);
-      clearProbMaps();
-      double propLogLikelihood = calculate(alignment,Q); //make faster later
-      double acceptProbability = exp(propLogLikelihood - stats.getCurrLogLikelihood() + log(r));
-      if ( acceptProbability > 1 )
-	acceptProbability = 1;
-      stats.addSumAcceptBL(acceptProbability); // total for all branches
-      if ( runif(rng) < acceptProbability )
-      {
-	(*e)->setLength(yyy);
-	stats.setCurrLogLikelihood(propLogLikelihood);
-      }
-      else
-      {
-	(*e)->setLength(xxx);
-      }
-      stats.addAvgBL(j++,(*e)->getLength());
-    }
-  }
+//  saveProbMaps(); // copy the current probability map for each node into the noncurrent one
+  root->mcmcUpdateEdges(stats,Q,alignment,rng,NULL);
 }
+
+#endif
 
 #if 0
 // 2017-06-16: version before messing with it for new MCMC approach
-void Tree::mcmcUpdateEdges(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,mt19937_64& rng)
+//void Tree::mcmcUpdateEdges(int i,MCMCStats& stats,QMatrix& Q,Alignment& alignment,mt19937_64& rng)
+void Tree::mcmcUpdateEdges(MCMCStats& stats,QMatrix& Q,Alignment& alignment,mt19937_64& rng)
 {
   // now with Q, we want to sample branch lengths
   clearProbMaps();
@@ -3041,7 +3090,10 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,doub
     if ( (numGenerations >= 10) && ( (i+1) % (numGenerations / 10) == 0 ) )
       cerr << '|';
     mcmcUpdateQ(i,stats,Q,alignment,scale,rng);
-    mcmcUpdateEdges(i,stats,Q,alignment,rng);
+    mcmcUpdateEdges(stats,Q,alignment,rng);
+//    cerr << "current logLikelihood in stats: " << stats.getCurrLogLikelihood() << endl;
+//    clearProbMaps();
+//    cerr << "recalculated loglikelihood    : " << calculate(alignment,Q) << endl << endl;
     if ( printOutput )
     {
       parStream << stats.getCurrLogLikelihood() << " " << Q.getStationaryP().transpose() << " " << Q.getSymmetricQP().transpose() << endl;

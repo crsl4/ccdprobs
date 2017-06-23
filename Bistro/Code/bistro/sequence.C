@@ -180,7 +180,7 @@ vector<double> Alignment::baseFrequencies()
   else
     pi[3] = m->second / (double)(total);
 
-  cerr << "read all counts" << endl;
+//  cerr << "read all counts" << endl;
   return pi;
 }
 
@@ -380,7 +380,8 @@ VectorXd Alignment::averagePairwiseS()
       foo /= foo.sum();
       ++total;
       s += foo;
-      cerr <<  setw(3) << i << " " << setw(3) << j << ": " << fixed << setprecision(6) << setw(9) << foo.transpose() << endl;
+// maybe put this output into a file?      
+//      cerr <<  setw(3) << i << " " << setw(3) << j << ": " << fixed << setprecision(6) << setw(9) << foo.transpose() << endl;
     }
   }
   s /= total;

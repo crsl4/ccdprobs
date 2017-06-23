@@ -1,3 +1,4 @@
+// -*-c++-*-
 #ifndef __TREE_H
 #define __TREE_H
 
@@ -95,6 +96,8 @@ public:
   void switchCurrent() { current = 1 - current; }
   void addSampler(int x, int y, int z) {sampler[0] += x; sampler[1] += y; sampler[2] += z;}
   vector<int> getSampler() {vector<int> v(3); v[0]=sampler[0]; v[1]=sampler[1]; v[2]=sampler[2]; return v;}
+  void saveLength() { length[1-current] = length[current]; }
+  void restoreLength() { length[current] = length[1-current]; }
 };
 
 class Node
@@ -115,21 +118,31 @@ private:
   int minNumber; // smallest number in subtree rooted at node
 public:
   map<string,pair<double,Vector4d> > patternToProbMap[2];
-  Node() { number = -1; level = 0; current = 0; }
+  Node()
+  {
+    number = -1;
+    level = 0;
+    current = 0;
+    mapParent[0] = mapParent[1] = NULL;
+  }
   ~Node()
   {
     edges.clear();
     activeChildren.clear();
+    patternToProbMap[0].clear();
+    patternToProbMap[1].clear();
   }
   Node(int n,bool l) : number(n), leaf(l)
   {
     level = 0;
     current = 0;
+    mapParent[0] = mapParent[1] = NULL;
   }
   Node(bool l) : leaf(l)
   {
     level = 0;
     current = 0;
+    mapParent[0] = mapParent[1] = NULL;
   }
   int getNumber() const { return number; }
   void setNumber(int x) { number = x; }
@@ -172,6 +185,12 @@ public:
   void randomize(mt19937_64&,Edge*);
   void clearProbMaps(Edge*);
   void clearProbMapsSmart(Edge*);
+  void clearProbMap()
+  {
+    // cerr << "clearing prob maps and mapParent for node " << number << endl << flush;
+    patternToProbMap[current].clear();
+    mapParent[current] = NULL;
+  }
   void saveProbMaps(Edge*);
   void depthFirstNodeList(list<Node*>&,Edge*);
   void postorderCherryNodeList(list<Node*>&,Edge*);
@@ -181,7 +200,22 @@ public:
   int getActiveChildrenSize() const { return activeChildren.size(); }
   void deactivateChild(int i) { activeChildren.erase(activeChildren.begin() + i); }
   void setActiveChildrenAndNodeParents(Edge*);
-  void setMapParent(Edge*);
+  void setMapParentRecursively(Edge*);
+  void setMapParentRecursivelySmart(Edge*);
+  void rootSetMapParentRecursively();
+  void clearMapParent()
+  {
+//    cerr << "Is clearMapParent ever called?" << endl;
+    mapParent[current] = NULL;
+  }
+  void setMapParent(Edge* e)
+  {
+    // if ( e==NULL )
+    //   cerr << "setting map parent for node " << number << " to NULL" << endl;
+    // else
+    //   cerr << "setting map parent for node " << number << " to edge " << e->getNumber() << endl;
+    mapParent[current] = e;
+  }
   Edge* getMapParent() { return mapParent[current]; }
   Node* closeRelative();
   Edge* getEdgeParent() const { return edgeParent; }
@@ -192,7 +226,6 @@ public:
   void subtreeMLELengths(Alignment&,QMatrix&,Edge*);
   void randomEdges(Alignment&,QMatrix&,mt19937_64&,Edge*,double&);
   void parsimonyScore(Alignment&,Edge*,int,int&,int&);
-  void clearMapParent();
   void distance(map<dynamic_bitset<unsigned char>,double>&,Clade&,Edge*);
   void processTree(CladeGraph*,dynamic_bitset<unsigned char>&,Edge* parent);
   void generateBranchLengths(Alignment&,QMatrix&,mt19937_64&,double&,double,Edge*);
@@ -201,6 +234,8 @@ public:
   double vectorProduct(vector<Vector4d>);
   double vectorProduct4D(Vector4d, Vector4d, Vector4d, Vector4d);
   void weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>&, Clade&, Edge*, double);
+  void mcmcUpdateEdges(MCMCStats&,QMatrix&,Alignment&,mt19937_64&,Edge*);
+  int getMapSize() { return patternToProbMap[current].size(); }
 };
 
 class Tree
@@ -292,10 +327,30 @@ public:
   void mcmcUpdateQ(int,MCMCStats&,QMatrix&,Alignment&,double,mt19937_64&);
   void mcmcUpdatePi(int,MCMCStats&,QMatrix&,Alignment&,double,mt19937_64&);
   void mcmcUpdateS(int,MCMCStats&,QMatrix&,Alignment&,double,mt19937_64&);
-  void mcmcUpdateEdges(int,MCMCStats&,QMatrix&,Alignment&,mt19937_64&);
+  void mcmcUpdateEdges(MCMCStats&,QMatrix&,Alignment&,mt19937_64&);
   void printDerivatives(ostream&,Alignment&,QMatrix&);
   void printSamplerInfo(ostream&);
   void weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>&, double);
+  // void printMapSizes()
+  // {
+  //   cerr << "Map sizes:";
+  //   for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
+  //     cerr << " " << (*n)->getMapSize();
+  //   cerr << endl;
+  // }
+  // void printMapParents()
+  // {
+  //   cerr << "Map parents:";
+  //   for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
+  //   {
+  //     Edge* foo = (*n)->getMapParent();
+  //     if ( foo == NULL )
+  // 	cerr << " " << -1;
+  //     else
+  // 	cerr << " " << foo->getNumber();
+  //   }
+  //   cerr << endl;
+  // }
 };
 
 class MCMCStats
