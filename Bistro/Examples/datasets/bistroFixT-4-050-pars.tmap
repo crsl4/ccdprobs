@@ -1,0 +1,100 @@
+translate
+       1 Hypoxylon_atroroseum_U32411,
+       2 Daldinia_concentrica_U32402,
+       3 Xylaria_hypoxylon_U20378,
+       4 Xylaria_curta_U32417,
+       5 Ophiostoma_ulmi_M83261,
+       6 Ophiostoma_piliferum_U20377,
+       7 Sordaria_fimicola_X69851,
+       8 Neurospora_crassa_X04971,
+       9 Chaetomium_globosum_U20379,
+      10 Cercophora_septentrionalis_U32,
+      11 Gaeumannomyces_graminis_var_gr,
+      12 Magnaporthe_salvinii_U78546,
+      13 Pyricularia_grisea_793,
+      14 Magnaporthe_grisea_Guy_11,
+      15 Hypocrea_pallida_U32408,
+      16 Nectria_cinnabarina_U32412,
+      17 Hypomyces_polyporinus_U32410,
+      18 Claviceps_purpurea_U44040,
+      19 Glomerella_cingulata_U48427,
+      20 Colletotrichum_gloeosporioides,
+      21 Microascus_trigonosporus_L3698,
+      22 Petriella_setifera_U32421,
+      23 Ceratocystis_virescens_U32419,
+      24 Ceratocystis_fimbriata_U32418,
+      25 Leucostoma_persoonii_M83259,
+      26 Diaporthe_phaseolorum_L36985,
+      27 Melanconis_marginalis_ATCC5690,
+      28 Gnomonia_setacea,
+      29 Valsa_ambiens_subsp._leucostom,
+      30 Cryptodiaporthe_corni,
+      31 Apiognomonia_supraseptata,
+      32 Amphiporthe_castanea,
+      33 Phomopsis_longicolla_U78778,
+      34 Cryphonectria_parasitica_713,
+      35 Endothia_gyrosa_L42443,
+      36 Endothia_eugeniae,
+      37 Plagiostoma_euphorbiae,
+      38 Pleuroceras_pleurostylum,
+      39 Gnomonia_padicola,
+      40 Apioplagiostoma_aceriferum,
+      41 Apiosporopsis_carpinea,
+      42 Linospora_capreae,
+      43 Discula_quercina,
+      44 Discula_campestris,
+      45 Discula_fraxinae,
+      46 Discula_destructiva_MD254,
+      47 Discula_sp._326,
+      48 Saccharomyces_cerevisiae_Z7557,
+      49 Candida_albicans_E15168,
+      50 Ambrosiozyma_platypodis_L36984;
+1.00000000 1.00000000 [ {4-5} , {4} ]
+1.00000000 1.00000000 [ {4-6} , {4-5} ]
+1.00000000 1.00000000 [ {7-8} , {7} ]
+1.00000000 1.00000000 [ {4-8} , {4-6} ]
+1.00000000 1.00000000 [ {3-8} , {3} ]
+1.00000000 1.00000000 [ {10-11} , {10} ]
+1.00000000 1.00000000 [ {9-11} , {9} ]
+1.00000000 1.00000000 [ {12-13} , {12} ]
+1.00000000 1.00000000 [ {9-13} , {9-11} ]
+1.00000000 1.00000000 [ {14-15} , {14} ]
+1.00000000 1.00000000 [ {14-16} , {14-15} ]
+1.00000000 1.00000000 [ {18-19} , {18} ]
+1.00000000 1.00000000 [ {17-19} , {17} ]
+1.00000000 1.00000000 [ {14-19} , {14-16} ]
+1.00000000 1.00000000 [ {9-19} , {9-13} ]
+1.00000000 1.00000000 [ {20-21} , {20} ]
+1.00000000 1.00000000 [ {22-23} , {22} ]
+1.00000000 1.00000000 [ {20-23} , {20-21} ]
+1.00000000 1.00000000 [ {24-25} , {24} ]
+1.00000000 1.00000000 [ {20-25} , {20-23} ]
+1.00000000 1.00000000 [ {27-28} , {27} ]
+1.00000000 1.00000000 [ {26-28} , {26} ]
+1.00000000 1.00000000 [ {26-29} , {26-28} ]
+1.00000000 1.00000000 [ {20-29} , {20-25} ]
+1.00000000 1.00000000 [ {9-29} , {9-19} ]
+1.00000000 1.00000000 [ {31-32} , {31} ]
+1.00000000 1.00000000 [ {30-32} , {30} ]
+1.00000000 1.00000000 [ {33-34} , {33} ]
+1.00000000 1.00000000 [ {30-34} , {30-32} ]
+1.00000000 1.00000000 [ {30-35} , {30-34} ]
+1.00000000 1.00000000 [ {9-35} , {9-29} ]
+1.00000000 1.00000000 [ {36-37} , {36} ]
+1.00000000 1.00000000 [ {38-39} , {38} ]
+1.00000000 1.00000000 [ {36-39} , {36-37} ]
+1.00000000 1.00000000 [ {36-40} , {36-39} ]
+1.00000000 1.00000000 [ {9-40} , {9-35} ]
+1.00000000 1.00000000 [ {43,45} , {43} ]
+1.00000000 1.00000000 [ {42,46} , {42} ]
+1.00000000 1.00000000 [ {41-42,46} , {41} ]
+1.00000000 1.00000000 [ {47-48} , {47} ]
+1.00000000 1.00000000 [ {43,45,47-48} , {43,45} ]
+1.00000000 1.00000000 [ {41-43,45-48} , {41-42,46} ]
+1.00000000 1.00000000 [ {41-48} , {44} ]
+1.00000000 1.00000000 [ {9-48} , {9-40} ]
+1.00000000 1.00000000 [ {3-48} , {3-8} ]
+1.00000000 1.00000000 [ {49-50} , {49} ]
+1.00000000 1.00000000 [ {3-50} , {3-48} ]
+1.00000000 1.00000000 [ {2-50} , {2} ]
+1.00000000 1.00000000 [ {1-50} , {1} ]
