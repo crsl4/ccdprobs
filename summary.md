@@ -2,26 +2,34 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- make plot for loglik to see if we have other burnin issues: .par file (darwin03)
-- generalized dirichlet: study and double check steps: new things: justify moments, what are marginals?
+- wait for tests fixed tree 050,059,064: darwin00 and birge
+- do test with more trees: 10000, do we get the same ESS?
+
+- manuscript
+- generalized dirichlet: justify moments, what are marginals? does this work for small alpha (only tested with big alpha)?
+  - a generalized dirichlet dist with scaled variances
+  - we know about the dirichlet: density, marginal, but there is a single scale parameter
+  - in an application, we wanted fit proba dist where the dirichlet didnt fit because there was variation among the variances
+  - density (how gotten?, reference Craiu and Craiu)
+  - how to simulate it
+  - **missing** if you want to pick alpha,lambda, how to do this if you have means and variances? need more justification
+  - we need to show that the mean/variance exist, or give boundaries. also, marginal?
+  - there are possible constraints for what the variances can be given a set of means
+  - simulations: simulate generalized dirichlet, pick alpha and lambda based on mean/variance, show that it is a good fit
+  - distribution on the norm of multivariate normal: iid case, with covariance? plot distance vs logl in multivariate normal case; and compare to what we get from the bootstrap trees: compare the percentiles of bootstrap with the ones with multivariate normal
+    - sample of bootstrap trees->mean tree-> distances from mean tree-> plot logl vs distances: difference between 95 percentile logl and the logl of the mean
+    - sample of multivariate normal (not independent)->distances from mean->plot logl vs distances: difference between 95 percentile logl to true mean logl
+    - problem: which covariance in the multinormal? maybe the difference in logl does not depend on the standard deviation
+    - we do this to calculate the scale in the weights by distance
+    - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
+    - we want to justify the use of the scale in weight
 
 
 - Clean up repository for users!!
 
-- Paper: [biometrics](http://onlinelibrary.wiley.com/journal/10.1111/(ISSN)1541-0420)
-- status quo is mcmc, successful but computationally inefficient (reference ronquist paper)
-- use IS as alternative
-- show methods
-- show examples (improvement in ESS does not translate to improvement in time, we do a lot more computation per tree)
-- discussion: problems, limitations: two components: sample topolgy, and then sample BL. the second one is good, but the other one: there are cases when the shrinking of bootstrap towards the mean is good, in other not
-  - setting priors on pi,s, the dirichlet is fine, but in the posterior is not really dirichlet (and we came up with the generalized dirichlet, maybe a separate paper)
-
 
 ## Check with Bret
-- great variability on ESS fixed tree between birge and darwin runs! but better results now with burnin=200, could be that burnin=200 not good for all, have not checked all plots
-- check code to read lines: there should be easier
-- error with getDoublesFromCommaList function: still does not work with spaces, but why not with the comma file? where to put in parameter.h?
-- his work not in main? to push my code 
+
 
 ## Jordan
 ### Final steps:

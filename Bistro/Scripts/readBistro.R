@@ -279,7 +279,23 @@ plotConvergence = function(stem){
 plotLengthFrequency = function(stem){
     tab1 = read.table(paste0(stem,".bootstrapCladeBL"),header=TRUE)
     tab2 = read.table(paste0(stem,".vstat"),header=TRUE)
+    myfun = function(x){
+        a = grepl("-",x)
+        b = grepl(",",x)
+        return(a|b)
+    }
+    ind1 = sapply(tab1$clade,FUN=myfun)
+    ind2 = sapply(tab2$clade,FUN=myfun)
+    tab1 = tab1[ind1,]
+    tab2 = tab2[ind2,]
     print(ggplot(tab1,aes(x=weighted.mean.BL,y=weight)) + geom_point() +
         geom_point(data=tab2,color="red") + ggtitle("black=bootstrap, red=IS"))
+}
 
+
+plotBistroPDF = function(stem){
+    pdf(paste0(stem,".pdf"))
+    plotBistro(stem)
+    plotConvergence(stem)
+    dev.off()
 }

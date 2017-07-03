@@ -214,6 +214,7 @@ In this case, the gamma sampler was used 34/38 times (0.89), the truncated norma
 - Generalized Dirichlet does gives a better performance in `024`, but a little worse in others
 
 #### After burnin = 200 & generalized dirichlet
+Actually, I thought that we used 200 burnin, but I did not recompile in Birge machine, so it was using the old burnin=100
 ```
 (master) $ grep "ESS = " *bistro*-3-*.log
 birge-bistro-3-024.log:ESS = 1.95, or 0.19 percent.
