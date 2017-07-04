@@ -1,0 +1,23 @@
+Bayesian Analysis (BA)  journal document class. 
+
+Distributed files include:
+
+ README          -- this file
+ ba_template.tex -- A template file
+ ba_sample.tex   -- A sample article
+ ba_sample.pdf   -- A sample article
+ sty/imsart.sty  -- Journal style  file
+ sty/imsart.cls  -- Main class file
+ img/fig001.eps  -- Sample image
+ bib/ba.bst      -- Bibtex style
+ bib/sample.bib  -- Bibtex DB sample
+ 
+
+Compile:      latex paper
+	
+Produce bbl:  bibtex paper
+
+VTeX UAB, 2016/01/25
+
+
+

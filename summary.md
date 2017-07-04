@@ -5,17 +5,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 - wait for tests fixed tree 050,059,064: darwin00 and birge
 - do test with more trees: 10000, do we get the same ESS?
 
-- manuscript
-- generalized dirichlet: justify moments, what are marginals? does this work for small alpha (only tested with big alpha)?
-  - a generalized dirichlet dist with scaled variances
-  - we know about the dirichlet: density, marginal, but there is a single scale parameter
-  - in an application, we wanted fit proba dist where the dirichlet didnt fit because there was variation among the variances
-  - density (how gotten?, reference Craiu and Craiu)
-  - how to simulate it
-  - **missing** if you want to pick alpha,lambda, how to do this if you have means and variances? need more justification
-  - we need to show that the mean/variance exist, or give boundaries. also, marginal?
-  - there are possible constraints for what the variances can be given a set of means
-  - simulations: simulate generalized dirichlet, pick alpha and lambda based on mean/variance, show that it is a good fit
+
   - distribution on the norm of multivariate normal: iid case, with covariance? plot distance vs logl in multivariate normal case; and compare to what we get from the bootstrap trees: compare the percentiles of bootstrap with the ones with multivariate normal
     - sample of bootstrap trees->mean tree-> distances from mean tree-> plot logl vs distances: difference between 95 percentile logl and the logl of the mean
     - sample of multivariate normal (not independent)->distances from mean->plot logl vs distances: difference between 95 percentile logl to true mean logl
@@ -29,7 +19,9 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-
+- example for manuscript
+- look at convergence plots for 024-064, some weird: like 043 that behaves well, but the plot does not look fine
+- manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 
 ## Jordan
 ### Final steps:

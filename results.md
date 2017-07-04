@@ -247,6 +247,18 @@ bistro-cats.log:ESS = 4.51, or 0.45 percent.
 bistroFixT-cats.log:ESS = 46.19, or 4.62 percent.
 ```
 
+Again, with burnin=200:
+```
+[claudia@darwin00] (10)$ grep ESS bistroFixT-4*.log
+bistroFixT-4-024.log:ESS = 197.70, or 19.77 percent.
+bistroFixT-4-027.log:ESS = 38.92, or 3.89 percent.
+bistroFixT-4-036.log:ESS = 51.75, or 5.18 percent.
+bistroFixT-4-043.log:ESS = 140.70, or 14.07 percent.
+bistroFixT-4-050.log:ESS = 29.24, or 2.92 percent.
+bistroFixT-4-059.log:ESS = 65.45, or 6.54 percent.
+bistroFixT-4-064.log:ESS = 17.66, or 1.77 percent.
+```
+See the plots `convergence*.pdf` to check the convergence of loglik, pi and rates.
 
 ### Generalized Dirichlet
 
