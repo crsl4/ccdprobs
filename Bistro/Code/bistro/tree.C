@@ -3062,21 +3062,21 @@ void MCMCStats::printMCMCSummary(ostream& f,QMatrix& Q,int numEdges,unsigned int
   f << endl << Q.getQ() << endl << endl;
 }
 
-void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,mt19937_64& rng, bool burnin)
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,mt19937_64& rng, bool burnin, vector<double>& logl)
 {
   ofstream treeStream;
   ofstream parStream;
-  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,false,burnin);
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,false,burnin,logl);
 }
 
-void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool burnin)
+void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool burnin,vector<double>& logl)
 {
-  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true,burnin);
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true,burnin,logl);
 }
 
 // for the variance: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
 void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,
-		mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput, bool burnin)
+		mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput, bool burnin, vector<double>& logl)
 {
   clearProbMaps();
   double currentLogLikelihood = calculate(alignment,Q);
@@ -3097,6 +3097,7 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,doub
     if ( printOutput )
     {
       parStream << stats.getCurrLogLikelihood() << " " << Q.getStationaryP().transpose() << " " << Q.getSymmetricQP().transpose() << endl;
+      logl[i] = stats.getCurrLogLikelihood();
       reroot(1);
       sortCanonical();
       treeStream << makeTreeNumbers() << endl;

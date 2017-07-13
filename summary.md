@@ -2,8 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- wait for tests fixed tree 050,059,064: darwin00 and birge
-- do test with more trees: 10000, do we get the same ESS?
+- make parallel mcmc chains (default 4); keep vector of loglik, calculate mean and sd of last half and calculate gelman statistics to decide what to use for burnin: leave last half, we give as argument the block size (default 500), so we generate 500+500, if the last 500 are not good, do another 500, and elimiate the first half of the beginning (250): we have formulas for deleting one element at a time from the mean and var
 
 
   - distribution on the norm of multivariate normal: iid case, with covariance? plot distance vs logl in multivariate normal case; and compare to what we get from the bootstrap trees: compare the percentiles of bootstrap with the ones with multivariate normal
@@ -19,8 +18,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
-- example for manuscript
-- look at convergence plots for 024-064, some weird: like 043 that behaves well, but the plot does not look fine
+- example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 
 ## Jordan
