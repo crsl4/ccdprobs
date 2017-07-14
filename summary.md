@@ -2,6 +2,12 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- compute gelman stat for the 4 chains
+- decide if we continue or not
+- if we continue, update the mean/var and add a new block
+
+- read steve derivation
+
 - make parallel mcmc chains (default 4); keep vector of loglik, calculate mean and sd of last half and calculate gelman statistics to decide what to use for burnin: leave last half, we give as argument the block size (default 500), so we generate 500+500, if the last 500 are not good, do another 500, and elimiate the first half of the beginning (250): we have formulas for deleting one element at a time from the mean and var
 
 
@@ -18,6 +24,11 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
+- how to pass a vector of Q? I get error when I try
+- gelman stat: http://astrostatistics.psu.edu/RLectures/diagnosticsMCMC.pdf
+- 
+
+
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 

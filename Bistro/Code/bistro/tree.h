@@ -320,7 +320,7 @@ public:
   Edge* whichMaxBranch(); //finds edge with max length
   void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, bool,vector<double>&);
   void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, ofstream&, ofstream&, bool, vector<double>&);
-  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, ofstream&, ofstream&, bool, bool, vector<double>&);
+  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, ofstream&, ofstream&, bool, bool, vector<double>&,bool);
   void setInitialEdgeLengths(double); // set all edge lengths to x
   double distance(Tree*);
   void processTree(CladeGraph*);

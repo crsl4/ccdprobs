@@ -289,6 +289,22 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    samplerStream.close();
 }
 
+void mcmcChain(int coreID, string text,QMatrix& q_init,Alignment& alignment,unsigned int blockSize,double scale,mt19937_64& rng,vector<double>& logl,Parameter& parameters, double& mean, double& var)
+{
+  Tree starttree(text,alignment);
+  string treeFile = parameters.getOutFileRoot() + "-" + to_string(coreID) + ".tre";
+  string parFile = parameters.getOutFileRoot() + "-" + to_string(coreID) + ".par";
+  ofstream treeStream(treeFile.c_str());
+  ofstream parStream(parFile.c_str());
+  if(coreID == 0)
+    starttree.mcmc(q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,true);
+  else
+    starttree.mcmc(q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,false);
+
+  treeStream.close();
+  parStream.close();
+}
+
 void createCladeToWeightBranchLengthMap(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& cladeToWeightBranchLengthMap,
 					vector<string> trees,vector<double> wt, Alignment& alignment)
 {
@@ -534,36 +550,61 @@ int main(int argc, char* argv[])
   }
   cout << starttree.makeTreeNumbers() << endl;
 
+
 // MCMC
   if ( parameters.getDoMCMC() )
   {
     cerr << "Running MCMC to estimate Q matrix ..." << endl;
+    int numChains = 4;
+    unsigned int blockSize = parameters.getNumMCMC();
 
-    string treeFile = parameters.getOutFileRoot() + ".tre";
-    string parFile = parameters.getOutFileRoot() + ".par";
-    ofstream treeStream(treeFile.c_str());
-    ofstream parStream(parFile.c_str());
-
-    // burnin
-    unsigned int mcmcGenerations = parameters.getNumMCMC();
-    unsigned int mcmcBurn =  mcmcGenerations / 5; // changed to 5 from 10 on 2017-06-16
-    vector<double>  logl(mcmcGenerations);
-    cerr << "burn-in: " << mcmcBurn << " generations." << endl;
-    starttree.mcmc(q_init,alignment,mcmcBurn,alignment.getNumSites(),rng,treeStream,parStream,true,logl);
-    cerr << endl << " done." << endl;
-
-    // mcmc to get final Q
-    cerr << "sampling: " << mcmcGenerations << " generations." << endl;
-    starttree.mcmc(q_init,alignment,mcmcGenerations,alignment.getNumSites(),rng,treeStream,parStream,false,logl);
-    cerr << endl << " done." << endl;
-    treeStream.close();
-    parStream.close();
-    for(int i=1; i<mcmcGenerations; ++i)
+    // generating the seeds for each chain
+    uniform_int_distribution<> rint_orig(0,4294967295);
+    unsigned int initial_seed = rint_orig(rng);
+    cout << "Seed = " << initial_seed << endl;
+    minstd_rand seed_rng(initial_seed);
+    uniform_int_distribution<> rint(0,4294967295);
+    vector<unsigned int> seeds(numChains);
+    vector<mt19937_64*> vrng;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
     {
-      cerr << "logl(" << i << ") = " << logl[i] << endl; 
+      *p = rint(seed_rng);
+      vrng.push_back( new mt19937_64(*p) );
     }
+    cout << "Seeds per chain: " << endl;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
+      cout << setw(15) << *p << endl;
+    
+    vector<thread> threads;
+    vector<vector<double> > logl0(numChains, vector<double>(blockSize,0.0));
+    vector<double> means(numChains);
+    vector<double> vars(numChains);
+    cerr << "successful initialization of parameters for mcmc chains" << endl;
+    
+    for ( int i=0; i<numChains; ++i )
+    {
+      cerr << "starting chain = " << i << endl;
+      QMatrix q_chain(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
+      threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(q_chain),ref(alignment),blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl0[i]),ref(parameters),ref(means[i]),ref(vars[i])));
+    }
+    
+    for(auto &t : threads){
+      t.join();
+    }
+    cerr << endl << "done." << endl;
 
-// write mcmc output to a file
+    // print vector of all logwt
+    for( vector< vector<double> >::iterator p=logl0.begin(); p != logl0.end(); ++p)
+    {
+      for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+      {
+	cerr << (*q) << endl;
+      }
+      cerr << "-----" << endl;
+    }
+    exit(1);
+
+    // write mcmc output to a file
     string mcmcFile = parameters.getOutFileRoot() + ".mcmc.out";
     cerr << "Writing MCMC output to " << mcmcFile << endl;
     ofstream mcmcstream(mcmcFile.c_str());
@@ -571,10 +612,6 @@ int main(int argc, char* argv[])
     VectorXd s = q_init.getSymmetricQP();
     Vector4d vpi = q_init.getMcmcVarP();
     VectorXd vs = q_init.getMcmcVarQP();  
-    // mcmcstream << pi.transpose() << endl;
-    // mcmcstream << s.transpose() << endl;
-    // mcmcstream << vpi.transpose() << endl;
-    // mcmcstream << vs.transpose() << endl;
     string sep = " ";
     mcmcstream << pi[0] << sep << pi[1] << sep << pi[2] << sep << pi[3] << endl;
     mcmcstream << s[0] << sep << s[1] << sep << s[2] << sep << s[3] << sep << s[4] << sep << s[5] << endl;

@@ -3066,29 +3066,33 @@ void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,doub
 {
   ofstream treeStream;
   ofstream parStream;
-  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,false,burnin,logl);
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,false,burnin,logl,true);
 }
 
 void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool burnin,vector<double>& logl)
 {
-  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true,burnin,logl);
+  mcmc(Q,alignment,numGenerations,scale,rng,treeStream,parStream,true,burnin,logl,true);
 }
 
 // for the variance: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
 void Tree::mcmc(QMatrix& Q,Alignment& alignment,unsigned int numGenerations,double scale,
-		mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput, bool burnin, vector<double>& logl)
+		mt19937_64& rng, ofstream& treeStream, ofstream& parStream, bool printOutput, bool burnin, vector<double>& logl,bool printBar)
 {
   clearProbMaps();
   double currentLogLikelihood = calculate(alignment,Q);
   MCMCStats stats(getNumEdges(),currentLogLikelihood);
 
-  cerr << '|';
+  if(printBar)
+    cerr << '|';
   for ( int i=0; i<numGenerations; ++i )
   {
-    if ( (numGenerations >= 100) && ( (i+1) % (numGenerations / 100) == 0 ) )
-      cerr << '*';
-    if ( (numGenerations >= 10) && ( (i+1) % (numGenerations / 10) == 0 ) )
-      cerr << '|';
+    if(printBar)
+    {
+      if ( (numGenerations >= 100) && ( (i+1) % (numGenerations / 100) == 0 ) )
+	cerr << '*';
+      if ( (numGenerations >= 10) && ( (i+1) % (numGenerations / 10) == 0 ) )
+	cerr << '|';
+    }
     mcmcUpdateQ(i,stats,Q,alignment,scale,rng);
     mcmcUpdateEdges(stats,Q,alignment,rng);
 //    cerr << "current logLikelihood in stats: " << stats.getCurrLogLikelihood() << endl;
