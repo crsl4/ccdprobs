@@ -289,7 +289,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    samplerStream.close();
 }
 
-void mcmcChain(int coreID, string text,QMatrix& q_init,Alignment& alignment,unsigned int blockSize,double scale,mt19937_64& rng,vector<double>& logl,Parameter& parameters, double& mean, double& var)
+void mcmcChain(int coreID, string text,QMatrix*& q_init,Alignment& alignment,unsigned int blockSize,double scale,mt19937_64& rng,vector<double>& logl,Parameter& parameters, double& mean, double& var)
 {
   Tree starttree(text,alignment);
   string treeFile = parameters.getOutFileRoot() + "-" + to_string(coreID) + ".tre";
@@ -297,9 +297,9 @@ void mcmcChain(int coreID, string text,QMatrix& q_init,Alignment& alignment,unsi
   ofstream treeStream(treeFile.c_str());
   ofstream parStream(parFile.c_str());
   if(coreID == 0)
-    starttree.mcmc(q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,true);
+    starttree.mcmc(*q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,true);
   else
-    starttree.mcmc(q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,false);
+    starttree.mcmc(*q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,false);
 
   treeStream.close();
   parStream.close();
@@ -576,7 +576,8 @@ int main(int argc, char* argv[])
       cout << setw(15) << *p << endl;
     
     vector<thread> threads;
-    vector<vector<double> > logl0(numChains, vector<double>(blockSize,0.0));
+    vector< vector<double> > logl0(numChains, vector<double>(blockSize,0.0));
+    vector<QMatrix*> qvec(numChains);
     vector<double> means(numChains);
     vector<double> vars(numChains);
     cerr << "successful initialization of parameters for mcmc chains" << endl;
@@ -584,8 +585,8 @@ int main(int argc, char* argv[])
     for ( int i=0; i<numChains; ++i )
     {
       cerr << "starting chain = " << i << endl;
-      QMatrix q_chain(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
-      threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(q_chain),ref(alignment),blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl0[i]),ref(parameters),ref(means[i]),ref(vars[i])));
+      qvec[i] = new QMatrix(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
+      threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(qvec[i]),ref(alignment),blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl0[i]),ref(parameters),ref(means[i]),ref(vars[i])));
     }
     
     for(auto &t : threads){
@@ -593,15 +594,21 @@ int main(int argc, char* argv[])
     }
     cerr << endl << "done." << endl;
 
-    // print vector of all logwt
-    for( vector< vector<double> >::iterator p=logl0.begin(); p != logl0.end(); ++p)
+    for(int i=0;i<numChains;++i)
     {
-      for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
-      {
-	cerr << (*q) << endl;
-      }
-      cerr << "-----" << endl;
+      cerr << qvec[i]->getStationaryP().transpose() << endl;
     }
+    // while(stat>1.05 and N<num)
+
+    // print vector of all logwt
+    // for( vector< vector<double> >::iterator p=logl0.begin(); p != logl0.end(); ++p)
+    // {
+    //   for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
+    //   {
+    // 	cerr << (*q) << endl;
+    //   }
+    //   cerr << "-----" << endl;
+    // }
     exit(1);
 
     // write mcmc output to a file
