@@ -2,10 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- compute gelman stat for the 4 chains
-- decide if we continue or not
-- if we continue, update the mean/var and add a new block
-- gelman stat: http://astrostatistics.psu.edu/RLectures/diagnosticsMCMC.pdf
+- test with 024 and 027, do convergence plots
 
 - read steve derivation: exponential families
 
@@ -25,6 +22,8 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 
 ## Check with Bret
+- max number of times we will try the mcmc fix
+- calculateP,S and variances: do we use only the last half? This is for restarting chains and also for last step
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 

@@ -1,3 +1,8 @@
+## to test new mcmc convergence
+../../Code/bistro/bistro -f ../../Data/datasets/024.fasta -o bistro024-mcmc -r 1000 -b 1000 > bistro024-mcmc.log
+../../Code/bistro/bistro -f ../../Data/datasets/027.fasta -o bistro027-mcmc -r 1000 -b 1000 > bistro027-mcmc.log
+
+
 source("../../Scripts/readBistro.R")
 pdf("convergence-024.pdf")
 plotConvergence("bistroFixT-4-024")

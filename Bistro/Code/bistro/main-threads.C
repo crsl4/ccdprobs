@@ -289,7 +289,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    samplerStream.close();
 }
 
-void mcmcChain(int coreID, string text,QMatrix*& q_init,Alignment& alignment,unsigned int blockSize,double scale,mt19937_64& rng,vector<double>& logl,Parameter& parameters, double& mean, double& var)
+void mcmcChain(int coreID, string text,QMatrix& q_init,Alignment& alignment,unsigned int blockSize,double scale,mt19937_64& rng,vector<double>& logl,Parameter& parameters, vector<vector<double>>& pi, vector<vector<double>>& rates)
 {
   Tree starttree(text,alignment);
   string treeFile = parameters.getOutFileRoot() + "-" + to_string(coreID) + ".tre";
@@ -297,12 +297,105 @@ void mcmcChain(int coreID, string text,QMatrix*& q_init,Alignment& alignment,uns
   ofstream treeStream(treeFile.c_str());
   ofstream parStream(parFile.c_str());
   if(coreID == 0)
-    starttree.mcmc(*q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,true);
+    starttree.mcmc(q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,true,pi,rates);
   else
-    starttree.mcmc(*q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,false);
+    starttree.mcmc(q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,false,pi,rates);
 
   treeStream.close();
   parStream.close();
+}
+
+//prop = proportion of the chain to keep for the computation
+//used for pi and rates
+void calculatePandS(vector<vector<double>> pi, vector<vector<double>> rates, vector<double>& piMean, 
+		    vector<double>& sMean, vector<double>& piVar, vector<double>& sVar, double prop)
+{
+  int start = prop*pi.size(); //assumes pi,rates have the same size
+  for(int i=start; i<pi.size(); ++i)
+  {
+    for(int j=0; j<4; ++j)
+    {
+      piMean[j] += pi[i][j];
+      piVar[j] += pi[i][j]*pi[i][j];
+    }
+    for(int j=0; j<6; ++j)
+    {
+      sMean[j] += rates[i][j];
+      sVar[j] += rates[i][j]*rates[i][j];
+    }
+  }
+  for(int j=0; j<4; ++j)
+  {
+    piMean[j] /= start;
+    piVar[j] = piVar[j]/start - (piMean[j]*piMean[j]);
+  }
+  for(int j=0; j<6; ++j)
+  {
+    sMean[j] /= start;
+    sVar[j] = sVar[j]/start - (sMean[j]*sMean[j]);
+  }
+}
+
+// take last half of vector
+// calculate mean and variance per chain
+// calculate mean of means, variance of means (b), mean of variances (w)
+// v = (1-1/n)*w+1/n*b
+// rstat = sqrt(v/w)
+// http://astrostatistics.psu.edu/RLectures/diagnosticsMCMC.pdf
+double gelmanRubin(vector<vector<double>> logl, double prop)
+{
+  int numChains = logl.size();
+  int n = logl[0].size();
+  int it = prop*n;
+  cerr << n << " iterations. Will use last part of: " << it << endl;
+  vector<double> sums(numChains,0.0);
+  vector<double> sums2(numChains,0.0);
+
+  for(int i=0; i<numChains; ++i)
+  {
+    for(int j=it; j<n; ++j)
+    {
+      sums[i] += logl[i][j];
+      sums2[i] += logl[i][j]*logl[i][j];
+    }
+  }
+
+  vector<double> means(numChains,0.0);
+  vector<double> vars(numChains,0.0);
+  double meanMean = 0.0;
+  double meanVar = 0.0;
+  double sum2Mean = 0.0;
+  for(int i=0; i<numChains; ++i)
+  {
+    means[i] = sums[i]/it;
+    vars[i] = sums2[i]/it-(means[i]*means[i]);
+    sum2Mean += means[i]*means[i];
+    meanMean += means[i];
+    meanVar += vars[i];
+  }
+  meanMean /= numChains;
+  meanVar /= numChains;
+  double varMeans = sum2Mean/numChains - meanMean*meanMean;
+  cerr << "Number of iterations: " << it << endl;
+  cerr << "mean of means: " << meanMean << endl;
+  cerr << "mean of variances: " << meanVar << endl;
+  cerr << "variance of means: " << varMeans << endl;
+  double v = (1-1/it)*meanVar + (1/it)*varMeans;
+  cerr << "v: " << v << endl;
+  return sqrt(v/meanVar);
+}
+
+void combine(vector<vector<vector<double>>> pi1, vector<vector<vector<double>>> rates1, vector<vector<double>>& pi2, vector<vector<double>>& rates2, double prop)
+{
+  int start = prop*pi1[0].size(); //assumes rates1 is same size
+  for(int i=0; i<pi1.size(); ++i)
+  {
+    for(int j=start; j<pi1[0].size(); ++j)
+    {
+      pi2.push_back(pi1[i][j]);
+      rates2.push_back(rates1[i][j]);
+    }
+  }
 }
 
 void createCladeToWeightBranchLengthMap(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& cladeToWeightBranchLengthMap,
@@ -557,6 +650,7 @@ int main(int argc, char* argv[])
     cerr << "Running MCMC to estimate Q matrix ..." << endl;
     int numChains = 4;
     unsigned int blockSize = parameters.getNumMCMC();
+    cerr << "Block size = " << blockSize << endl;
 
     // generating the seeds for each chain
     uniform_int_distribution<> rint_orig(0,4294967295);
@@ -576,17 +670,16 @@ int main(int argc, char* argv[])
       cout << setw(15) << *p << endl;
     
     vector<thread> threads;
-    vector< vector<double> > logl0(numChains, vector<double>(blockSize,0.0));
-    vector<QMatrix*> qvec(numChains);
-    vector<double> means(numChains);
-    vector<double> vars(numChains);
+    vector< vector<double> > logl1(numChains, vector<double>(2*blockSize,0.0));
+    vector< vector< vector<double> > > pi1(numChains); //vector of vector of pi1,pi2,pi3,pi4
+    vector< vector< vector<double> > > rates1(numChains); //vector of vector of s1,s2,s3,s4,s5,s6
     cerr << "successful initialization of parameters for mcmc chains" << endl;
-    
+
     for ( int i=0; i<numChains; ++i )
     {
       cerr << "starting chain = " << i << endl;
-      qvec[i] = new QMatrix(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
-      threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(qvec[i]),ref(alignment),blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl0[i]),ref(parameters),ref(means[i]),ref(vars[i])));
+      QMatrix newQ(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
+      threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),2*blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
     }
     
     for(auto &t : threads){
@@ -594,22 +687,65 @@ int main(int argc, char* argv[])
     }
     cerr << endl << "done." << endl;
 
-    for(int i=0;i<numChains;++i)
-    {
-      cerr << qvec[i]->getStationaryP().transpose() << endl;
-    }
-    // while(stat>1.05 and N<num)
+    int maxN = 10; //fixit
+    double lim = 1.05;
+    double prop = 0.5;
+    double rstat = gelmanRubin(logl1,prop);
+    cerr << "Gelman-Rubin = " << rstat << endl;
 
-    // print vector of all logwt
-    // for( vector< vector<double> >::iterator p=logl0.begin(); p != logl0.end(); ++p)
-    // {
-    //   for(vector<double>::iterator q=(*p).begin(); q != (*p).end(); ++q)
-    //   {
-    // 	cerr << (*q) << endl;
-    //   }
-    //   cerr << "-----" << endl;
-    // }
-    exit(1);
+    int it = 1;
+    while(rstat > lim && it < maxN)
+    {
+      cerr << "convergence not met yet: Gelman-Rubin = " << rstat << " > " << lim << endl;
+      vector<thread> threads;
+      for ( int i=0; i<numChains; ++i )
+      {
+	cerr << "starting chain = " << i << endl;
+	vector<double> piMean(4,0.0); 
+	vector<double> sMean(6,0.0);
+	vector<double> piVar(4,0.0); 
+	vector<double> sVar(6,0.0);
+	int last = pi1[i].size();
+	calculatePandS(pi1[i], rates1[i], piMean, sMean, piVar, sVar, prop);
+	QMatrix newQ(convert(pi1[i][last-1]),convert(rates1[i][last-1]),convert(piVar),convert(sVar));
+	threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
+      }
+      rstat = gelmanRubin(logl1,prop);
+      it = it + 1;
+    }
+
+    if(it > maxN)
+      cerr << "Convergence never met. Gelman-Rubin = " << rstat << ", but we did more than " << it << "iterations." << endl; 
+
+    vector<double> piMean(4,0.0); 
+    vector<double> sMean(6,0.0);
+    vector<double> piVar(4,0.0); 
+    vector<double> sVar(6,0.0);
+    vector<vector<double>> pi2;
+    vector<vector<double>> rates2;
+    combine(pi1,rates1,pi2,rates2,prop);
+    calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar, prop);
+    QMatrix q_init(convert(piMean),convert(sMean),convert(piVar),convert(sVar));
+
+    // mcmc log file
+    string mcmcLogfile = parameters.getOutFileRoot() + ".mcmc.log";
+    cerr << "Writing MCMC log to " << mcmcLogfile << endl;
+    ofstream mcmclog(mcmcLogfile.c_str());
+    mcmclog << "Initial seed = " << initial_seed << endl;
+    mcmclog << "Number of chains = " << numChains << endl;
+    mcmclog << "Block size = " << blockSize << endl;
+    mcmclog << "Seeds per chain: " << endl;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
+      mcmclog << setw(15) << *p << endl;
+    mcmclog << "Maximum number of iterations allowed of Gelman-Rubin approach = " << maxN << endl;
+    mcmclog << "Convergence whenever the Gelman-Rubin statistics was less than " << lim << endl;
+    mcmclog << "Proportion of the chain discarded as burnin = " << prop << endl;
+    mcmclog << "Gelman-Rubin statistics at the end = " << rstat << endl;
+    if(it > maxN)
+      mcmclog << "Convergence never met. Gelman-Rubin = " << rstat << ">" << lim << ", but we did more than " << it << "iterations." << endl;
+    else
+      mcmclog << "Number of iterations needed to reach convergence = " << it << endl;
+    mcmclog.close();
 
     // write mcmc output to a file
     string mcmcFile = parameters.getOutFileRoot() + ".mcmc.out";
@@ -625,6 +761,7 @@ int main(int argc, char* argv[])
     mcmcstream << vpi[0] << sep << vpi[1] << sep << vpi[2] << sep << vpi[3] << endl;
     mcmcstream << vs[0] << sep << vs[1] << sep << vs[2] << sep << vs[3] << sep << vs[4] << sep << vs[5] << endl;
     mcmcstream.close();
+    exit(1);
   }
   cerr << "After MCMC block" << endl;
 
