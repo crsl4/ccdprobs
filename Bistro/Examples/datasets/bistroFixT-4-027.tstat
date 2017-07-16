@@ -26,7 +26,7 @@ translate
       25 Xenopus_laevis,
       26 Discoglossus_pictus,
       27 Latimeria_chalumnae;
-mb-clade prob crudeSE(ESS=38.92) clade
+mb-clade prob crudeSE(ESS=5.58) clade
 ...***..................... 1.00000000 0.00000000 {4-6}
 ...****.................... 1.00000000 0.00000000 {4-7}
 ..*****.................... 1.00000000 0.00000000 {3-7}
