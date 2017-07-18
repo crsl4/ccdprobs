@@ -1,3 +1,18 @@
+## original code:
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-orig -r 1000 -b 1000 > bistro-orig.log
+
+## with threads and 1 chain:
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-chain1 -r 1000 -b 1000 --do-mcmc-chains > bistro-chain1.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-mcmc -r 1000 -b 1000 > bistro-mcmc.log
+
+source("../../Scripts/summary.R")
+compareBistro("bistro-mcmc",besttree="(1,2,(3,(4,(5,6))));",bmcmc="mcmc2")
+
+
+## allocation error
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o test -r 1000 -b 1000 -s 44468458 > test.log
+
+
 ## distances
 ../../Code/badger/mb2badger artiodactyl-6.nex.run1.t
 ../../Code/bistro/distances -f ../../Data/artiodactyl-6.fasta --mbfile artiodactyl-6.nex.run1.tre --bistrofile bistro-new---0-249.treeBL

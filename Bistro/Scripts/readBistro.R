@@ -255,7 +255,7 @@ getAdjacentEdges = function(tree)
 
 plotConvergence = function(stem){
     require(ggplot2)
-    mcmc_out = read.table(paste0(stem,".par"),header=FALSE)
+    mcmc_out = read.table(paste0(stem,".mcmc.par"),header=FALSE)
     names(mcmc_out) = c("logl",paste0("pi",1:4),paste0("s",1:6))
     n = length(mcmc_out$logl)
 
