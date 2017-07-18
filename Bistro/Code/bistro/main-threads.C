@@ -700,6 +700,32 @@ int main(int argc, char* argv[])
     meanTreeFileStream << meanTree << endl;
     meanTreeFileStream.close();
 
+#if 0
+    // ============================================================
+    // print out a table of likelihoods for different edge lengths
+    // and then exit
+    Tree logltree(meanTree,alignment);
+    logltree.mleLengths(alignment,model_init);
+    string profileFile = parameters.getOutFileRoot() + ".profile";
+    ofstream profile(profileFile.c_str());
+    logltree.printProfile(profile,alignment,model_init);
+    profile.close();
+    exit(0);
+    // ============================================================
+#endif    
+    
+#if 0
+    // ============================================================
+    // Likelihood profile
+    Tree logltree(meanTree,alignment);
+    string profileFile = parameters.getOutFileRoot() + ".profile";
+    ofstream profile(profileFile.c_str());
+    logltree.logLikelihoodProfile(profile,alignment,model_init);
+    profile.close();
+
+    // ============================================================
+#endif    
+
     // calculate distance from trees to mean tree
     Tree mtree(meanTree,alignment);
     cerr << "mean tree topology = " << mtree.makeTopologyNumbers() << endl;

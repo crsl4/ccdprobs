@@ -1076,15 +1076,16 @@ void Edge::calculate(double t,Alignment& alignment,QMatrix& qmatrix,double& logl
 
 void Edge::printLikMinLength(ostream& f,Alignment& alignment,QMatrix& qmatrix)
 {
-  f << "likelihood around MIN_EDGE_LENGTH" << endl;
-  f << "t, logl, dlogl, ddlogl" << endl;
-  double dx = 0.00005;
+//  f << "likelihood around MIN_EDGE_LENGTH" << endl;
+//  f << "t, logl, dlogl, ddlogl" << endl;
+//  double dx = 0.00005;
+  double dx = 2.0*length[0] / 100.0;
   for ( int i=0; i<=100; ++i )
   {
     double curr = i*dx;
     double logl,dlogl,ddlogl;
     calculate(curr,alignment,qmatrix,logl,dlogl,ddlogl);
-    f << curr << ", " << logl << ", " << dlogl << ", " << ddlogl << endl;
+    f << number << "," << curr << ", " << setprecision(12) << logl << ", " << setprecision(12) << dlogl << ", " << setprecision(12) << ddlogl << endl;
   }
   // for(int i=1;i<9;++i)
   // {
@@ -3280,4 +3281,66 @@ void Tree::weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,doubl
   sortCanonical();
   Clade clade1(numTaxa);
   root->weightedBL(cladeToWeightBranchLengthMap,clade1,NULL,weight);
+}
+
+void Edge::logLikelihoodProfile(ostream& f,Alignment& alignment,QMatrix& model)
+{
+  double originalLength = length[current];
+  int n = 20;
+  double delta = originalLength*4 / n;
+  double t = 0;
+  Vector4d pi = model.getStationaryP();
+  for ( int i=0; i<n+1; ++i )
+  {
+    cerr << "i = " << i << endl;
+    Matrix4d P = model.getTransitionMatrix(t);
+    double logLikelihood = 0;
+    for ( int k=0; k<alignment.getNumSites(); ++k )
+    {
+      nodes[0]->calculate(k,alignment,this);
+      nodes[1]->calculate(k,alignment,this);
+      pair<double,Vector4d> condProbPair0 = nodes[0]->getProb();
+      pair<double,Vector4d> condProbPair1 = nodes[1]->getProb();
+      double sum=0;
+      for ( int a=0; a<4; ++a )
+	for ( int b=0; b<4; ++b )
+	  sum += pi(a)*condProbPair0.second(a)*P(a,b)*condProbPair1.second(b);
+      logLikelihood += condProbPair0.first + condProbPair1.first + log(sum);
+    }
+    if ( i==0 )
+    {
+      nodes[0]->setMapParentRecursivelySmart(this);
+      nodes[1]->setMapParentRecursivelySmart(this);
+    }
+    f << setw(2) << number << " " << setw(10) << setprecision(6) << fixed << t << " " << setw(12) << setprecision(8) << fixed << logLikelihood << endl;
+    t += delta;
+  }
+}
+
+void Node::logLikelihoodProfile(ostream& f,Alignment& alignment,QMatrix& model,Edge* parent)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+  {
+    if ( (*e) != parent )
+      logLikelihoodProfile(f,alignment,model,*e);
+  }
+  if ( parent != NULL )
+    parent->logLikelihoodProfile(f,alignment,model);
+}
+
+void Tree::logLikelihoodProfile(ostream& f,Alignment& alignment,QMatrix& model)
+{
+  cerr << "start profile" << endl;
+  calculate(alignment,model);
+  cerr << "after calculation" << endl;
+  f << "edge t logl" << endl;
+  root->logLikelihoodProfile(f,alignment,model,NULL);
+}
+
+void Tree::printProfile(ostream& f,Alignment& alignment,QMatrix& model)
+{
+  f << "number,t,logl,dlogl,ddlogl" << endl;
+  calculate(alignment,model);
+  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
+    (*e)->printLikMinLength(f,alignment,model);
 }
