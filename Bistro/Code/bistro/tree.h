@@ -318,9 +318,9 @@ public:
   double logLikelihoodScore(Alignment&, QMatrix&);
   void clearMapParent();
   Edge* whichMaxBranch(); //finds edge with max length
-  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, bool,vector<double>&);
-  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, ofstream&, ofstream&, bool, vector<double>&);
-  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, ofstream&, ofstream&, bool, bool, vector<double>&,bool,vector<vector<double>>&, vector<vector<double>>&);
+  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, bool);
+  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, ofstream&, ofstream&, bool);
+  void mcmc(QMatrix&, Alignment&, unsigned int, double, mt19937_64&, ofstream&, ofstream&, bool, bool);
   void setInitialEdgeLengths(double); // set all edge lengths to x
   double distance(Tree*);
   void processTree(CladeGraph*);

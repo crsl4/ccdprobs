@@ -1,3 +1,9 @@
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-mcmc -r 1000 -b 1000 > bistro-mcmc.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-orig -r 1000 -b 1000 > bistro-orig.log
+source("../../Scripts/summary.R")
+compareBistro("bistro-mcmc",besttree="(1,2,(3,(4,(5,6))));",bmcmc="mcmc2")
+
+
 ## allocation error
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o test -r 1000 -b 1000 -s 44468458 > test.log
 

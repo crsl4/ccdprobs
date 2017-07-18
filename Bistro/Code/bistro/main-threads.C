@@ -53,7 +53,7 @@ vector<double> getDoublesFromSpaceList (string x)
   {
     s >> d;
     v.push_back(d);
-  } 
+  }
   return v;
 }
 
@@ -147,7 +147,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      Vector4d p_star;
      Vector6d s_star;
      q_init.genDirichletProposal(logQ, rng, p_star, s_star);
-     
+
      QMatrix model(p_star,s_star);
 
      pi.push_back(convert(p_star));
@@ -307,7 +307,7 @@ void mcmcChain(int coreID, string text,QMatrix& q_init,Alignment& alignment,unsi
 
 //prop = proportion of the chain to keep for the computation
 //used for pi and rates
-void calculatePandS(vector<vector<double>> pi, vector<vector<double>> rates, vector<double>& piMean, 
+void calculatePandS(vector<vector<double>> pi, vector<vector<double>> rates, vector<double>& piMean,
 		    vector<double>& sMean, vector<double>& piVar, vector<double>& sVar, double prop)
 {
   int start = prop*pi.size(); //assumes pi,rates have the same size
@@ -368,30 +368,41 @@ double gelmanRubin(vector<vector<double>> logl, double prop)
   for(int i=0; i<numChains; ++i)
   {
     means[i] = sums[i]/it;
+    cerr << "mean" << i << " = " << means[i] << endl;
     vars[i] = sums2[i]/it-(means[i]*means[i]);
+    cerr << "var" << i << " = " << vars[i] << endl;
     sum2Mean += means[i]*means[i];
     meanMean += means[i];
     meanVar += vars[i];
   }
   meanMean /= numChains;
   meanVar /= numChains;
-  double varMeans = sum2Mean/numChains - meanMean*meanMean;
+  double varMeans;
+  if(numChains > 1) 
+    varMeans = sum2Mean/(numChains-1) - meanMean*meanMean*numChains/(numChains-1);
+  else
+    varMeans = 0;
+  varMeans *= it;
   cerr << "Number of iterations: " << it << endl;
   cerr << "mean of means: " << meanMean << endl;
   cerr << "mean of variances: " << meanVar << endl;
   cerr << "variance of means: " << varMeans << endl;
-  double v = (1-1/it)*meanVar + (1/it)*varMeans;
+  double weight = 1/(double)it;
+  cerr << "weight: " << weight << endl;
+  double v = (1-weight)*meanVar + weight*varMeans;
   cerr << "v: " << v << endl;
   return sqrt(v/meanVar);
 }
 
-void combine(vector<vector<vector<double>>> pi1, vector<vector<vector<double>>> rates1, vector<vector<double>>& pi2, vector<vector<double>>& rates2, double prop)
+void combine(vector<vector<vector<double>>> pi1, vector<vector<vector<double>>> rates1, vector<vector<double>>& pi2, vector<vector<double>>& rates2, double prop, ofstream& file)
 {
   int start = prop*pi1[0].size(); //assumes rates1 is same size
   for(int i=0; i<pi1.size(); ++i)
   {
     for(int j=start; j<pi1[0].size(); ++j)
     {
+      file << pi1[i][j][0] << " " << pi1[i][j][1] << " " << pi1[i][j][2] << " " << pi1[i][j][3] << " ";
+      file << rates1[i][j][0] << " " << rates1[i][j][1] << " " << rates1[i][j][2] << " " << rates1[i][j][3] << " " << rates1[i][j][4] << " " << rates1[i][j][5] << endl;
       pi2.push_back(pi1[i][j]);
       rates2.push_back(rates1[i][j]);
     }
@@ -428,7 +439,7 @@ vector<double> quantiles(vector<pair<double,double>>& v)
   }
   // now we find the 97.5% quantile
   sum = 0;
-  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i ) 
+  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i )
   {
     sum += (i->second);
     if(sum < 0.025)
@@ -438,7 +449,7 @@ vector<double> quantiles(vector<pair<double,double>>& v)
   }
   // now we find the 2.5% quantile
   sum = 0;
-  for (vector<pair<double,double>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i ) 
+  for (vector<pair<double,double>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i )
   {
     sum += (i->second);
     if(sum < 0.025)
@@ -448,7 +459,7 @@ vector<double> quantiles(vector<pair<double,double>>& v)
   }
   // now we find the median
   sum = 0;
-  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i ) 
+  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i )
   {
     sum += (i->second);
     if(sum < 0.5)
@@ -577,7 +588,7 @@ int main(int argc, char* argv[])
     string mcmcname = parameters.getMCMCfile();
     cerr << "Reading mcmc output from file " << mcmcname << endl;
     ifstream mcmcIN(mcmcname.c_str());
-    if(!mcmcIN) 
+    if(!mcmcIN)
     {
       cerr << "Error: Could not open " << mcmcname << endl;
       exit(1);
@@ -586,7 +597,7 @@ int main(int argc, char* argv[])
     int ii = 1;
     if(getline(mcmcIN,l))
     {
-      do 
+      do
       {
 	if(ii == 1)
 	  p0 = convert(getDoublesFromSpaceList(l));
@@ -606,12 +617,12 @@ int main(int argc, char* argv[])
     // ---------------------- Estimate Q with base frequencies and pairwise counts -----------------
     vector<double> p_init = alignment.baseFrequencies();
     cerr << "Estimated base frequencies: " << convert(p_init).transpose() << endl << endl;
-    
+
     VectorXd s_pairwise(6);
     s_pairwise = alignment.averagePairwiseS();
     cerr << endl << "Estimated rates: " << endl;
     cerr << s_pairwise.transpose() << endl << endl;
-    
+
     // checking to see if p and s were initialized at command line
     if ( parameters.getEnteredP() )
       p0 = convert(parameters.getStationaryP());
@@ -621,22 +632,22 @@ int main(int argc, char* argv[])
       s0 = convert(parameters.getSymmetricQP());
     else
       s0 = s_pairwise;
-    
+
 // initial mcmc var (just so that there are not zeros)
     for ( int j=0; j<4; ++j )
       vp0(j) = p0(j)*(1-p0(j))/alignment.getNumSites();
-        
+
     for ( int j=0; j<6; ++j )
       vs0(j) = s0(j)*(1-s0(j))/alignment.getNumSites();
   }
-    
+
   QMatrix q_init(p0,s0,vp0,vs0);
 // ------------------------------ Put MLE branch lengths to tree -------------------------
   cout << "Putting MLE Branch Lengths" << endl;
   cout << "p: " << q_init.getStationaryP().transpose() << endl;
   cout << "s: " << q_init.getSymmetricQP().transpose() << endl;
   cout << "Q: " << endl << q_init.getQ() << endl << endl;
-  
+
   for ( int i=0; i<4; ++i )
   {
     starttree.mleLengths(alignment,q_init);
@@ -648,7 +659,7 @@ int main(int argc, char* argv[])
   if ( parameters.getDoMCMC() )
   {
     cerr << "Running MCMC to estimate Q matrix ..." << endl;
-    int numChains = 4;
+    int numChains = 1;
     unsigned int blockSize = parameters.getNumMCMC();
     cerr << "Block size = " << blockSize << endl;
 
@@ -668,9 +679,9 @@ int main(int argc, char* argv[])
     cout << "Seeds per chain: " << endl;
     for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
       cout << setw(15) << *p << endl;
-    
+
     vector<thread> threads;
-    vector< vector<double> > logl1(numChains, vector<double>(2*blockSize,0.0));
+    vector< vector<double> > logl1(numChains);
     vector< vector< vector<double> > > pi1(numChains); //vector of vector of pi1,pi2,pi3,pi4
     vector< vector< vector<double> > > rates1(numChains); //vector of vector of s1,s2,s3,s4,s5,s6
     cerr << "successful initialization of parameters for mcmc chains" << endl;
@@ -681,7 +692,7 @@ int main(int argc, char* argv[])
       QMatrix newQ(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
       threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),2*blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
     }
-    
+
     for(auto &t : threads){
       t.join();
     }
@@ -694,38 +705,51 @@ int main(int argc, char* argv[])
     cerr << "Gelman-Rubin = " << rstat << endl;
 
     int it = 1;
-    while(rstat > lim && it < maxN)
+    while(0 & rstat > lim && it < maxN)
     {
       cerr << "convergence not met yet: Gelman-Rubin = " << rstat << " > " << lim << endl;
-      vector<thread> threads;
+      vector<thread> threads2;
       for ( int i=0; i<numChains; ++i )
       {
 	cerr << "starting chain = " << i << endl;
-	vector<double> piMean(4,0.0); 
+	vector<double> piMean(4,0.0);
 	vector<double> sMean(6,0.0);
-	vector<double> piVar(4,0.0); 
+	vector<double> piVar(4,0.0);
 	vector<double> sVar(6,0.0);
 	int last = pi1[i].size();
 	calculatePandS(pi1[i], rates1[i], piMean, sMean, piVar, sVar, prop);
 	QMatrix newQ(convert(pi1[i][last-1]),convert(rates1[i][last-1]),convert(piVar),convert(sVar));
-	threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
+	threads2.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
       }
+      for(auto &t : threads2){
+	t.join();
+      }
+      cerr << endl << "done." << endl;
+
       rstat = gelmanRubin(logl1,prop);
       it = it + 1;
     }
 
     if(it > maxN)
-      cerr << "Convergence never met. Gelman-Rubin = " << rstat << ", but we did more than " << it << "iterations." << endl; 
+      cerr << "Convergence never met. Gelman-Rubin = " << rstat << ", but we did more than " << it << "iterations." << endl;
+    else
+      cerr << "Convergence met. Gelman-Rubin = " << rstat << " < " << lim << endl;
 
-    vector<double> piMean(4,0.0); 
+
+    vector<double> piMean(4,0.0);
     vector<double> sMean(6,0.0);
-    vector<double> piVar(4,0.0); 
+    vector<double> piVar(4,0.0);
     vector<double> sVar(6,0.0);
     vector<vector<double>> pi2;
     vector<vector<double>> rates2;
-    combine(pi1,rates1,pi2,rates2,prop);
+    string mcmcPars = parameters.getOutFileRoot() + ".mcmc.par";
+    ofstream mcmcp(mcmcPars.c_str());
+    combine(pi1,rates1,pi2,rates2,prop,mcmcp);
+    mcmcp.close();
     calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar, prop);
     QMatrix q_init(convert(piMean),convert(sMean),convert(piVar),convert(sVar));
+    cerr << "pi: " << convert(piMean).transpose() << endl;
+    cerr << "rates: " << convert(sMean).transpose() << endl;
 
     // mcmc log file
     string mcmcLogfile = parameters.getOutFileRoot() + ".mcmc.log";
@@ -754,14 +778,13 @@ int main(int argc, char* argv[])
     Vector4d pi = q_init.getStationaryP();
     VectorXd s = q_init.getSymmetricQP();
     Vector4d vpi = q_init.getMcmcVarP();
-    VectorXd vs = q_init.getMcmcVarQP();  
+    VectorXd vs = q_init.getMcmcVarQP();
     string sep = " ";
     mcmcstream << pi[0] << sep << pi[1] << sep << pi[2] << sep << pi[3] << endl;
     mcmcstream << s[0] << sep << s[1] << sep << s[2] << sep << s[3] << sep << s[4] << sep << s[5] << endl;
     mcmcstream << vpi[0] << sep << vpi[1] << sep << vpi[2] << sep << vpi[3] << endl;
     mcmcstream << vs[0] << sep << vs[1] << sep << vs[2] << sep << vs[3] << sep << vs[4] << sep << vs[5] << endl;
     mcmcstream.close();
-    exit(1);
   }
   cerr << "After MCMC block" << endl;
 
@@ -1118,7 +1141,7 @@ int main(int argc, char* argv[])
 
     // combine vector of all trees
     cerr << "numRandom = " << numRandom << endl;
-    
+
     vector<string> trees;
     for( vector< vector<string> >::iterator p=trees0.begin(); p != trees0.end(); ++p)
     {
@@ -1278,7 +1301,7 @@ int main(int argc, char* argv[])
   unsigned int seconds = totalTime / 1000;
   unsigned int minutes = seconds / 60;
   unsigned int hours = minutes / 60;
-  
+
   cout << "Times: " << endl;
   // cout << "Processing command-line arguments: " << (ms1.count() - ms0.count())/1000 << "seconds" << endl;
   // cout << "Reading FASTA: " << (ms2.count() - ms1.count())/1000 << "seconds" << endl;
@@ -1299,6 +1322,6 @@ int main(int argc, char* argv[])
     cout << minutes << " minutes, " << seconds - 3600*hours - 60*minutes << " seconds." << endl;
   else
     cout << seconds << " seconds." << endl;
-    
+
   return 0;
 }

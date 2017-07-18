@@ -2,6 +2,10 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- add new code little by little and compare ESS
+- tree-new.[Ch], go with main-threads.C; tree.[Ch] go with main-threads-orig.C
+
+- leave running 024,027 darwin
 - test with 024 and 027, do convergence plots
 
 - read steve derivation: exponential families
@@ -23,7 +27,8 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## Check with Bret
 - max number of times we will try the mcmc fix
-- calculateP,S and variances: do we use only the last half? This is for restarting chains and also for last step
+- new mcmc implemented, artiodactyl worse! compare to main-threads-orig but still bad
+
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 
