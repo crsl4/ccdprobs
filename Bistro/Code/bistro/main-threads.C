@@ -308,10 +308,10 @@ void mcmcChain(int coreID, string text,QMatrix& q_init,Alignment& alignment,unsi
 //prop = proportion of the chain to keep for the computation
 //used for pi and rates
 void calculatePandS(vector<vector<double>> pi, vector<vector<double>> rates, vector<double>& piMean,
-		    vector<double>& sMean, vector<double>& piVar, vector<double>& sVar, double prop)
+		    vector<double>& sMean, vector<double>& piVar, vector<double>& sVar)
 {
-  int start = prop*pi.size(); //assumes pi,rates have the same size
-  for(int i=start; i<pi.size(); ++i)
+  int n = pi.size(); //assumes pi,rates have the same size
+  for(int i=0; i<pi.size(); ++i)
   {
     for(int j=0; j<4; ++j)
     {
@@ -326,13 +326,13 @@ void calculatePandS(vector<vector<double>> pi, vector<vector<double>> rates, vec
   }
   for(int j=0; j<4; ++j)
   {
-    piMean[j] /= start;
-    piVar[j] = piVar[j]/start - (piMean[j]*piMean[j]);
+    piMean[j] /= n;
+    piVar[j] = piVar[j]/n - (piMean[j]*piMean[j]);
   }
   for(int j=0; j<6; ++j)
   {
-    sMean[j] /= start;
-    sVar[j] = sVar[j]/start - (sMean[j]*sMean[j]);
+    sMean[j] /= n;
+    sVar[j] = sVar[j]/n - (sMean[j]*sMean[j]);
   }
 }
 
@@ -686,6 +686,10 @@ int main(int argc, char* argv[])
     vector< vector< vector<double> > > rates1(numChains); //vector of vector of s1,s2,s3,s4,s5,s6
     cerr << "successful initialization of parameters for mcmc chains" << endl;
 
+    if(!parameters.getDoChains())
+      mcmcChain(0,starttree.makeTreeNumbers(),q_init,alignment,2*blockSize,alignment.getNumSites(),rng,logl1[0],parameters,pi1[0],rates1[0]);
+    else
+    {
     for ( int i=0; i<numChains; ++i )
     {
       cerr << "starting chain = " << i << endl;
@@ -701,11 +705,15 @@ int main(int argc, char* argv[])
     int maxN = 10; //fixit
     double lim = 1.05;
     double prop = 0.5;
-    double rstat = gelmanRubin(logl1,prop);
+    double rstat;
+    int it = 1;
+
+    if(0)
+    {
+    rstat = gelmanRubin(logl1,prop);
     cerr << "Gelman-Rubin = " << rstat << endl;
 
-    int it = 1;
-    while(0 & rstat > lim && it < maxN)
+    while(rstat > lim && it < maxN)
     {
       cerr << "convergence not met yet: Gelman-Rubin = " << rstat << " > " << lim << endl;
       vector<thread> threads2;
@@ -717,7 +725,7 @@ int main(int argc, char* argv[])
 	vector<double> piVar(4,0.0);
 	vector<double> sVar(6,0.0);
 	int last = pi1[i].size();
-	calculatePandS(pi1[i], rates1[i], piMean, sMean, piVar, sVar, prop);
+	calculatePandS(pi1[i], rates1[i], piMean, sMean, piVar, sVar);
 	QMatrix newQ(convert(pi1[i][last-1]),convert(rates1[i][last-1]),convert(piVar),convert(sVar));
 	threads2.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
       }
@@ -734,7 +742,7 @@ int main(int argc, char* argv[])
       cerr << "Convergence never met. Gelman-Rubin = " << rstat << ", but we did more than " << it << "iterations." << endl;
     else
       cerr << "Convergence met. Gelman-Rubin = " << rstat << " < " << lim << endl;
-
+    }
 
     vector<double> piMean(4,0.0);
     vector<double> sMean(6,0.0);
@@ -746,11 +754,13 @@ int main(int argc, char* argv[])
     ofstream mcmcp(mcmcPars.c_str());
     combine(pi1,rates1,pi2,rates2,prop,mcmcp);
     mcmcp.close();
-    calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar, prop);
+    calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar);
     QMatrix q_init(convert(piMean),convert(sMean),convert(piVar),convert(sVar));
     cerr << "pi: " << convert(piMean).transpose() << endl;
     cerr << "rates: " << convert(sMean).transpose() << endl;
 
+    if(0)
+    {
     // mcmc log file
     string mcmcLogfile = parameters.getOutFileRoot() + ".mcmc.log";
     cerr << "Writing MCMC log to " << mcmcLogfile << endl;
@@ -770,7 +780,8 @@ int main(int argc, char* argv[])
     else
       mcmclog << "Number of iterations needed to reach convergence = " << it << endl;
     mcmclog.close();
-
+    }
+    }
     // write mcmc output to a file
     string mcmcFile = parameters.getOutFileRoot() + ".mcmc.out";
     cerr << "Writing MCMC output to " << mcmcFile << endl;

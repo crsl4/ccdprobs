@@ -3,7 +3,8 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
 - add new code little by little and compare ESS
-- tree-new.[Ch], go with main-threads.C; tree.[Ch] go with main-threads-orig.C
+- now we need to make 4 chains and without calculating gelman, simply combine and check ESS again
+- tree.[Ch], go with main-threads.C; tree-orig.[Ch] go with main-threads-orig.C
 
 - leave running 024,027 darwin
 - test with 024 and 027, do convergence plots

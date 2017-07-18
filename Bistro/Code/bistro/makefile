@@ -29,8 +29,8 @@ LDLIBS = -lpthread
 
 all: bistro distances
 
-bistro: main-threads-orig.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h cladegraph.h $(OBJS)
-	$(CC) $(CFLAGS) -o bistro main-threads-orig.C $(OBJS) $(LDLIBS)
+bistro: main-threads.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h cladegraph.h $(OBJS)
+	$(CC) $(CFLAGS) -o bistro main-threads.C $(OBJS) $(LDLIBS)
 
 #bmcmc: main-mcmc.C parameter.h sequence.h alias.h ccdprobs.h model.h tree.h random.h $(OBJS)
 #	$(CC) $(CFLAGS) -o bmcmc main-mcmc.C $(OBJS) $(LDLIBS)

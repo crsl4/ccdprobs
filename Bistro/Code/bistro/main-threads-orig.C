@@ -546,18 +546,21 @@ int main(int argc, char* argv[])
     // burnin
     unsigned int mcmcGenerations = parameters.getNumMCMC();
     unsigned int mcmcBurn =  mcmcGenerations / 5; // changed to 5 from 10 on 2017-06-16
-//    starttree.print(cerr);
-//    cerr << endl;
+    vector<double>  logl(mcmcGenerations);
     cerr << "burn-in: " << mcmcBurn << " generations." << endl;
-    starttree.mcmc(q_init,alignment,mcmcBurn,alignment.getNumSites(),rng,treeStream,parStream,true);
+    starttree.mcmc(q_init,alignment,mcmcBurn,alignment.getNumSites(),rng,treeStream,parStream,true,logl);
     cerr << endl << " done." << endl;
 
     // mcmc to get final Q
     cerr << "sampling: " << mcmcGenerations << " generations." << endl;
-    starttree.mcmc(q_init,alignment,mcmcGenerations,alignment.getNumSites(),rng,treeStream,parStream,false);
+    starttree.mcmc(q_init,alignment,mcmcGenerations,alignment.getNumSites(),rng,treeStream,parStream,false,logl);
     cerr << endl << " done." << endl;
     treeStream.close();
     parStream.close();
+    for(int i=1; i<mcmcGenerations; ++i)
+    {
+      cerr << "logl(" << i << ") = " << logl[i] << endl; 
+    }
 
 // write mcmc output to a file
     string mcmcFile = parameters.getOutFileRoot() + ".mcmc.out";
