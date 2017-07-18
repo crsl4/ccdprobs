@@ -752,7 +752,8 @@ int main(int argc, char* argv[])
     vector<vector<double>> rates2;
     string mcmcPars = parameters.getOutFileRoot() + ".mcmc.par";
     ofstream mcmcp(mcmcPars.c_str());
-    combine(pi1,rates1,pi2,rates2,prop,mcmcp);
+    combine(pi1,rates1,pi2,rates2,0,mcmcp); //fixit
+//    combine(pi1,rates1,pi2,rates2,prop,mcmcp);
     mcmcp.close();
     calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar);
     QMatrix q_init(convert(piMean),convert(sMean),convert(piVar),convert(sVar));

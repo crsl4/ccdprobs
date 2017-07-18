@@ -28,7 +28,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## Check with Bret
 - max number of times we will try the mcmc fix
-- new mcmc implemented, artiodactyl worse! compare to main-threads-orig but still bad
+- new mcmc implemented, artiodactyl worse! compare bistro-chain1 and bistro-orig; check compare-orig-chain1.r
 
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
