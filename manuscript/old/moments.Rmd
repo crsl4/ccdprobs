@@ -1,0 +1,54 @@
+---
+title: "General Dirichlet Mean Ratios"
+author: "Claudia Sol&iacute;s-Lemus, Steve Goldstein, and Bret Larget"
+date: "7/14/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Using notation from the previous document,
+let
+$$
+m_j^0 = m_j(\alpha,\lambda) \qquad \text{and} \qquad m_j^i = m_j(\alpha^{(i)},\lambda)
+$$
+The recursion is
+$$
+m_j^0 = \frac{\alpha_j}{\lambda_jA} \sum_{i=1}^k \lambda_i m_i^j
+$$
+where $A = \sum_{i=1}^k \alpha_i$.
+Multiply both sides of the recursion by $A$ and sum over $j$.
+$$
+A \sum_{j=1}^k m_j^0 = \sum_{j=1}^k \frac{\alpha_j}{\lambda_j} \sum_{i=1}^k \lambda_i m_i^j
+$$
+Simplify the left-hand side and separate the double sum on the right hand side into the cases where $i$ is equal to and not equal to $j$.
+$$
+A = \sum_{i=1}^k \alpha_i m_i^i + \sum_{i=1}^k \sum_{j \neq i} \frac{\alpha_j\lambda_i}{\lambda_j} m_i^j
+$$
+Write $m_i^i$ as one minus the sum of the other means from the same distribution.
+$$
+A = \sum_{i=1}^k \alpha_i \Big(1 - \sum_{j \neq i} m_j^i\Big) + \sum_{i=1}^k \sum_{j \neq i} \frac{\alpha_j\lambda_i}{\lambda_j} m_i^j
+$$
+Subtract $A$ from both sides
+and exchange the order of summation of the second sum.
+$$
+0 =  - \sum_{i=1}^k \sum_{j \neq i} \alpha_i m_j^i + \sum_{i=1}^k \sum_{j \neq i} \frac{\alpha_i\lambda_j}{\lambda_i} m_j^i
+$$
+Combine sums and simplify.
+$$
+0 =  \sum_{i=1}^k \sum_{j \neq i}  \frac{\alpha_i}{\lambda_i} m_j^i (\lambda_j - \lambda_i)
+$$
+Rewrite combining terms for the same $i$ and $j$.
+$$
+0 =  \sum_{i=1}^{k-1} \sum_{j = i+1}^k \Big[\Big(\frac{\alpha_i}{\lambda_i} m_j^i - \frac{\alpha_j}{\lambda_j}m_i^j\Big) (\lambda_j - \lambda_i)\Big]
+$$
+
+This derivation shows that the entire sum equals zero.
+Simulation suggests that each term in the sum equals zero,
+or that
+$$
+\frac{m_i^j}{m_j^i} = \frac{\alpha_i/\lambda_j}{\alpha_j/\lambda_i}
+$$
+More information beyond the sum constraints and the recursion equation is needed to demonstrate this last equation.

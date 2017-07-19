@@ -98,6 +98,7 @@ public:
   vector<int> getSampler() {vector<int> v(3); v[0]=sampler[0]; v[1]=sampler[1]; v[2]=sampler[2]; return v;}
   void saveLength() { length[1-current] = length[current]; }
   void restoreLength() { length[current] = length[1-current]; }
+  void logLikelihoodProfile(ostream&,Alignment&,QMatrix&);
 };
 
 class Node
@@ -180,7 +181,7 @@ public:
   void setLevel(Edge*);
   void setPattern(int,const Alignment& ,Edge* );
   void calculateAfterPattern(int,const Alignment& ,Edge*);
-  void calculate(int,const Alignment&,Edge*);//,bool);
+  void calculate(int,const Alignment&,Edge*);
   pair<double,Vector4d> getProb();
   void randomize(mt19937_64&,Edge*);
   void clearProbMaps(Edge*);
@@ -236,6 +237,7 @@ public:
   void weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>&, Clade&, Edge*, double);
   void mcmcUpdateEdges(MCMCStats&,QMatrix&,Alignment&,mt19937_64&,Edge*);
   int getMapSize() { return patternToProbMap[current].size(); }
+  void logLikelihoodProfile(ostream&,Alignment&,QMatrix&,Edge*);
 };
 
 class Tree
@@ -331,7 +333,8 @@ public:
   void printDerivatives(ostream&,Alignment&,QMatrix&);
   void printSamplerInfo(ostream&);
   void weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>&, double);
-  // void printMapSizes()
+  void logLikelihoodProfile(ostream&,Alignment&,QMatrix&);
+  void printProfile(ostream&,Alignment&,QMatrix&);
   // {
   //   cerr << "Map sizes:";
   //   for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
