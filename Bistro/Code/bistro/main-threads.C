@@ -378,7 +378,7 @@ double gelmanRubin(vector<vector<double>> logl, double prop)
   meanMean /= numChains;
   meanVar /= numChains;
   double varMeans;
-  if(numChains > 1) 
+  if(numChains > 1)
     varMeans = sum2Mean/(numChains-1) - meanMean*meanMean*numChains/(numChains-1);
   else
     varMeans = 0;
@@ -659,7 +659,7 @@ int main(int argc, char* argv[])
   if ( parameters.getDoMCMC() )
   {
     cerr << "Running MCMC to estimate Q matrix ..." << endl;
-    int numChains = 1;
+    int numChains = 4;
     unsigned int blockSize = parameters.getNumMCMC();
     cerr << "Block size = " << blockSize << endl;
 
@@ -687,13 +687,23 @@ int main(int argc, char* argv[])
     cerr << "successful initialization of parameters for mcmc chains" << endl;
 
     if(!parameters.getDoChains())
-      mcmcChain(0,starttree.makeTreeNumbers(),q_init,alignment,2*blockSize,alignment.getNumSites(),rng,logl1[0],parameters,pi1[0],rates1[0]);
+    {
+      QMatrix newQ(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
+      mcmcChain(0,starttree.makeTreeNumbers(),newQ,alignment,2*blockSize,alignment.getNumSites(),rng,logl1[0],parameters,pi1[0],rates1[0]);
+      q_init.reset(newQ.getStationaryP(),newQ.getSymmetricQP());
+      q_init.setMcmcVarP(newQ.getMcmcVarP());
+      q_init.setMcmcVarQP(newQ.getMcmcVarQP());
+    }
     else
     {
     for ( int i=0; i<numChains; ++i )
     {
       cerr << "starting chain = " << i << endl;
+      cerr << "mcmc var pi: " << q_init.getMcmcVarP().transpose() << endl;
+      cerr << "mcmc var s: " << q_init.getMcmcVarQP().transpose() << endl;
       QMatrix newQ(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
+      cerr << "mcmc var pi: " << newQ.getMcmcVarP().transpose() << endl;
+      cerr << "mcmc var s: " << newQ.getMcmcVarQP().transpose() << endl;
       threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),2*blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
     }
 
@@ -756,7 +766,9 @@ int main(int argc, char* argv[])
 //    combine(pi1,rates1,pi2,rates2,prop,mcmcp);
     mcmcp.close();
     calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar);
-    QMatrix q_init(convert(piMean),convert(sMean),convert(piVar),convert(sVar));
+    q_init.reset(convert(piMean),convert(sMean));
+    q_init.setMcmcVarP(convert(piVar));
+    q_init.setMcmcVarQP(convert(sVar));
     cerr << "pi: " << convert(piMean).transpose() << endl;
     cerr << "rates: " << convert(sMean).transpose() << endl;
 

@@ -1,8 +1,13 @@
 ## original code:
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-orig -r 1000 -b 1000 > bistro-orig.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-orig2 -r 1000 -b 1000 > bistro-orig2.log
 
 ## with threads and 1 chain:
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-chain1 -r 1000 -b 1000 --do-mcmc-chains > bistro-chain1.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-chain1-2 -r 1000 -b 1000 --do-mcmc-chains > bistro-chain1-2.log
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-chains4 -r 1000 -b 1000 --do-mcmc-chains > bistro-chains4.log
+
+
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-mcmc -r 1000 -b 1000 > bistro-mcmc.log
 
 source("../../Scripts/summary.R")
