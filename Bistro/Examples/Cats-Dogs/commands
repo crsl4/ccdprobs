@@ -1,3 +1,6 @@
+## with 4 mcmc chains
+../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro-chains -r 1000 -b 1000 > bistro-chains.log
+
 ## new output files
 ../../Code/bistro/bistro -f ../../Data/cats-dogs.fasta -o bistro5 -r 1000 -b 1000 > bistro5.log
 

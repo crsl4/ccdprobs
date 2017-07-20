@@ -70,3 +70,66 @@ f = function(k,mean.a=2000,shape=2,n=1000)
 f(4)
 
 ```
+
+```{r}
+## Test Steve's ratio result
+k = 10
+n = 1000000
+#### generate p
+p = parameters(k=k,mean.a=1)
+p1 = p
+p1$alpha[1] = p$alpha[1] + 1
+p2 = p
+p2$alpha[2] = p$alpha[2] + 1
+#### generate x
+x = generate(p,n=n)
+x1 = generate(p1,n=n)
+x2 = generate(p2,n=n)
+#### calculate means and variances
+m = apply(x,2,mean)
+m1 = apply(x1,2,mean)
+m2 = apply(x2,2,mean)
+v1 = apply(x1,2,var)
+v2 = apply(x2,2,var)
+#### compare ratios
+r.emp = m2[1]/m1[2]
+r.eq = (p$alpha[1]/p$lambda[1]) / (p$alpha[2]/p$lambda[2])
+r.emp
+r.eq
+se.r.emp = sqrt( v2[1]/n/m1[2]^2 + m2[1]^2*v1[2]/n/m1[2]^4 )
+se.r.emp
+# CI
+r.emp + c(-1,1)*1.96*se.r.emp
+# z
+z = (r.eq - r.emp) / se.r.emp
+z
+```
+
+```{r}
+# Explore k=2 for given alpha and lambda
+k=2
+n=10^6
+lambda = c(0.5,1.5)
+a1 = seq(1,10,1)
+a2 = seq(1,10,1)
+out = matrix(0,length(a1)*length(a2),5)
+i=1
+for ( a in a1 )
+{
+  for ( b in a2 )
+  {
+    print(i)
+    p = data.frame(alpha=c(a,b),lambda=lambda)    
+    p2 = p
+    p2$alpha[2] = p$alpha[2] + 1
+    x2 = generate(p2,n=n)
+    m2 = apply(x2,2,mean)
+    out[i,] = c(p$alpha,p$lambda,m2[2])
+    i = i+1
+  }
+}
+
+colnames(out) = c("alpha1","alpha2","lambda1","lambda2","m22")
+out = data.frame(out)
+out$m01 = with(out, (alpha1*lambda2 - (1-m22)*alpha2*(lambda1-lambda2)) / (lambda2*(alpha1+alpha2)) )
+```

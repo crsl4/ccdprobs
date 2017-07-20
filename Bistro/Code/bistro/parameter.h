@@ -40,6 +40,7 @@ private:
   string bistrofile; //for main-distances.C
   bool onlyMCMC;
   int skip; //for main-distances.C
+  bool noMCMCThreads;
 public:
   Parameter()
   {
@@ -66,6 +67,7 @@ public:
     numMCMC = 1000;
     onlyMCMC = false;
     skip=0;
+    noMCMCThreads = false;
   }
   string getSequenceFileName() const { return sequenceFileName; }
   void setSequenceFileName(string x) { sequenceFileName = x; }
@@ -122,6 +124,9 @@ public:
   void setOnlyMCMC(bool b) { onlyMCMC = b; }
   int getSkip() const { return skip; }
   void setSkip(int n) { skip = n; }
+  bool getNoMCMCThreads() const { return noMCMCThreads; }
+  void setNoMCMCThreads(bool b) { noMCMCThreads = b; }
+
 };
 
 

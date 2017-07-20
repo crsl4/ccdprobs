@@ -2,25 +2,19 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- wait for tests fixed tree 050,059,064: darwin00 and birge
-- do test with more trees: 10000, do we get the same ESS?
+- leave running cats, whales, 024,027,036,043,050 on fixed tree (darwin)
+- do convergence plots
+- check paper that does mcmc and IS (someone in cimat told me)
 
+- read steve derivation: exponential families
 
-  - distribution on the norm of multivariate normal: iid case, with covariance? plot distance vs logl in multivariate normal case; and compare to what we get from the bootstrap trees: compare the percentiles of bootstrap with the ones with multivariate normal
-    - sample of bootstrap trees->mean tree-> distances from mean tree-> plot logl vs distances: difference between 95 percentile logl and the logl of the mean
-    - sample of multivariate normal (not independent)->distances from mean->plot logl vs distances: difference between 95 percentile logl to true mean logl
-    - problem: which covariance in the multinormal? maybe the difference in logl does not depend on the standard deviation
-    - we do this to calculate the scale in the weights by distance
-    - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
-    - we want to justify the use of the scale in weight
-
-
-- Clean up repository for users!!
 
 
 ## Check with Bret
-- example for manuscript
-- look at convergence plots for 024-064, some weird: like 043 that behaves well, but the plot does not look fine
+- max number of times we will try the mcmc fix
+- new mcmc implemented, artiodactyl worse! compare bistro-chain1 and bistro-orig; check compare-orig-chain1.r
+
+- example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 
 ## Jordan
@@ -59,6 +53,13 @@ git push
 Bret algorithm: give a score to each split (see below), sort the splits, and
 input split into tree if they are compatible. The score of a split is the square of the parent edge of the split, and the best score for the subtree. **Question:** How are the Frechet mean and the Bret mean different?
 - Sequential IS?
+- distribution on the norm of multivariate normal: iid case, with covariance? plot distance vs logl in multivariate normal case; and compare to what we get from the bootstrap trees: compare the percentiles of bootstrap with the ones with multivariate normal
+  - sample of bootstrap trees->mean tree-> distances from mean tree-> plot logl vs distances: difference between 95 percentile logl and the logl of the mean
+  - sample of multivariate normal (not independent)->distances from mean->plot logl vs distances: difference between 95 percentile logl to true mean logl
+  - problem: which covariance in the multinormal? maybe the difference in logl does not depend on the standard deviation
+  - we do this to calculate the scale in the weights by distance
+  - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
+  - we want to justify the use of the scale in weight
 
 
 ## Performance improvements
