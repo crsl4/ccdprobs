@@ -37,7 +37,7 @@ void usage(ostream& f)
   f << "    --mcmc-file file               |  for --no-mcmc option, you specify the file with mcmc output from previous run" << endl;
   f << "    -m num                         |  nonnegative integer number of MCMC cycles (1000), update Q and all edge lengths" << endl;
   f << "    --only-mcmc                    |  only does the MCMC for a fixed tree (false)" << endl;
-  f << "    --do-mcmc-chains               |  uses 4 independent chains in MCMC (false)" << endl;
+  f << "    --no-mcmc-threads              |  does not do 4 chains for MCMC (false)" << endl;
   f << "    --mbfile file                  |  [not used in bistro] mrbayes file after mb2badger (.tre) for distances" << endl;
   f << "    --bistrofile file              |  [not used in bistro] bistro file (.treeBL) for distances" << endl;
   f << "    --skip int                     |  [not used in bistro] number of trees to skip in mrbayes (0)" << endl;
@@ -278,9 +278,9 @@ void Parameter::processCommandLine(int argc,char* argv[])
     {
       doMCMC = false;
     }
-    else if ( strcmp(argv[k],"--do-mcmc-chains") == 0 )
+    else if ( strcmp(argv[k],"--no-mcmc-threads") == 0 )
     {
-      doChains = true;
+      noMCMCThreads = true;
     }
     // else if ( strcmp(argv[k],"--mcmc-chains") == 0)
     // {

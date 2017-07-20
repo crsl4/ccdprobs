@@ -686,7 +686,7 @@ int main(int argc, char* argv[])
     vector< vector< vector<double> > > rates1(numChains); //vector of vector of s1,s2,s3,s4,s5,s6
     cerr << "successful initialization of parameters for mcmc chains" << endl;
 
-    if(!parameters.getDoChains())
+    if(parameters.getNoMCMCThreads())
     {
       QMatrix newQ(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
       mcmcChain(0,starttree.makeTreeNumbers(),newQ,alignment,2*blockSize,alignment.getNumSites(),rng,logl1[0],parameters,pi1[0],rates1[0]);
@@ -699,11 +699,7 @@ int main(int argc, char* argv[])
     for ( int i=0; i<numChains; ++i )
     {
       cerr << "starting chain = " << i << endl;
-      cerr << "mcmc var pi: " << q_init.getMcmcVarP().transpose() << endl;
-      cerr << "mcmc var s: " << q_init.getMcmcVarQP().transpose() << endl;
       QMatrix newQ(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
-      cerr << "mcmc var pi: " << newQ.getMcmcVarP().transpose() << endl;
-      cerr << "mcmc var s: " << newQ.getMcmcVarQP().transpose() << endl;
       threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),2*blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
     }
 
@@ -718,8 +714,6 @@ int main(int argc, char* argv[])
     double rstat;
     int it = 1;
 
-    if(0)
-    {
     rstat = gelmanRubin(logl1,prop);
     cerr << "Gelman-Rubin = " << rstat << endl;
 
@@ -752,7 +746,6 @@ int main(int argc, char* argv[])
       cerr << "Convergence never met. Gelman-Rubin = " << rstat << ", but we did more than " << it << "iterations." << endl;
     else
       cerr << "Convergence met. Gelman-Rubin = " << rstat << " < " << lim << endl;
-    }
 
     vector<double> piMean(4,0.0);
     vector<double> sMean(6,0.0);
@@ -762,8 +755,7 @@ int main(int argc, char* argv[])
     vector<vector<double>> rates2;
     string mcmcPars = parameters.getOutFileRoot() + ".mcmc.par";
     ofstream mcmcp(mcmcPars.c_str());
-    combine(pi1,rates1,pi2,rates2,0,mcmcp); //fixit
-//    combine(pi1,rates1,pi2,rates2,prop,mcmcp);
+    combine(pi1,rates1,pi2,rates2,prop,mcmcp);
     mcmcp.close();
     calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar);
     q_init.reset(convert(piMean),convert(sMean));
@@ -772,8 +764,6 @@ int main(int argc, char* argv[])
     cerr << "pi: " << convert(piMean).transpose() << endl;
     cerr << "rates: " << convert(sMean).transpose() << endl;
 
-    if(0)
-    {
     // mcmc log file
     string mcmcLogfile = parameters.getOutFileRoot() + ".mcmc.log";
     cerr << "Writing MCMC log to " << mcmcLogfile << endl;
@@ -794,7 +784,7 @@ int main(int argc, char* argv[])
       mcmclog << "Number of iterations needed to reach convergence = " << it << endl;
     mcmclog.close();
     }
-    }
+
     // write mcmc output to a file
     string mcmcFile = parameters.getOutFileRoot() + ".mcmc.out";
     cerr << "Writing MCMC output to " << mcmcFile << endl;
@@ -943,8 +933,8 @@ int main(int argc, char* argv[])
     profile.close();
     exit(0);
     // ============================================================
-#endif    
-    
+#endif
+
 #if 0
     // ============================================================
     // Likelihood profile
@@ -955,7 +945,7 @@ int main(int argc, char* argv[])
     profile.close();
 
     // ============================================================
-#endif    
+#endif
 
     // calculate distance from trees to mean tree
     Tree mtree(meanTree,alignment);

@@ -2,27 +2,12 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- now we need to make 4 chains and without calculating gelman, simply combine and check ESS again
-
-
-- leave running 024,027 darwin
-- test with 024 and 027, do convergence plots
+- leave running cats, whales, 024,027,036,043,050 on fixed tree (darwin)
+- do convergence plots
+- check paper that does mcmc and IS (someone in cimat told me)
 
 - read steve derivation: exponential families
 
-- make parallel mcmc chains (default 4); keep vector of loglik, calculate mean and sd of last half and calculate gelman statistics to decide what to use for burnin: leave last half, we give as argument the block size (default 500), so we generate 500+500, if the last 500 are not good, do another 500, and elimiate the first half of the beginning (250): we have formulas for deleting one element at a time from the mean and var
-
-
-  - distribution on the norm of multivariate normal: iid case, with covariance? plot distance vs logl in multivariate normal case; and compare to what we get from the bootstrap trees: compare the percentiles of bootstrap with the ones with multivariate normal
-    - sample of bootstrap trees->mean tree-> distances from mean tree-> plot logl vs distances: difference between 95 percentile logl and the logl of the mean
-    - sample of multivariate normal (not independent)->distances from mean->plot logl vs distances: difference between 95 percentile logl to true mean logl
-    - problem: which covariance in the multinormal? maybe the difference in logl does not depend on the standard deviation
-    - we do this to calculate the scale in the weights by distance
-    - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
-    - we want to justify the use of the scale in weight
-
-
-- Clean up repository for users!!
 
 
 ## Check with Bret
@@ -68,6 +53,13 @@ git push
 Bret algorithm: give a score to each split (see below), sort the splits, and
 input split into tree if they are compatible. The score of a split is the square of the parent edge of the split, and the best score for the subtree. **Question:** How are the Frechet mean and the Bret mean different?
 - Sequential IS?
+- distribution on the norm of multivariate normal: iid case, with covariance? plot distance vs logl in multivariate normal case; and compare to what we get from the bootstrap trees: compare the percentiles of bootstrap with the ones with multivariate normal
+  - sample of bootstrap trees->mean tree-> distances from mean tree-> plot logl vs distances: difference between 95 percentile logl and the logl of the mean
+  - sample of multivariate normal (not independent)->distances from mean->plot logl vs distances: difference between 95 percentile logl to true mean logl
+  - problem: which covariance in the multinormal? maybe the difference in logl does not depend on the standard deviation
+  - we do this to calculate the scale in the weights by distance
+  - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
+  - we want to justify the use of the scale in weight
 
 
 ## Performance improvements
