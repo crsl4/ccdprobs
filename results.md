@@ -319,3 +319,33 @@ But if we look in the `treeBL`, the branch lengths do not seem to be weird in an
 - 024: Bisto does not agree with any mb tree, MB trimodal, distant means
 
 **Conclusion** The pull towards the mean tree does not work because bistro mean tree tends to be different (and far) from MB mean tree.
+
+## Improvements to MCMC
+
+We identified issues with MCMC in which the specified burnin was not enough. We needed some measures inside the code to determine whether the chain has converged.
+We modified the mcmc step to do 4 independent chains, and calculate the Gelman-Rubin statistics to decide if the chains have converged (using 50% of the chain as burnin).
+
+Performance on fixed tree:
+- cats dogs: ESS = 119.57, or 11.96 percent.
+- whales: ESS = 36.60, or 3.66 percent.
+```
+[claudia@darwin03] (23)$ grep ESS bistroFixT-6*.log
+bistroFixT-6-024.log:ESS = 381.25, or 38.12 percent.
+bistroFixT-6-027.log:ESS = 32.99, or 3.30 percent.
+bistroFixT-6-036.log:ESS = 55.41, or 5.54 percent.
+bistroFixT-6-043.log:ESS = 110.77, or 11.08 percent.
+bistroFixT-6-050.log:ESS = 3.91, or 0.39 percent.
+bistroFixT-6-059.log:ESS = 166.70, or 16.67 percent.
+```
+
+Before:
+```
+[claudia@darwin00] (10)$ grep ESS bistroFixT-4*.log
+bistroFixT-4-024.log:ESS = 197.70, or 19.77 percent.
+bistroFixT-4-027.log:ESS = 38.92, or 3.89 percent.
+bistroFixT-4-036.log:ESS = 51.75, or 5.18 percent.
+bistroFixT-4-043.log:ESS = 140.70, or 14.07 percent.
+bistroFixT-4-050.log:ESS = 29.24, or 2.92 percent.
+bistroFixT-4-059.log:ESS = 65.45, or 6.54 percent.
+bistroFixT-4-064.log:ESS = 17.66, or 1.77 percent.
+```
