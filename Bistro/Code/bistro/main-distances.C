@@ -120,6 +120,14 @@ int main(int argc, char* argv[])
   cerr << "read " << mbtrees.size() << " trees" << endl;
   f.close();
 
+  // mean tree
+  CladeGraph MBcladeGraph;
+  cerr << "Computing MrBayes mean tree" << endl;
+  MBcladeGraph.findMeanTree(mbtrees,alignment); //warning: this will fail is fasta and nexus files have different translate table
+  cerr << "done." << endl;
+  string MBmeanTree = MBcladeGraph.getMeanTree();
+  cerr << "MB meanTree = " << MBmeanTree << endl;
+  Tree mbtree(MBmeanTree,alignment);
 
   string bistroname = parameters.getBistrofile();
   ifstream f2(bistroname.c_str());
@@ -134,20 +142,17 @@ int main(int argc, char* argv[])
 
 
   // mean tree
-  CladeGraph MBcladeGraph;
   CladeGraph BistrocladeGraph;
-  cerr << "Computing MrBayes mean tree" << endl;
-  MBcladeGraph.findMeanTree(mbtrees,alignment); //warning: this will fail is fasta and nexus files have different translate table
-  cerr << "done." << endl;
   cerr << "Computing Bistro mean tree" << endl;
   BistrocladeGraph.findMeanTree(bistrotrees,alignment);
   cerr << "done." << endl;
-  string MBmeanTree = MBcladeGraph.getMeanTree();
   string BistromeanTree = BistrocladeGraph.getMeanTree();
-  cerr << "MB meanTree = " << MBmeanTree << endl;
   cerr << "Bistro meanTree = " << BistromeanTree << endl;
-  Tree mbtree(MBmeanTree,alignment);
   Tree bistrotree(BistromeanTree,alignment);
+
+  if(parameters.getOnlyMean())
+    return 0;
+
   double dm = mbtree.distance(&bistrotree);
   cerr << "Distance between mean trees: " << dm << endl;
 

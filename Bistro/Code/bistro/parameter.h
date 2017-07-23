@@ -39,6 +39,7 @@ private:
   string mbfile; //for main-distances.C
   string bistrofile; //for main-distances.C
   bool onlyMCMC;
+  bool onlyMean; //for main-distances.C
   int skip; //for main-distances.C
   bool noMCMCThreads;
 public:
@@ -66,6 +67,7 @@ public:
     doMCMC = true;
     numMCMC = 1000;
     onlyMCMC = false;
+    onlyMean = false;
     skip=0;
     noMCMCThreads = false;
   }
@@ -122,6 +124,8 @@ public:
   void setBistrofile(string x) { bistrofile = x; }
   bool getOnlyMCMC() const { return onlyMCMC; }
   void setOnlyMCMC(bool b) { onlyMCMC = b; }
+  bool getOnlyMean() const { return onlyMean; }
+  void setOnlyMean(bool b) { onlyMean = b; }
   int getSkip() const { return skip; }
   void setSkip(int n) { skip = n; }
   bool getNoMCMCThreads() const { return noMCMCThreads; }

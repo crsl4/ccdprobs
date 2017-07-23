@@ -206,9 +206,10 @@ void CladeGraph::printMaps(ostream& f)
 
 void CladeGraph::findMeanTree(vector<string> trees,Alignment& alignment)
 {
-  int foo = 0;
   processTrees(trees,alignment);
+//  cerr << "processed trees" << endl;
   setMeanLengths();
+//  cerr << "set mean lengths" << endl;
   setValues();
 //  printMaps(cerr);
   root->setSubtree(true);

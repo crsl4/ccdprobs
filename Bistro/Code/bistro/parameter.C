@@ -41,6 +41,7 @@ void usage(ostream& f)
   f << "    --mbfile file                  |  [not used in bistro] mrbayes file after mb2badger (.tre) for distances" << endl;
   f << "    --bistrofile file              |  [not used in bistro] bistro file (.treeBL) for distances" << endl;
   f << "    --skip int                     |  [not used in bistro] number of trees to skip in mrbayes (0)" << endl;
+  f << "    --only-mean                    |  [not used in bistro] only calculates the mean tree for mb and bistro (false)" << endl;
   exit(1);
 }
 
@@ -273,6 +274,10 @@ void Parameter::processCommandLine(int argc,char* argv[])
     else if ( strcmp(argv[k],"--only-mcmc") == 0 )
     {
       onlyMCMC = true;
+    }
+    else if ( strcmp(argv[k],"--only-mean") == 0 )
+    {
+      onlyMean = true;
     }
     else if ( strcmp(argv[k],"--no-mcmc") == 0 )
     {

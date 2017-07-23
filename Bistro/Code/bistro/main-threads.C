@@ -872,6 +872,7 @@ int main(int argc, char* argv[])
 	alignment.setBootstrapWeights(weights,rng);
 	alignment.calculateGTRDistancesUsingWeights(weights,model_init,gtrDistanceMatrix,bootDistanceMatrix);
 	Tree bootTree(bootDistanceMatrix);
+	string topBL = bootTree.makeTreeNumbers(); //we want this unrooted 
 	bootTree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
 	bootTree.sortCanonical();
 	string unrootedTreeString = bootTree.makeTreeNumbers(); // for the new distance method
@@ -879,7 +880,6 @@ int main(int argc, char* argv[])
 	bootTree.sortCanonical();
 
 	string top = bootTree.makeTopologyNumbers();
-	string topBL = bootTree.makeTreeNumbers();
 	// write bootstrap tree to file
 	if ( topBL.find("nan") != string::npos )
 	{
