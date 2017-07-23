@@ -1,0 +1,37 @@
+#NEXUS
+[ID: 9036931725]
+[This file contains the trees that were found during the MCMC
+search, sorted by posterior probability. "p" indicates the
+posterior probability of the tree whereas "P" indicates the
+cumulative posterior probability.]
+
+begin trees;
+   translate
+    1 Cassowary,
+    2 Emu,
+    3 EasternMoa,
+    4 lbmoa,
+    5 Dinornis,
+    6 gskiwi,
+    7 BrownKiwi,
+    8 LSKiwi,
+    9 GreatRhea,
+   10 LesserRhea,
+   11 Ostrich,
+   12 BrushTurkey,
+   13 Chicken,
+   14 magpiegoose,
+   15 duck,
+   16 oystercatcher,
+   17 turnstone,
+   18 LBPenguin,
+   19 GaviaStellata,
+   20 Alligator,
+   21 Caiman,
+   22 Gtinamou,
+   23 ECtinamou,
+   24 Crypturellus;
+   tree tree_1 [p = 0.500, P = 0.500] = [&W 0.500000] (24,((23,(22,21)),((((((20,19),(18,17)),(16,15)),((14,13),(12,(11,10)))),((9,8),(7,6))),((5,4),(2,3)))),1);
+   tree tree_2 [p = 0.499, P = 0.999] = [&W 0.499091] (24,(23,((22,21),((20,19),(((18,17),(16,15)),(((14,13),(12,11)),(((10,9),8),((7,6),((5,4),(2,3))))))))),1);
+   tree tree_3 [p = 0.001, P = 1.000] = [&W 0.000909] (2,((24,23),(((((((22,21),20),(19,18)),(17,(16,15))),((14,13),(12,11))),((10,9),(8,7))),((6,5),(4,3)))),1);
+end;
