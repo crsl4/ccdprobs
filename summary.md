@@ -2,16 +2,18 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- leave running cats, whales, 024,027,036,043,050 on fixed tree (darwin)
-- do convergence plots
+- add logl to .mcmc.par file, and change back plotConvergence2
 - check paper that does mcmc and IS (someone in cimat told me)
 
+- do mrbayes on 024,027...run mb2badger and calculate mean tree from bistro and mean tree from mrbayes, and see how far apart they are. if they are not to far, we can try method below to shrink.
+- update bistro manuscript
+
 - read steve derivation: exponential families
+- wait for steve derivation for a better way to compute alpha and lambda
 
 
 
 ## Check with Bret
-- max number of times we will try the mcmc fix
 - print and sign evaluation
 
 

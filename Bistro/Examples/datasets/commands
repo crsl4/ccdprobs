@@ -1,3 +1,42 @@
+## running MrBayes
+mb ../../Data/datasets/024.nex
+mb ../../Data/datasets/027.nex ## darwin03
+mb ../../Data/datasets/036.nex ## darwin04
+mb ../../Data/datasets/043.nex ## darwin05
+mb ../../Data/datasets/050.nex ## darwin06
+mb ../../Data/datasets/059.nex ## darwin02
+
+## then we want to run mb2badger, and compute mean of .tre files to compare to bootstrap from BISTRO
+
+## After runningBistro2.jl:
+source("../../Scripts/readBistro.R")
+pdf("convergence-024.pdf")
+plotConvergence2("bistroFixT-6-024")
+dev.off()
+pdf("convergence-027.pdf")
+plotConvergence2("bistroFixT-6-027")
+dev.off()
+pdf("convergence-036.pdf")
+plotConvergence2("bistroFixT-6-036")
+dev.off()
+pdf("convergence-043.pdf")
+plotConvergence2("bistroFixT-6-043")
+dev.off()
+pdf("convergence-050.pdf")
+plotConvergence2("bistroFixT-6-050")
+dev.off()
+pdf("convergence-059.pdf")
+plotConvergence2("bistroFixT-6-059")
+dev.off()
+
+source("../../Scripts/summary.R")
+compareBistro("bistroFixT-6-027",bmcmc="bmcmc027",besttree="(1,((2,(3,((4,(5,6)),7))),(((((((8,9),10),(11,12)),(13,(14,15))),(((16,17),(18,19)),(20,21))),((22,24),23)),(25,26))),27);")
+compareBistro("bistroFixT-6-036",bmcmc="bmcmc036",besttree="(1,(((2,3),(((4,5),6),((7,(8,9)),((10,11),(12,((13,(14,15)),(16,17))))))),(((((18,19),20),(21,(22,23))),(((24,(25,26)),27),(28,29))),((30,(31,32)),33))),((34,35),36));")
+compareBistro("bistroFixT-6-043",bmcmc="bmcmc043",besttree="(1,(2,(((((((3,4),((5,6),(7,8))),(((9,10),11),(12,13))),((14,(15,16)),(17,(18,19)))),(((((20,(21,22)),(23,24)),(25,26)),((27,28),(29,30))),((31,32),33))),(34,(35,(36,37)))),((38,39),((40,42),41)))),43);")
+compareBistro("bistroFixT-6-024",bmcmc="bmcmc024",besttree="(1,(((2,(3,4)),(((5,(6,7)),(8,(9,10))),((((11,12),(13,14)),(15,(16,17))),((18,19),(20,21))))),(22,23)),24);")
+
+
+
 ## first run with original main-threads-orig.C
 ../../Code/bistro/bistro -f ../../Data/datasets/024.fasta -o bistro024-orig -r 1000 -b 1000 -t "(1:0.040227,(((2:0.0397228,(3:0.0391007,4:0.0397539):0.00517169):0.00230193,(((5:0.042646,(6:0.042183,7:0.0416105):0.00515033):0.00190524,(8:0.0410199,(9:0.0376683,10:0.0376715):0.00811142):0.00264118):0.000803475,((((11:0.0361048,12:0.0370633):0.00577436,(13:0.0392761,14:0.0393327):0.00634764):0.00180546,(15:0.0434878,(16:0.0388414,17:0.0410627):0.00741223):0.00172584):0.000517437,((18:0.0422137,19:0.0386776):0.00479707,(20:0.0412199,21:0.0415818):0.00589029):0.00201852):0.000592302):0.000743618):0.00162637,(22:0.041285,23:0.0398374):0.00455197):0.00638054,24:0.0396157);" > bistro024-orig.log
 ## then with new mcmc threads:
