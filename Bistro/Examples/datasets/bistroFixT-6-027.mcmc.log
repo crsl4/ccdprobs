@@ -1,13 +1,13 @@
-Initial seed = 1821618317
+Initial seed = 3416154737
 Number of chains = 4
 Block size = 1000
 Seeds per chain: 
-     4078391441
-     4217947411
-     1946091284
-     2664463340
+     2019147236
+     1596476175
+     1255505398
+     3586516550
 Maximum number of iterations allowed of Gelman-Rubin approach = 10
 Convergence whenever the Gelman-Rubin statistics was less than 1.05
 Proportion of the chain discarded as burnin = 0.5
-Gelman-Rubin statistics at the end = 1.01781
+Gelman-Rubin statistics at the end = 1.01446
 Number of iterations needed to reach convergence = 1

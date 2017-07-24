@@ -35,7 +35,7 @@ translate
       34 Microcebus_rufus_2,
       35 Microcebus_sambiranensis,
       36 Microcebus_ravelobensis;
-mb-clade prob crudeSE(ESS=55.41) clade
+mb-clade prob crudeSE(ESS=223.57) clade
 .................***................ 1.00000000 0.00000000 {18-20}
 .................**................. 1.00000000 0.00000000 {18-19}
 .****************................... 1.00000000 0.00000000 {2-17}
