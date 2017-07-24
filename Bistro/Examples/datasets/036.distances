@@ -1,0 +1,75 @@
+Processing command line ... done.
+Reading alignment from FASTA file ... done.
+
+Alignment summary:
+Didelphis_virginiana: A=551 C=503 G=245 T=513
+Equus_caballus: A=556 C=494 G=241 T=521
+Rhinoceros_unicornis: ?=1 A=568 C=491 G=232 T=520
+Bos_tarus: A=567 C=508 G=230 T=507
+Hippopotamus_amphibius: ?=3 A=565 C=501 G=237 T=506
+Balaenoptera_physalus: A=578 C=486 G=234 T=514
+Physeter_macrocephalus: A=553 C=510 G=231 T=518
+Ursus_americanus: A=571 C=502 G=235 T=504
+Canis_familiaris: A=563 C=496 G=237 T=516
+Felis_catus: A=559 C=494 G=239 T=520
+Homo_sapiens: A=553 C=504 G=247 T=508
+Pan_troglodytes: A=556 C=512 G=246 T=498
+Gorilla_gorilla: A=560 C=489 G=237 T=526
+Pongo_pygmaeus: A=550 C=514 G=243 T=505
+Macaca_mulatta: A=543 C=528 G=240 T=501
+Callithrix_jacchus: A=547 C=504 G=244 T=517
+Loris_tardigradus: A=552 C=518 G=239 T=503
+Galago_crassicaudatus: ?=1 A=530 C=517 G=236 T=528
+Daubentonia_madagascariensis: A=538 C=522 G=236 T=516
+Varecia_variegata: A=554 C=525 G=239 T=494
+Eulemur_mongoz: ?=2 A=537 C=516 G=236 T=521
+Lemur_catta: A=557 C=505 G=236 T=514
+Hapalemur_griseus: A=534 C=522 G=245 T=511
+Propithecus_tattersalli: A=540 C=516 G=248 T=508
+Lepilemur_edwardsi: A=550 C=525 G=234 T=503
+Cheirogaleus_medius: A=539 C=531 G=250 T=492
+Mirza_coquereli: A=529 C=539 G=241 T=503
+Microcebus_murinus: -=1 A=546 C=553 G=235 T=477
+Microcebus_griseorufus: A=553 C=537 G=238 T=484
+Microcebus_myoxinus: A=551 C=542 G=242 T=477
+Microcebus_berthae: A=560 C=520 G=234 T=498
+Microcebus_rufus_1: A=550 C=523 G=241 T=498
+Microcebus_tavaratra: A=538 C=540 G=246 T=488
+Microcebus_rufus_2: A=555 C=520 G=228 T=509
+Microcebus_sambiranensis: A=545 C=532 G=238 T=497
+Microcebus_ravelobensis: ?=5 A=545 C=504 G=246 T=512
+
+Read MrBayes file: 036.nex.run1.tre
+read 22001 trees
+Computing MrBayes mean tree
+done.
+MB meanTree = (1:0.0875644,(2:0.0834653,(3:0.0720429,(4:0.0734073,(5:0.0742511,(6:0.0839117,(7:0.0932401,(8:0.0813149,(9:0.0894596,(10:0.090185,(11:0.0876109,(12:0.0847255,(13:0.0826326,(14:0.0707776,(15:0.0781684,16:0.114987):0.0370283):0.0304587):0.0368275):0.0389148):0.029271):0.0295913):0.0208889):0.0326336):0.0368634):0.0249377):0.024963):0.0358493):0.0285766):0.0337882,(((((((((((((((((((17:0.105606,18:0.0738661):0.0363304,19:0.0765767):0.0309133,20:0.0738644):0.0384648,21:0.0821027):0.0387762,22:0.0853945):0.0308935,23:0.082245):0.0398329,24:0.0938782):0.0364868,25:0.0912975):0.0283365,26:0.09775):0.0441461,27:0.117837):0.0310755,28:0.0914752):0.0389788,29:0.0776094):0.0380291,30:0.0886566):0.0343545,31:0.0803147):0.0358186,32:0.0785755):0.0338153,33:0.084561):0.0355285,34:0.0825571):0.0093369,35:0.0721286):0.0185827,36:0.0708893):0.0275227);
+Read Bistro file: bistro-6-036.bootstrapBL
+read 1000 trees
+Computing Bistro mean tree
+done.
+Bistro meanTree = (1:0.0912461,(((2:0.0834547,3:0.0776173):0.00763851,(((4:0.0757175,5:0.0748022):0.00760912,6:0.0857814):0.00230024,((7:0.0940647,(8:0.078938,9:0.0860795):0.010847):0.00213721,((10:0.0913831,11:0.0882434):0.00634471,(12:0.093142,((13:0.0863826,(14:0.0828466,15:0.0869275):0.00751384):0.00483575,(16:0.0988856,17:0.088096):0.00915454):0.00540457):0.00448426):0.00229933):0.00256046):0.0018536):0.00281701,(((((18:0.086234,19:0.0839358):0.00927216,20:0.0826623):0.00683275,(21:0.0896827,(22:0.0907858,23:0.089788):0.0149828):0.00828588):0.00890293,((((24:0.10083,(25:0.0925138,26:0.106494):0.00577601):0.00820069,27:0.120528):0.00528969,28:0.0970836):0.00311987,(29:0.0931229,30:0.0932744):0.00672053):0.00190726):0.00122616,((31:0.085475,32:0.0861242):0.00980249,33:0.0879633):0.00256983):0.00185064):0.00187825,((34:0.078133,35:0.070571):0.00786924,36:0.0708674):0.00367123);
+Distance between mean trees: 0.198598
+Getting random sample of 100 trees
+size of newtrees: 99
+size of newtrees: 99
+size of newtrees: 49
+size of newtrees: 49
+Distance for MrBayes trees
+done.
+Distance for Bistro trees
+done.
+Writing MrBayes matrix to file 036.nex.run1.tre.distances
+done.
+Writing MrBayes trees used to file 036.nex.run1.tre.listTrees
+done.
+Writing Bistro matrix to file bistro-6-036.bootstrapBL.distances
+done.
+Writing Bistro trees used to file bistro-6-036.bootstrapBL.listTrees
+done.
+Distance for combined trees
+done.
+Writing combined matrix to file combined.distances
+done.
+Writing combined trees used to file combined.listTrees
+done.

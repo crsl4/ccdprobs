@@ -1,0 +1,89 @@
+Processing command line ... done.
+Reading alignment from FASTA file ... done.
+
+Alignment summary:
+Hypoxylon_atroroseum_U32411: -=27 ?=134 A=271 C=187 G=242 N=3 T=269
+Daldinia_concentrica_U32402: -=29 ?=86 A=276 C=200 G=255 T=287
+Xylaria_hypoxylon_U20378: -=32 ?=59 A=288 C=204 G=259 N=2 T=289
+Xylaria_curta_U32417: -=33 ?=69 A=288 C=198 G=253 T=292
+Ophiostoma_ulmi_M83261: -=30 ?=93 A=277 C=195 G=249 N=1 T=288
+Ophiostoma_piliferum_U20377: -=31 ?=78 A=288 C=202 G=253 N=1 T=280
+Sordaria_fimicola_X69851: -=30 ?=25 A=301 C=218 G=269 T=290
+Neurospora_crassa_X04971: -=30 A=298 C=225 G=276 T=304
+Chaetomium_globosum_U20379: -=28 ?=38 A=297 C=209 G=265 N=4 T=292
+Cercophora_septentrionalis_U32: -=33 ?=60 A=286 C=205 G=253 N=12 T=284
+Gaeumannomyces_graminis_var_gr: -=40 ?=81 A=279 C=202 G=247 N=5 T=279
+Magnaporthe_salvinii_U78546: -=39 ?=57 A=283 C=205 G=257 N=4 T=288
+Pyricularia_grisea_793: -=29 ?=57 A=282 C=211 G=263 N=2 T=289
+Magnaporthe_grisea_Guy_11: -=28 ?=18 A=292 C=220 G=274 N=7 T=294
+Hypocrea_pallida_U32408: -=29 ?=60 A=278 C=224 G=270 N=1 T=271
+Nectria_cinnabarina_U32412: -=27 ?=81 A=271 C=216 G=265 N=1 T=272
+Hypomyces_polyporinus_U32410: -=27 ?=106 A=264 C=213 G=251 N=13 T=259
+Claviceps_purpurea_U44040: -=25 ?=127 A=262 C=203 G=255 N=2 T=259
+Glomerella_cingulata_U48427: -=30 ?=70 A=285 C=212 G=263 N=3 T=270
+Colletotrichum_gloeosporioides: -=32 ?=76 A=278 C=202 G=255 N=16 T=274
+Microascus_trigonosporus_L3698: -=30 ?=103 A=278 C=202 G=247 N=4 T=269
+Petriella_setifera_U32421: -=30 ?=92 A=278 C=205 G=254 N=2 T=272
+Ceratocystis_virescens_U32419: -=29 ?=120 A=266 C=202 G=244 N=5 T=267
+Ceratocystis_fimbriata_U32418: -=26 ?=128 A=274 C=195 G=248 N=1 T=261
+Leucostoma_persoonii_M83259: -=29 ?=63 A=282 C=212 G=264 N=2 T=281
+Diaporthe_phaseolorum_L36985: -=30 ?=60 A=279 C=218 G=264 N=4 T=278
+Melanconis_marginalis_ATCC5690: -=30 ?=131 A=263 C=196 G=240 N=6 T=267
+Gnomonia_setacea: -=27 ?=65 A=280 C=209 G=259 N=3 T=290
+Valsa_ambiens_subsp._leucostom: -=31 ?=79 A=279 C=211 G=250 T=283
+Cryptodiaporthe_corni: -=27 ?=69 A=281 C=215 G=266 N=1 T=274
+Apiognomonia_supraseptata: -=32 ?=69 A=273 C=221 G=262 N=6 T=270
+Amphiporthe_castanea: -=26 ?=85 A=282 C=215 G=258 N=2 T=265
+Phomopsis_longicolla_U78778: -=30 ?=100 A=274 C=207 G=256 T=266
+Cryphonectria_parasitica_713: -=30 ?=55 A=282 C=214 G=264 N=11 T=277
+Endothia_gyrosa_L42443: -=31 ?=124 A=263 C=207 G=250 N=1 T=257
+Endothia_eugeniae: -=28 ?=125 A=269 C=202 G=244 N=2 T=263
+Plagiostoma_euphorbiae: -=33 ?=36 A=290 C=219 G=268 N=8 T=279
+Pleuroceras_pleurostylum: -=31 ?=66 A=281 C=208 G=263 N=4 T=280
+Gnomonia_padicola: -=31 ?=38 A=293 C=215 G=271 N=1 T=284
+Apioplagiostoma_aceriferum: -=28 ?=76 A=284 C=211 G=258 T=276
+Apiosporopsis_carpinea: -=31 ?=63 A=283 C=216 G=262 N=2 T=276
+Linospora_capreae: -=27 ?=76 A=284 C=208 G=260 N=2 T=276
+Discula_quercina: -=32 ?=73 A=277 C=212 G=254 N=5 T=280
+Discula_campestris: -=29 ?=50 A=288 C=221 G=266 T=279
+Discula_fraxinae: -=31 ?=40 A=293 C=217 G=266 N=3 T=283
+Discula_destructiva_MD254: -=32 ?=47 A=291 C=214 G=266 T=283
+Discula_sp._326: -=32 ?=46 A=290 C=214 G=264 N=2 T=285
+Saccharomyces_cerevisiae_Z7557: -=30 ?=25 A=293 C=219 G=267 T=299
+Candida_albicans_E15168: -=24 ?=74 A=286 C=202 G=257 N=2 T=288
+Ambrosiozyma_platypodis_L36984: -=27 ?=81 A=284 C=199 G=249 N=1 T=292
+
+Read MrBayes file: 050.nex.run1.tre
+read 22001 trees
+Computing MrBayes mean tree
+done.
+MB meanTree = (1:0.0171362,2:0.0149846,(((((((3:0.0230808,5:0.0151482):0.00842359,4:0.0119057):0.0166576,6:0.0086044):0.0118557,7:0.00960745):0.00525933,8:0.0162969):0.0152823,((((9:0.0170827,(10:0.0130696,11:0.0187387):0.0154593):0.0116027,((14:0.0160912,(15:0.0203131,16:0.0190439):0.00185829):0.00958711,((17:0.012277,(18:0.00800205,19:0.0213748):0.0122084):0.0124438,(((20:0.0215345,21:0.0157843):0.0156197,(22:0.0055496,23:0.0147809):0.0104632):0.018539,(24:0.00962791,(25:0.00764659,(26:0.0127282,(27:0.00359531,28:0.00961829):0.00857436):0.0166506):0.00519731):0.00874766):0.00565243):0.00496276):0.00380042):0.00192734,(12:0.0190936,13:0.00830736):0.0104789):0.00577314,((((((((29:0.0176279,30:0.00844828):0.00476738,31:0.0143533):0.00378477,32:0.0134895):0.00372045,(33:0.0101756,34:0.00628684):0.00428373):0.00341289,35:0.00697611):0.0104917,(((((36:0.0073245,37:0.0119651):0.00774787,(38:0.0101041,39:0.0145481):0.00594955):0.00445311,40:0.0183888):0.00544377,41:0.0120849):0.00238889,42:0.00776903):0.00254165):0.00117585,46:0.0115113):0.00154603,(((43:0.00454662,45:0.00661256):0.00367668,(47:0.00517259,48:0.010213):0.00233283):0.00455557,44:0.00478237):0.00375908):0.00514869):0.00534965):0.00382775,(49:0.0106843,50:0.0108057):0.00237488):0.00761359);
+Read Bistro file: bistro-6-050.bootstrapBL
+read 1000 trees
+Computing Bistro mean tree
+done.
+Bistro meanTree = (1:0.0154804,(((((((((9:0.0175859,(10:0.0153065,11:0.0138734):0.0115353):0.00656836,(12:0.0190919,13:0.00808746):0.00453066):0.00110217,(((14:0.0151799,15:0.0214181):0.0032526,16:0.0150021):0.00194717,(17:0.0144839,(18:0.0102104,19:0.0217753):0.00732772):0.00458331):0.000699654):0.000502174,(((20:0.0240453,21:0.0147137):0.00815856,(22:0.0118928,23:0.00498894):0.00983684):0.00603102,(24:0.00731324,25:0.012913):0.00825073):0.00140745):0.00066676,(((26:0.0153121,(27:0.00722363,28:0.00796835):0.00452735):0.00422566,29:0.0173781):0.00253986,((30:0.00868715,(31:0.0147653,32:0.00901191):0.0025418):0.00137536,((33:0.00754015,34:0.00649483):0.00311134,35:0.00662817):0.000505048):0.0014893):0.00133539):0.00153713,((36:0.00520807,37:0.0134934):0.00347125,((38:0.00962268,39:0.0141955):0.00637918,40:0.0135978):0.00087323):0.000573998):0.000340206,((((41:0.00839226,42:0.00447788):0.0012356,46:0.0105008):0.000539339,((43:0.00166416,45:0.00422451):0.000669651,(47:0.00329849,48:0.00948983):0.001294):0.00117801):0.000493497,44:0.00462196):0.000324838):0.00272726,(3:0.0185381,(((4:0.0176493,5:0.0178119):0.0036971,6:0.0147107):0.00562982,(7:0.0125443,8:0.0155806):0.00376525):0.00230696):0.00431158):0.00190354,(49:0.00902211,50:0.00882045):0.00242195):0.00196616,2:0.0131855);
+Distance between mean trees: 0.049617
+Getting random sample of 100 trees
+size of newtrees: 99
+size of newtrees: 99
+size of newtrees: 49
+size of newtrees: 49
+Distance for MrBayes trees
+done.
+Distance for Bistro trees
+done.
+Writing MrBayes matrix to file 050.nex.run1.tre.distances
+done.
+Writing MrBayes trees used to file 050.nex.run1.tre.listTrees
+done.
+Writing Bistro matrix to file bistro-6-050.bootstrapBL.distances
+done.
+Writing Bistro trees used to file bistro-6-050.bootstrapBL.listTrees
+done.
+Distance for combined trees
+done.
+Writing combined matrix to file combined.distances
+done.
+Writing combined trees used to file combined.listTrees
+done.

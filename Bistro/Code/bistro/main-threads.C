@@ -394,15 +394,17 @@ double gelmanRubin(vector<vector<double>> logl, double prop)
   return sqrt(v/meanVar);
 }
 
-void combine(vector<vector<vector<double>>> pi1, vector<vector<vector<double>>> rates1, vector<vector<double>>& pi2, vector<vector<double>>& rates2, double prop, ofstream& file)
+void combine(vector<vector<vector<double>>> pi1, vector<vector<vector<double>>> rates1, vector<vector<double>> logl1, vector<vector<double>>& pi2, vector<vector<double>>& rates2, vector<double>& logl2, double prop, ofstream& file)
 {
-  int start = prop*pi1[0].size(); //assumes rates1 is same size
-  for(int i=0; i<pi1.size(); ++i)
+  int start = prop*pi1[0].size(); //assumes rates1,logl1 are same size
+  for(int i=0; i<pi1.size(); ++i) //number of chains
   {
     for(int j=start; j<pi1[0].size(); ++j)
     {
+      file << logl1[i][j] << " "; 
       file << pi1[i][j][0] << " " << pi1[i][j][1] << " " << pi1[i][j][2] << " " << pi1[i][j][3] << " ";
       file << rates1[i][j][0] << " " << rates1[i][j][1] << " " << rates1[i][j][2] << " " << rates1[i][j][3] << " " << rates1[i][j][4] << " " << rates1[i][j][5] << endl;
+      logl2.push_back(logl1[i][j]);
       pi2.push_back(pi1[i][j]);
       rates2.push_back(rates1[i][j]);
     }
@@ -753,9 +755,10 @@ int main(int argc, char* argv[])
     vector<double> sVar(6,0.0);
     vector<vector<double>> pi2;
     vector<vector<double>> rates2;
+    vector<double> logl2;
     string mcmcPars = parameters.getOutFileRoot() + ".mcmc.par";
     ofstream mcmcp(mcmcPars.c_str());
-    combine(pi1,rates1,pi2,rates2,prop,mcmcp);
+    combine(pi1,rates1,logl1,pi2,rates2,logl2,prop,mcmcp);
     mcmcp.close();
     calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar);
     q_init.reset(convert(piMean),convert(sMean));

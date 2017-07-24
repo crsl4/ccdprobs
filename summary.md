@@ -2,23 +2,25 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- add logl to .mcmc.par file, and change back plotConvergence2
+
+
 - check paper that does mcmc and IS (someone in cimat told me)
-
-- do mrbayes on 024,027...run mb2badger and calculate mean tree from bistro and mean tree from mrbayes, and see how far apart they are. if they are not to far, we can try method below to shrink.
-- update bistro manuscript
-
 - read steve derivation: exponential families
 - wait for steve derivation for a better way to compute alpha and lambda
 
 
 
 ## Check with Bret
-- print and sign evaluation
-
-
+- bistro and mb mean trees are very different (see for example 059. mb mean tree = map, but != bistro mean tree and map). Bistro more balanced, is there a bias towards balance with bootstrap? So, the problem is not with spread, but with center. Could consensus tree of bootstrap be better than mean tree?
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
+
+## To knitr Rmd files:
+```R
+library(knitr)
+pandoc("input.Rmd", format = "latex")
+```
+
 
 ## Jordan
 ### Final steps:
@@ -63,6 +65,7 @@ input split into tree if they are compatible. The score of a split is the square
   - we do this to calculate the scale in the weights by distance
   - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
   - we want to justify the use of the scale in weight
+
 
 
 ## Performance improvements

@@ -1,0 +1,82 @@
+Processing command line ... done.
+Reading alignment from FASTA file ... done.
+
+Alignment summary:
+Caecomyces_communis: -=130 A=413 C=310 G=399 N=1 T=407
+Absidia_glauca: -=143 A=417 C=307 G=392 T=401
+Rhizopus_oryzae: -=141 A=415 C=308 G=402 T=394
+Mucor_hiemalis: -=159 A=418 C=301 G=393 T=389
+Mortierella_polycephala: -=182 A=423 C=302 G=373 T=380
+Echinosporangium_transversale: -=241 A=390 C=289 G=368 T=372
+Mortierella_wolfii: -=214 A=391 C=287 G=387 T=381
+Piromyces_communis: -=194 A=403 C=297 G=382 S=1 T=383
+Kickxella_alabastrina: -=194 A=418 C=305 G=380 R=1 S=2 T=360
+Linderina_pennispora: -=211 A=401 C=293 G=382 T=373
+Dipsacomyces_acuminosporus: -=188 A=391 C=300 G=396 S=1 T=384
+Entomophthora_muscae: -=160 A=412 C=307 G=400 T=381
+Conidiobolus_coronatus: -=176 A=414 C=293 G=391 T=386
+Smittium_culisetae: -=183 A=421 C=295 G=385 T=376
+Furculomyces_boomerangus: -=182 A=418 C=288 G=377 T=395
+Capniomyces_stellatus: -=164 A=429 C=283 G=390 N=1 T=393
+Blastocladiella_emersonii: -=211 A=414 C=266 G=371 T=398
+Chytridium_confervae: -=216 A=407 C=279 G=362 T=396
+Neocallimastix_frontalis: -=219 A=404 C=275 G=376 T=386
+Ustilago_hordii: -=217 A=417 C=279 G=376 T=371
+Endogone_pisiforme: -=225 A=395 C=277 G=395 T=368
+Glomus_mossae: -=240 A=400 C=282 G=371 T=367
+Gigaspora_margarita: -=176 A=418 C=296 G=374 T=396
+Coprinus_cinereus: -=188 A=417 C=287 G=373 T=395
+Boletus_satanas: -=221 A=404 C=270 G=377 R=1 T=387
+Morchella_elata: -=237 A=401 C=264 G=377 T=381
+Peziza_badia: -=237 A=403 C=272 G=364 T=384
+Saccharomyces_cerevisiae: -=202 A=410 C=282 G=367 T=399
+Pneumocystis_carinii: -=191 A=423 C=269 G=369 T=408
+Eurotium_rubrum: -=195 A=417 C=268 G=372 T=408
+Neurospora_crassa: -=190 A=416 C=276 G=368 T=410
+Taphrina_deformans: -=189 A=410 C=284 G=381 T=396
+Schizosaccharomyces_pombe: -=234 A=403 C=265 G=366 T=392
+Caenorhabditis_drosophilae: -=217 A=406 C=278 G=362 T=397
+Hydra_littoralis: -=171 A=404 C=296 G=390 T=399
+Calanus_pacificus: -=135 A=431 C=300 G=392 T=402
+Coleochaete_scutata: -=135 A=426 C=293 G=399 T=407
+Physcomitrella_patens: -=131 A=419 C=287 G=410 T=413
+Arabidopsis_thaliana: -=125 A=426 C=284 G=405 T=420
+Zea_mays: -=131 A=415 C=293 G=411 T=410
+Mesostigma_viride: -=127 A=431 C=301 G=398 T=403
+Xenopus_laevis: -=125 A=422 C=304 G=409 T=400
+Gallus_gallus: -=126 A=417 C=305 G=408 T=404
+
+Read MrBayes file: 043.nex.run1.tre
+read 22001 trees
+Computing MrBayes mean tree
+done.
+MB meanTree = (1:0.0550771,((2:0.0468695,3:0.0658761):0.0195383,(((((4:0.0671356,(5:0.0401607,6:0.0634503):0.016199):0.0156356,((7:0.0527217,8:0.0368104):0.0222124,(9:0.0398978,(10:0.0262045,11:0.061646):0.0211495):0.00980919):0.00876083):0.0134813,(12:0.0533258,13:0.0477652):0.0357106):0.0102502,(((((14:0.0727,15:0.0588482):0.0231021,16:0.0657255):0.01606,(17:0.0568474,(18:0.0571245,19:0.049513):0.0229545):0.0251803):0.0121913,(((((20:0.0600766,21:0.0283899):0.0254293,22:0.0353944):0.0321892,23:0.0474676):0.0219248,24:0.0648215):0.0180102,(25:0.0416776,26:0.0507775):0.0279232):0.0175052):0.0110421,((((27:0.0407362,28:0.0157944):0.0270986,29:0.0320519):0.0208188,30:0.030959):0.0216741,((31:0.0432691,32:0.0486404):0.00879781,(33:0.0373321,34:0.0488427):0.0170062):0.0028798):0.0137634):0.00175282):0.0033213,((35:0.0569794,(36:0.0432571,37:0.0587669):0.0157889):0.0177007,(38:0.0613824,(39:0.0532691,((40:0.0593077,41:0.0743165):0.0100966,42:0.069426):0.0155246):0.00966818):0.00824363):0.0068727):0.0114034):0.0170826,43:0.0744319);
+Read Bistro file: bistro-6-043.bootstrapBL
+read 1000 trees
+Computing Bistro mean tree
+done.
+Bistro meanTree = (1:0.0544328,((((((((3:0.0585844,4:0.0654338):0.00350466,((5:0.0447746,6:0.0591256):0.00533132,(7:0.0468165,8:0.0412618):0.0105817):0.00284956):0.00184366,(((9:0.0397721,10:0.0326188):0.00632344,11:0.0548882):0.00452885,(12:0.0527359,13:0.0471185):0.00812675):0.00164977):0.0023041,((14:0.0651105,(15:0.061296,16:0.0657605):0.00865914):0.00622553,(17:0.0550363,(18:0.0644016,19:0.0420601):0.0115884):0.0110939):0.00158135):0.000512852,(((((20:0.0523793,(21:0.0387686,22:0.0361629):0.0140272):0.0116357,(23:0.051239,24:0.0609308):0.00524585):0.0036179,(25:0.048484,26:0.0448579):0.00850686):0.0014545,((27:0.0271295,28:0.0272599):0.00893159,(29:0.039264,30:0.032288):0.00493417):0.0028631):0.000501311,((31:0.0411274,32:0.043376):0.00374711,33:0.0435459):0.00343855):0.000590609):0.000924653,(34:0.0421418,(35:0.0529444,(36:0.0448221,37:0.0546131):0.00982281):0.0067966):0.00107545):0.00142511,((38:0.0560059,39:0.0496388):0.00342543,((40:0.0624241,42:0.0623289):0.00292385,41:0.0709147):0.0063798):0.00228647):0.00373884,2:0.0483406):0.00456917,43:0.0653997);
+Distance between mean trees: 0.101826
+Getting random sample of 100 trees
+size of newtrees: 99
+size of newtrees: 99
+size of newtrees: 49
+size of newtrees: 49
+Distance for MrBayes trees
+done.
+Distance for Bistro trees
+done.
+Writing MrBayes matrix to file 043.nex.run1.tre.distances
+done.
+Writing MrBayes trees used to file 043.nex.run1.tre.listTrees
+done.
+Writing Bistro matrix to file bistro-6-043.bootstrapBL.distances
+done.
+Writing Bistro trees used to file bistro-6-043.bootstrapBL.listTrees
+done.
+Distance for combined trees
+done.
+Writing combined matrix to file combined.distances
+done.
+Writing combined trees used to file combined.listTrees
+done.
