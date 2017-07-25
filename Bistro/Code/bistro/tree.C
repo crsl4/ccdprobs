@@ -3356,3 +3356,101 @@ void Tree::printProfile(ostream& f,Alignment& alignment,QMatrix& model)
   for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
     (*e)->printLikMinLength(f,alignment,model);
 }
+
+void Tree::getInternalEdges(vector<Edge*>& internalEdges)
+{
+  for ( vector<Edge*>::iterator e=edges.begin(); e!= edges.end(); ++e )
+  {
+    if ( (*e)->getNode(0)->getLeaf() || (*e)->getNode(1)->getLeaf() )
+      continue;
+    internalEdges.push_back(*e);
+  }
+}
+
+// find edge e1 in edges; replace with e2
+void Node::swapEdge(Edge* e1,Edge* e2)
+{
+  vector<Edge*>::iterator p = find(edges.begin(),edges.end(),e1);
+  if ( p == edges.end() )
+  {
+    cerr << "Error: Node::swapEdge fails to find edge" << endl;
+    exit(1);
+  }
+  *p = e2;
+}
+
+void Edge::swapNode(Node* n1, Node* n2)
+{
+  if ( nodes[0] == n1 )
+  {
+    nodes[0] = n2;
+    return;
+  }
+  if ( nodes[1] == n1 )
+  {
+    nodes[1] = n2;
+    return;
+  }
+  cerr << "Error: Edge::swapNode fails to find node." << endl;
+  exit(1);
+}
+
+Edge* Node::pickOtherEdge(Edge* e,mt19937_64& rng)
+{
+  vector<Edge*> otherEdges;
+  for ( vector<Edge*>::iterator p=edges.begin(); p!= edges.end(); ++p )
+    if ( *p != e )
+      otherEdges.push_back(*p);
+  uniform_int_distribution<> rint(0,otherEdges.size()-1);
+  return otherEdges[rint(rng)];
+}
+
+// assumes that tree is not binary
+void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,int>& pmap,vector<Edge*>& internalEdges)
+{
+  string oldTop = makeTopologyNumbers();
+  // slope from nonparsimonious parsimony score paper
+  double PARSIMONY_SLOPE = 3.3;
+  // pick random internal node and edges to swap
+  uniform_int_distribution<> rint(0,internalEdges.size()-1);
+  Edge* e = internalEdges[rint(rng)];
+  Node* n1 = e->getNode(0);
+  Node* n2 = e->getNode(1);
+  Edge* e1 = n1->pickOtherEdge(e,rng);
+  Edge* e2 = n2->pickOtherEdge(e,rng);
+  // swap the subtrees
+  n1->swapEdge(e1,e2);
+  n2->swapEdge(e2,e1);
+  e1->swapNode(n1,n2);
+  e2->swapNode(n2,n1);
+  // calculate the parsimony score
+  reroot(1);
+  sortCanonical();
+  string top = makeTopologyNumbers();
+  map<string,int>::iterator p = pmap.find(top);
+  if ( p == pmap.end() )
+  {
+    pmap[top] = parsimonyScore(alignment);
+  }
+  int oldScore = score;
+  int newScore = pmap[top];
+  // accept or reject
+  // accept if log runif < theta * (old score - new score)
+  uniform_real_distribution<double> runif(0,1);
+  if ( log(runif(rng)) < PARSIMONY_SLOPE * (score - newScore) ) // accept
+  {
+    score = newScore;
+    cerr << "accepted ";
+  }
+  else
+  {
+    n1->swapEdge(e2,e1);
+    n2->swapEdge(e1,e2);
+    e1->swapNode(n2,n1);
+    e2->swapNode(n1,n2);
+    reroot(1);
+    sortCanonical();
+    cerr << "rejected ";
+  }
+  cerr << oldTop << " " << oldScore << " " << top << " " << newScore << endl;
+}

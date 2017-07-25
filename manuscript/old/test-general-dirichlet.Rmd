@@ -132,4 +132,58 @@ for ( a in a1 )
 colnames(out) = c("alpha1","alpha2","lambda1","lambda2","m22")
 out = data.frame(out)
 out$m01 = with(out, (alpha1*lambda2 - (1-m22)*alpha2*(lambda1-lambda2)) / (lambda2*(alpha1+alpha2)) )
+out$m02 =  with(out, (alpha2*lambda1 - m22*alpha2*(lambda1-lambda2)) / (lambda2*(alpha1+alpha2)) )
+out$s = with(out, alpha1+alpha2)
+out$p = with(out, alpha1/s)
+out$r = with(out, lambda1/lambda2)
+out1$s = with(out1, alpha1+alpha2)
+out1$p = with(out1, alpha1/s)
+out1$r = with(out1, lambda1/lambda2)
+```
+
+```{r}
+# More exploration
+k = 2
+n = 10^6
+pset = c(0.01,0.1,0.3,0.5,0.7,0.9,0.99)
+sset = c(1,4,16,64,256)
+rset = c(0.1,0.25,0.5,1,2,4,10)
+i=1
+total = length(pset) * length(sset) * length(rset)
+out = matrix(0,total,13)
+for ( p in pset )
+{
+  for ( s in sset )
+  {
+    for ( r in rset )
+    {
+      print(paste(i,"of",total))
+      alpha = c(p*s,(1-p)*s)
+      lambda = c(2*r/(1+r),2/(r+1))
+      df = data.frame(alpha,lambda)
+      df2 = df
+      df2$alpha[2] = df$alpha[2] + 1
+      x2 = generate(df2,n=n)
+      m2 = apply(x2,2,mean)
+      z = m2[2]
+      m01 = p - (1-z)*(r-1)*(1-p)
+      m02 = r*(1-p) - z*(r-1)*(1-p)
+      m11 = 1 - (1-z)*r*(1-p)/p
+      m12 = (1-z)*r*(1-p)/p
+      m21 = 1-z
+      out[i,] = c(alpha,lambda,r,p,s,m01,m02,m11,m12,m21,m22=z)
+      i = i+1
+    }
+  }
+}
+colnames(out) = c("alpha1","alpha2","lambda1","lambda2","r","p","s","m01","m02","m11","m12","m21","m22")
+out = data.frame(out)
+```
+
+```{r}
+require(ggplot2)
+ggplot(out, aes(x=log(p),y=log(m01))) + geom_line() + facet_grid(r ~ s)
+ggplot(out, aes(x=s,y=m01)) + geom_line() + facet_grid(r ~ p)
+ggplot(out, aes(x=log(r),y=m01)) + geom_line() + facet_grid(p ~ s)
+ggplot(out, aes(x=s,y=log(m01)/log(p))) + geom_line() + facet_grid(. ~ r)
 ```

@@ -832,6 +832,22 @@ int main(int argc, char* argv[])
 
   milliseconds ms7 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
+// NEW CODE --- mcmc on topologies using parsimony
+  Tree* ptree = new Tree(starttree.makeTopologyNumbers(),alignment);
+  ptree->reroot(1);
+  ptree->sortCanonical();
+  vector<Edge*> internalEdges;
+  ptree->getInternalEdges(internalEdges);
+  map<string,int> pmap;
+  int score = ptree->parsimonyScore(alignment);
+  pmap[ptree->makeTopologyNumbers()] = score;
+  cerr << "MCMC on topologies" << endl;
+  for ( int i=0; i<100; ++i )
+  {
+    ptree->mcmcNNI(rng,alignment,score,pmap,internalEdges);
+    cerr << ptree->makeTopologyNumbers() << " " << setw(5) << score << endl;
+  }
+  
 // not normalized maps; normalization taken care of during alias creation
   map<string,int> topologyToCountMap;
   map<string,double> topologyToWeightMap;
