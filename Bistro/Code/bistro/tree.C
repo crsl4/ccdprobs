@@ -3410,7 +3410,8 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
 {
   string oldTop = makeTopologyNumbers();
   // slope from nonparsimonious parsimony score paper
-  double PARSIMONY_SLOPE = 3.3;
+//  double PARSIMONY_SLOPE = 3.3;
+  double PARSIMONY_SLOPE = 0.5;
   // pick random internal node and edges to swap
   uniform_int_distribution<> rint(0,internalEdges.size()-1);
   Edge* e = internalEdges[rint(rng)];
@@ -3418,14 +3419,23 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
   Node* n2 = e->getNode(1);
   Edge* e1 = n1->pickOtherEdge(e,rng);
   Edge* e2 = n2->pickOtherEdge(e,rng);
+//  stringstream s1;
+//  n1->getNeighbor(e1)->makeTopology(s1,e1,false);
+//  stringstream s2;
+//  n2->getNeighbor(e2)->makeTopology(s2,e2,false);
+//  string sub1;
+//  s1 >> sub1;
+//  string sub2;
+//  s2 >> sub2;
+//  cerr << "=== " << "(" << n1->getNumber() << "," << n2->getNumber() << ") " << sub1 << " <--> " << sub2 << endl;
   // swap the subtrees
   n1->swapEdge(e1,e2);
   n2->swapEdge(e2,e1);
   e1->swapNode(n1,n2);
   e2->swapNode(n2,n1);
-  // calculate the parsimony score
   reroot(1);
   sortCanonical();
+  // calculate the parsimony score
   string top = makeTopologyNumbers();
   map<string,int>::iterator p = pmap.find(top);
   if ( p == pmap.end() )
@@ -3437,10 +3447,13 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
   // accept or reject
   // accept if log runif < theta * (old score - new score)
   uniform_real_distribution<double> runif(0,1);
+  double acceptProb = exp(PARSIMONY_SLOPE * (score - newScore));
+  if ( acceptProb > 1 )
+    acceptProb = 1;
   if ( log(runif(rng)) < PARSIMONY_SLOPE * (score - newScore) ) // accept
   {
     score = newScore;
-    cerr << "accepted ";
+//    cerr << "accepted ";
   }
   else
   {
@@ -3450,7 +3463,7 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
     e2->swapNode(n1,n2);
     reroot(1);
     sortCanonical();
-    cerr << "rejected ";
+//    cerr << "rejected ";
   }
-  cerr << oldTop << " " << oldScore << " " << top << " " << newScore << endl;
+//  cerr << setw(6) << setprecision(4) << fixed << acceptProb << " " << oldTop << " " << oldScore << " " << top << " " << newScore << endl;
 }

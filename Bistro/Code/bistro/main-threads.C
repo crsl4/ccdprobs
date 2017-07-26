@@ -838,16 +838,56 @@ int main(int argc, char* argv[])
   ptree->sortCanonical();
   vector<Edge*> internalEdges;
   ptree->getInternalEdges(internalEdges);
+//  cerr << "internal edges:";
+//  for ( vector<Edge*>::iterator e=internalEdges.begin(); e!=internalEdges.end(); ++e )
+//    cerr << " " << (*e)->getNumber();
+//  cerr << endl;
   map<string,int> pmap;
   int score = ptree->parsimonyScore(alignment);
   pmap[ptree->makeTopologyNumbers()] = score;
   cerr << "MCMC on topologies" << endl;
-  for ( int i=0; i<100; ++i )
+  for ( int i=0; i<100000; ++i )
   {
     ptree->mcmcNNI(rng,alignment,score,pmap,internalEdges);
-    cerr << ptree->makeTopologyNumbers() << " " << setw(5) << score << endl;
+//    cerr << ptree->makeTopologyNumbers() << " " << setw(5) << score << endl;
   }
-  
+  cerr << "Parsimony tree map" << endl;
+  int minParsimony = pmap.begin()->second;
+  for ( map<string,int>::iterator p=pmap.begin(); p!= pmap.end(); ++p )
+    if ( p->second < minParsimony )
+      minParsimony = p->second;
+
+  cerr << "Minimum parsimony score = " << minParsimony << endl;
+  cerr << "Total number of sampled trees = " << pmap.size() << endl;
+  vector<double> weight(pmap.size(),0);
+  double total = 0;
+  double PARSIMONY_SCALAR = 3.3;
+  {
+    int i=0;
+    for ( map<string,int>::iterator p=pmap.begin(); p!= pmap.end(); ++p )
+    {
+//      cerr << p->first << " " << p->second << endl;
+      weight[i] = exp(PARSIMONY_SCALAR*(minParsimony - p->second));
+      total += weight[i++];
+    }
+  }
+  {
+    int i=0;
+    for ( vector<double>::iterator p=weight.begin(); p!=weight.end(); ++p )
+    {
+      if ( i < 100 )
+      {
+	cerr << weight[i] 
+      (*p) /= total;
+  {
+    int i=0;
+    cerr << "tree parsimony probability" << endl;
+    for ( map<string,int>::iterator p=pmap.begin(); p!= pmap.end(); ++p )
+    {
+      if ( weight[i] > 0.000001 )
+	cerr << p->first << " " << p->second << " " << setw(10) << setprecision(8) << fixed << weight[i++] << endl;
+    }
+  }
 // not normalized maps; normalization taken care of during alias creation
   map<string,int> topologyToCountMap;
   map<string,double> topologyToWeightMap;
