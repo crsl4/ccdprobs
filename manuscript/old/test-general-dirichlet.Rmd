@@ -187,3 +187,34 @@ ggplot(out, aes(x=s,y=m01)) + geom_line() + facet_grid(r ~ p)
 ggplot(out, aes(x=log(r),y=m01)) + geom_line() + facet_grid(p ~ s)
 ggplot(out, aes(x=s,y=log(m01)/log(p))) + geom_line() + facet_grid(. ~ r)
 ```
+
+### Test ratio idea
+
+```{r}
+k=3
+n=100000
+p = parameters(k,mean.a=2)
+x = generate(p,n)
+x1 = cbind(x[,1]/x[,1],x[,2]/x[,1],x[,3]/x[,1])
+r1 = apply(x1,2,mean)
+x2 = cbind(x[,1]/x[,2],x[,2]/x[,2],x[,3]/x[,2])
+r2 = apply(x2,2,mean)
+x3 = cbind(x[,1]/x[,3],x[,2]/x[,3],x[,3]/x[,3])
+r3 = apply(x3,2,mean)
+lambda12 = r1[2] * (p$alpha[1]-1)/p$alpha[2]
+lambda13 = r1[3] * (p$alpha[1]-1)/p$alpha[3]
+lambda.est1 = c(1,1/lambda12,1/lambda13)
+lambda.est1 = 3 * lambda.est1 / sum(lambda.est1)
+lambda21 = r2[1] * (p$alpha[2]-1)/p$alpha[1]
+lambda23 = r2[3] * (p$alpha[2]-1)/p$alpha[3]
+lambda.est2 = c(1/lambda21,1,1/lambda23)
+lambda.est2 = 3 * lambda.est2 / sum(lambda.est2)
+###
+xl = x %*% diag(p$lambda)
+s = apply(xl,1,sum)
+for ( i in 1:n )
+  xl[i,] = xl[i,]/s[i]
+mu = apply(xl,2,mean)
+#mu = mu/sum(mu)
+
+```

@@ -871,14 +871,14 @@ int main(int argc, char* argv[])
       total += weight[i++];
     }
   }
-  {
-    int i=0;
-    for ( vector<double>::iterator p=weight.begin(); p!=weight.end(); ++p )
-    {
-      if ( i < 100 )
-      {
-	cerr << weight[i] 
-      (*p) /= total;
+//  {
+//    int i=0;
+//    for ( vector<double>::iterator p=weight.begin(); p!=weight.end(); ++p )
+//    {
+//      if ( i < 100 )
+//      {
+//	cerr << weight[i] 
+//      (*p) /= total;
   {
     int i=0;
     cerr << "tree parsimony probability" << endl;
