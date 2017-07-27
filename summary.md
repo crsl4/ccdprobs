@@ -2,16 +2,23 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-
-
+- finish mixture mcmcNNI and bootstrap
 - check paper that does mcmc and IS (someone in cimat told me)
-- read steve derivation: exponential families
-- wait for steve derivation for a better way to compute alpha and lambda
+
 
 
 
 ## Check with Bret
-- bistro and mb mean trees are very different (see for example 059. mb mean tree = map, but != bistro mean tree and map). Bistro more balanced, is there a bias towards balance with bootstrap? So, the problem is not with spread, but with center. Could consensus tree of bootstrap be better than mean tree?
+- we do mcmcNNI: we have a sample of trees: we have a topology to count map and a topology to parsimony score map, which we then convert to topology to parsimony weight map (does not need to be normalized)
+- we do bootstrap: we have a topology to count map, a topology to parsimony map, a topology to distance map; and all are converted to topology to weight map (except the count one)
+- do we use parsimony weight map in both for the mixture? how?
+- created new output files: .mcmc.topCounts, .mcmc*.smap/tmap: compare test.mcmc.topCounts and test.topCounts (for artiodactyl and 027)
+
+- we have PARSIMONY_SLOPE in tree.C and PARSIMONY_SCALAR in main-threads.C, why two? why different? do we want to have a constant better? we had been using 0.5 for the parsimony maps before; also before we weighted by count as well: shouldn't all be the same constant?
+- if I understand correctly, we have a pmap with topologies and parsimony, do we want to weight the trees in the map based on parsimony? do we want to use the mcmc sample of trees (which would be spreader, I think)?
+- should we put trees in the pmap (and cmap) only if accepted? now we add to pmap/cmap when proposing the new tree
+- in tree.C, not using acceptProb
+
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 
