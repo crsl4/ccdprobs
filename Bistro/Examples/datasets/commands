@@ -1,5 +1,5 @@
 ## test mcmcNNI
-../../Code/bistro/bistro -f ../../Data/datasets/027.fasta -o test -r 1000 -b 1000 --no-mcmc --mcmc-file text.mcmc.out > test.log
+../../Code/bistro/bistro -f ../../Data/datasets/027.fasta -o test -r 1000 -b 1000 --no-mcmc --mcmc-file test.mcmc.out > test.log
 
 
 ## Now we want to compare bootstrap trees with mrbayes trees

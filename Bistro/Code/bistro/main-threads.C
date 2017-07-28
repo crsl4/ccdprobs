@@ -844,9 +844,9 @@ int main(int argc, char* argv[])
 //  cerr << endl;
   map<string,int> pmap; //topology to parsimony score map
   map<string,int> cmap; //topology to count map
-  unsigned int mcmcGen = 100000;
+  unsigned int mcmcGen = 10000;
   int score = ptree->parsimonyScore(alignment);
-  int minParsimony = 1000000;
+  int minParsimony = ptree->getNumTaxa()*alignment.getNumSites();
   pmap[ptree->makeTopologyNumbers()] = score;
   cerr << "MCMC on topologies" << endl;
   for ( int i=0; i<mcmcGen; ++i )
@@ -863,7 +863,7 @@ int main(int argc, char* argv[])
   for ( map<string,int>::iterator m=cmap.begin(); m != cmap.end(); ++m )
   {
     topologyToParsimonyWeightMap[ (*m).first ] =
-      (*m).second * exp( PARSIMONY_SCALAR *
+      exp( PARSIMONY_SCALAR *
 			 (minParsimony - pmap[ (*m).first ]) );
   }
 

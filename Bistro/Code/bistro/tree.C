@@ -3445,7 +3445,6 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
     if ( tmp < minimumParsimonyScore)
       minimumParsimonyScore = tmp;
   }
-  cmap[top]++;
   int oldScore = score;
   int newScore = pmap[top];
   // accept or reject
@@ -3457,6 +3456,7 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
   if ( log(runif(rng)) < PARSIMONY_SLOPE * (score - newScore) ) // accept
   {
     score = newScore;
+    oldTop = top;
 //    cerr << "accepted ";
   }
   else
@@ -3469,5 +3469,6 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
     sortCanonical();
 //    cerr << "rejected ";
   }
+  cmap[oldTop]++;
 //  cerr << setw(6) << setprecision(4) << fixed << acceptProb << " " << oldTop << " " << oldScore << " " << top << " " << newScore << endl;
 }

@@ -2,21 +2,15 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- finish mixture mcmcNNI and bootstrap
-- check paper that does mcmc and IS (someone in cimat told me)
+- finish mixture mcmcNNI and bootstrap: normalize the two maps (weights add up to 1): bootstrap with distance weight and the mcmc pmap, and then combine and use that one for ccdprobs
 
 
+- write down dirichlet paper
+- write down bistro paper to add the new topology stuff
 
 
 ## Check with Bret
-- we do mcmcNNI: we have a sample of trees: we have a topology to count map and a topology to parsimony score map, which we then convert to topology to parsimony weight map (does not need to be normalized)
-- we do bootstrap: we have a topology to count map, a topology to parsimony map, a topology to distance map; and all are converted to topology to weight map (except the count one)
-- do we use parsimony weight map in both for the mixture? how?
-- created new output files: .mcmc.topCounts, .mcmc*.smap/tmap: compare test.mcmc.topCounts and test.topCounts (for artiodactyl and 027)
 
-- we have PARSIMONY_SLOPE in tree.C and PARSIMONY_SCALAR in main-threads.C, why two? why different? do we want to have a constant better? we had been using 0.5 for the parsimony maps before; also before we weighted by count as well: shouldn't all be the same constant?
-- if I understand correctly, we have a pmap with topologies and parsimony, do we want to weight the trees in the map based on parsimony? do we want to use the mcmc sample of trees (which would be spreader, I think)?
-- should we put trees in the pmap (and cmap) only if accepted? now we add to pmap/cmap when proposing the new tree
 - in tree.C, not using acceptProb
 
 - example for bistro manuscript
@@ -72,7 +66,7 @@ input split into tree if they are compatible. The score of a split is the square
   - we do this to calculate the scale in the weights by distance
   - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
   - we want to justify the use of the scale in weight
-
+- check paper that does mcmc and IS (someone in cimat told me)
 
 
 ## Performance improvements
