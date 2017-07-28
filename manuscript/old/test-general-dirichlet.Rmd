@@ -46,6 +46,69 @@ generate = function(p,n=1000)
     x[i,] = x[i,] / s[i]
   return(x)
 }
+
+estimateAlphaFixedLambda = function(x,lambda)
+{
+  # The vector (lambda_1*x_1,...,lambda_k*x_k) / sum_i lambda_i*x_i
+  # ~ Dirichlet(alpha_1,...,alpha_k)
+  k = ncol(x)
+  n = nrow(x)
+  xl = x
+  for ( i in 1:k )
+    xl[,i] = x[,i]*lambda[i]
+  # normalize rows
+  s = apply(xl,1,sum)
+  for ( i in 1:n )
+    xl[i,] = xl[i,]/s[i]
+  # get vector proportional to alpha
+  mu = apply(xl,2,mean)
+  v = apply(xl,2,var)
+  # v_i = mu_i * (1-mu_i) / (1 + phi);  sum alpha = phi
+  # average phi estimates for each column
+  phi = mu * (1-mu) / v - 1
+#  a = diag(phi) %*% matrix(1,k,k) %*% diag(mu)
+#  print(a)
+#  alpha1 = apply(a,2,mean)
+#  alpha = mu * phi
+#  cat("mu:    ")
+#  print(mu)
+#n  cat("v:     ")
+#  print(v)
+#  cat("phi:   ")
+#  print(phi)
+#  cat("alpha: ")
+#  print(alpha)
+#  phi.mean = mean(phi)
+  # alpha = mu * phi
+#  print(mu * mean(phi))
+  p = data.frame(alpha = mu * mean(phi), lambda=lambda)
+  p$mu = p$alpha / p$lambda
+  p$mu = p$mu / sum(p$mu)
+  return( p )
+}
+estimateLambdaFixedAlpha = function(x,alpha)
+{
+  k = ncol(x)
+  x2 = x
+  lambda = matrix(0,k,k)
+  for ( i in 1:k )
+  {
+    if ( alpha[i] > 1 )
+    {
+      for ( j in 1:k )
+        x2[,j] = x[,j] / x[,i]
+      m = apply(x2,2,mean)
+      r = alpha / (alpha[i]-1) / m
+      r[i] = 1
+      lambda[i,] = r / mean(r)
+    }
+  }
+  lambda = lambda[ apply(lambda,1,function(x){!all(x==0)}), ]
+  p = data.frame(alpha=alpha, lambda=apply(lambda,2,mean))
+  p$mu = p$alpha / p$lambda
+  p$mu = p$mu / sum(p$mu)
+  return (p)
+}
 ```
 
 ## Run the test
@@ -216,5 +279,33 @@ for ( i in 1:n )
   xl[i,] = xl[i,]/s[i]
 mu = apply(xl,2,mean)
 #mu = mu/sum(mu)
+v = apply(xl,2,var)
+mu * (1-mu) / v -1
+sum(p$alpha) 
+```
 
+```{r}
+## Test iterative estimate
+p = parameters(4,mean.a=3,shape=2)
+p$mu = with(p, alpha/lambda)
+p$mu = p$mu / sum(p$mu)
+x = generate(p,10^5)
+mu = apply(x,2,mean)
+v = apply(x,2,var)
+lambda0 = mu * (1-mu) / v
+lambda0 = lambda0 / mean(lambda0)
+#pp = estimateAlphaFixedLambda(x,lambda0)
+pp = estimateAlphaFixedLambda(x,rep(1,4))
+print(cbind(pp,p))
+for ( i in 1:20 )
+{
+  ppp = pp
+  pp = estimateLambdaFixedAlpha(x,pp$alpha)
+  pp = estimateAlphaFixedLambda(x,pp$lambda)
+#  print( cbind(pp,p) )
+  df = data.frame(alphaDiff = pp$alpha-ppp$alpha, lambdaDiff = pp$lambda - ppp$lambda, muDiff = pp$mu - ppp$mu)
+  print(round(df,4))
+  print(sum(abs(df$muDiff)))
+}
+print(cbind(pp,p))
 ```
