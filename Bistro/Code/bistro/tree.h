@@ -339,7 +339,7 @@ public:
   void logLikelihoodProfile(ostream&,Alignment&,QMatrix&);
   void printProfile(ostream&,Alignment&,QMatrix&);
   void getInternalEdges(vector<Edge*>&);
-  void mcmcNNI(mt19937_64&,Alignment&,int&,map<string,int>&,vector<Edge*>&);
+  void mcmcNNI(mt19937_64&,Alignment&,int&,map<string,int>&,map<string,int>&,vector<Edge*>&,int&);
 };
 
 class MCMCStats

@@ -3406,7 +3406,7 @@ Edge* Node::pickOtherEdge(Edge* e,mt19937_64& rng)
 }
 
 // assumes that tree is not binary
-void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,int>& pmap,vector<Edge*>& internalEdges)
+void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,int>& pmap,map<string,int>& cmap,vector<Edge*>& internalEdges, int& minimumParsimonyScore)
 {
   string oldTop = makeTopologyNumbers();
   // slope from nonparsimonious parsimony score paper
@@ -3440,7 +3440,10 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
   map<string,int>::iterator p = pmap.find(top);
   if ( p == pmap.end() )
   {
-    pmap[top] = parsimonyScore(alignment);
+    int tmp = parsimonyScore(alignment);
+    pmap[top] = tmp;
+    if ( tmp < minimumParsimonyScore)
+      minimumParsimonyScore = tmp;
   }
   int oldScore = score;
   int newScore = pmap[top];
@@ -3453,6 +3456,7 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
   if ( log(runif(rng)) < PARSIMONY_SLOPE * (score - newScore) ) // accept
   {
     score = newScore;
+    oldTop = top;
 //    cerr << "accepted ";
   }
   else
@@ -3465,5 +3469,6 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
     sortCanonical();
 //    cerr << "rejected ";
   }
+  cmap[oldTop]++;
 //  cerr << setw(6) << setprecision(4) << fixed << acceptProb << " " << oldTop << " " << oldScore << " " << top << " " << newScore << endl;
 }

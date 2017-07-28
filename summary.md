@@ -2,16 +2,17 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- finish mixture mcmcNNI and bootstrap: normalize the two maps (weights add up to 1): bootstrap with distance weight and the mcmc pmap, and then combine and use that one for ccdprobs
 
 
-- check paper that does mcmc and IS (someone in cimat told me)
-- read steve derivation: exponential families
-- wait for steve derivation for a better way to compute alpha and lambda
-
+- write down dirichlet paper
+- write down bistro paper to add the new topology stuff
 
 
 ## Check with Bret
-- bistro and mb mean trees are very different (see for example 059. mb mean tree = map, but != bistro mean tree and map). Bistro more balanced, is there a bias towards balance with bootstrap? So, the problem is not with spread, but with center. Could consensus tree of bootstrap be better than mean tree?
+
+- in tree.C, not using acceptProb
+
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 
@@ -65,7 +66,7 @@ input split into tree if they are compatible. The score of a split is the square
   - we do this to calculate the scale in the weights by distance
   - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
   - we want to justify the use of the scale in weight
-
+- check paper that does mcmc and IS (someone in cimat told me)
 
 
 ## Performance improvements

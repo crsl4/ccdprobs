@@ -1,3 +1,7 @@
+## with new mcmcNNI
+../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o test -r 1000 -b 1000 --no-mcmc --mcmc-file test.mcmc.out > test.log
+
+
 ## by default now we do the chains:
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-threads -r 1000 -b 1000 > bistro-threads.log
 ../../Code/bistro/bistro -f ../../Data/artiodactyl-6.fasta -o bistro-nochain -r 1000 -b 1000 --no-mcmc-threads > bistro-nochain.log
