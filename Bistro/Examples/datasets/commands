@@ -1,3 +1,7 @@
+## test mcmcNNI
+../../Code/bistro/bistro -f ../../Data/datasets/027.fasta -o test -r 1000 -b 1000 --no-mcmc --mcmc-file test.mcmc.out > test.log
+
+
 ## Now we want to compare bootstrap trees with mrbayes trees
 ## running MrBayes
 mb ../../Data/datasets/024.nex
@@ -7,7 +11,7 @@ mb ../../Data/datasets/043.nex ## darwin05
 mb ../../Data/datasets/050.nex ## darwin06
 mb ../../Data/datasets/059.nex ## darwin02
 
-## we had to move the files 
+## we had to move the files
 ## then we want to run mb2badger, and compute mean of .tre files to compare to bootstrap from BISTR
 ../../Code/badger/mb2badger 024.nex.run1.t
 ../../Code/badger/mb2badger 027.nex.run1.t
@@ -16,14 +20,25 @@ mb ../../Data/datasets/059.nex ## darwin02
 ../../Code/badger/mb2badger 050.nex.run1.t
 ../../Code/badger/mb2badger 059.nex.run1.t
 
-../../Code/bistro/distances -f ../../Data/datasets/024.fasta --mbfile 024.nex.run1.tre --bistrofile bistro-3-024.bootstrapBL
+../../Code/bistro/distances -f ../../Data/datasets/024.fasta --mbfile 024.nex.run1.tre --bistrofile bistro-6-024.bootstrapBL &> 024.distances
+mv combined.distances combined024.distances
+mv combined.listTrees combined024.listTrees
+../../Code/bistro/distances -f ../../Data/datasets/027.fasta --mbfile 027.nex.run1.tre --bistrofile bistro-6-027.bootstrapBL &> 027.distances
+mv combined.distances combined027.distances
+mv combined.listTrees combined027.listTrees
+../../Code/bistro/distances -f ../../Data/datasets/036.fasta --mbfile 036.nex.run1.tre --bistrofile bistro-6-036.bootstrapBL &> 036.distances
+mv combined.distances combined036.distances
+mv combined.listTrees combined036.listTrees
+../../Code/bistro/distances -f ../../Data/datasets/043.fasta --mbfile 043.nex.run1.tre --bistrofile bistro-6-043.bootstrapBL &> 043.distances
+mv combined.distances combined043.distances
+mv combined.listTrees combined043.listTrees
+../../Code/bistro/distances -f ../../Data/datasets/050.fasta --mbfile 050.nex.run1.tre --bistrofile bistro-6-050.bootstrapBL &> 050.distances
+mv combined.distances combined050.distances
+mv combined.listTrees combined050.listTrees
+../../Code/bistro/distances -f ../../Data/datasets/059.fasta --mbfile 059.nex.run1.tre --bistrofile bistro-6-059.bootstrapBL &> 059.distances
+mv combined.distances combined059.distances
+mv combined.listTrees combined059.listTrees
 
-../../Code/bistro/distances -f ../../Data/datasets/024.fasta --mbfile 024.nex.run1.tre --bistrofile bistro024---0-249.treeBL
-
-
-## segmentation fault
-../../Code/bistro/distances -f ../../Data/datasets/024.fasta --mbfile 024.nex.run1.tre --bistrofile bistro024.bootstrapBL
-../../Code/bistro/distances -f ../../Data/datasets/043.fasta --mbfile 043.nex.run1.tre --bistrofile bistro043.bootstrapBL
 
 ## After runningBistro2.jl:
 source("../../Scripts/readBistro.R")

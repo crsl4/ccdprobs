@@ -46,6 +46,69 @@ generate = function(p,n=1000)
     x[i,] = x[i,] / s[i]
   return(x)
 }
+
+estimateAlphaFixedLambda = function(x,lambda)
+{
+  # The vector (lambda_1*x_1,...,lambda_k*x_k) / sum_i lambda_i*x_i
+  # ~ Dirichlet(alpha_1,...,alpha_k)
+  k = ncol(x)
+  n = nrow(x)
+  xl = x
+  for ( i in 1:k )
+    xl[,i] = x[,i]*lambda[i]
+  # normalize rows
+  s = apply(xl,1,sum)
+  for ( i in 1:n )
+    xl[i,] = xl[i,]/s[i]
+  # get vector proportional to alpha
+  mu = apply(xl,2,mean)
+  v = apply(xl,2,var)
+  # v_i = mu_i * (1-mu_i) / (1 + phi);  sum alpha = phi
+  # average phi estimates for each column
+  phi = mu * (1-mu) / v - 1
+#  a = diag(phi) %*% matrix(1,k,k) %*% diag(mu)
+#  print(a)
+#  alpha1 = apply(a,2,mean)
+#  alpha = mu * phi
+#  cat("mu:    ")
+#  print(mu)
+#n  cat("v:     ")
+#  print(v)
+#  cat("phi:   ")
+#  print(phi)
+#  cat("alpha: ")
+#  print(alpha)
+#  phi.mean = mean(phi)
+  # alpha = mu * phi
+#  print(mu * mean(phi))
+  p = data.frame(alpha = mu * mean(phi), lambda=lambda)
+  p$mu = p$alpha / p$lambda
+  p$mu = p$mu / sum(p$mu)
+  return( p )
+}
+estimateLambdaFixedAlpha = function(x,alpha)
+{
+  k = ncol(x)
+  x2 = x
+  lambda = matrix(0,k,k)
+  for ( i in 1:k )
+  {
+    if ( alpha[i] > 1 )
+    {
+      for ( j in 1:k )
+        x2[,j] = x[,j] / x[,i]
+      m = apply(x2,2,mean)
+      r = alpha / (alpha[i]-1) / m
+      r[i] = 1
+      lambda[i,] = r / mean(r)
+    }
+  }
+  lambda = lambda[ apply(lambda,1,function(x){!all(x==0)}), ]
+  p = data.frame(alpha=alpha, lambda=apply(lambda,2,mean))
+  p$mu = p$alpha / p$lambda
+  p$mu = p$mu / sum(p$mu)
+  return (p)
+}
 ```
 
 ## Run the test
@@ -132,4 +195,117 @@ for ( a in a1 )
 colnames(out) = c("alpha1","alpha2","lambda1","lambda2","m22")
 out = data.frame(out)
 out$m01 = with(out, (alpha1*lambda2 - (1-m22)*alpha2*(lambda1-lambda2)) / (lambda2*(alpha1+alpha2)) )
+out$m02 =  with(out, (alpha2*lambda1 - m22*alpha2*(lambda1-lambda2)) / (lambda2*(alpha1+alpha2)) )
+out$s = with(out, alpha1+alpha2)
+out$p = with(out, alpha1/s)
+out$r = with(out, lambda1/lambda2)
+out1$s = with(out1, alpha1+alpha2)
+out1$p = with(out1, alpha1/s)
+out1$r = with(out1, lambda1/lambda2)
+```
+
+```{r}
+# More exploration
+k = 2
+n = 10^6
+pset = c(0.01,0.1,0.3,0.5,0.7,0.9,0.99)
+sset = c(1,4,16,64,256)
+rset = c(0.1,0.25,0.5,1,2,4,10)
+i=1
+total = length(pset) * length(sset) * length(rset)
+out = matrix(0,total,13)
+for ( p in pset )
+{
+  for ( s in sset )
+  {
+    for ( r in rset )
+    {
+      print(paste(i,"of",total))
+      alpha = c(p*s,(1-p)*s)
+      lambda = c(2*r/(1+r),2/(r+1))
+      df = data.frame(alpha,lambda)
+      df2 = df
+      df2$alpha[2] = df$alpha[2] + 1
+      x2 = generate(df2,n=n)
+      m2 = apply(x2,2,mean)
+      z = m2[2]
+      m01 = p - (1-z)*(r-1)*(1-p)
+      m02 = r*(1-p) - z*(r-1)*(1-p)
+      m11 = 1 - (1-z)*r*(1-p)/p
+      m12 = (1-z)*r*(1-p)/p
+      m21 = 1-z
+      out[i,] = c(alpha,lambda,r,p,s,m01,m02,m11,m12,m21,m22=z)
+      i = i+1
+    }
+  }
+}
+colnames(out) = c("alpha1","alpha2","lambda1","lambda2","r","p","s","m01","m02","m11","m12","m21","m22")
+out = data.frame(out)
+```
+
+```{r}
+require(ggplot2)
+ggplot(out, aes(x=log(p),y=log(m01))) + geom_line() + facet_grid(r ~ s)
+ggplot(out, aes(x=s,y=m01)) + geom_line() + facet_grid(r ~ p)
+ggplot(out, aes(x=log(r),y=m01)) + geom_line() + facet_grid(p ~ s)
+ggplot(out, aes(x=s,y=log(m01)/log(p))) + geom_line() + facet_grid(. ~ r)
+```
+
+### Test ratio idea
+
+```{r}
+k=3
+n=100000
+p = parameters(k,mean.a=2)
+x = generate(p,n)
+x1 = cbind(x[,1]/x[,1],x[,2]/x[,1],x[,3]/x[,1])
+r1 = apply(x1,2,mean)
+x2 = cbind(x[,1]/x[,2],x[,2]/x[,2],x[,3]/x[,2])
+r2 = apply(x2,2,mean)
+x3 = cbind(x[,1]/x[,3],x[,2]/x[,3],x[,3]/x[,3])
+r3 = apply(x3,2,mean)
+lambda12 = r1[2] * (p$alpha[1]-1)/p$alpha[2]
+lambda13 = r1[3] * (p$alpha[1]-1)/p$alpha[3]
+lambda.est1 = c(1,1/lambda12,1/lambda13)
+lambda.est1 = 3 * lambda.est1 / sum(lambda.est1)
+lambda21 = r2[1] * (p$alpha[2]-1)/p$alpha[1]
+lambda23 = r2[3] * (p$alpha[2]-1)/p$alpha[3]
+lambda.est2 = c(1/lambda21,1,1/lambda23)
+lambda.est2 = 3 * lambda.est2 / sum(lambda.est2)
+###
+xl = x %*% diag(p$lambda)
+s = apply(xl,1,sum)
+for ( i in 1:n )
+  xl[i,] = xl[i,]/s[i]
+mu = apply(xl,2,mean)
+#mu = mu/sum(mu)
+v = apply(xl,2,var)
+mu * (1-mu) / v -1
+sum(p$alpha) 
+```
+
+```{r}
+## Test iterative estimate
+p = parameters(4,mean.a=3,shape=2)
+p$mu = with(p, alpha/lambda)
+p$mu = p$mu / sum(p$mu)
+x = generate(p,10^5)
+mu = apply(x,2,mean)
+v = apply(x,2,var)
+lambda0 = mu * (1-mu) / v
+lambda0 = lambda0 / mean(lambda0)
+#pp = estimateAlphaFixedLambda(x,lambda0)
+pp = estimateAlphaFixedLambda(x,rep(1,4))
+print(cbind(pp,p))
+for ( i in 1:20 )
+{
+  ppp = pp
+  pp = estimateLambdaFixedAlpha(x,pp$alpha)
+  pp = estimateAlphaFixedLambda(x,pp$lambda)
+#  print( cbind(pp,p) )
+  df = data.frame(alphaDiff = pp$alpha-ppp$alpha, lambdaDiff = pp$lambda - ppp$lambda, muDiff = pp$mu - ppp$mu)
+  print(round(df,4))
+  print(sum(abs(df$muDiff)))
+}
+print(cbind(pp,p))
 ```

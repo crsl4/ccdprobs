@@ -2,23 +2,26 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- add logl to .mcmc.par file, and change back plotConvergence2
-- check paper that does mcmc and IS (someone in cimat told me)
+- finish mixture mcmcNNI and bootstrap: normalize the two maps (weights add up to 1): bootstrap with distance weight and the mcmc pmap, and then combine and use that one for ccdprobs
 
-- do mrbayes on 024,027...run mb2badger and calculate mean tree from bistro and mean tree from mrbayes, and see how far apart they are. if they are not to far, we can try method below to shrink.
-- update bistro manuscript
 
-- read steve derivation: exponential families
-- wait for steve derivation for a better way to compute alpha and lambda
-
+- write down dirichlet paper
+- write down bistro paper to add the new topology stuff
 
 
 ## Check with Bret
-- print and sign evaluation
 
+- in tree.C, not using acceptProb
 
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
+
+## To knitr Rmd files:
+```R
+library(knitr)
+pandoc("input.Rmd", format = "latex")
+```
+
 
 ## Jordan
 ### Final steps:
@@ -63,6 +66,7 @@ input split into tree if they are compatible. The score of a split is the square
   - we do this to calculate the scale in the weights by distance
   - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
   - we want to justify the use of the scale in weight
+- check paper that does mcmc and IS (someone in cimat told me)
 
 
 ## Performance improvements

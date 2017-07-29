@@ -276,26 +276,26 @@ plotConvergence = function(stem){
         geom_point(aes(y=s6),col="purple"))
 }
 
-plotConvergence2 = function(stem){
-    require(ggplot2)
-    mcmc_out = read.table(paste0(stem,".mcmc.par"),header=FALSE)
-    names(mcmc_out) = c(paste0("pi",1:4),paste0("s",1:6))
-    n = length(mcmc_out$pi1)
+## plotConvergence2 = function(stem){
+##     require(ggplot2)
+##     mcmc_out = read.table(paste0(stem,".mcmc.par"),header=FALSE)
+##     names(mcmc_out) = c(paste0("pi",1:4),paste0("s",1:6))
+##     n = length(mcmc_out$pi1)
 
-    print(ggplot(mcmc_out,aes(x=1:n)) +
-        geom_point(aes(y=pi1),col="blue") +
-        geom_point(aes(y=pi2),col="red") +
-        geom_point(aes(y=pi3),col="green") +
-        geom_point(aes(y=pi4),col="yellow"))
+##     print(ggplot(mcmc_out,aes(x=1:n)) +
+##         geom_point(aes(y=pi1),col="blue") +
+##         geom_point(aes(y=pi2),col="red") +
+##         geom_point(aes(y=pi3),col="green") +
+##         geom_point(aes(y=pi4),col="yellow"))
 
-    print(ggplot(mcmc_out,aes(x=1:n)) +
-        geom_point(aes(y=s1),col="blue") +
-        geom_point(aes(y=s2),col="red") +
-        geom_point(aes(y=s3),col="green") +
-        geom_point(aes(y=s4),col="yellow") +
-        geom_point(aes(y=s5),col="orange") +
-        geom_point(aes(y=s6),col="purple"))
-}
+##     print(ggplot(mcmc_out,aes(x=1:n)) +
+##         geom_point(aes(y=s1),col="blue") +
+##         geom_point(aes(y=s2),col="red") +
+##         geom_point(aes(y=s3),col="green") +
+##         geom_point(aes(y=s4),col="yellow") +
+##         geom_point(aes(y=s5),col="orange") +
+##         geom_point(aes(y=s6),col="purple"))
+## }
 
 plotLengthFrequency = function(stem){
     tab1 = read.table(paste0(stem,".bootstrapCladeBL"),header=TRUE)

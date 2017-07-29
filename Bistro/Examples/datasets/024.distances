@@ -1,0 +1,63 @@
+Processing command line ... done.
+Reading alignment from FASTA file ... done.
+
+Alignment summary:
+Cassowary: -=63 A=2729 C=2847 G=1916 R=1647 T=2973 Y=2015
+Emu: -=6 A=2724 C=2859 G=1940 R=1640 T=2999 Y=2022
+EasternMoa: -=15 A=2703 C=2870 G=1952 R=1625 T=2989 Y=2036
+lbmoa: -=62 A=2670 C=2858 G=1959 R=1585 T=2979 Y=2077
+Dinornis: -=52 A=2691 C=2841 G=1951 R=1597 T=2993 Y=2065
+gskiwi: -=37 A=2714 C=2876 G=1917 R=1609 T=2985 Y=2052
+BrownKiwi: -=21 A=2721 C=2851 G=1939 R=1602 T=2997 Y=2059
+LSKiwi: -=23 A=2744 C=2870 G=1933 R=1601 T=2960 Y=2059
+GreatRhea: -=23 A=2724 C=2852 G=1941 N=1 R=1608 T=2990 Y=2051
+LesserRhea: -=40 A=2725 C=2873 G=1920 R=1588 T=2985 Y=2059
+Ostrich: -=79 A=2725 C=2856 G=1914 N=1 R=1606 T=2971 Y=2038
+BrushTurkey: -=79 A=2740 C=2861 G=1899 R=1612 T=2967 Y=2032
+Chicken: -=62 A=2740 C=2896 G=1929 R=1578 T=2961 Y=2024
+magpiegoose: -=65 A=2716 C=2903 G=1939 R=1574 T=2966 Y=2027
+duck: -=62 A=2691 C=2865 G=1919 R=1603 T=2997 Y=2053
+oystercatcher: -=22 A=2741 C=2878 G=1914 R=1614 T=2973 Y=2048
+turnstone: -=2 A=2727 C=2852 G=1949 R=1592 T=2998 Y=2070
+LBPenguin: -=1 A=2693 C=2870 G=1961 R=1611 T=3003 Y=2051
+GaviaStellata: -=7 A=2743 C=2862 G=1944 R=1598 T=2973 Y=2063
+Alligator: -=9 A=2715 C=2899 G=1952 R=1583 T=2953 Y=2079
+Caiman: -=22 A=2744 C=2849 G=1927 R=1610 T=2987 Y=2051
+Gtinamou: -=20 A=2722 C=2872 G=1963 R=1614 T=2954 Y=2045
+ECtinamou: -=51 A=2680 C=2871 G=1943 R=1602 T=2985 Y=2058
+Crypturellus: -=67 A=2727 C=2863 G=1922 R=1628 T=2950 Y=2033
+
+Read MrBayes file: 024.nex.run1.tre
+read 22001 trees
+Computing MrBayes mean tree
+done.
+MB meanTree = (1:0.061943,((((2:0.0601881,3:0.0592558):0.0295168,((4:0.0604012,5:0.0616232):0.0268623,((6:0.0609094,7:0.0564196):0.0257563,(8:0.055568,9:0.062067):0.0256383):0.0107998):0.0072168):0.00954059,(((((10:0.0584351,11:0.0481539):0.0274329,(12:0.0507255,13:0.053615):0.0202671):0.0104546,(14:0.0532989,15:0.059372):0.0261837):0.00766253,(16:0.0549529,17:0.0606936):0.0281575):0.00898972,((18:0.058076,19:0.0541883):0.0220081,(20:0.0523336,21:0.0627729):0.0288435):0.013281):0.012184):0.0145548,(22:0.0680999,23:0.053197):0.0253921):0.0232983,24:0.0542719);
+Read Bistro file: bistro-6-024.bootstrapBL
+read 1000 trees
+Computing Bistro mean tree
+done.
+Bistro meanTree = (1:0.0402852,((((2:0.0396609,3:0.0392467):0.00437999,(4:0.0398325,5:0.0425959):0.00390973):0.00138546,(((6:0.0424069,7:0.0417964):0.00505505,(8:0.0411127,(9:0.0377531,10:0.0376897):0.00829165):0.00240542):0.0010178,((((11:0.0361696,12:0.037094):0.00599679,(13:0.0391003,14:0.0395072):0.00664326):0.00192441,(15:0.0437715,(16:0.0390453,17:0.0411292):0.00719562):0.00172671):0.000532715,((18:0.042361,19:0.0387008):0.0046463,(20:0.0412141,21:0.0417332):0.0058016):0.00183854):0.000604983):0.00033767):0.00159217,(22:0.0415971,23:0.0400248):0.00438032):0.00636168,24:0.0397541);
+Distance between mean trees: 0.121764
+Getting random sample of 100 trees
+size of newtrees: 99
+size of newtrees: 99
+size of newtrees: 49
+size of newtrees: 49
+Distance for MrBayes trees
+done.
+Distance for Bistro trees
+done.
+Writing MrBayes matrix to file 024.nex.run1.tre.distances
+done.
+Writing MrBayes trees used to file 024.nex.run1.tre.listTrees
+done.
+Writing Bistro matrix to file bistro-6-024.bootstrapBL.distances
+done.
+Writing Bistro trees used to file bistro-6-024.bootstrapBL.listTrees
+done.
+Distance for combined trees
+done.
+Writing combined matrix to file combined.distances
+done.
+Writing combined trees used to file combined.listTrees
+done.

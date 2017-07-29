@@ -394,15 +394,17 @@ double gelmanRubin(vector<vector<double>> logl, double prop)
   return sqrt(v/meanVar);
 }
 
-void combine(vector<vector<vector<double>>> pi1, vector<vector<vector<double>>> rates1, vector<vector<double>>& pi2, vector<vector<double>>& rates2, double prop, ofstream& file)
+void combine(vector<vector<vector<double>>> pi1, vector<vector<vector<double>>> rates1, vector<vector<double>> logl1, vector<vector<double>>& pi2, vector<vector<double>>& rates2, vector<double>& logl2, double prop, ofstream& file)
 {
-  int start = prop*pi1[0].size(); //assumes rates1 is same size
-  for(int i=0; i<pi1.size(); ++i)
+  int start = prop*pi1[0].size(); //assumes rates1,logl1 are same size
+  for(int i=0; i<pi1.size(); ++i) //number of chains
   {
     for(int j=start; j<pi1[0].size(); ++j)
     {
+      file << logl1[i][j] << " "; 
       file << pi1[i][j][0] << " " << pi1[i][j][1] << " " << pi1[i][j][2] << " " << pi1[i][j][3] << " ";
       file << rates1[i][j][0] << " " << rates1[i][j][1] << " " << rates1[i][j][2] << " " << rates1[i][j][3] << " " << rates1[i][j][4] << " " << rates1[i][j][5] << endl;
+      logl2.push_back(logl1[i][j]);
       pi2.push_back(pi1[i][j]);
       rates2.push_back(rates1[i][j]);
     }
@@ -753,9 +755,10 @@ int main(int argc, char* argv[])
     vector<double> sVar(6,0.0);
     vector<vector<double>> pi2;
     vector<vector<double>> rates2;
+    vector<double> logl2;
     string mcmcPars = parameters.getOutFileRoot() + ".mcmc.par";
     ofstream mcmcp(mcmcPars.c_str());
-    combine(pi1,rates1,pi2,rates2,prop,mcmcp);
+    combine(pi1,rates1,logl1,pi2,rates2,logl2,prop,mcmcp);
     mcmcp.close();
     calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar);
     q_init.reset(convert(piMean),convert(sMean));
@@ -829,12 +832,125 @@ int main(int argc, char* argv[])
 
   milliseconds ms7 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
+// NEW CODE --- mcmc on topologies using parsimony
+  Tree* ptree = new Tree(starttree.makeTopologyNumbers(),alignment);
+  ptree->reroot(1);
+  ptree->sortCanonical();
+  vector<Edge*> internalEdges;
+  ptree->getInternalEdges(internalEdges);
+//  cerr << "internal edges:";
+//  for ( vector<Edge*>::iterator e=internalEdges.begin(); e!=internalEdges.end(); ++e )
+//    cerr << " " << (*e)->getNumber();
+//  cerr << endl;
+  map<string,int> pmap; //topology to parsimony score map
+  map<string,int> cmap; //topology to count map
+  unsigned int mcmcGen = 10000;
+  int score = ptree->parsimonyScore(alignment);
+  int minParsimony = ptree->getNumTaxa()*alignment.getNumSites();
+  pmap[ptree->makeTopologyNumbers()] = score;
+  cerr << "MCMC on topologies" << endl;
+  for ( int i=0; i<mcmcGen; ++i )
+  {
+    ptree->mcmcNNI(rng,alignment,score,pmap,cmap,internalEdges,minParsimony);
+//    cerr << ptree->makeTopologyNumbers() << " " << setw(5) << score << endl;
+  }
+  cerr << "Parsimony tree map" << endl;
+  cerr << "Minimum parsimony score = " << minParsimony << endl;
+  cerr << "Total number of sampled trees = " << pmap.size() << endl;
+
+  map<string,double> topologyToParsimonyWeightMap;
+  double PARSIMONY_SCALAR = 3.3;
+  for ( map<string,int>::iterator m=cmap.begin(); m != cmap.end(); ++m )
+  {
+    topologyToParsimonyWeightMap[ (*m).first ] =
+      exp( PARSIMONY_SCALAR *
+			 (minParsimony - pmap[ (*m).first ]) );
+  }
+
+// --------------------- Clade distribution from mcmcNNI sample ------------------------------------
+  vector<int> taxaNumbers0;
+  vector<string> taxaNames0;
+  alignment.getTaxaNumbersAndNames(taxaNumbers0,taxaNames0);
+  CCDProbs<int> ccdCountsMCMC(cmap,taxaNumbers0,taxaNames0);
+  CCDProbs<double> ccdParsimonyMCMC(topologyToParsimonyWeightMap,taxaNumbers0,taxaNames0);
+
+  // write map out to temp files to check
+  string countsSmapFileMCMC = parameters.getOutFileRoot() + ".mcmc-nopars.smap";
+  string countsTmapFileMCMC = parameters.getOutFileRoot() + ".mcmc-nopars.tmap";
+  string parsimonySmapFileMCMC = parameters.getOutFileRoot() + ".mcmc-pars.smap";
+  string parsimonyTmapFileMCMC = parameters.getOutFileRoot() + ".mcmc-pars.tmap";
+
+  ofstream smap2(countsSmapFileMCMC.c_str());
+  ccdCountsMCMC.writeCladeCount(smap2);
+  smap2.close();
+  ofstream tmap2(countsTmapFileMCMC.c_str());
+  ccdCountsMCMC.writePairCount(tmap2);
+  tmap2.close();
+  smap2.open(parsimonySmapFileMCMC);
+  ccdParsimonyMCMC.writeCladeCount(smap2);
+  smap2.close();
+  tmap2.open(parsimonyTmapFileMCMC);
+  ccdParsimonyMCMC.writePairCount(tmap2);
+  tmap2.close();
+
+  cerr << endl << "Topology counts to file after MCMC" << endl;
+  {
+    string topologyCountsFile = parameters.getOutFileRoot() + ".mcmc.topCounts";
+    ofstream topCounts(topologyCountsFile.c_str());
+    map<string,double>::iterator wm=topologyToParsimonyWeightMap.begin();
+
+    topCounts << "tree count parsimonyWt parsimonyScore parsimonyDiff" << endl;;
+    for ( map<string,int>::iterator cm=cmap.begin(); cm != cmap.end(); ++cm )
+    {
+      string top = (*cm).first;
+      topCounts << top << " " << setw(5) << (*cm).second << " " << flush;
+      topCounts << setw(10) << setprecision(4) << fixed << (*wm).second;
+      topCounts << " " << setw(5) << pmap[ top ] << " " << setw(4) << minParsimony - pmap[ top ];
+      topCounts << " " << endl;
+      ++wm;
+    }
+    topCounts << endl;
+    topCounts.close();
+  }
+  cerr << "after writing to files" << endl;
+
+
+  // vector<double> weight(pmap.size(),0);
+  // double total = 0;
+  // cout << "topology to parsimony map" << endl;
+  // {
+  //   int i=0;
+  //   for ( map<string,int>::iterator p=pmap.begin(); p!= pmap.end(); ++p )
+  //   {
+  //     cout << p->first << " " << p->second << endl;
+  //     weight[i] = exp(PARSIMONY_SCALAR*(minParsimony - p->second));
+  //     total += weight[i++];
+  //   }
+  // }
+//  {
+//    int i=0;
+//    for ( vector<double>::iterator p=weight.begin(); p!=weight.end(); ++p )
+//    {
+//      if ( i < 100 )
+//      {
+//	cerr << weight[i] 
+//      (*p) /= total;
+  // {
+  //   int i=0;
+  //   cerr << "tree parsimony probability" << endl;
+  //   for ( map<string,int>::iterator p=pmap.begin(); p!= pmap.end(); ++p )
+  //   {
+  //     if ( weight[i] > 0.000001 )
+  // 	cerr << p->first << " " << p->second << " " << setw(10) << setprecision(8) << fixed << weight[i++] << endl;
+  //   }
+  // }
+
 // not normalized maps; normalization taken care of during alias creation
   map<string,int> topologyToCountMap;
   map<string,double> topologyToWeightMap;
   map<string,double> topologyToDistanceWeightMap;
 
-  if( parameters.getWeightScale() == 0)
+  if( parameters.getWeightScale() == 0) //for distance weight
     parameters.setWeightScale(200);
 
 // --------------------------------------- Bootstrap of topologies from ccdprobs -----------------------
@@ -984,8 +1100,8 @@ int main(int argc, char* argv[])
 	(*m).second * exp( 0.5 *
 			   (minimumParsimonyScore - topologyToParsimonyScoreMap[ (*m).first ]) );
     }
-    cout << endl << "Topology counts to file" << endl;
-    cerr << endl << "Topology counts to file" << endl;
+    cout << endl << "Topology counts to file after bootstrap" << endl;
+    cerr << endl << "Topology counts to file after bootstrap" << endl;
     {
       string topologyCountsFile = parameters.getOutFileRoot() + ".topCounts";
       ofstream topCounts(topologyCountsFile.c_str());

@@ -99,6 +99,7 @@ public:
   void saveLength() { length[1-current] = length[current]; }
   void restoreLength() { length[current] = length[1-current]; }
   void logLikelihoodProfile(ostream&,Alignment&,QMatrix&);
+  void swapNode(Node*, Node*);
 };
 
 class Node
@@ -238,6 +239,8 @@ public:
   void mcmcUpdateEdges(MCMCStats&,QMatrix&,Alignment&,mt19937_64&,Edge*);
   int getMapSize() { return patternToProbMap[current].size(); }
   void logLikelihoodProfile(ostream&,Alignment&,QMatrix&,Edge*);
+  Edge* pickOtherEdge(Edge*,mt19937_64&);
+  void swapEdge(Edge*,Edge*);
 };
 
 class Tree
@@ -335,25 +338,8 @@ public:
   void weightedBL(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>&, double);
   void logLikelihoodProfile(ostream&,Alignment&,QMatrix&);
   void printProfile(ostream&,Alignment&,QMatrix&);
-  // {
-  //   cerr << "Map sizes:";
-  //   for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
-  //     cerr << " " << (*n)->getMapSize();
-  //   cerr << endl;
-  // }
-  // void printMapParents()
-  // {
-  //   cerr << "Map parents:";
-  //   for ( vector<Node*>::iterator n=nodes.begin(); n!=nodes.end(); ++n )
-  //   {
-  //     Edge* foo = (*n)->getMapParent();
-  //     if ( foo == NULL )
-  // 	cerr << " " << -1;
-  //     else
-  // 	cerr << " " << foo->getNumber();
-  //   }
-  //   cerr << endl;
-  // }
+  void getInternalEdges(vector<Edge*>&);
+  void mcmcNNI(mt19937_64&,Alignment&,int&,map<string,int>&,map<string,int>&,vector<Edge*>&,int&);
 };
 
 class MCMCStats
