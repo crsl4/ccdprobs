@@ -2,17 +2,15 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- finish mixture mcmcNNI and bootstrap: normalize the two maps (weights add up to 1): bootstrap with distance weight and the mcmc pmap, and then combine and use that one for ccdprobs
-
+- wait for darwin datasets: do we need to sample more trees? if the mb tree is in a good spot, then maybe we just need to sample more trees
+- compare the pmap/dmap, smap/tmap, see if mb tree is there, do mds
 
 - write down dirichlet paper
 - write down bistro paper to add the new topology stuff
+- try to get the MLE for generalized dirichlet
 
 
 ## Check with Bret
-
-- in tree.C, not using acceptProb
-
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 

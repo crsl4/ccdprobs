@@ -849,8 +849,13 @@ int main(int argc, char* argv[])
   int minParsimony = ptree->getNumTaxa()*alignment.getNumSites();
   pmap[ptree->makeTopologyNumbers()] = score;
   cerr << "MCMC on topologies" << endl;
+  cerr << '|';
   for ( int i=0; i<mcmcGen; ++i )
   {
+    if ( (mcmcGen >= 100) && ( (i+1) % (mcmcGen / 100) == 0 ) )
+      cerr << '*';
+    if ( (mcmcGen >= 10) && ( (i+1) % (mcmcGen / 10) == 0 ) )
+      cerr << '|';
     ptree->mcmcNNI(rng,alignment,score,pmap,cmap,internalEdges,minParsimony);
 //    cerr << ptree->makeTopologyNumbers() << " " << setw(5) << score << endl;
   }
@@ -860,11 +865,10 @@ int main(int argc, char* argv[])
 
   map<string,double> topologyToParsimonyWeightMap;
   double PARSIMONY_SCALAR = 3.3;
-  for ( map<string,int>::iterator m=cmap.begin(); m != cmap.end(); ++m )
+  for ( map<string,int>::iterator m=pmap.begin(); m != pmap.end(); ++m )
   {
     topologyToParsimonyWeightMap[ (*m).first ] =
-      exp( PARSIMONY_SCALAR *
-			 (minParsimony - pmap[ (*m).first ]) );
+      exp( PARSIMONY_SCALAR * (minParsimony - (*m).second) );
   }
 
 // --------------------- Clade distribution from mcmcNNI sample ------------------------------------
@@ -992,6 +996,7 @@ int main(int argc, char* argv[])
 	bootTree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
 	bootTree.sortCanonical();
 	string unrootedTreeString = bootTree.makeTreeNumbers(); // for the new distance method
+	string unrootedTop = bootTree.makeTopologyNumbers(); // to match the pmap that is unrooted
 	bootTree.makeBinary();
 	bootTree.sortCanonical();
 
@@ -1011,11 +1016,11 @@ int main(int argc, char* argv[])
 	if ( topologyToParsimonyScoreMap.find(top) == topologyToParsimonyScoreMap.end() )
 	{
 	  int score = bootTree.parsimonyScore(alignment);
-	  topologyToParsimonyScoreMap[ top ] = score;
+	  topologyToParsimonyScoreMap[ unrootedTop ] = score;
 	  if ( score < minimumParsimonyScore || b==0 )
 	    minimumParsimonyScore = score;
 	}
-	topologyToCountMap[ top ]++;
+	topologyToCountMap[ unrootedTop ]++;
       } // end of bootstrap
       cerr << endl;
       if ( badTrees > 0 )
@@ -1079,7 +1084,7 @@ int main(int argc, char* argv[])
       double d = mtree.distance(boottree);
       cout << boottree->makeTopologyNumbers() << " " << d << endl;
       boottree->reroot(1); //warning: if 1 changes, need to change makeBinary if called after
-      boottree->makeBinary();
+      //boottree->makeBinary();
       boottree->sortCanonical();
       string topDist = boottree->makeTopologyNumbers();
       bootstrapTreesDist << topDist << " " << d << endl;
@@ -1112,7 +1117,7 @@ int main(int argc, char* argv[])
       for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
       {
 	Tree t((*cm).first,alignment);
-	t.unroot();
+	//t.unroot();
 	t.reroot(1);
 	t.sortCanonical();
 	string top = t.makeTopologyNumbers();
@@ -1156,6 +1161,43 @@ int main(int argc, char* argv[])
   vector<string> taxaNames;
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
   milliseconds ms9 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
+// --------------------- Combine bootstrap map and mcmc map -----------------------------------------
+  // first we need to normalize the maps
+  double total = 0.0;
+  string pmapFile = parameters.getOutFileRoot() + ".pmap";
+  ofstream pmapStream(pmapFile.c_str());
+  pmapStream << "tree parsimonyWt" << endl;
+
+  for ( map<string,double>::iterator m=topologyToParsimonyWeightMap.begin(); m != topologyToParsimonyWeightMap.end(); ++m )
+    total += (*m).second;
+  for ( map<string,double>::iterator m=topologyToParsimonyWeightMap.begin(); m != topologyToParsimonyWeightMap.end(); ++m )
+  {
+    (*m).second /= total;
+    pmapStream << (*m).first << " " << (*m).second << endl;
+  }
+  pmapStream.close();
+
+  total = 0.0;
+  string dmapFile = parameters.getOutFileRoot() + ".dmap";
+  ofstream dmapStream(dmapFile.c_str());
+  dmapStream << "tree distanceWt" << endl;
+
+  for ( map<string,double>::iterator m=topologyToDistanceWeightMap.begin(); m != topologyToDistanceWeightMap.end(); ++m )
+    total += (*m).second;
+  for ( map<string,double>::iterator m=topologyToDistanceWeightMap.begin(); m != topologyToDistanceWeightMap.end(); ++m )
+  {
+    (*m).second /= total;
+    dmapStream << (*m).first << " " << (*m).second << endl;
+  }
+  dmapStream.close();
+
+  // now we are going to add the mcmc map to the distance map
+  for ( map<string,double>::iterator m=topologyToParsimonyWeightMap.begin(); m != topologyToParsimonyWeightMap.end(); ++m )
+    if ( topologyToDistanceWeightMap.find((*m).first) == topologyToDistanceWeightMap.end() )
+      topologyToDistanceWeightMap[ (*m).first ] = (*m).second;
+    else
+      topologyToDistanceWeightMap[ (*m).first ] += (*m).second;
 
 // --------------------- Clade distribution from bootstrap sample ------------------------------------
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);

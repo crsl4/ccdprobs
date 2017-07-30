@@ -1,3 +1,6 @@
+../../Code/bistro/bistro -f ../../Data/whales.fasta -o bistro4 -r 1000 -b 1000 > bistro4.log
+../../Code/bistro/bistro -f ../../Data/whales.fasta -o bistro3 -r 10000 -b 1000 > bistro3.log
+
 ## mcmc 4 chains:
 ../../Code/bistro/bistro -f ../../Data/whales.fasta -o bistro-fixT-chains -r 1000 -b 1000 -t "(1,2,((3,(((4,5),14),((6,7),((((8,9),11),(10,12)),13)))),(15,((((16,17),((18,19),(20,21))),((24,((25,26),((27,28),(29,30)))),31)),(22,23)))));" > bistro-fixT-chains.log
 
