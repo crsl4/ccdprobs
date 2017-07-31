@@ -326,8 +326,18 @@ for $\alpha_j>1$, and thus,
 \frac{\lambda_i}{\lambda_j} = \frac{\alpha_i}{\alpha_j-1} \frac{1}{\hat{\mu}_{X_i/X_j}}.
 \end{align*}
 
+\subsection{Maximum Likelihood Estimation}
 
-
+\begin{align*}
+\log f(x) &= \log \Gamma(A) + \sum_{i=1}^k \alpha_i \log(\lambda_i) -
+\sum_{i=1}^k log \Gamma(\alpha_i) + \sum_{i=1}^k (\alpha_i-1\log(X_i))
+-A \log \left( \sum_{i=1}^k \lambda_i X_i \right) \\
+\frac{\partial \log f}{\partial \lambda_i} &=
+\frac{\alpha_i}{\lambda_i} -A\frac{X_i}{\sum_{j=1}^k \lambda_j X_j} \\
+\frac{\partial \log f}{\partial \alpha_i} &=
+\frac{\Gamma'(A)}{\Gamma(A)} + \log(\lambda_i) -\frac{1}{\alpha_i} +
+\log(X_i) -\log \left( \sum_{i=1}^k \lambda_i X_i \right)
+\end{align*}
 
 \section{Simulations}
 
