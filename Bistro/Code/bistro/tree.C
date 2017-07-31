@@ -3453,7 +3453,7 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
   double acceptProb = exp(PARSIMONY_SLOPE * (score - newScore));
   if ( acceptProb > 1 )
     acceptProb = 1;
-  if ( log(runif(rng)) < PARSIMONY_SLOPE * (score - newScore) ) // accept
+  if ( log(runif(rng)) < log(acceptProb) ) // accept
   {
     score = newScore;
     oldTop = top;

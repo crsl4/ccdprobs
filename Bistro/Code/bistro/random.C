@@ -20,8 +20,8 @@ void checkMuV(double mu, double v)
     cerr << "Error with either mu or v negative: " << mu << ", " << v << endl;
     exit(1);
   }
-  else if ( mu < TOL || v < TOL )
-    cerr << "Warning with either mu or v smaller than TOL: " << mu << ", " << v << endl;
+  // else if ( mu < TOL || v < TOL )
+  //   cerr << "Warning with either mu or v smaller than TOL: " << mu << ", " << v << endl;
 }
 
 // In original code, v was the sd
