@@ -1,0 +1,11 @@
+Parameter Mean StdDev
+s(A<->C) 0.3626 -nan
+s(A<->G) 0.1543 -nan
+s(A<->T) 0.1089 -nan
+s(C<->G) 0.0343 -nan
+s(C<->T) 0.3145 -nan
+s(G<->T) 0.0253 -nan
+pi(A)    0.2430 0.0000
+pi(C)    0.2625 0.0000
+pi(G)    0.1838 -nan
+pi(T)    0.3108 0.0000
