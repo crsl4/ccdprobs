@@ -1,3 +1,8 @@
+## distances:
+../../Code/bistro/distances -f ../../Data/whales.fasta --mbfile whales.nex.run1.tre --bistrofile bistro4---0-249.treeBL
+## now go to mds2.R
+
+
 ../../Code/bistro/bistro -f ../../Data/whales.fasta -o bistro4 -r 1000 -b 1000 > bistro4.log
 ../../Code/bistro/bistro -f ../../Data/whales.fasta -o bistro3 -r 10000 -b 1000 > bistro3.log
 

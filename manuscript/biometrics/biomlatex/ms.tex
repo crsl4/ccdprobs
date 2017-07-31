@@ -124,7 +124,7 @@ deteriorates as the parameter space increases due to slow or poor
 mixing. In phylogenetic analyses, the tree space increases
 dramatically with the number of species. Then, MCMC methods need a
 very big chain in order to navigate the huge tree space. In addition,
-the MCMC moves keep most of the parameters constant, when proposing a
+the MCMC moves keep most of the parameters constant when proposing a
 new state, and thus the resulting chain is highly dependent. This
 situation could result in a decreased effective sample size as we need
 a chain with millions of generations to generate few independent
@@ -137,15 +137,19 @@ Importance Sampling for TRees \falta{O...}) for Bayesian phylogenetic
 inference through importance sampling. We compare the performance of
 MrBayes \falta{(reference)} and BISTRO in a variety of simulated and
 real-life datasets, and conclude that this new sampling scheme is more
-efficient as proven by a bigger effective sample size (ESS). However,
-we found difficulties when applying BISTRO to big datasets (more than
-25 taxa).
+efficient as proven by a bigger effective sample size (ESS). We show
+that the importance sampling methodology is adequate to estimate the
+posterior distribution of numerical parameters in a fixed topology,
+like branch lengths, base frequencies and rates, even in big datasets
+of up to \falta{60} taxa.  However, we found difficulties when
+incorporating topology uncertainy in datasets with as little as 25
+taxa.
 
 In section \ref{phyloIS}, we describe the methods applied to
 phylogenetics. In section \ref{examples}, we apply BISTRO to different
 simulated and real-life datasets, and compared its performance to
 MrBayes in terms of ESS. In section \ref{discussion}, we discuss the
-difficulties to apply BISTRO to big trees.
+difficulties to apply BISTRO to big datasets.
 
 
 
@@ -163,19 +167,18 @@ $\mathbf{Q}(\pi,r)$ represents the rate matrix for the GTR model
 (\pi_A, \pi_C, \pi_G, \pi_T)$ and the transition rate parameters $s =
 (s_{AC}, s_{AG}, s_{AT}, s_{CG}, s_{CT}, s_{GT})$. Note that we have a
 different parametrization than MrBayes \falta{(add model
-  parametrization here)} Let $X$ denote the DNA sequences as input
-data.
+  parametrization here)} 
 
-We want to generate independent samples from the posterior
-distribution $p(\theta|X)$ (the $f(x)$ density in section
-\ref{background}). Thus, we need to find a density $g(\theta|X)$ such
-that we can generate samples from $g$ instead of $p$.
+Let $X$ denote the DNA sequences as input data. We want to generate
+independent samples from the posterior distribution
+$p(\theta|X)$. Thus, we need to find a density $g(\theta|X)$ such that
+we can generate samples from $g$ instead of $p$.
 
-The success of importance sampling relies on choosing a $g$ that is
-close enough to the density of interest: centered in the same place
-(no bias) and with heavier tails. We will focus in finding a $g$ that
-ressembles the likelihood $L(X|\theta)$, instead of the posterior
-$p(\theta|X)$, since we can always choose a flat prior.
+The success of importance sampling relies on choosing a density $g$
+that is close enough to the density of interest: centered in the same
+place (no bias) and with slightly heavier tails. We will focus in
+finding a $g$ that ressembles the likelihood $L(X|\theta)$, instead of
+the posterior $p(\theta|X)$.
 
 The importance sampling density $g(\theta|X)$ has three parts since
 $\theta$ has three parts: topology, branch lengths and rate matrix. We
@@ -186,49 +189,22 @@ g(\theta|X) = g_1(\mathbf{Q})g_2(T|\mathbf{Q})g_3(t|T,\mathbf{Q})
 
 \subsection{Density for $\mathbf{Q}$}
 The rate matrix $\mathbf{Q}$ is obtained from two components: a vector
-of base frequencies $\pi\sim
-Dirichlet(\alpha_1,\alpha_2,\alpha_3,\alpha_4)$ and the vector of
-rates $s\sim
-Dirichlet(\beta_1,\beta_2.\beta_3,\beta_4,\beta_5,\beta_6)$. To choose
-the parameters of the Dirichlets, we need to find unbiased estimates
-of $\pi$ and $s$. This proved to be a difficult task. Estimating $\pi$
-by the observed base frequencies and $s$ by the observed pairwise
-counts would yield biased estimates. Estimating $Q$ for a fixed
-initial topology with branch lengths would also yield biased
-estimates. This is due to the fact that we need an estimate of $Q$
-\textit{averaged} over different topologies and branch lengths.  We
-provide a partial solution by using MCMC on the fixed Neighbor-Joining
-(NJ) tree (from Jukes-Cantor distances) to sample branch lengths and
-$Q$. We then use the sample of $Q$ to provide estimates of center and
-variance for the Dirichlet densities.
+of base frequencies $\pi$ and a vector of transition rates $s$ which
+have commonly be assumed to follow a Dirichlet distribution: $\pi\sim
+Dirichlet(\alpha_1,\alpha_2,\alpha_3,\alpha_4)$ and $s\sim
+Dirichlet(\beta_1,\beta_2.\beta_3,\beta_4,\beta_5,\beta_6)$. 
+We found, however, that it is not always the case that the Dirichlet
+distribution is a good fit for $\pi$ and $s$, and we propose the use a
+new distribution: the symmetric generalized Dirichlet \falta{(how to
+  put reference?)}.
 
-\paragraph{Parameters of the proposal density for $\mathbf{Q}$}
-\begin{enumerate}
-\item{Obtain the NJ tree from the JC distances}
-\item{Use MCMC on that fixed tree to obtain estimates of mean and
-    variance for $\pi$:
-    $(\hat{\pi}_1,\hat{\pi}_2,\hat{\pi}_3,\hat{\pi}_4)$ and $s$:
-    $(\hat{s}_1,\hat{s}_2,\hat{s}_3,\hat{s}_4,\hat{s}_5,\hat{s}_6)$}
-\item{Compute the parameters of the proposal Dirichlet densities:
-    $\alpha_i=c_p\hat{\pi}_i$ for $i=1,2,3,4$ and
-    $\beta_j=c_s\hat{s}_j$ for $j=1,2,3,4,5,6$, where $c_p,c_s$
-    correspond to scaling factors that depend in the MCMC variance}
-\end{enumerate}
-
-For the importance sampling scheme, we sample $\pi\sim Dirichlet$ and
-$s\sim Dirichlet$, and then construct $\mathbf{Q}$ like this:
-\begin{equation}
-q_{ij} = \frac{s_{ij}}{2\pi_i} \\
-q_{ii} = -\sum_i q_{ij}
-\end{equation}
-
-\subsubsection{Symmetric Generalized Dirichlet}
+\subsubsection{The Dirichlet distribution}
 The Dirichlet distribution is a very commonly used probability distribution
 on sets of positive random variables constrained to sum to one.
 The random variables $X_1,\ldots,X_k$ are said to have a Dirichlet distribution
 when they have the joint density
 \begin{equation}
-f(x_1,\ldots,x_k) = \frac{\Gamma(\alpha_1 + \cdots + \alpha_k)}{\prod_{i=1}^k \Gamma(\alpha_i)} \prod_{i=1}^k x_i^{\alpha_i - 1},
+  f(x_1,\ldots,x_k) = \frac{\Gamma(\alpha_1 + \cdots + \alpha_k)}{\prod_{i=1}^k \Gamma(\alpha_i)} \prod_{i=1}^k x_i^{\alpha_i - 1},
 \end{equation}
 where $x_i > 0$ for all $i$ and $\sum_{i=1}^k x_i = 1$, and the
 parameters $\alpha_i > 0$ for $i=1,\ldots,k$.
@@ -237,46 +213,33 @@ Each random variable $X_i$ has a marginal
 $\text{Beta}(\alpha_i,\theta-\alpha_i)$ distribution where $\theta =
 \sum_{i=1}^k \alpha_i$.  It follows that $X_i$ has mean
 $\mathsf{E}(X_i) = \alpha_i/\theta$ and variance $\mathsf{Var}(X_i) =
-\alpha_i(\theta-\alpha_i) / ( \theta^2(\theta+1) )$.  A consequence is
-that when attempting to select a Dirichlet distribution to match the
-distribution of a given set of random variables constrained to equal
-one, while it is possible to select the parameters $\{\alpha_i\}$ to
-match the marginal means by letting $\alpha_i$ be proportional to the
-desired marginal mean, there remains only a single scale factor which
-determines all of the marginal variances.  We seek a generalization
-which a larger parameterization that is flexible enough to match, at
-least approximately, the means and variances of each marginal
-distribution.
-
-We know of another generalization of the Dirichlet distribution
-(described \falta{reference}) that is different than what we propose
-here in that it is asymmetric in the indices of the random variables
-and has the property that some correlations may be positive.
-
-\subsubsection{Generation of symmetric generalized Dirichlet random variables}
-
-To generate random variables $X_1,\ldots,X_k \sim
+\alpha_i(\theta-\alpha_i) / ( \theta^2(\theta+1) )$.  To generate
+random variables $X_1,\ldots,X_k \sim
 \text{Dirichlet}(\alpha_1,\ldots,\alpha_k)$, one simply generates
 independent random variables $Y_i \sim \text{Gamma}(\alpha_1,\lambda)$
 for $i=i,\ldots,k$ and any arbitrary $\lambda>0$ (typically
-$\lambda=1$) and letting $X_i = Y_i / \sum_{j=1}^k Y_j$.  This
+$\lambda=1$) and letting $X_i = Y_i / \sum_{j=1}^k Y_j$.
+
+A consequence is that when selecting the parameters $\{\alpha_i\}$ to
+match the marginal means, there remains only a single scale factor
+which determines all of the marginal variances. This
 suggests that by allowing the value of $\lambda$ to vary with $i$ that
 we may be able to create a distribution on positive random variables
 constrained to sum to one with the desired flexibility in the first
 and second moments.
 
-\subsubsection{A Generalized Dirichlet Distribution}
+\subsubsection{A Symmetric Generalized Dirichlet distribution}
 
-Define the symmetric generalized Dirichlet distribution on
-$X_1,\ldots,X_n$ to be the distribution of $(X_1,\ldots,X_k)$ where
-$X_i = Y_i \big/ \sum_{j=1}^k Y_j$ for $i=1,\ldots,k$ where the random
-variables $\{Y_i\}$ are mutually independent and $Y_i \sim
-\text{Gamma}(\alpha_i,\lambda_i)$.  As the distribution of the
-$\{X_i\}$ would be the same if all $\{Y_i\}$ were multiplied by a
-common constant, we add the constraint that $\sum_{i=1}^k \lambda_i =
-k$ so that the average values of the $\{\lambda_i\}$ parameters is
-one.  \falta{(check if setting mean of $1/\lambda_i$ to be one is more
-  convenient)}.
+We define the symmetric generalized Dirichlet distribution
+\falta{(reference)} on $X_1,\ldots,X_n$ to be the distribution of
+$(X_1,\ldots,X_k)$ where $X_i = Y_i \big/ \sum_{j=1}^k Y_j$ for
+$i=1,\ldots,k$ where the random variables $\{Y_i\}$ are mutually
+independent and $Y_i \sim \text{Gamma}(\alpha_i,\lambda_i)$.  As the
+distribution of the $\{X_i\}$ would be the same if all $\{Y_i\}$ were
+multiplied by a common constant, we add the constraint that
+$\sum_{i=1}^k \lambda_i = k$ so that the average values of the
+$\{\lambda_i\}$ parameters is one.  \falta{(check if setting mean of
+  $1/\lambda_i$ to be one is more convenient)}.
 
 It is known \falta{(references)} that the distribution of the sum $S =
 \sum_{i=1}^k Y_i$ may be written as an infinite mixture of Gamma
@@ -291,14 +254,14 @@ closed form solution.
   & \qquad \text{where
     $x_i > 0$ for all $i$ and $\sum_{i=1}^k x_i = 1$}
 \end{eqnarray*}
-\falta{The derivation is shown in the appendix.}
+For the derivation, see \falta{reference}. 
 
 I have not been able to derive closed form solutions for the marginal
 means and variances, but the means are close (if not exactly equal to)
 $(\alpha_i/\lambda_i) \big/ \sum_{j=1}^k (\alpha_j/\lambda_j)$.
 
 \subsubsection{Parameter Estimation}
-
+\label{paramEst}
 Suppose that a probability density $g$ on the $k$-dimensional simplex
 has marginal mean $\{\mu_i\}$ and marginal variances $\{v_i\}$.  We do
 the following.
@@ -308,23 +271,61 @@ $$
 $$
 \lambda_i = \frac{\mu_i(1-\mu_i)}{v_i} \Bigg/ \sum_{j=1}^k \frac{\mu_j(1-\mu_j)}{kv_j}
 $$
-By construction, the mean of the $\{\lambda_i\}$ is one.
-\falta{I need to provide some more theoretical evidence that these parameter estimates work.}
+By construction, the mean of the $\{\lambda_i\}$ is one.  \falta{I
+  need to provide some more theoretical evidence that these parameter
+  estimates work.}
+
+
+To choose the parameters of the symmetric generalized Dirichlets, we
+need to find unbiased estimates of $\pi$ and $s$. This proved to be a
+difficult task. Estimating $\pi$ by the observed base frequencies and
+$s$ by the observed pairwise counts would yield biased
+estimates. Estimating $Q$ for a fixed initial topology with branch
+lengths would also yield biased estimates. This is due to the fact
+that we need an estimate of $Q$ \textit{averaged} over different
+topologies and branch lengths.  We provide a partial solution by using
+MCMC on the fixed Neighbor-Joining (NJ) tree (from Jukes-Cantor
+distances) to sample branch lengths and $Q$. We then use the sample of
+$Q$ to provide estimates of center and variance for the symmetric
+generalized Dirichlet densities.
+
+\paragraph{Parameters of the proposal density for $\mathbf{Q}$}
+\begin{enumerate}
+\item{Obtain the NJ tree from the JC distances}
+\item{Use MCMC on that fixed tree to obtain estimates of mean and
+    variance for $\pi$:
+    $(\hat{\pi}_1,\hat{\pi}_2,\hat{\pi}_3,\hat{\pi}_4)$ and $s$:
+    $(\hat{s}_1,\hat{s}_2,\hat{s}_3,\hat{s}_4,\hat{s}_5,\hat{s}_6)$}
+\item{Compute the parameters of the proposal symmetric generalized
+    Dirichlet densities as described in section \ref{paramEst}}
+\end{enumerate}
+
+For the importance sampling scheme, we sample $\pi\sim
+SymmetricGeneralizedDirichlet$ and $s\sim
+SymmetricGeneralizedDirichlet$, and then construct $\mathbf{Q}$ like
+this:
+\begin{equation}
+q_{ij} = \frac{s_{ij}}{2\pi_i} \\
+q_{ii} = -\sum_i q_{ij}
+\end{equation}
+
 
 
 \subsection{Density for $T$ given $\mathbf{Q}$}
 The proposal density for tree topologies depend on the clade
-distribution \citep{Larget2013}, but first we need an estimate of this
-clade distribution. With the MCMC mean estimate of $Q$, we use the GTR
-distance matrix between sequences to obtain a NJ tree. We then
-bootstrap the sites to get a bootstrap sample of NJ trees. Originally,
-we wanted to use this sample of NJ trees to estimate the clade
-distributions, but the bootstrap sample of trees has two problems:
-one, it is too spread out and therefore, it contains many clades that
-have too low posterior probability, and two, sometimes it lacks
-important clades with high posterior probability that never appear in
-the bootstrap sample. \falta{(do we solve this with the mean tree
-  approach?)}
+distribution \citep{Larget2013}. In order to estimate the clade
+distribution, we need a sample of tree topologies, which we obtain by
+a mixture of a bootstrap sample and an MCMC sample.
+
+First, we bootstrap the sites and with the MCMC mean estimate of $Q$,
+we use the GTR distance matrix between sequences to obtain a NJ tree.
+We repeat this procedure to obtain a bootstrap sample of NJ trees.
+
+The bootstrap sample of trees has two problems: one, it is too spread
+out and therefore, it contains many clades that have too low posterior
+probability, and two, sometimes it lacks important clades with high
+posterior probability that never appear in the bootstrap
+sample. 
 
 To overcome these problems, we decide to weight trees according to its
 distance from a center tree. The procedure is like this: from the
@@ -336,8 +337,21 @@ the distance $d(T_{mean},T)$ defined as in \falta{(reference)}. In
 this way, trees that are close to the mean tree will have higher
 weight, and thus its clades will be sampled more often when using the
 clade distribution. This idea is based on the assumption that the mean
-tree is close to the MLE tree (which has not been proven, but see for
-a slightly different mean tree \falta{reference Megan Owen}).
+tree is close to the MLE tree which has not been proven (but see for a
+slightly different mean tree \falta{reference Megan Owen}).
+
+In practice, we discovered that sometimes the mean tree is far from
+the MLE tree. To avoid a biased clade distribution, we decide to mix
+the bootstrap sample with an MCMC sample as described next. As
+suggested in \falta{reference of nonparsimonious paper}, we used the
+parsimony score as a proxy of a integrated likelihood on tree
+topologies, and run a Markov chain to get a tree sample. We weight
+each tree in the sample with a weight of the form $\exp{-3.3
+  parsimony}$, where the constant $3.3$ was suggested by visual
+inspection of \falta{reference of nonparsimoniuos paper}.
+
+In the end, we combine both the bootstrap sample and the MCMC sample,
+and use the combined sample to estimate the clade distribution.
 
 \paragraph{Estimation of clade distribution}
 \begin{enumerate}
@@ -348,17 +362,21 @@ a slightly different mean tree \falta{reference Megan Owen}).
 \item{Compute the distance of each bootstrap tree to the mean tree as
     in \falta{(reference)}, and weight each tree by $\exp{-\lambda
       d(T_{mean},T)}$}
-\item{Use the weighted sample of bootstrap trees to estimate the clade
-    distribution as in \citep{Larget2013}}
+\item{Obtain an MCMC sample using the parsimony score as a proxy of
+    the integrated likelihood on tree topologies}
+\item{Weight each tree in the MCMC sample with $\exp{-3.3 parsimony}$}
+\item{Combine the two samples and use the resulting sample to estimate
+    the clade distribution as in \citep{Larget2013}}
 \end{enumerate}
 
 For the importance sampling scheme, we will sample one topology from
-the clade distribution \falta{(add details here on how?)}.
+the clade distribution as in \citep{Larget2013} \falta{(add more
+  details?)}.
 
 
 \subsection{Density for $t$ given $T,\mathbf{Q}$}
 After drawing a random topology $T$, we initialize all the branch
-lengths with the NJ distances (and $0.00001$ as minimun length in case
+lengths with the NJ distances (and set $0.00001$ as minimun length in case
 of negative distance), and then estimate the MLE distance for each
 branch at a time using the likelihood function
 \begin{equation}
@@ -376,12 +394,11 @@ values. Since the NJ branch lengths are very different from the MLE
 branch lenghts, we need to do several MLE passes to get accurate
 branch length estimates.
 
-After all branch lengths are set at their MLE, we order the nodes in
-postorder, and traverse the tree from leaves to root. For a given
-cherry, we jointly sample the two branch lengths leading to leaves
-with a Gamma distribution centered at the joint MLE and with variance
-given by the observed $2 \times 2$ information matrix from the
-likelihood:
+After all branch lengths are set at their MLE, we traverse the tree in
+postorder from leaves to root. For a given cherry, we jointly sample
+the two branch lengths leading to leaves with a Gamma distribution
+centered at the joint MLE and with variance given by the observed $2
+\times 2$ information matrix from the likelihood:
 \begin{eqnarray*}
 L(t_1,t_2) &= \prod_k \sum_y \pi_y \sum_{x_1} \sum_{x_2}
 P_{yx_1}(t_1)P_{yx_2}(t_2) * \\
@@ -389,7 +406,6 @@ P_{yx_1}(t_1)P_{yx_2}(t_2) * \\
 \end{eqnarray*}
 The observed information matrix is negative the inverse of the Hessian
 matrix evaluated at the MLE.
-\falta{(add figure)}
 
 This joint density allows us to account for the correlation of
 sister edges, which is an important component of the likelihood under
@@ -475,7 +491,7 @@ The derivation is straightforward.
 Finally, whenever $z_0>7$, we use an exponential distribution, instead
 of truncated normal because of numerical issues.
 
-\subsection{Computation of the weights}
+\subsection{Computation of the importance weights}
 We computed the likelihood of the data given the drawn $\theta = (\mathbf{Q}, T,
 \lambda)$ and evaluated the importance sampling density $g(\theta|X)$
 to obtain the weight:
@@ -493,9 +509,9 @@ we need to normalize the weights:
 \tilde{w}(\theta_j) = \frac{w(\theta_j)}{\sum_{i=1}^n w(\theta_i)}.
 \end{equation}
 
-todo:
+\falta{todo:
 - add here the whole algorithm of bistro
-- describe h functions of interest: indicator of tree
+- describe h functions of interest: indicator of tree}
 
 
 \section{Examples}
@@ -515,9 +531,6 @@ problems, limitations: two components: sample topolgy, and then
 sample BL. the second one is good, but the other one: there are
 cases when the shrinking of bootstrap towards the mean is good, in
 other not 
-- setting priors on pi,s, the dirichlet is fine, but in
-the posterior is not really dirichlet (and we came up with the
-generalized dirichlet
 
 \backmatter
 
