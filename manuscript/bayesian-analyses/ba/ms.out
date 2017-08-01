@@ -1,5 +1,11 @@
 \BOOKMARK [1][-]{section.1}{The Dirichlet distribution}{}% 1
 \BOOKMARK [2][-]{subsection.1.1}{Generation of random variables}{section.1}% 2
 \BOOKMARK [1][-]{section.2}{A Generalized Dirichlet Distribution}{}% 3
-\BOOKMARK [2][-]{subsection.2.1}{Parameter Estimation}{section.2}% 4
-\BOOKMARK [1][-]{section.3}{Simulations}{}% 5
+\BOOKMARK [2][-]{subsection.2.1}{Marginal Moments}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{Parameter Estimation}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.3}{Mean Ratios}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.4}{Exponential Family}{section.2}% 7
+\BOOKMARK [2][-]{subsection.2.5}{Iterative parameter estimation}{section.2}% 8
+\BOOKMARK [2][-]{subsection.2.6}{Maximum Likelihood Estimation}{section.2}% 9
+\BOOKMARK [1][-]{section.3}{Simulations}{}% 10
+\BOOKMARK [1][-]{appendix.A}{Derivation of density}{}% 11

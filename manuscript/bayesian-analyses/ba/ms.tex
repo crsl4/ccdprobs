@@ -37,24 +37,24 @@
 \runtitle{Generalized Dirichlet}
 %%\thankstext{T1}{Footnote to the title with the ``thankstext'' command.}
 
-\begin{aug}
-\author{\fnms{Bret}
-  \snm{Larget}\thanksref{addr1}\ead[label=e1]{bret.larget@wisc.edu}}
-\and
-\author{\fnms{Claudia} \snm{Sol\'{i}s-Lemus}\thanksref{addr1}\ead[label=e2]{solislemus@wisc.edu}}
+% \begin{aug}
+% \author{\fnms{Bret}
+%   \snm{Larget}\thanksref{addr1}\ead[label=e1]{bret.larget@wisc.edu}}
+% \and
+% \author{\fnms{Claudia} \snm{Sol\'{i}s-Lemus}\thanksref{addr1}\ead[label=e2]{solislemus@wisc.edu}}
 
 
-\runauthor{B. Larget and C. Sol\'{i}s-Lemus}
+% \runauthor{B. Larget and C. Sol\'{i}s-Lemus}
 
-\address[addr1]{Department of Botany
-  132 Birge Hall, 
-  430 Lincoln Drive, 
-  Madison, WI 53706
-    \printead{e1} % print email address of "e1"
-    \printead*{e2}
-}
+% \address[addr1]{Department of Botany
+%   132 Birge Hall, 
+%   430 Lincoln Drive, 
+%   Madison, WI 53706
+%     \printead{e1} % print email address of "e1"
+%     \printead*{e2}
+% }
 
-\end{aug}
+% \end{aug}
 
 \begin{abstract}
 \falta{xxx}
@@ -136,19 +136,65 @@ It is known \falta{(REFERENCES)} that the distribution of the sum $S =
 \sum_{i=1}^k Y_i$ may be written as an infinite mixture of Gamma
 densities.  However, the joint density of $X_1,\ldots,X_k)$ has a
 closed form solution.
-$$
+\begin{align*}
 f(x_1,\ldots,x_k) = \frac{\Gamma\big(\sum_{i=1}^k
   \alpha_i\big)\big(\prod_{i=1}^k
   \lambda_i^{\alpha_i}\big)}{\prod_{i=1}^k \Gamma(\alpha_i)} \times
 \frac{\prod_{i=1}^k x_i^{\alpha_i - 1}}{\big(\sum_{i=1}^k \lambda_i
-  x_i\big)^{\sum_{i=1}^k \alpha_i}}, \qquad \text{where $x_i > 0$ for
-  all $i$ and $\sum_{i=1}^k x_i = 1$}
-$$
+  x_i\big)^{\sum_{i=1}^k \alpha_i}},
+\end{align*}
+where $x_i > 0$ for all $i$ and $\sum_{i=1}^k x_i = 1$.
 \falta{The derivation is shown in the appendix.}
 
 I have not been able to derive closed form solutions for the marginal
 means and variances, but the means are close (if not exactly equal to)
 $(\alpha_i/\lambda_i) \big/ \sum_{j=1}^k (\alpha_j/\lambda_j)$.
+
+\subsection{Marginal Moments}
+
+We have not been able to derive closed form solutions for the marginal means and variances,
+but when all of the $\alpha_i$ values are large,
+the marginal means are numerically close to $(\alpha_i/\lambda_i) \big/ \sum_{j=1}^k (\alpha_j/\lambda_j)$,
+which we use for parameter estimation.
+
+We do present the following relationship between marginal means from generalized Dirichlet distributions with common $\lambda$ vectors and $\alpha$ vectors that differ by one in a single dimension.
+To simplify notation,
+we write
+\begin{align*}
+f(x | \alpha,\lambda) = 
+\frac{\Gamma(A)\lambda^\alpha}{\Gamma(\alpha)} \times \frac{x^{\alpha-1}}{(\lambda \cdot x)^A}
+\end{align*}
+where $x=(x_1,\ldots,x_k)$,
+$\alpha=(\alpha_1,\ldots,\alpha_k)$,
+$\lambda=(\lambda_1,\ldots,\lambda_k)$,
+$A = \sum_{i=1}^k \alpha_i$,
+an expression of vectors of the form $a^b$
+is short for $\prod_{i=1}^k a_k^{b_i}$,
+$\Gamma(\alpha)$ represents $\prod_{i=1}^k \Gamma(\alpha_i)$,
+and $\lambda \cdot x$ is the dot product $\sum_{i=1}^k \lambda_i x_i$.
+Furthermore,
+let $\alpha^{(j)}$ represent the vector
+where the $i$th element equals $\alpha_i$ if $i \neq j$ and equals $\alpha_j + 1$
+when $i=j$.
+The integral expression $\int_{\triangle} \cdot\ \mathrm{d}x$
+refers to integration over the simplex $\sum_{i=1}^k x_i=1$ and $0 < x_i < 1$ for $i=1,\ldots,k$.
+We introduce the notation
+\begin{align*}
+m_j(\alpha,\lambda) = \mathsf{E}(X_j | \alpha,\lambda) = \int_{\triangle} x_j f(x|\alpha,\lambda) \, \mathrm{d}x
+\end{align*}
+for the marginal means.
+Using the fact that $a\Gamma(a) = \Gamma(a+1)$,
+we note that
+\begin{eqnarray*}
+x_j f(x | \alpha,\lambda) & = &
+\frac{(\Gamma(A+1)/A)(\lambda^{\alpha^{(j)}}/\lambda_j)}{\Gamma(\alpha^{(j)})/\alpha_j} \times \frac{x^{\alpha^{(j)}-1}(\lambda \cdot x)}{(\lambda \cdot x)^{A+1}} \\
+& = & \bigg(\frac{\alpha_j/\lambda_j}{A}\bigg) (\lambda \cdot x) f(x | \alpha^{(j)},\lambda)
+\end{eqnarray*}
+Integrating over the simplex on both sides shows that
+\begin{align*}
+m_j(\alpha,\lambda) = \bigg(\frac{\alpha_j/\lambda_j}{A}\bigg) \sum_{i=1}^k \lambda_i m_i(\alpha^{(j)},\lambda)
+\end{align*}
+
 
 \subsection{Parameter Estimation}
 
@@ -166,6 +212,132 @@ By construction, the mean of the $\{\lambda_i\}$ is one.
 
 \falta{I need to provide some more theoretical evidence that these
   parameter estimates work.}
+
+\subsection{Mean Ratios}
+Let
+$$
+m_j^0 = m_j(\alpha,\lambda) \qquad \text{and} \qquad m_j^i = m_j(\alpha^{(i)},\lambda)
+$$
+The recursion is
+$$
+m_j^0 = \frac{\alpha_j}{\lambda_jA} \sum_{i=1}^k \lambda_i m_i^j
+$$
+where $A = \sum_{i=1}^k \alpha_i$.
+Multiply both sides of the recursion by $A$ and sum over $j$.
+$$
+A \sum_{j=1}^k m_j^0 = \sum_{j=1}^k \frac{\alpha_j}{\lambda_j} \sum_{i=1}^k \lambda_i m_i^j
+$$
+Simplify the left-hand side and separate the double sum on the right hand side into the cases where $i$ is equal to and not equal to $j$.
+$$
+A = \sum_{i=1}^k \alpha_i m_i^i + \sum_{i=1}^k \sum_{j \neq i} \frac{\alpha_j\lambda_i}{\lambda_j} m_i^j
+$$
+Write $m_i^i$ as one minus the sum of the other means from the same distribution.
+$$
+A = \sum_{i=1}^k \alpha_i \Big(1 - \sum_{j \neq i} m_j^i\Big) + \sum_{i=1}^k \sum_{j \neq i} \frac{\alpha_j\lambda_i}{\lambda_j} m_i^j
+$$
+Subtract $A$ from both sides
+and exchange the order of summation of the second sum.
+$$
+0 =  - \sum_{i=1}^k \sum_{j \neq i} \alpha_i m_j^i + \sum_{i=1}^k \sum_{j \neq i} \frac{\alpha_i\lambda_j}{\lambda_i} m_j^i
+$$
+Combine sums and simplify.
+$$
+0 =  \sum_{i=1}^k \sum_{j \neq i}  \frac{\alpha_i}{\lambda_i} m_j^i (\lambda_j - \lambda_i)
+$$
+Rewrite combining terms for the same $i$ and $j$.
+$$
+0 =  \sum_{i=1}^{k-1} \sum_{j = i+1}^k \Big[\Big(\frac{\alpha_i}{\lambda_i} m_j^i - \frac{\alpha_j}{\lambda_j}m_i^j\Big) (\lambda_j - \lambda_i)\Big]
+$$
+
+This derivation shows that the entire sum equals zero.
+Simulation suggests that each term in the sum equals zero,
+or that
+$$
+\frac{m_i^j}{m_j^i} = \frac{\alpha_i/\lambda_j}{\alpha_j/\lambda_i}
+$$
+More information beyond the sum constraints and the recursion equation
+is needed to demonstrate this last equation.
+
+
+
+\subsection{Exponential Family}
+The natural exponential family has the form $f(x) =
+h(x)\exp{\theta^TT(x)-A(\theta)}$. We can write the generalized
+Dirichlet function in the same form, assuming that the $\{\lambda_i\}$
+are known and with $A=\sum \alpha_i$:
+\begin{align*}
+f(x) & = \exp \left( -\sum_{i=1}^k \log(X_i) \right) * \\
+& \exp \left( \log(\Gamma(A)) + \sum_{i=1}^k \alpha_i \log(\lambda_i)
+  -\sum_{i=1}^k \log(\Gamma(\alpha_i))  \right) * \\
+& \exp \left( \sum_{i=1}^k \alpha_i \log(X_i) -A \log(\sum_{i=1}^k \lambda_iX_i)) \right)
+\end{align*}
+
+where
+
+\begin{align*}
+h(x) & = \exp \left( -\sum_{i=1}^k \log(X_i) -A \log(\sum_{i=1}^k
+  \lambda_i X_i) \right) \\
+A(\theta) &= \log(\Gamma(A)) + \sum_{i=1}^k \alpha_i \log(\lambda_i) 
+  -\sum_{i=1}^k \log(\Gamma(\alpha_i)) \\
+\theta &= (\alpha_1,...,\alpha_k) \\
+T(X) &= (\log(X_1),...,\log(X_k))
+\end{align*}
+
+By the theory of exponential families, we know that:
+\begin{align*}
+\frac{d A(\theta)}{d \theta} &= E(T(X)) \\
+\frac{d^2 A(\theta)}{d \theta^T \theta} &= Var(T(X))
+\end{align*}
+So, for the generalized Dirichlet:
+\begin{align*}
+E(log(X_l)) &= \frac{\partial A(\theta)}{\partial \alpha_l} =
+-\log(\lambda_l) + \frac{\Gamma(\alpha_l)}{\Gamma(\alpha_l)} \\
+Var(log(X_l)) &= \frac{\partial^2 A(\theta)}{\partial \alpha_l^2} = \frac{\Gamma''(\alpha_l)\Gamma(\alpha_l)-\Gamma'(\alpha_l)^2}{\Gamma(\alpha_l)^2}
+\end{align*}
+
+\subsection{Iterative parameter estimation}
+
+Let $X \sim Generalized-Dirichlet(\alpha,\lambda)$, then
+\begin{align*}
+\frac{\lambda X}{\sum_i \lambda_iX_i} \sim Dirichlet(\alpha)
+\end{align*}
+
+Thus, for $\lambda$ fixed, we can estimate $\alpha$ by:
+\begin{align*}
+\lambda_iX_i &\sim Beta(\alpha_i,A-\alpha_i) \\
+E(\lambda_iX_i) &= \frac{\alpha_i}{A} = \mu_i \\
+Var(\lambda_iX_i) &= \frac{\mu_i(1-\mu_i)}{1+A} = v_i \\
+=> \hat{A_i} &= \frac{\hat{\mu_i}(1-\hat{\mu_i})}{\hat{v_i}} -1
+\end{align*}
+Thus, we have $k$ estimates of $\alpha$: $\hat{\alpha}^{(i)}=\lambda
+\bar{X} \hat{A_i}$, and we can average them to get an estimate of $\alpha$.
+
+Next, to estimate $\lambda$, we use that
+\begin{align*}
+\frac{\lambda_iX_i}{\lambda_jX_j} \sim Beta'(\alpha_i,\alpha_j)
+\end{align*}
+
+Therefore, 
+\begin{align*}
+E \left( \frac{\lambda_iX_i}{\lambda_jX_j} \right) = \frac{\alpha_i}{\alpha_j-1}
+\end{align*}
+for $\alpha_j>1$, and thus,
+\begin{align*}
+\frac{\lambda_i}{\lambda_j} = \frac{\alpha_i}{\alpha_j-1} \frac{1}{\hat{\mu}_{X_i/X_j}}.
+\end{align*}
+
+\subsection{Maximum Likelihood Estimation}
+
+\begin{align*}
+\log f(x) &= \log \Gamma(A) + \sum_{i=1}^k \alpha_i \log(\lambda_i) -
+\sum_{i=1}^k log \Gamma(\alpha_i) + \sum_{i=1}^k (\alpha_i-1\log(X_i))
+-A \log \left( \sum_{i=1}^k \lambda_i X_i \right) \\
+\frac{\partial \log f}{\partial \lambda_i} &=
+\frac{\alpha_i}{\lambda_i} -A\frac{X_i}{\sum_{j=1}^k \lambda_j X_j} \\
+\frac{\partial \log f}{\partial \alpha_i} &=
+\frac{\Gamma'(A)}{\Gamma(A)} + \log(\lambda_i) -\frac{1}{\alpha_i} +
+\log(X_i) -\log \left( \sum_{i=1}^k \lambda_i X_i \right)
+\end{align*}
 
 \section{Simulations}
 
@@ -206,6 +378,56 @@ By construction, the mean of the $\{\lambda_i\}$ is one.
     the marginal mode?}
 \end{itemize}
 
+\appendix
+\section{Derivation of density}
+
+Here is a derivation of the density of the symmetric generalized Dirichlet distribution.
+
+The joint density of $(Y_1,\ldots,Y_k)$ where $Y_i \sim \text{Gamma}(\alpha_i,\lambda_i)$ and are mutually independent is
+$$
+f(y_1,\ldots,y_k) = \prod_{i=1}^k \Bigg( \frac{ \lambda_i^{\alpha_i}}{\Gamma(\alpha_i)} y_i^{\alpha_i-1} \mathrm{e}^{-\lambda_i y_i} \Bigg)
+$$
+Let $S = \sum_{i=1}^k Y_i$ and $X_i = Y_i / S$ for $i=1,\ldots,k$.
+Note that $Y_i = SX_i$ for $i=1,\ldots,k-1$ and $Y_k = S(1 - \sum_{i=1}^{k-1} X_i)$.
+We find the joint density of $(S,X_1,\ldots,X_{k-1})$.
+The Jacobian matrix $J = \partial(y_1,\ldots,y_k)/\partial(x_1,\ldots,x_{k-1},s)$
+satisfies
+$$
+J_{ij} = \left\{
+\begin{array}{ll}
+s & \text{if $i=j$, $i<k$} \\
+0 & \text{if $i \neq j$, $i<k$} \\
+x_j & \text{if $i=k$, $j<k$} \\
+-s & \text{if $j=k$, $i<k$} \\
+1 - \sum_{i=1}^{k-1} x_i & \text{if $i=j=k$}
+\end{array}
+\right.
+$$
+To determine the determinant,
+replace the $k$th row by itself minus $x_i/s$ times the $i$th row
+for $i=1,\ldots,k-1$,
+which does not affect the value of the determinant.
+The resulting $k$th row has values 0 in columns $j=1,\ldots,k-1$ and value 1
+in column $k$ and is a diagonal matrix with diagonal elements $s$ in the first $k-1$ rows and 1 in the last row.
+Thus $|\det J| = s^{k-1}$.
+It follows that the joint density of $(X_1,\ldots,X_{k-1},S)$ is
+$$
+f(x_1,\ldots,x_{k-1},s) = s^{k-1} \prod_{i=1}^k \Bigg( \frac{ \lambda_i^{\alpha_i}}{\Gamma(\alpha_i)} (sx_i)^{\alpha_i-1} \mathrm{e}^{-\lambda_i sx_i} \Bigg)
+$$
+where $x_k = 1 - \sum_{i=1}^{k-1} x_i$.
+Rewriting, the joint density is as follows.
+$$
+f(x_1,\ldots,x_{k-1},s) =  \prod_{i=1}^k \Bigg( \frac{ \lambda_i^{\alpha_i}x_i^{\alpha_i-1}}{\Gamma(\alpha_i)} \Bigg)
+s^{\sum_{i=1}^k \alpha_i-1} \mathrm{e}^{-\big(\sum_{i=1}^k \lambda_ix_i\big)s}
+$$
+Holding all of the $x_i$ constant,
+we recognize the gamma density in $s$
+up to constants and can thus integrate out $s$ to find the joint density of the $x_i$.
+$$
+f(x_1,\ldots,x_{k-1}) = \prod_{i=1}^k \Bigg( \frac{ \lambda_i^{\alpha_i}x_i^{\alpha_i-1}}{\Gamma(\alpha_i)} \Bigg) \frac{\Gamma\big(\sum_{i=1}^k \alpha_i\big)}{\big(\sum_{i=1}^k \lambda_i x_i\big)^{\sum_{i=1}^k \alpha_i}}
+$$
+where $x_k = 1 - \sum_{i=1}^{k-1} x_i$.
+Reorganization yields the equation at the bottom of page 1.
 
 \bibliographystyle{ba}
 \bibliography{sample}

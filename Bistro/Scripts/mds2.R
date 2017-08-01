@@ -61,8 +61,8 @@ meanDistance = function(d)
 
 #d.bistro = matrix(scan("bistro4---0-249.treeBL.distances"),100,100)
 #d.mb = matrix(scan("cats-dogs-2.nex.run1.tre.distances"),100,100)
-d.combined = matrix(scan("combined036.distances"),102,102)
-d.trees = read.table("combined036.listTrees",header=FALSE)
+d.combined = matrix(scan("combined.distances"),102,102)
+d.trees = read.table("combined.listTrees",header=FALSE)
 
 mds.phylo.combined(d.combined,d.trees)
 pdf("combined036.pdf")

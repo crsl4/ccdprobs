@@ -547,3 +547,140 @@ bistroFixT-4-050.log:ESS = 29.24, or 2.92 percent.
 bistroFixT-4-059.log:ESS = 65.45, or 6.54 percent.
 bistroFixT-4-064.log:ESS = 17.66, or 1.77 percent.
 ```
+
+## Mixture of bootstrap and MCMC samples
+Not a great performace:
+```
+[claudia@darwin03] (8)$ grep "ESS" bistro-7*.log
+bistro-7-024.log:ESS = 1.00, or 0.10 percent.
+bistro-7-027.log:ESS = 1.00, or 0.10 percent.
+bistro-7-036.log:ESS = 1.00, or 0.10 percent.
+bistro-7-043.log:ESS = 1.00, or 0.10 percent.
+bistro-7-050.log:ESS = 1.94, or 0.19 percent.
+bistro-7-059.log:ESS = 1.00, or 0.10 percent.
+```
+We will study if the MB tree has a big weight in the sample, or not.
+### Whales
+We have two MB trees, with only difference in clades:
+- `((12,10),(13,(11,(9,8))))` with PP = 0.15
+- `((13,(12,11)),(10,(9,8)))` with PP = 0.11
+
+The tree with minimum parsimony in `bistro4.pmap`:
+```
+(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((((16,17),((18,19),(20,21))),31),(((24,(27,28)),(25,26)),(29,30))),(22,23))))); 0.917937
+```
+which is very close to the second tree in MB, but not identical.
+```R
+library(ape)
+mbtre1 = read.tree(text="(2,(((((31,((30,29),((26,25),((28,27),24)))),(23,22)),(((21,20),(19,18)),(17,16))),15),(((((12,10),(13,(11,(9,8)))),(7,6)),(14,(5,4))),3)),1);") ## PP = 0.15
+mbtre2 = read.tree(text="(2,(((((31,((30,29),((26,25),((28,27),24)))),(23,22)),(((21,20),(19,18)),(17,16))),15),(((((13,(12,11)),(10,(9,8))),(7,6)),(14,(5,4))),3)),1);") ## PP = 0.11
+minPars = read.tree(text="(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((((16,17),((18,19),(20,21))),31),(((24,(27,28)),(25,26)),(29,30))),(22,23)))));")
+layout(matrix(c(1,2),nrow=1))
+plot(mbtre2, no.margin=TRUE)
+plot(minPars, no.margin=TRUE)
+```
+We want to know the weight that we give to the MB trees. We search for the canonical form of the MrBayes trees in `whales.nex.run1.top`:
+- MB tree 1, with PP=0.15 in canonical form, does not appear in `bistro4.pmap` (from MCMC sample) nor in `bistro4.dmap` (from bootstrap sample): `(1,2,((3,(((4,5),14),((6,7),((((8,9),11),13),(10,12))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));`
+- MB tree 2, with PP=0.11 in canonical form, does not appear in `bistro4.pmap` (from MCMC sample) nor in `bistro4.dmap` (from bootstrap sample): `(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));`
+
+So, the clade `{22-31}` has high support in MB, but not in Bistro. It is not that bad in the combined sample `bistro4-dist.smap`: `0.10155057 {22-31}`, but in MCMC it has zero: `0.00000000 {22-31}`.
+
+Still, the most probable tree in Bistro is very close to the best tree in MrBayes:
+```R
+bistrotre = read.tree(text="(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),(((24,((25,26),(27,28))),(29,30)),31))))));")
+plot(mbtre1,no.margin=TRUE)
+plot(bistrotre,no.margin=TRUE)
+```
+When we look at the trees with bigger weight:
+```R
+source("../../Scripts/readBistro.R")
+dat = readBistro("bistro4")
+dat[which(dat$w>0.1),]
+tree
+116 (1,2,((3,(((4,5),14),((6,7),((((8,9),11),13),(10,12))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));
+533 (1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),(((24,((25,26),(27,28))),(29,30)),31))))));
+959 (1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));
+logl   logTop   logBL logPrior    logQ    logWt      pi1      pi2
+116 -12700.1 -8.19213 230.458  114.071 32.0449 -12840.3 0.236586 0.224867
+533 -12715.8 -9.33905 218.178  113.526 28.0682 -12839.2 0.239776 0.215767
+959 -12712.5 -4.93804 215.264  113.486 30.1094 -12839.4 0.233628 0.219768
+pi3      pi4       s1       s2        s3         s4       s5
+116 0.174140 0.364407 0.156044 0.215387 0.0539366 0.01190150 0.554446
+533 0.171681 0.372776 0.150807 0.192966 0.0647123 0.00958182 0.571554
+959 0.168277 0.378328 0.160774 0.181724 0.0552653 0.01111810 0.584949
+s6         w
+116 0.00828461 0.1147488
+533 0.01037850 0.3447246
+959 0.00616993 0.2822366
+```
+The second tree in bistro with weight = 0.28 is almost identical to the best tree in MrBayes
+```R
+bistro2 = read.tree(text="(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));")
+```
+For this dataset, we have ESS=4% with fixed tree and ESS=0.4% for random tree.
+What is special about the bistro trees? Nothing special about the logl, nor logTop, nor logPrior, nor logQ, nor logBL
+```R
+ggplot(dat,aes(x=logl,y=logTop,color=w))+geom_point()
+ggplot(dat,aes(x=logPrior,y=logQ,color=w))+geom_point()
+```
+
+### 024
+
+```R
+library(ape)
+mbtre1 = read.tree(text="(24,((23,22),((((21,20),(19,18)),((17,16),((15,14),((13,12),(11,10))))),((((9,8),(7,6)),(5,4)),(2,3)))),1);") ## PP = 0.34
+mbtre2 = read.tree(text="(2,((24,23),((((((((22,21),(20,19)),(18,17)),(16,15)),((14,13),(12,11))),(10,9)),((8,7),(6,5))),(4,3))),1);") ## PP = 0.30
+minPars = read.tree(text="(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((((16,17),((18,19),(20,21))),31),(((24,(27,28)),(25,26)),(29,30))),(22,23)))));")
+layout(matrix(c(1,2),nrow=1))
+plot(mbtre1, no.margin=TRUE)
+plot(mbtre2, no.margin=TRUE)
+```
+These trees are very weird: it seems like if 2 was inserted int a different place, and all the other taxa was simply shifted.
+
+**aqui voy**
+- need to compare to min parsimony tree in pmap, and the remaining:
+We want to know the weight that we give to the MB trees. We search for the canonical form of the MrBayes trees in `whales.nex.run1.top`:
+- MB tree 1, with PP=0.15 in canonical form, does not appear in `bistro4.pmap` (from MCMC sample) nor in `bistro4.dmap` (from bootstrap sample): `(1,2,((3,(((4,5),14),((6,7),((((8,9),11),13),(10,12))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));`
+- MB tree 2, with PP=0.11 in canonical form, does not appear in `bistro4.pmap` (from MCMC sample) nor in `bistro4.dmap` (from bootstrap sample): `(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));`
+
+So, the clade `{22-31}` has high support in MB, but not in Bistro. It is not that bad in the combined sample `bistro4-dist.smap`: `0.10155057 {22-31}`, but in MCMC it has zero: `0.00000000 {22-31}`.
+
+Still, the most probable tree in Bistro is very close to the best tree in MrBayes:
+```R
+bistrotre = read.tree(text="(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),(((24,((25,26),(27,28))),(29,30)),31))))));")
+plot(mbtre1,no.margin=TRUE)
+plot(bistrotre,no.margin=TRUE)
+```
+When we look at the trees with bigger weight:
+```R
+source("../../Scripts/readBistro.R")
+dat = readBistro("bistro4")
+dat[which(dat$w>0.1),]
+tree
+116 (1,2,((3,(((4,5),14),((6,7),((((8,9),11),13),(10,12))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));
+533 (1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),(((24,((25,26),(27,28))),(29,30)),31))))));
+959 (1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));
+logl   logTop   logBL logPrior    logQ    logWt      pi1      pi2
+116 -12700.1 -8.19213 230.458  114.071 32.0449 -12840.3 0.236586 0.224867
+533 -12715.8 -9.33905 218.178  113.526 28.0682 -12839.2 0.239776 0.215767
+959 -12712.5 -4.93804 215.264  113.486 30.1094 -12839.4 0.233628 0.219768
+pi3      pi4       s1       s2        s3         s4       s5
+116 0.174140 0.364407 0.156044 0.215387 0.0539366 0.01190150 0.554446
+533 0.171681 0.372776 0.150807 0.192966 0.0647123 0.00958182 0.571554
+959 0.168277 0.378328 0.160774 0.181724 0.0552653 0.01111810 0.584949
+s6         w
+116 0.00828461 0.1147488
+533 0.01037850 0.3447246
+959 0.00616993 0.2822366
+```
+The second tree in bistro with weight = 0.28 is almost identical to the best tree in MrBayes
+```R
+bistro2 = read.tree(text="(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((16,17),((18,19),(20,21))),((22,23),((((24,(27,28)),(25,26)),(29,30)),31))))));")
+```
+For this dataset, we have ESS=4% with fixed tree and ESS=0.4% for random tree.
+What is special about the bistro trees? Nothing special about the logl, nor logTop, nor logPrior, nor logQ, nor logBL
+```R
+ggplot(dat,aes(x=logl,y=logTop,color=w))+geom_point()
+ggplot(dat,aes(x=logPrior,y=logQ,color=w))+geom_point()
+```
+We can also see the MDS plot, and we can see that the bistro cloud intersects slightly with the MB cloud, but not enough
