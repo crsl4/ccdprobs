@@ -560,6 +560,7 @@ bistro-7-050.log:ESS = 1.94, or 0.19 percent.
 bistro-7-059.log:ESS = 1.00, or 0.10 percent.
 ```
 We will study if the MB tree has a big weight in the sample, or not.
+
 ### Whales
 We have two MB trees, with only difference in clades:
 - `((12,10),(13,(11,(9,8))))` with PP = 0.15
@@ -576,7 +577,7 @@ mbtre1 = read.tree(text="(2,(((((31,((30,29),((26,25),((28,27),24)))),(23,22)),(
 mbtre2 = read.tree(text="(2,(((((31,((30,29),((26,25),((28,27),24)))),(23,22)),(((21,20),(19,18)),(17,16))),15),(((((13,(12,11)),(10,(9,8))),(7,6)),(14,(5,4))),3)),1);") ## PP = 0.11
 minPars = read.tree(text="(1,2,((3,(((4,5),14),((6,7),(((8,9),10),((11,12),13))))),(15,(((((16,17),((18,19),(20,21))),31),(((24,(27,28)),(25,26)),(29,30))),(22,23)))));")
 layout(matrix(c(1,2),nrow=1))
-plot(mbtre2, no.margin=TRUE)
+plot(mbtre1, no.margin=TRUE)
 plot(minPars, no.margin=TRUE)
 ```
 We want to know the weight that we give to the MB trees. We search for the canonical form of the MrBayes trees in `whales.nex.run1.top`:
@@ -684,3 +685,7 @@ ggplot(dat,aes(x=logl,y=logTop,color=w))+geom_point()
 ggplot(dat,aes(x=logPrior,y=logQ,color=w))+geom_point()
 ```
 We can also see the MDS plot, and we can see that the bistro cloud intersects slightly with the MB cloud, but not enough
+
+
+# Simulations
+

@@ -2,17 +2,15 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- wait for datasets in darwin because it was not run correctly (not pmap file created!)
-- compare the pmap/dmap, smap/tmap, see if mb tree is there, do mds
+- rerun mrbayes for 024 (and others?), check if converged?
+- simulated data: get mle tree (and parameters) with raxml, simulate data on this tree (using our code and maybe also seqgen): taxa 6,12,24, but not so many sites (nsites=1500)
+- compare the pmap/dmap, smap/tmap, see if mb/true/mle tree is there, do mds; we need a way to see which clades are not sampled correctly
 
 - write down dirichlet paper
 - finish bistro methods
-- try to get the MLE for generalized dirichlet
 
 
 ## Check with Bret
-- whales MB trees does not apper in pmap or dmap; I think that we need also to try with simulated data because we do not know the truth
-- weird mb trees for 024
 - example for bistro manuscript
 - manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
 
@@ -67,7 +65,8 @@ input split into tree if they are compatible. The score of a split is the square
   - we can get quantiles of logl-max logl of mrbayes runs, and compare to the quantiles we get from normal (or bivariate normal): `dnorm(x)/dnorm(0)`: compare to different datasets
   - we want to justify the use of the scale in weight
 - check paper that does mcmc and IS (someone in cimat told me)
-
+- newton raphson in R (`test-generalized-dirichlet.Rmd`), see [here](https://tminka.github.io/papers/minka-gamma.pdf) for ideas; continue with the pseudoEM that Bret started; think about the EM approach
+- show that the loglikelihood is flat in the direction of alpha/lambda: [directional derivative](http://mathworld.wolfram.com/DirectionalDerivative.html)
 
 ## Performance improvements
 - Test if first branches to estimate are poor in comparison to deep branches: to test without randomize, we need to call sort canonical before sampling branch lengths

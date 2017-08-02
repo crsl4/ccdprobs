@@ -1,3 +1,9 @@
+## after mixture mcmc_bootstrap
+../../Code/bistro/bistro -f ../../Data/sim-artiodactyl-6.fasta -o sim-artiodactyl-bistro -r 1000 -b 1000 > sim-artiodactyl-bistro.log
+../../Code/bistro/bistro -f ../../Data/sim-cats-dogs-nsites1500.fasta -o sim-cats-bistro -r 1000 -b 1000 > sim-cats-bistro.log
+../../Code/bistro/bistro -f ../../Data/sim-whales-nsites1500-sorted.fasta -o sim-whales-bistro -r 1000 -b 1000 > sim-whales-bistro.log
+../../Code/bistro/bistro -f ../../Data/sim-024-nsites1500.fasta -o sim-024-bistro -r 1000 -b 1000 > sim-024-bistro.log
+
 ## distances
 ../../Code/bistro/distances -f ../../Data/sim-whales-nsites1500-sorted.fasta --mbfile sim-whales-nsites1500-sorted.nex.run1.tre --bistrofile bistro5-whales---0-249.treeBL
 
