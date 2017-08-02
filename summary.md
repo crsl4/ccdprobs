@@ -3,6 +3,7 @@ Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
 - rerun mrbayes for 024 (and others?), check if converged?
+- check results for simulated data with mean tree
 - simulated data: get mle tree (and parameters) with raxml, simulate data on this tree (using our code and maybe also seqgen): taxa 6,12,24, but not so many sites (nsites=1500)
 - compare the pmap/dmap, smap/tmap, see if mb/true/mle tree is there, do mds; we need a way to see which clades are not sampled correctly
 
