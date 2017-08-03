@@ -689,3 +689,23 @@ We can also see the MDS plot, and we can see that the bistro cloud intersects sl
 
 # Simulations
 
+```
+(master) $ grep ESS sim-*.log
+sim-artiodactyl-bistro.log:ESS = 502.58, or 50.26 percent.
+sim-cats-bistro.log:ESS = 5.15, or 0.52 percent.
+sim-whales-bistro.log:ESS = 2.09, or 0.21 percent.
+```
+## whales
+```R
+library(ape)
+bistrotre = read.tree(text="(1,2,((3,(((4,5),14),((6,7),(((8,9),((10,12),13)),11)))),(15,(((((16,17),((18,19),(20,21))),(((24,((27,28),(29,30))),(25,26)),31)),22),23))));")
+truetre = read.tree(text="(1:0.0231136,2:0.0372603,((3:0.094114,(((4:0.025742,5:0.022279):0.0249355,14:0.0685793):0.00162364,((6:0.027438,7:0.0173734):0.0210568,((((8:0.0170381,9:0.0189656):0.0173591,11:0.0375513):0.00117174,(10:0.0324844,12:0.0337327):0.00110449):0.000772143,13:0.0327726):0.00476205):0.00772679):0.014146):0.00534651,(15:0.101767,((((16:0.0503164,17:0.0470883):0.0368309,((18:0.0110323,19:0.00505243):0.02207,(20:0.0116344,21:0.0071754):0.0214576):0.0500723):0.0548426,((24:0.0799893,((25:0.0553201,26:0.0455578):0.0283923,((27:0.0766089,28:0.0689195):0.00240495,(29:0.0489559,30:0.0222969):0.0290598):0.00387214):0.00247192):0.0113158,31:0.12489):0.0064916):0.00406787,(22:0.0938027,23:0.0901243):0.00790296):0.00718762):0.0331146):0.064614);")
+layout(matrix(c(1,2),nrow=1))
+plot(truetre, no.margin=TRUE)
+plot(bistrotre, no.margin=TRUE)
+```
+Bistro tree with PP=0.68 is not the true tree. But this is a difficult problem because of a polytomy in the true tree.
+
+# Simulation study
+
+1. We will run MrBayes on the 024,027,036,041,043,050,059,064. They use 20,000*(2n-3) generations, sampling every n generations. So, we modify the nexus files accordingly. We notice that in Ronquist manuscript, they use 900,000 generations in one chain for the 024 dataset. We used 1,100,000 with two chains and they did not converge. They probably did not notice because they had only one chain. We will use 5,000,000 generations in the 024 dataset and test if they converge.

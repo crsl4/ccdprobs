@@ -65,7 +65,8 @@ begin mrbayes;
       lset nst=6;
       outgroup 1;
 
-      mcmc ngen=1100000 printfreq=10000 samplefreq=50;
-      sumt burnin=100000;
-      sump burnin=100000;
+      mcmc ngen=5500000 burninfrac = 0.25 printfreq=10000 samplefreq=250
+      nruns=2 nchains=2 temp=0.40 swapfreq=10;
+      sumt;
+      sump;
 end;
