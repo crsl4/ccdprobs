@@ -1,0 +1,68 @@
+---
+title: "General Dirichlet Integer Moments"
+author: "Bret Larget"
+date: "8/2/2017"
+header-includes:
+   - \usepackage{amsmath}
+output: pdf_document
+---
+
+## Exact moment calculations for integer $\alpha$
+
+Case: $k=2$, $\alpha_1 = m$, $\alpha_2 = n$
+
+$$
+f(x | m, n, \lambda_1, \lambda_2) = 
+\frac{\Gamma(m+n)\lambda_1^m\lambda_2^n}{\Gamma(m)\Gamma(n)}\frac{x^{m-1}(1-x)^{n-1}}{((\lambda_1 - \lambda_2)x + \lambda_2)^{m+n}}
+$$
+
+The expected value of $X$ is the following:
+
+$$
+\mathsf{E}(X) = \int_0^1 \frac{\Gamma(m+n)\lambda_1^m\lambda_2^n}{\Gamma(m)\Gamma(n)}\frac{x^{m}(1-x)^{n-1}}{\big((\lambda_1 - \lambda_2)x + \lambda_2\big)^{m+n}} \, \mathrm{d}x
+$$
+Carry out the substitution $u = (\lambda_1 - \lambda_2)x + \lambda_2$ where
+$\mathrm{d}u = (\lambda_1 - \lambda_2)\mathrm{d}x$,
+$x = (u-\lambda_2)/(\lambda_1-\lambda_2)$, and
+$1-x = -(u - \lambda_1)/(\lambda_1-\lambda_2)$.
+$$
+\mathsf{E}(X) = \frac{\Gamma(m+n)\lambda_1^m\lambda_2^n}{\Gamma(m)\Gamma(n)(\lambda_1-\lambda_2)^{m+n}}
+\int_{\lambda_2}^{\lambda_1} \frac{(-1)^{n-1}(u-\lambda_2)^{m}(u-\lambda_1)^{n-1}}{u^{m+n}} \, \mathrm{d}u
+$$
+After binomial expansion,
+this expression follows.
+$$
+\mathsf{E}(X) = \frac{\Gamma(m+n)\lambda_1^m\lambda_2^n}{\Gamma(m)\Gamma(n)(\lambda_1-\lambda_2)^{m+n}}
+\sum_{i=0}^m \sum_{j=0}^{n-1} \binom{m}{i}\binom{n-1}{j} (-1)^{m-i-j} \lambda_1^{n-1-j} \lambda_2^{m-i}
+\int_{\lambda_2}^{\lambda_1} u^{i+j-m-n} \, \mathrm{d}u
+$$
+In the very last term of the double sum,
+the exponent of $u$ equals $-1$.
+Otherwise,
+integration just raises the exponent by one.
+\begin{eqnarray*}
+\mathsf{E}(X) & = &\frac{\Gamma(m+n)\lambda_1^m\lambda_2^n}{\Gamma(m)\Gamma(n)(\lambda_1-\lambda_2)^{m+n}} \\
+&& \times
+\Bigg[
+\sum_{i=0}^m \sum_{\substack{j=0 \\ (i,j) \neq (m,n-1)}}^{n-1}
+\bigg\{ \binom{m}{i}\binom{n-1}{j} (-1)^{m-i-j} \lambda_1^{n-1-j} \lambda_2^{m-i} \bigg(
+\frac{u^{i+j-m-n+1}}{i+j-m-n+1}
+\Bigg|_{u=\lambda_2}^{\lambda_1} \bigg\} + \log(u)\bigg|_{\lambda_2}^{\lambda_1} \Bigg]
+\end{eqnarray*}
+This simplifies to
+\begin{eqnarray*}
+\mathsf{E}(X) & = & \frac{\Gamma(m+n)\lambda_1^m\lambda_2^n}{\Gamma(m)\Gamma(n)(\lambda_1-\lambda_2)^{m+n}} \\
+&& \times \Bigg[
+\sum_{i=0}^m \sum_{\substack{j=0 \\ (i,j) \neq (m,n-1)}}^{n-1}
+\Bigg\{ \binom{m}{i}\binom{n-1}{j} (-1)^{m-i-j+1}\frac{ (\lambda_2/\lambda_1)^{(m-i)} - (\lambda_1/\lambda_2)^{n-1-j}}{(m-i) + (n-1-j)}\Bigg\}
++ \log\bigg( \frac{\lambda_1}{\lambda_2}\bigg) \Bigg]
+\end{eqnarray*}
+Change the order of both sums and let $r=\lambda_1/\lambda_2$.
+\begin{eqnarray*}
+\mathsf{E}(X) & = & \frac{\Gamma(m+n)}{\Gamma(m)\Gamma(n)}\Big(\frac{r}{r-1}\Big)^m
+\Big(\frac{1}{r-1}\Big)^n \\
+&& \times \Bigg[
+\sum_{i=0}^m \sum_{\substack{j=0 \\ (i,j) \neq (0,0)}}^{n-1}
+\Bigg\{ \binom{m}{i}\binom{n-1}{j} (-1)^{n+i+j}\frac{ r^{-i} - r^j}{i+j}\Bigg\}
++ \log\bigg( \frac{\lambda_1}{\lambda_2}\bigg) \Bigg]
+\end{eqnarray*}
