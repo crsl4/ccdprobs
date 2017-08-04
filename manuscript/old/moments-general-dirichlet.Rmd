@@ -199,3 +199,4 @@ f(x_1,\ldots,x_{k-1}) = \prod_{i=1}^k \Bigg( \frac{ \lambda_i^{\alpha_i}x_i^{\al
 $$
 where $x_k = 1 - \sum_{i=1}^{k-1} x_i$.
 Reorganization yields the equation at the bottom of page 1.
+

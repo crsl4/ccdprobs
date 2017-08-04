@@ -66,6 +66,7 @@ estimateAlphaFixedLambda = function(x,lambda)
   # v_i = mu_i * (1-mu_i) / (1 + phi);  sum alpha = phi
   # average phi estimates for each column
   phi = mu * (1-mu) / v - 1
+  print(phi)
 #  a = diag(phi) %*% matrix(1,k,k) %*% diag(mu)
 #  print(a)
 #  alpha1 = apply(a,2,mean)
@@ -108,6 +109,89 @@ estimateLambdaFixedAlpha = function(x,alpha)
   p$mu = p$alpha / p$lambda
   p$mu = p$mu / sum(p$mu)
   return (p)
+}
+
+## update formula
+updateAlpha = function(a,log.mean,mean.log)
+{
+  temp = 1/a + (mean.log - log.mean + log(a) - psigamma(a)) / (a^2 * (1/a - psigamma(a,deriv=1)))
+  return ( 1 / temp )
+}
+
+# estimate a single alpha and lambda by MLE from an iid sample
+estimateGamma = function(x)
+{
+  log.mean = log(mean(x))
+  mean.log = mean(log(x))
+  a0 = 0.5 / (log.mean - mean.log)
+  a1 = updateAlpha(a0,log.mean,mean.log)
+  while ( abs(a1-a0) > 10^{-12} )
+  {
+    a0 = a1
+    a1 = updateAlpha(a0,log.mean,mean.log)
+  }
+  return(data.frame(alpha=a1,lambda=a1/mean(x)))
+}
+
+estimateOneS = function(x,p)
+{
+  s = with(p, (sum(alpha)-1) / sum(lambda*x))
+  return(s)
+}
+
+estimateAlphaLambda = function(x,s)
+{
+  alpha = numeric(k)
+  lambda = numeric(k)
+  for ( j in 1:k )
+  {
+    y = x[,j] * s
+    al = estimateGamma(y)
+    alpha[j] = al$alpha
+    lambda[j] = al$lambda
+  }
+  alpha = alpha / mean(lambda)
+  lambda = lambda / mean(lambda)
+  return(data.frame(alpha=alpha,lambda=lambda))
+}
+
+integerMean = function(m,n,r)
+{
+  cc = exp(lgamma(m+n) - lgamma(m) - lgamma(n)) * r^m / (r-1)^(m+n)
+  total = log(r)
+  for ( i in 0:m )
+    for ( j in 0:(n-1))
+      if ( i+j != 0 )
+        total = total + choose(m,i)*choose(n-1,j)*(-1)^(i+j+n) * (r^(-i) - r^j)/(i+j)
+  return(cc*total)
+}
+
+integerMean2 = function(m,n,lambda1,lambda2)
+{
+  r = lambda1/lambda2
+  cc = exp(lgamma(m+n) - lgamma(m) - lgamma(n)) * lambda1^m * lambda2^n / (lambda1-lambda2)^(m+n)
+  total = log(r)
+  for ( i in 0:m )
+    for ( j in 0:(n-1))
+      if ( i+j != m+n-1 )
+        total = total + choose(m,i)*choose(n-1,j)*(-1)^(m-i-j+1) * ((1/r)^(m-i) - r^(n-1-j))/(m-i+n-1-j)
+  return(cc*total)
+}
+
+integerMean3 = function(m,n,lambda1,lambda2)
+{
+  r = lambda1/lambda2
+  cc = exp(lgamma(m+n) - lgamma(m) - lgamma(n)) * lambda1^m * lambda2^n / (lambda1-lambda2)^(m+n)
+  total = log(r)
+  for ( i in 0:m )
+    for ( j in 0:(n-1))
+      if ( i+j != m+n-1 )
+      {
+        foo = choose(m,i)*choose(n-1,j)*(-1)^(m-i-j+1) * lambda1^(n-1-j) * lambda2^(m-i) * (lambda1^(i+j-m-n+1) - lambda2^(i+j-m-n+1))/(m-i+n-1-j)
+        print(foo)
+        total = total + foo
+      }
+  return(cc*total)
 }
 ```
 
@@ -308,4 +392,21 @@ for ( i in 1:20 )
   print(sum(abs(df$muDiff)))
 }
 print(cbind(pp,p))
+```
+
+```{r}
+k = 4
+n = 10000
+p = parameters(k,mean.a=5,shape=2)
+x = generate(p,n)
+est0 = estimate(x)
+s = apply(x,1,estimateOneS,p=p)
+p1 = estimateAlphaLambda(x,s)
+for ( i in 1:10 )
+{
+  s = apply(x,1,estimateOneS,p=p1)
+  print(range(s))
+  p1 = estimateAlphaLambda(x,s)
+  print(p1)
+}
 ```
