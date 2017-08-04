@@ -1,0 +1,4538 @@
+
+
+                            MrBayes v3.2.6 x64
+
+                      (Bayesian Analysis of Phylogeny)
+
+              Distributed under the GNU General Public License
+
+
+               Type "help" or "help <command>" for information
+                     on the commands that are available.
+
+                   Type "about" for authorship and general
+                       information about the program.
+
+
+
+   Executing file "024.nex"
+   UNIX line termination
+   Longest line length = 14206
+   Parsing file
+   Expecting NEXUS formatted file
+   Reading taxa block
+      Allocated taxon set
+      Defining new set of 24 taxa
+   Exiting taxa block
+   Reading characters block
+      Allocated matrix
+      Defining new character matrix with 14190 characters
+      Data is Dna
+      Gaps coded as -
+      Missing data coded as ?
+      Taxon  1 -> Cassowary
+      Taxon  2 -> Emu
+      Taxon  3 -> EasternMoa
+      Taxon  4 -> lbmoa
+      Taxon  5 -> Dinornis
+      Taxon  6 -> gskiwi
+      Taxon  7 -> BrownKiwi
+      Taxon  8 -> LSKiwi
+      Taxon  9 -> GreatRhea
+      Taxon 10 -> LesserRhea
+      Taxon 11 -> Ostrich
+      Taxon 12 -> BrushTurkey
+      Taxon 13 -> Chicken
+      Taxon 14 -> magpiegoose
+      Taxon 15 -> duck
+      Taxon 16 -> oystercatcher
+      Taxon 17 -> turnstone
+      Taxon 18 -> LBPenguin
+      Taxon 19 -> GaviaStellata
+      Taxon 20 -> Alligator
+      Taxon 21 -> Caiman
+      Taxon 22 -> Gtinamou
+      Taxon 23 -> ECtinamou
+      Taxon 24 -> Crypturellus
+      Successfully read matrix
+      Setting default partition (does not divide up characters)
+      Setting model defaults
+      Seed (for generating default start values) = 1501850407
+      Setting output file names to "024.nex.run<i>.<p|t>"
+   Exiting characters block
+   Reading mrbayes block
+      Setting autoclose to yes
+      Setting nowarnings to yes
+      Setting Nst to 6
+      Successfully set likelihood model parameters
+      Setting outgroup to taxon "Cassowary"
+      Setting number of generations to 5500000
+      Setting burnin fraction to 0.25
+      Setting print frequency to 10000
+      Setting sample frequency to 250
+      Setting number of runs to 2
+      Setting number of chains to 2
+      Setting heating parameter to 0.400000
+      Setting swap frequency to 10
+      Setting chain output file names to "024.nex.run<i>.<p/t>"
+      Running Markov chain
+      MCMC stamp = 0662310351
+      Seed = 1468535369
+      Swapseed = 1501850407
+      Model settings:
+
+         Data not partitioned --
+            Datatype  = DNA
+            Nucmodel  = 4by4
+            Nst       = 6
+                        Substitution rates, expressed as proportions
+                        of the rate sum, have a Dirichlet prior
+                        (1.00,1.00,1.00,1.00,1.00,1.00)
+            Covarion  = No
+            # States  = 4
+                        State frequencies have a Dirichlet prior
+                        (1.00,1.00,1.00,1.00)
+            Rates     = Equal
+
+      Active parameters: 
+
+         Parameters
+         ---------------------
+         Revmat              1
+         Statefreq           2
+         Ratemultiplier      3
+         Topology            4
+         Brlens              5
+         ---------------------
+
+         1 --  Parameter  = Revmat
+               Type       = Rates of reversible rate matrix
+               Prior      = Dirichlet(1.00,1.00,1.00,1.00,1.00,1.00)
+
+         2 --  Parameter  = Pi
+               Type       = Stationary state frequencies
+               Prior      = Dirichlet
+
+         3 --  Parameter  = Ratemultiplier
+               Type       = Partition-specific rate multiplier
+               Prior      = Fixed(1.0)
+
+         4 --  Parameter  = Tau
+               Type       = Topology
+               Prior      = All topologies equally probable a priori
+               Subparam.  = V
+
+         5 --  Parameter  = V
+               Type       = Branch lengths
+               Prior      = Unconstrained:GammaDir(1.0,0.1000,1.0,1.0)
+
+
+
+      The MCMC sampler will use the following moves:
+         With prob.  Chain will use move
+            0.96 %   Dirichlet(Revmat)
+            0.96 %   Slider(Revmat)
+            0.96 %   Dirichlet(Pi)
+            0.96 %   Slider(Pi)
+            9.62 %   ExtSPR(Tau,V)
+            9.62 %   ExtTBR(Tau,V)
+            9.62 %   NNI(Tau,V)
+            9.62 %   ParsSPR(Tau,V)
+           38.46 %   Multiplier(V)
+           13.46 %   Nodeslider(V)
+            5.77 %   TLMultiplier(V)
+
+      Division 1 has 5318 unique site patterns
+      Initializing conditional likelihoods
+      Using standard SSE likelihood calculator for division 1 (single-precision)
+
+      Initial log likelihoods and log prior probs for run 1:
+         Chain 1 -- -158590.174736 -- 72.542948
+         Chain 2 -- -158790.147040 -- 72.542948
+
+      Initial log likelihoods and log prior probs for run 2:
+         Chain 1 -- -158172.588742 -- 72.542948
+         Chain 2 -- -158579.724079 -- 72.542948
+
+
+      Using a relative burnin of 25.0 % for diagnostics
+
+      Chain results (5500000 generations requested):
+
+          0 -- [-158590.175] (-158790.147) * [-158172.589] (-158579.724) 
+
+      Average standard deviation of split frequencies: 0.449977
+
+      10000 -- (-124209.495) [-124169.676] * (-124256.449) [-124175.375] -- 5:47:42
+
+      Average standard deviation of split frequencies: 0.345798
+
+
+      Average standard deviation of split frequencies: 0.482209
+
+      20000 -- (-124212.960) [-124171.581] * (-124254.354) [-124168.222] -- 5:42:30
+
+      Average standard deviation of split frequencies: 0.625048
+
+
+      Average standard deviation of split frequencies: 0.632430
+
+      30000 -- (-124209.946) [-124154.793] * (-124258.298) [-124175.223] -- 5:43:23
+
+      Average standard deviation of split frequencies: 0.632470
+
+
+      Average standard deviation of split frequencies: 0.632499
+
+      40000 -- (-124200.845) [-124167.658] * (-124258.183) [-124172.241] -- 5:43:31
+
+      Average standard deviation of split frequencies: 0.632521
+
+
+      Average standard deviation of split frequencies: 0.632538
+
+      50000 -- (-124205.424) [-124169.510] * (-124240.399) [-124180.828] -- 5:41:32
+
+      Average standard deviation of split frequencies: 0.632551
+
+
+      Average standard deviation of split frequencies: 0.632562
+
+      60000 -- (-124213.034) [-124161.485] * (-124264.420) [-124177.427] -- 5:41:30
+
+      Average standard deviation of split frequencies: 0.632572
+
+
+      Average standard deviation of split frequencies: 0.632674
+
+      70000 -- (-124207.452) [-124161.972] * (-124249.996) [-124171.816] -- 5:41:18
+
+      Average standard deviation of split frequencies: 0.632674
+
+
+      Average standard deviation of split frequencies: 0.632674
+
+      80000 -- (-124202.731) [-124163.233] * (-124250.293) [-124172.817] -- 5:39:52
+
+      Average standard deviation of split frequencies: 0.632674
+
+
+      Average standard deviation of split frequencies: 0.632674
+
+      90000 -- (-124205.004) [-124169.034] * (-124255.859) [-124168.017] -- 5:39:37
+
+      Average standard deviation of split frequencies: 0.632674
+
+
+      Average standard deviation of split frequencies: 0.632674
+
+      100000 -- (-124194.721) [-124184.209] * (-124267.139) [-124175.836] -- 5:38:24
+
+      Average standard deviation of split frequencies: 0.632613
+
+
+      Average standard deviation of split frequencies: 0.632616
+
+      110000 -- (-124220.977) [-124179.177] * (-124268.876) [-124180.324] -- 5:38:06
+
+      Average standard deviation of split frequencies: 0.632618
+
+
+      Average standard deviation of split frequencies: 0.632621
+
+      120000 -- (-124195.845) [-124164.793] * (-124250.553) [-124172.860] -- 5:36:59
+
+      Average standard deviation of split frequencies: 0.632623
+
+
+      Average standard deviation of split frequencies: 0.632625
+
+      130000 -- (-124206.725) [-124160.831] * (-124261.514) [-124181.522] -- 5:36:39
+
+      Average standard deviation of split frequencies: 0.632627
+
+
+      Average standard deviation of split frequencies: 0.632629
+
+      140000 -- (-124203.902) [-124162.121] * (-124268.564) [-124184.338] -- 5:35:38
+
+      Average standard deviation of split frequencies: 0.632630
+
+
+      Average standard deviation of split frequencies: 0.632632
+
+      150000 -- (-124199.157) [-124157.744] * (-124242.498) [-124172.743] -- 5:35:16
+
+      Average standard deviation of split frequencies: 0.632633
+
+
+      Average standard deviation of split frequencies: 0.632635
+
+      160000 -- [-124159.357] (-124175.854) * (-124250.899) [-124177.675] -- 5:34:51
+
+      Average standard deviation of split frequencies: 0.631669
+
+
+      Average standard deviation of split frequencies: 0.612941
+
+      170000 -- [-124135.510] (-124183.297) * (-124259.109) [-124176.900] -- 5:33:54
+
+      Average standard deviation of split frequencies: 0.595313
+
+
+      Average standard deviation of split frequencies: 0.501427
+
+      180000 -- [-124142.783] (-124164.428) * (-124247.124) [-124176.657] -- 5:32:59
+
+      Average standard deviation of split frequencies: 0.491881
+
+
+      Average standard deviation of split frequencies: 0.482850
+
+      190000 -- [-124144.180] (-124176.009) * (-124253.947) [-124179.738] -- 5:31:38
+
+      Average standard deviation of split frequencies: 0.474294
+
+
+      Average standard deviation of split frequencies: 0.466176
+
+      200000 -- [-124143.429] (-124176.181) * (-124255.166) [-124169.832] -- 5:30:48
+
+      Average standard deviation of split frequencies: 0.458462
+
+
+      Average standard deviation of split frequencies: 0.451125
+
+      210000 -- [-124146.295] (-124166.468) * (-124270.845) [-124178.935] -- 5:29:59
+
+      Average standard deviation of split frequencies: 0.444136
+
+
+      Average standard deviation of split frequencies: 0.437472
+
+      220000 -- [-124141.452] (-124180.317) * (-124257.339) [-124178.656] -- 5:29:12
+
+      Average standard deviation of split frequencies: 0.431110
+
+
+      Average standard deviation of split frequencies: 0.425031
+
+      230000 -- [-124133.168] (-124174.609) * (-124262.173) [-124170.166] -- 5:28:48
+
+      Average standard deviation of split frequencies: 0.419216
+
+
+      Average standard deviation of split frequencies: 0.413647
+
+      240000 -- [-124147.332] (-124179.209) * (-124262.837) [-124173.224] -- 5:28:01
+
+      Average standard deviation of split frequencies: 0.408311
+
+
+      Average standard deviation of split frequencies: 0.403192
+
+      250000 -- [-124148.493] (-124179.186) * (-124253.357) [-124172.586] -- 5:27:15
+
+      Average standard deviation of split frequencies: 0.398277
+
+
+      Average standard deviation of split frequencies: 0.393555
+
+      260000 -- [-124143.478] (-124172.030) * (-124240.605) [-124179.572] -- 5:26:29
+
+      Average standard deviation of split frequencies: 0.389014
+
+
+      Average standard deviation of split frequencies: 0.384645
+
+      270000 -- [-124142.021] (-124171.160) * (-124254.819) [-124177.738] -- 5:25:44
+
+      Average standard deviation of split frequencies: 0.380437
+
+
+      Average standard deviation of split frequencies: 0.376382
+
+      280000 -- [-124144.539] (-124169.494) * (-124250.020) [-124173.828] -- 5:25:00
+
+      Average standard deviation of split frequencies: 0.372471
+
+
+      Average standard deviation of split frequencies: 0.368698
+
+      290000 -- [-124154.173] (-124173.906) * (-124259.758) [-124169.849] -- 5:24:16
+
+      Average standard deviation of split frequencies: 0.365054
+
+
+      Average standard deviation of split frequencies: 0.361854
+
+      300000 -- [-124134.215] (-124170.405) * (-124251.604) [-124167.499] -- 5:23:50
+
+      Average standard deviation of split frequencies: 0.358445
+
+
+      Average standard deviation of split frequencies: 0.355149
+
+      310000 -- [-124138.792] (-124176.510) * (-124253.665) [-124172.835] -- 5:23:23
+
+      Average standard deviation of split frequencies: 0.351958
+
+
+      Average standard deviation of split frequencies: 0.348869
+
+      320000 -- [-124134.363] (-124187.010) * (-124244.832) [-124166.694] -- 5:22:40
+
+      Average standard deviation of split frequencies: 0.345877
+
+
+      Average standard deviation of split frequencies: 0.342976
+
+      330000 -- [-124136.990] (-124178.194) * (-124252.056) [-124168.220] -- 5:21:57
+
+      Average standard deviation of split frequencies: 0.340163
+
+
+      Average standard deviation of split frequencies: 0.337434
+
+      340000 -- [-124149.852] (-124167.551) * (-124268.352) [-124183.112] -- 5:21:14
+
+      Average standard deviation of split frequencies: 0.334785
+
+
+      Average standard deviation of split frequencies: 0.332213
+
+      350000 -- [-124148.364] (-124181.838) * (-124257.002) [-124167.577] -- 5:20:31
+
+      Average standard deviation of split frequencies: 0.329983
+
+
+      Average standard deviation of split frequencies: 0.327551
+
+      360000 -- [-124133.999] (-124170.668) * (-124255.546) [-124187.629] -- 5:19:49
+
+      Average standard deviation of split frequencies: 0.325186
+
+
+      Average standard deviation of split frequencies: 0.322886
+
+      370000 -- [-124142.008] (-124176.577) * (-124260.299) [-124176.487] -- 5:19:07
+
+      Average standard deviation of split frequencies: 0.320648
+
+
+      Average standard deviation of split frequencies: 0.318470
+
+      380000 -- [-124138.869] (-124159.371) * (-124249.696) [-124173.087] -- 5:18:25
+
+      Average standard deviation of split frequencies: 0.316349
+
+
+      Average standard deviation of split frequencies: 0.314283
+
+      390000 -- [-124134.932] (-124184.806) * (-124259.940) [-124179.307] -- 5:17:44
+
+      Average standard deviation of split frequencies: 0.312284
+
+
+      Average standard deviation of split frequencies: 0.310321
+
+      400000 -- [-124146.063] (-124185.590) * (-124259.235) [-124173.346] -- 5:17:15
+
+      Average standard deviation of split frequencies: 0.308408
+
+
+      Average standard deviation of split frequencies: 0.306542
+
+      410000 -- [-124148.636] (-124179.005) * (-124259.064) [-124169.354] -- 5:16:34
+
+      Average standard deviation of split frequencies: 0.304722
+
+
+      Average standard deviation of split frequencies: 0.302945
+
+      420000 -- [-124140.717] (-124175.905) * (-124271.771) [-124175.144] -- 5:15:53
+
+      Average standard deviation of split frequencies: 0.301210
+
+
+      Average standard deviation of split frequencies: 0.299517
+
+      430000 -- [-124145.794] (-124165.304) * (-124275.973) [-124175.107] -- 5:15:12
+
+      Average standard deviation of split frequencies: 0.297862
+
+
+      Average standard deviation of split frequencies: 0.296246
+
+      440000 -- [-124152.671] (-124176.099) * (-124250.016) [-124172.392] -- 5:14:31
+
+      Average standard deviation of split frequencies: 0.294666
+
+
+      Average standard deviation of split frequencies: 0.293122
+
+      450000 -- [-124142.726] (-124172.372) * (-124259.744) [-124175.986] -- 5:13:50
+
+      Average standard deviation of split frequencies: 0.291612
+
+
+      Average standard deviation of split frequencies: 0.290136
+
+      460000 -- [-124151.604] (-124170.180) * (-124244.016) [-124178.102] -- 5:13:10
+
+      Average standard deviation of split frequencies: 0.288691
+
+
+      Average standard deviation of split frequencies: 0.287278
+
+      470000 -- [-124151.710] (-124183.495) * (-124259.713) [-124172.735] -- 5:12:30
+
+      Average standard deviation of split frequencies: 0.285894
+
+
+      Average standard deviation of split frequencies: 0.284540
+
+      480000 -- [-124146.740] (-124176.253) * (-124257.277) [-124179.670] -- 5:11:49
+
+      Average standard deviation of split frequencies: 0.283213
+
+
+      Average standard deviation of split frequencies: 0.281915
+
+      490000 -- [-124135.545] (-124170.375) * (-124261.252) [-124171.185] -- 5:11:09
+
+      Average standard deviation of split frequencies: 0.280642
+
+
+      Average standard deviation of split frequencies: 0.394952
+
+      500000 -- [-124145.732] (-124175.666) * (-124258.434) [-124171.924] -- 5:10:40
+
+      Average standard deviation of split frequencies: 0.394741
+
+
+      Average standard deviation of split frequencies: 0.394535
+
+      510000 -- [-124148.588] (-124180.949) * (-124250.268) [-124176.468] -- 5:09:59
+
+      Average standard deviation of split frequencies: 0.394364
+
+
+      Average standard deviation of split frequencies: 0.394165
+
+      520000 -- [-124142.396] (-124174.020) * (-124250.708) [-124176.555] -- 5:09:20
+
+      Average standard deviation of split frequencies: 0.393970
+
+
+      Average standard deviation of split frequencies: 0.393779
+
+      530000 -- [-124141.549] (-124176.219) * (-124260.077) [-124176.891] -- 5:08:40
+
+      Average standard deviation of split frequencies: 0.393591
+
+
+      Average standard deviation of split frequencies: 0.393407
+
+      540000 -- [-124143.005] (-124170.248) * (-124269.770) [-124168.538] -- 5:08:00
+
+      Average standard deviation of split frequencies: 0.393227
+
+
+      Average standard deviation of split frequencies: 0.393049
+
+      550000 -- [-124142.617] (-124174.630) * (-124262.548) [-124173.877] -- 5:07:30
+
+      Average standard deviation of split frequencies: 0.392875
+
+
+      Average standard deviation of split frequencies: 0.392704
+
+      560000 -- [-124142.246] (-124174.306) * (-124256.962) [-124170.543] -- 5:06:50
+
+      Average standard deviation of split frequencies: 0.392536
+
+
+      Average standard deviation of split frequencies: 0.392371
+
+      570000 -- [-124145.205] (-124174.651) * (-124243.974) [-124168.855] -- 5:06:10
+
+      Average standard deviation of split frequencies: 0.392194
+
+
+      Average standard deviation of split frequencies: 0.392035
+
+      580000 -- [-124138.411] (-124174.175) * (-124264.207) [-124171.864] -- 5:05:31
+
+      Average standard deviation of split frequencies: 0.391879
+
+
+      Average standard deviation of split frequencies: 0.391725
+
+      590000 -- [-124143.486] (-124171.330) * (-124264.859) [-124174.145] -- 5:04:51
+
+      Average standard deviation of split frequencies: 0.391601
+
+
+      Average standard deviation of split frequencies: 0.391452
+
+      600000 -- [-124148.701] (-124183.283) * (-124250.307) [-124171.786] -- 5:04:12
+
+      Average standard deviation of split frequencies: 0.391306
+
+
+      Average standard deviation of split frequencies: 0.391162
+
+      610000 -- [-124153.169] (-124180.562) * (-124240.116) [-124176.373] -- 5:03:41
+
+      Average standard deviation of split frequencies: 0.391020
+
+
+      Average standard deviation of split frequencies: 0.390881
+
+      620000 -- [-124143.704] (-124172.538) * (-124253.495) [-124166.044] -- 5:03:01
+
+      Average standard deviation of split frequencies: 0.390744
+
+
+      Average standard deviation of split frequencies: 0.390609
+
+      630000 -- [-124148.701] (-124179.548) * (-124257.108) [-124174.882] -- 5:02:22
+
+      Average standard deviation of split frequencies: 0.390476
+
+
+      Average standard deviation of split frequencies: 0.390345
+
+      640000 -- [-124140.434] (-124174.163) * (-124248.411) [-124172.765] -- 5:01:43
+
+      Average standard deviation of split frequencies: 0.390217
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      650000 -- [-124141.238] (-124186.158) * (-124248.471) [-124168.339] -- 5:01:04
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      660000 -- [-124140.300] (-124171.903) * (-124260.141) [-124163.418] -- 5:00:32
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      670000 -- [-124137.910] (-124182.534) * (-124246.659) [-124176.081] -- 4:59:53
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      680000 -- [-124138.614] (-124179.528) * (-124249.592) [-124174.102] -- 4:59:14
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      690000 -- [-124137.735] (-124179.215) * (-124246.695) [-124170.795] -- 4:58:35
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      700000 -- [-124141.620] (-124172.741) * (-124258.889) [-124170.155] -- 4:57:56
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      710000 -- [-124143.617] (-124183.377) * (-124256.299) [-124186.288] -- 4:57:24
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      720000 -- [-124141.591] (-124177.558) * (-124264.000) [-124176.611] -- 4:56:45
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390206
+
+      730000 -- [-124142.945] (-124172.336) * (-124249.746) [-124174.667] -- 4:56:06
+
+      Average standard deviation of split frequencies: 0.390206
+
+
+      Average standard deviation of split frequencies: 0.390205
+
+      740000 -- [-124146.928] (-124191.182) * (-124246.018) [-124176.082] -- 4:55:27
+
+      Average standard deviation of split frequencies: 0.390205
+
+
+      Average standard deviation of split frequencies: 0.390204
+
+      750000 -- [-124139.837] (-124174.612) * (-124252.158) [-124178.208] -- 4:54:55
+
+      Average standard deviation of split frequencies: 0.390204
+
+
+      Average standard deviation of split frequencies: 0.390203
+
+      760000 -- [-124143.058] (-124172.442) * (-124265.723) [-124177.532] -- 4:54:16
+
+      Average standard deviation of split frequencies: 0.390203
+
+
+      Average standard deviation of split frequencies: 0.390202
+
+      770000 -- [-124143.663] (-124186.041) * (-124247.793) [-124178.427] -- 4:53:37
+
+      Average standard deviation of split frequencies: 0.390202
+
+
+      Average standard deviation of split frequencies: 0.390201
+
+      780000 -- [-124142.713] (-124181.461) * (-124256.682) [-124181.637] -- 4:52:58
+
+      Average standard deviation of split frequencies: 0.390201
+
+
+      Average standard deviation of split frequencies: 0.390200
+
+      790000 -- [-124147.648] (-124169.262) * (-124252.054) [-124171.488] -- 4:52:20
+
+      Average standard deviation of split frequencies: 0.390200
+
+
+      Average standard deviation of split frequencies: 0.390199
+
+      800000 -- [-124141.150] (-124184.136) * (-124267.234) [-124171.806] -- 4:51:41
+
+      Average standard deviation of split frequencies: 0.390199
+
+
+      Average standard deviation of split frequencies: 0.390199
+
+      810000 -- [-124147.083] (-124184.563) * (-124255.397) [-124178.134] -- 4:51:03
+
+      Average standard deviation of split frequencies: 0.390198
+
+
+      Average standard deviation of split frequencies: 0.390198
+
+      820000 -- [-124145.060] (-124188.282) * (-124258.604) [-124163.045] -- 4:50:24
+
+      Average standard deviation of split frequencies: 0.390197
+
+
+      Average standard deviation of split frequencies: 0.390197
+
+      830000 -- [-124138.304] (-124176.347) * (-124245.792) [-124174.611] -- 4:49:45
+
+      Average standard deviation of split frequencies: 0.390196
+
+
+      Average standard deviation of split frequencies: 0.390196
+
+      840000 -- [-124143.677] (-124171.066) * (-124248.673) [-124187.904] -- 4:49:07
+
+      Average standard deviation of split frequencies: 0.390196
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      850000 -- [-124142.985] (-124177.584) * (-124264.452) [-124179.373] -- 4:48:34
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      860000 -- [-124136.029] (-124159.763) * (-124256.092) [-124174.832] -- 4:47:55
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      870000 -- [-124146.021] (-124166.347) * (-124259.205) [-124183.521] -- 4:47:17
+
+      Average standard deviation of split frequencies: 0.390193
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      880000 -- [-124149.033] (-124170.434) * (-124252.286) [-124178.371] -- 4:46:39
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      890000 -- [-124147.056] (-124177.063) * (-124260.181) [-124171.571] -- 4:46:00
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      900000 -- [-124146.020] (-124164.989) * (-124264.035) [-124170.408] -- 4:45:22
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      910000 -- [-124141.365] (-124189.904) * (-124243.443) [-124177.384] -- 4:44:43
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      920000 -- [-124141.336] (-124181.245) * (-124255.388) [-124170.841] -- 4:44:10
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      930000 -- [-124137.520] (-124177.632) * (-124264.779) [-124180.469] -- 4:43:32
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390206
+
+      940000 -- [-124147.593] (-124174.317) * (-124260.479) [-124184.254] -- 4:42:53
+
+      Average standard deviation of split frequencies: 0.390206
+
+
+      Average standard deviation of split frequencies: 0.390205
+
+      950000 -- [-124146.711] (-124195.917) * (-124270.316) [-124172.001] -- 4:42:15
+
+      Average standard deviation of split frequencies: 0.390205
+
+
+      Average standard deviation of split frequencies: 0.390204
+
+      960000 -- [-124141.254] (-124170.649) * (-124270.802) [-124174.980] -- 4:41:37
+
+      Average standard deviation of split frequencies: 0.390204
+
+
+      Average standard deviation of split frequencies: 0.390204
+
+      970000 -- [-124141.867] (-124179.080) * (-124258.847) [-124170.790] -- 4:40:59
+
+      Average standard deviation of split frequencies: 0.390203
+
+
+      Average standard deviation of split frequencies: 0.390203
+
+      980000 -- [-124145.099] (-124182.646) * (-124265.637) [-124172.293] -- 4:40:25
+
+      Average standard deviation of split frequencies: 0.390202
+
+
+      Average standard deviation of split frequencies: 0.390202
+
+      990000 -- [-124145.462] (-124177.082) * (-124258.136) [-124174.662] -- 4:39:47
+
+      Average standard deviation of split frequencies: 0.390202
+
+
+      Average standard deviation of split frequencies: 0.390201
+
+      1000000 -- [-124142.154] (-124168.561) * (-124248.266) [-124171.828] -- 4:39:09
+
+      Average standard deviation of split frequencies: 0.390201
+
+
+      Average standard deviation of split frequencies: 0.390201
+
+      1010000 -- [-124150.160] (-124189.555) * (-124256.010) [-124174.290] -- 4:38:30
+
+      Average standard deviation of split frequencies: 0.390200
+
+
+      Average standard deviation of split frequencies: 0.390200
+
+      1020000 -- [-124140.022] (-124173.910) * (-124253.173) [-124169.852] -- 4:37:52
+
+      Average standard deviation of split frequencies: 0.390200
+
+
+      Average standard deviation of split frequencies: 0.390199
+
+      1030000 -- [-124149.127] (-124175.378) * (-124253.470) [-124170.524] -- 4:37:14
+
+      Average standard deviation of split frequencies: 0.390199
+
+
+      Average standard deviation of split frequencies: 0.390199
+
+      1040000 -- [-124156.224] (-124179.037) * (-124250.535) [-124174.866] -- 4:36:40
+
+      Average standard deviation of split frequencies: 0.390198
+
+
+      Average standard deviation of split frequencies: 0.390198
+
+      1050000 -- [-124155.089] (-124173.047) * (-124259.059) [-124175.102] -- 4:36:02
+
+      Average standard deviation of split frequencies: 0.390198
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      1060000 -- [-124141.915] (-124184.075) * (-124261.846) [-124171.718] -- 4:35:24
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      1070000 -- [-124152.183] (-124184.015) * (-124248.642) [-124177.149] -- 4:34:46
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      1080000 -- [-124153.375] (-124167.408) * (-124247.407) [-124187.110] -- 4:34:08
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      1090000 -- [-124152.785] (-124165.805) * (-124260.131) [-124179.061] -- 4:33:30
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      1100000 -- [-124147.627] (-124179.094) * (-124253.920) [-124172.292] -- 4:32:55
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      1110000 -- [-124143.902] (-124175.669) * (-124258.797) [-124175.922] -- 4:32:17
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      1120000 -- [-124157.521] (-124176.576) * (-124248.777) [-124170.694] -- 4:31:39
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      1130000 -- [-124146.408] (-124161.518) * (-124266.142) [-124182.041] -- 4:31:01
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      1140000 -- [-124149.807] (-124174.581) * (-124259.107) [-124181.796] -- 4:30:23
+
+      Average standard deviation of split frequencies: 0.390206
+
+
+      Average standard deviation of split frequencies: 0.390206
+
+      1150000 -- [-124148.090] (-124174.561) * (-124272.792) [-124171.949] -- 4:29:45
+
+      Average standard deviation of split frequencies: 0.390206
+
+
+      Average standard deviation of split frequencies: 0.390205
+
+      1160000 -- [-124149.981] (-124182.842) * (-124259.162) [-124166.700] -- 4:29:11
+
+      Average standard deviation of split frequencies: 0.390205
+
+
+      Average standard deviation of split frequencies: 0.390205
+
+      1170000 -- [-124147.499] (-124181.475) * (-124258.478) [-124174.182] -- 4:28:33
+
+      Average standard deviation of split frequencies: 0.390204
+
+
+      Average standard deviation of split frequencies: 0.390204
+
+      1180000 -- [-124138.077] (-124167.846) * (-124258.681) [-124178.206] -- 4:27:55
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390190
+
+      1190000 -- [-124137.334] (-124177.818) * (-124262.676) [-124169.357] -- 4:27:17
+
+      Average standard deviation of split frequencies: 0.390189
+
+
+      Average standard deviation of split frequencies: 0.390189
+
+      1200000 -- [-124137.589] (-124177.067) * (-124243.522) [-124174.067] -- 4:26:39
+
+      Average standard deviation of split frequencies: 0.390189
+
+
+      Average standard deviation of split frequencies: 0.390189
+
+      1210000 -- [-124146.202] (-124193.399) * (-124254.697) [-124174.471] -- 4:26:01
+
+      Average standard deviation of split frequencies: 0.390188
+
+
+      Average standard deviation of split frequencies: 0.390188
+
+      1220000 -- [-124145.037] (-124166.192) * (-124254.837) [-124170.970] -- 4:25:27
+
+      Average standard deviation of split frequencies: 0.390188
+
+
+      Average standard deviation of split frequencies: 0.390188
+
+      1230000 -- [-124145.486] (-124180.999) * (-124262.191) [-124177.339] -- 4:24:49
+
+      Average standard deviation of split frequencies: 0.390187
+
+
+      Average standard deviation of split frequencies: 0.390187
+
+      1240000 -- [-124143.099] (-124180.413) * (-124256.157) [-124182.503] -- 4:24:11
+
+      Average standard deviation of split frequencies: 0.390187
+
+
+      Average standard deviation of split frequencies: 0.390187
+
+      1250000 -- [-124148.779] (-124180.251) * (-124246.417) [-124178.015] -- 4:23:33
+
+      Average standard deviation of split frequencies: 0.390186
+
+
+      Average standard deviation of split frequencies: 0.390186
+
+      1260000 -- [-124142.367] (-124178.959) * (-124255.054) [-124180.730] -- 4:22:55
+
+      Average standard deviation of split frequencies: 0.390186
+
+
+      Average standard deviation of split frequencies: 0.390186
+
+      1270000 -- [-124146.826] (-124170.694) * (-124257.134) [-124177.936] -- 4:22:17
+
+      Average standard deviation of split frequencies: 0.390185
+
+
+      Average standard deviation of split frequencies: 0.390185
+
+      1280000 -- [-124140.275] (-124176.227) * (-124248.068) [-124188.406] -- 4:21:39
+
+      Average standard deviation of split frequencies: 0.390185
+
+
+      Average standard deviation of split frequencies: 0.390185
+
+      1290000 -- [-124149.484] (-124170.647) * (-124247.008) [-124172.083] -- 4:21:01
+
+      Average standard deviation of split frequencies: 0.390185
+
+
+      Average standard deviation of split frequencies: 0.390184
+
+      1300000 -- [-124144.321] (-124167.509) * (-124260.196) [-124169.872] -- 4:20:27
+
+      Average standard deviation of split frequencies: 0.390184
+
+
+      Average standard deviation of split frequencies: 0.390196
+
+      1310000 -- [-124140.156] (-124188.829) * (-124264.105) [-124172.400] -- 4:19:49
+
+      Average standard deviation of split frequencies: 0.390196
+
+
+      Average standard deviation of split frequencies: 0.390196
+
+      1320000 -- [-124154.236] (-124179.125) * (-124256.499) [-124170.975] -- 4:19:11
+
+      Average standard deviation of split frequencies: 0.390196
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      1330000 -- [-124144.099] (-124169.689) * (-124243.723) [-124177.897] -- 4:18:33
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      1340000 -- [-124144.382] (-124179.356) * (-124260.152) [-124177.491] -- 4:17:58
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      1350000 -- [-124142.515] (-124194.852) * (-124244.847) [-124171.457] -- 4:17:21
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      1360000 -- [-124141.902] (-124171.879) * (-124259.672) [-124170.360] -- 4:16:43
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390193
+
+      1370000 -- [-124135.703] (-124183.640) * (-124242.311) [-124182.218] -- 4:16:05
+
+      Average standard deviation of split frequencies: 0.390193
+
+
+      Average standard deviation of split frequencies: 0.390193
+
+      1380000 -- [-124142.319] (-124170.986) * (-124259.140) [-124167.531] -- 4:15:30
+
+      Average standard deviation of split frequencies: 0.390193
+
+
+      Average standard deviation of split frequencies: 0.390192
+
+      1390000 -- [-124140.685] (-124183.658) * (-124242.288) [-124175.132] -- 4:14:52
+
+      Average standard deviation of split frequencies: 0.390192
+
+
+      Average standard deviation of split frequencies: 0.390180
+
+      1400000 -- [-124142.121] (-124193.769) * (-124246.969) [-124167.859] -- 4:14:14
+
+      Average standard deviation of split frequencies: 0.390180
+
+
+      Average standard deviation of split frequencies: 0.390180
+
+      1410000 -- [-124146.997] (-124164.398) * (-124252.521) [-124185.200] -- 4:13:37
+
+      Average standard deviation of split frequencies: 0.390180
+
+
+      Average standard deviation of split frequencies: 0.390191
+
+      1420000 -- [-124140.748] (-124176.386) * (-124250.919) [-124183.566] -- 4:12:59
+
+      Average standard deviation of split frequencies: 0.390191
+
+
+      Average standard deviation of split frequencies: 0.390191
+
+      1430000 -- [-124139.210] (-124183.216) * (-124259.403) [-124178.819] -- 4:12:21
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390190
+
+      1440000 -- [-124143.755] (-124179.472) * (-124261.344) [-124173.707] -- 4:11:43
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390190
+
+      1450000 -- [-124148.750] (-124168.824) * (-124249.117) [-124178.037] -- 4:11:08
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390189
+
+      1460000 -- [-124141.670] (-124170.688) * (-124255.342) [-124172.334] -- 4:10:31
+
+      Average standard deviation of split frequencies: 0.390189
+
+
+      Average standard deviation of split frequencies: 0.390189
+
+      1470000 -- [-124136.883] (-124179.024) * (-124265.507) [-124167.323] -- 4:09:53
+
+      Average standard deviation of split frequencies: 0.390189
+
+
+      Average standard deviation of split frequencies: 0.390188
+
+      1480000 -- [-124140.062] (-124173.152) * (-124246.745) [-124173.930] -- 4:09:15
+
+      Average standard deviation of split frequencies: 0.390188
+
+
+      Average standard deviation of split frequencies: 0.390188
+
+      1490000 -- [-124139.242] (-124180.114) * (-124264.358) [-124187.142] -- 4:08:37
+
+      Average standard deviation of split frequencies: 0.390188
+
+
+      Average standard deviation of split frequencies: 0.390188
+
+      1500000 -- [-124147.395] (-124172.527) * (-124261.273) [-124173.004] -- 4:08:00
+
+      Average standard deviation of split frequencies: 0.390187
+
+
+      Average standard deviation of split frequencies: 0.390187
+
+      1510000 -- [-124141.474] (-124162.844) * (-124258.216) [-124174.370] -- 4:07:22
+
+      Average standard deviation of split frequencies: 0.390187
+
+
+      Average standard deviation of split frequencies: 0.390187
+
+      1520000 -- [-124141.873] (-124175.609) * (-124256.373) [-124186.332] -- 4:06:44
+
+      Average standard deviation of split frequencies: 0.390187
+
+
+      Average standard deviation of split frequencies: 0.390186
+
+      1530000 -- [-124136.683] (-124185.309) * (-124249.815) [-124178.470] -- 4:06:06
+
+      Average standard deviation of split frequencies: 0.390186
+
+
+      Average standard deviation of split frequencies: 0.390197
+
+      1540000 -- [-124133.864] (-124171.722) * (-124248.478) [-124163.945] -- 4:05:29
+
+      Average standard deviation of split frequencies: 0.390196
+
+
+      Average standard deviation of split frequencies: 0.390196
+
+      1550000 -- [-124143.752] (-124169.399) * (-124251.842) [-124173.486] -- 4:04:51
+
+      Average standard deviation of split frequencies: 0.390196
+
+
+      Average standard deviation of split frequencies: 0.390196
+
+      1560000 -- [-124144.276] (-124179.837) * (-124247.795) [-124174.585] -- 4:04:13
+
+      Average standard deviation of split frequencies: 0.390196
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      1570000 -- [-124154.247] (-124191.469) * (-124266.938) [-124177.155] -- 4:03:38
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      1580000 -- [-124139.720] (-124173.746) * (-124258.732) [-124172.586] -- 4:03:00
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      1590000 -- [-124141.609] (-124170.518) * (-124257.295) [-124177.489] -- 4:02:23
+
+      Average standard deviation of split frequencies: 0.390205
+
+
+      Average standard deviation of split frequencies: 0.390204
+
+      1600000 -- [-124143.270] (-124171.317) * (-124252.298) [-124174.647] -- 4:01:45
+
+      Average standard deviation of split frequencies: 0.390204
+
+
+      Average standard deviation of split frequencies: 0.390204
+
+      1610000 -- [-124151.610] (-124186.413) * (-124255.185) [-124172.084] -- 4:01:07
+
+      Average standard deviation of split frequencies: 0.390204
+
+
+      Average standard deviation of split frequencies: 0.390203
+
+      1620000 -- [-124143.190] (-124167.416) * (-124238.743) [-124189.991] -- 4:00:30
+
+      Average standard deviation of split frequencies: 0.390203
+
+
+      Average standard deviation of split frequencies: 0.390203
+
+      1630000 -- [-124137.221] (-124175.067) * (-124263.026) [-124185.318] -- 3:59:52
+
+      Average standard deviation of split frequencies: 0.390203
+
+
+      Average standard deviation of split frequencies: 0.390202
+
+      1640000 -- [-124141.624] (-124177.975) * (-124243.951) [-124171.520] -- 3:59:14
+
+      Average standard deviation of split frequencies: 0.390222
+
+
+      Average standard deviation of split frequencies: 0.390222
+
+      1650000 -- [-124145.574] (-124184.683) * (-124254.978) [-124182.072] -- 3:58:39
+
+      Average standard deviation of split frequencies: 0.390221
+
+
+      Average standard deviation of split frequencies: 0.390221
+
+      1660000 -- [-124146.890] (-124168.432) * (-124255.308) [-124170.980] -- 3:58:02
+
+      Average standard deviation of split frequencies: 0.390221
+
+
+      Average standard deviation of split frequencies: 0.390221
+
+      1670000 -- [-124149.863] (-124176.008) * (-124246.719) [-124185.211] -- 3:57:24
+
+      Average standard deviation of split frequencies: 0.390220
+
+
+      Average standard deviation of split frequencies: 0.390220
+
+      1680000 -- [-124146.094] (-124182.810) * (-124260.618) [-124174.396] -- 3:56:46
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      1690000 -- [-124142.650] (-124180.839) * (-124252.033) [-124173.552] -- 3:56:09
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      1700000 -- [-124143.308] (-124176.216) * (-124264.275) [-124171.510] -- 3:55:31
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      1710000 -- [-124143.059] (-124175.819) * (-124244.691) [-124170.998] -- 3:54:56
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      1720000 -- [-124141.850] (-124172.420) * (-124246.678) [-124183.882] -- 3:54:18
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      1730000 -- [-124147.054] (-124187.776) * (-124257.362) [-124170.448] -- 3:53:40
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      1740000 -- [-124140.074] (-124174.449) * (-124258.511) [-124172.030] -- 3:53:03
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      1750000 -- [-124133.730] (-124168.322) * (-124256.204) [-124171.413] -- 3:52:25
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      1760000 -- [-124134.174] (-124185.294) * (-124246.648) [-124173.175] -- 3:51:50
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      1770000 -- [-124148.792] (-124172.748) * (-124254.358) [-124174.998] -- 3:51:12
+
+      Average standard deviation of split frequencies: 0.390224
+
+
+      Average standard deviation of split frequencies: 0.390224
+
+      1780000 -- [-124144.998] (-124171.785) * (-124249.279) [-124175.232] -- 3:50:35
+
+      Average standard deviation of split frequencies: 0.390224
+
+
+      Average standard deviation of split frequencies: 0.390223
+
+      1790000 -- [-124148.013] (-124173.951) * (-124258.253) [-124178.598] -- 3:49:57
+
+      Average standard deviation of split frequencies: 0.390223
+
+
+      Average standard deviation of split frequencies: 0.390223
+
+      1800000 -- [-124141.188] (-124181.175) * (-124259.077) [-124179.099] -- 3:49:21
+
+      Average standard deviation of split frequencies: 0.390223
+
+
+      Average standard deviation of split frequencies: 0.390222
+
+      1810000 -- [-124134.660] (-124174.249) * (-124242.703) [-124191.811] -- 3:48:44
+
+      Average standard deviation of split frequencies: 0.390222
+
+
+      Average standard deviation of split frequencies: 0.390222
+
+      1820000 -- [-124148.763] (-124183.385) * (-124261.485) [-124173.282] -- 3:48:06
+
+      Average standard deviation of split frequencies: 0.390222
+
+
+      Average standard deviation of split frequencies: 0.390221
+
+      1830000 -- [-124144.988] (-124187.788) * (-124247.097) [-124168.679] -- 3:47:29
+
+      Average standard deviation of split frequencies: 0.390221
+
+
+      Average standard deviation of split frequencies: 0.390221
+
+      1840000 -- [-124141.268] (-124170.475) * (-124263.641) [-124172.074] -- 3:46:51
+
+      Average standard deviation of split frequencies: 0.390238
+
+
+      Average standard deviation of split frequencies: 0.390238
+
+      1850000 -- [-124148.888] (-124188.245) * (-124256.317) [-124166.530] -- 3:46:14
+
+      Average standard deviation of split frequencies: 0.390238
+
+
+      Average standard deviation of split frequencies: 0.390237
+
+      1860000 -- [-124151.033] (-124177.400) * (-124260.294) [-124189.224] -- 3:45:38
+
+      Average standard deviation of split frequencies: 0.390237
+
+
+      Average standard deviation of split frequencies: 0.390237
+
+      1870000 -- [-124159.770] (-124177.601) * (-124248.611) [-124173.470] -- 3:45:00
+
+      Average standard deviation of split frequencies: 0.390237
+
+
+      Average standard deviation of split frequencies: 0.390236
+
+      1880000 -- [-124138.759] (-124161.696) * (-124246.246) [-124176.920] -- 3:44:23
+
+      Average standard deviation of split frequencies: 0.390236
+
+
+      Average standard deviation of split frequencies: 0.390244
+
+      1890000 -- [-124144.544] (-124177.930) * (-124254.692) [-124171.266] -- 3:43:45
+
+      Average standard deviation of split frequencies: 0.390244
+
+
+      Average standard deviation of split frequencies: 0.390244
+
+      1900000 -- [-124143.143] (-124176.833) * (-124253.117) [-124170.503] -- 3:43:08
+
+      Average standard deviation of split frequencies: 0.390243
+
+
+      Average standard deviation of split frequencies: 0.390243
+
+      1910000 -- [-124135.096] (-124185.838) * (-124258.711) [-124170.021] -- 3:42:32
+
+      Average standard deviation of split frequencies: 0.390251
+
+
+      Average standard deviation of split frequencies: 0.390251
+
+      1920000 -- [-124144.969] (-124170.544) * (-124251.495) [-124172.196] -- 3:41:54
+
+      Average standard deviation of split frequencies: 0.390251
+
+
+      Average standard deviation of split frequencies: 0.390250
+
+      1930000 -- [-124143.286] (-124171.859) * (-124246.136) [-124170.042] -- 3:41:17
+
+      Average standard deviation of split frequencies: 0.390250
+
+
+      Average standard deviation of split frequencies: 0.390250
+
+      1940000 -- [-124152.688] (-124180.232) * (-124255.113) [-124172.817] -- 3:40:39
+
+      Average standard deviation of split frequencies: 0.390249
+
+
+      Average standard deviation of split frequencies: 0.390249
+
+      1950000 -- [-124136.297] (-124180.954) * (-124251.159) [-124170.059] -- 3:40:04
+
+      Average standard deviation of split frequencies: 0.390249
+
+
+      Average standard deviation of split frequencies: 0.390248
+
+      1960000 -- [-124148.750] (-124168.821) * (-124255.110) [-124175.896] -- 3:39:26
+
+      Average standard deviation of split frequencies: 0.390248
+
+
+      Average standard deviation of split frequencies: 0.390248
+
+      1970000 -- [-124157.957] (-124176.085) * (-124258.909) [-124172.849] -- 3:38:49
+
+      Average standard deviation of split frequencies: 0.390256
+
+
+      Average standard deviation of split frequencies: 0.390255
+
+      1980000 -- [-124144.275] (-124174.090) * (-124265.435) [-124175.438] -- 3:38:11
+
+      Average standard deviation of split frequencies: 0.390255
+
+
+      Average standard deviation of split frequencies: 0.390255
+
+      1990000 -- [-124141.805] (-124185.102) * (-124257.440) [-124172.240] -- 3:37:34
+
+      Average standard deviation of split frequencies: 0.390254
+
+
+      Average standard deviation of split frequencies: 0.390254
+
+      2000000 -- [-124144.089] (-124171.397) * (-124254.710) [-124178.644] -- 3:36:58
+
+      Average standard deviation of split frequencies: 0.390254
+
+
+      Average standard deviation of split frequencies: 0.390254
+
+      2010000 -- [-124141.086] (-124192.730) * (-124247.244) [-124174.434] -- 3:36:20
+
+      Average standard deviation of split frequencies: 0.390253
+
+
+      Average standard deviation of split frequencies: 0.390253
+
+      2020000 -- [-124146.009] (-124174.482) * (-124256.268) [-124179.319] -- 3:35:43
+
+      Average standard deviation of split frequencies: 0.390253
+
+
+      Average standard deviation of split frequencies: 0.390252
+
+      2030000 -- [-124140.827] (-124177.790) * (-124247.101) [-124181.950] -- 3:35:05
+
+      Average standard deviation of split frequencies: 0.390252
+
+
+      Average standard deviation of split frequencies: 0.390252
+
+      2040000 -- [-124149.280] (-124179.320) * (-124250.238) [-124177.524] -- 3:34:29
+
+      Average standard deviation of split frequencies: 0.390243
+
+
+      Average standard deviation of split frequencies: 0.390243
+
+      2050000 -- [-124146.949] (-124170.274) * (-124251.996) [-124183.662] -- 3:33:52
+
+      Average standard deviation of split frequencies: 0.390243
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      2060000 -- [-124138.537] (-124169.626) * (-124258.990) [-124174.423] -- 3:33:14
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      2070000 -- [-124144.412] (-124172.684) * (-124251.354) [-124173.401] -- 3:32:37
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      2080000 -- [-124141.860] (-124184.471) * (-124254.361) [-124170.756] -- 3:31:59
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      2090000 -- [-124142.498] (-124174.582) * (-124252.835) [-124173.503] -- 3:31:22
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      2100000 -- [-124140.542] (-124182.707) * (-124253.996) [-124175.467] -- 3:30:44
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      2110000 -- [-124143.478] (-124167.717) * (-124237.101) [-124174.411] -- 3:30:08
+
+      Average standard deviation of split frequencies: 0.390193
+
+
+      Average standard deviation of split frequencies: 0.390193
+
+      2120000 -- [-124143.715] (-124177.716) * (-124252.328) [-124172.758] -- 3:29:31
+
+      Average standard deviation of split frequencies: 0.390193
+
+
+      Average standard deviation of split frequencies: 0.390193
+
+      2130000 -- [-124149.551] (-124172.749) * (-124266.074) [-124175.142] -- 3:28:53
+
+      Average standard deviation of split frequencies: 0.390193
+
+
+      Average standard deviation of split frequencies: 0.390193
+
+      2140000 -- [-124142.428] (-124168.482) * (-124257.341) [-124176.026] -- 3:28:16
+
+      Average standard deviation of split frequencies: 0.390192
+
+
+      Average standard deviation of split frequencies: 0.390192
+
+      2150000 -- [-124144.382] (-124174.253) * (-124263.519) [-124178.621] -- 3:27:38
+
+      Average standard deviation of split frequencies: 0.390192
+
+
+      Average standard deviation of split frequencies: 0.390192
+
+      2160000 -- [-124140.455] (-124170.909) * (-124261.524) [-124171.082] -- 3:27:02
+
+      Average standard deviation of split frequencies: 0.390192
+
+
+      Average standard deviation of split frequencies: 0.390192
+
+      2170000 -- [-124150.964] (-124167.490) * (-124249.699) [-124174.075] -- 3:26:25
+
+      Average standard deviation of split frequencies: 0.390192
+
+
+      Average standard deviation of split frequencies: 0.390191
+
+      2180000 -- [-124138.881] (-124182.819) * (-124270.584) [-124173.620] -- 3:25:47
+
+      Average standard deviation of split frequencies: 0.390191
+
+
+      Average standard deviation of split frequencies: 0.390191
+
+      2190000 -- [-124143.887] (-124195.321) * (-124248.298) [-124166.835] -- 3:25:10
+
+      Average standard deviation of split frequencies: 0.390191
+
+
+      Average standard deviation of split frequencies: 0.390191
+
+      2200000 -- [-124152.092] (-124173.966) * (-124249.415) [-124170.649] -- 3:24:33
+
+      Average standard deviation of split frequencies: 0.390191
+
+
+      Average standard deviation of split frequencies: 0.390191
+
+      2210000 -- [-124141.866] (-124181.898) * (-124256.296) [-124170.334] -- 3:23:57
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390190
+
+      2220000 -- [-124138.862] (-124179.659) * (-124258.261) [-124171.522] -- 3:23:19
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390190
+
+      2230000 -- [-124135.887] (-124172.884) * (-124254.321) [-124165.606] -- 3:22:42
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390190
+
+      2240000 -- [-124144.473] (-124170.903) * (-124248.200) [-124176.258] -- 3:22:04
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390197
+
+      2250000 -- [-124139.160] (-124169.933) * (-124257.059) [-124181.931] -- 3:21:27
+
+      Average standard deviation of split frequencies: 0.390197
+
+
+      Average standard deviation of split frequencies: 0.390196
+
+      2260000 -- [-124138.625] (-124171.152) * (-124248.860) [-124176.143] -- 3:20:49
+
+      Average standard deviation of split frequencies: 0.390196
+
+
+      Average standard deviation of split frequencies: 0.390196
+
+      2270000 -- [-124152.343] (-124170.461) * (-124250.654) [-124186.384] -- 3:20:12
+
+      Average standard deviation of split frequencies: 0.390196
+
+
+      Average standard deviation of split frequencies: 0.390196
+
+      2280000 -- [-124151.187] (-124173.544) * (-124249.850) [-124170.411] -- 3:19:34
+
+      Average standard deviation of split frequencies: 0.390199
+
+
+      Average standard deviation of split frequencies: 0.390199
+
+      2290000 -- [-124140.292] (-124183.629) * (-124264.829) [-124185.614] -- 3:18:57
+
+      Average standard deviation of split frequencies: 0.390199
+
+
+      Average standard deviation of split frequencies: 0.390199
+
+      2300000 -- [-124145.401] (-124178.018) * (-124256.752) [-124178.884] -- 3:18:21
+
+      Average standard deviation of split frequencies: 0.390199
+
+
+      Average standard deviation of split frequencies: 0.390198
+
+      2310000 -- [-124137.497] (-124179.773) * (-124257.062) [-124177.464] -- 3:17:43
+
+      Average standard deviation of split frequencies: 0.390198
+
+
+      Average standard deviation of split frequencies: 0.390198
+
+      2320000 -- [-124137.401] (-124173.150) * (-124267.202) [-124177.054] -- 3:17:06
+
+      Average standard deviation of split frequencies: 0.390198
+
+
+      Average standard deviation of split frequencies: 0.390198
+
+      2330000 -- [-124150.732] (-124186.541) * (-124260.945) [-124168.382] -- 3:16:28
+
+      Average standard deviation of split frequencies: 0.390198
+
+
+      Average standard deviation of split frequencies: 0.390197
+
+      2340000 -- [-124151.459] (-124184.570) * (-124257.045) [-124181.674] -- 3:15:51
+
+      Average standard deviation of split frequencies: 0.390197
+
+
+      Average standard deviation of split frequencies: 0.390197
+
+      2350000 -- [-124145.612] (-124184.842) * (-124241.665) [-124178.726] -- 3:15:13
+
+      Average standard deviation of split frequencies: 0.390197
+
+
+      Average standard deviation of split frequencies: 0.390190
+
+      2360000 -- [-124142.099] (-124171.319) * (-124248.832) [-124172.588] -- 3:14:37
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390190
+
+      2370000 -- [-124147.071] (-124177.757) * (-124253.601) [-124174.538] -- 3:14:00
+
+      Average standard deviation of split frequencies: 0.390190
+
+
+      Average standard deviation of split frequencies: 0.390189
+
+      2380000 -- [-124140.949] (-124179.284) * (-124258.845) [-124161.648] -- 3:13:22
+
+      Average standard deviation of split frequencies: 0.390189
+
+
+      Average standard deviation of split frequencies: 0.390189
+
+      2390000 -- [-124148.394] (-124174.963) * (-124257.691) [-124181.136] -- 3:12:45
+
+      Average standard deviation of split frequencies: 0.390189
+
+
+      Average standard deviation of split frequencies: 0.390189
+
+      2400000 -- [-124147.079] (-124174.164) * (-124248.443) [-124184.640] -- 3:12:08
+
+      Average standard deviation of split frequencies: 0.390189
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      2410000 -- [-124153.079] (-124184.132) * (-124250.811) [-124177.019] -- 3:11:31
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      2420000 -- [-124144.680] (-124171.842) * (-124251.282) [-124173.639] -- 3:10:54
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      2430000 -- [-124150.105] (-124172.234) * (-124267.219) [-124181.608] -- 3:10:17
+
+      Average standard deviation of split frequencies: 0.390195
+
+
+      Average standard deviation of split frequencies: 0.390195
+
+      2440000 -- [-124143.564] (-124169.227) * (-124250.697) [-124177.850] -- 3:09:39
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      2450000 -- [-124139.367] (-124170.917) * (-124254.285) [-124175.887] -- 3:09:02
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      2460000 -- [-124147.103] (-124178.145) * (-124261.702) [-124175.751] -- 3:08:24
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      2470000 -- [-124139.512] (-124189.742) * (-124251.214) [-124179.238] -- 3:07:47
+
+      Average standard deviation of split frequencies: 0.390194
+
+
+      Average standard deviation of split frequencies: 0.390194
+
+      2480000 -- [-124133.964] (-124181.989) * (-124251.095) [-124172.436] -- 3:07:11
+
+      Average standard deviation of split frequencies: 0.390193
+
+
+      Average standard deviation of split frequencies: 0.390193
+
+      2490000 -- [-124142.737] (-124184.492) * (-124272.125) [-124173.853] -- 3:06:33
+
+      Average standard deviation of split frequencies: 0.390193
+
+
+      Average standard deviation of split frequencies: 0.390200
+
+      2500000 -- [-124138.970] (-124186.286) * (-124244.558) [-124172.737] -- 3:05:56
+
+      Average standard deviation of split frequencies: 0.390199
+
+
+      Average standard deviation of split frequencies: 0.390199
+
+      2510000 -- [-124143.107] (-124186.791) * (-124259.705) [-124170.314] -- 3:05:20
+
+      Average standard deviation of split frequencies: 0.390199
+
+
+      Average standard deviation of split frequencies: 0.390205
+
+      2520000 -- [-124144.291] (-124181.207) * (-124264.826) [-124173.465] -- 3:04:42
+
+      Average standard deviation of split frequencies: 0.390205
+
+
+      Average standard deviation of split frequencies: 0.390205
+
+      2530000 -- [-124133.327] (-124181.184) * (-124252.719) [-124176.453] -- 3:04:05
+
+      Average standard deviation of split frequencies: 0.390205
+
+
+      Average standard deviation of split frequencies: 0.390205
+
+      2540000 -- [-124143.890] (-124186.726) * (-124242.802) [-124183.233] -- 3:03:27
+
+      Average standard deviation of split frequencies: 0.390205
+
+
+      Average standard deviation of split frequencies: 0.390205
+
+      2550000 -- [-124151.747] (-124173.322) * (-124264.939) [-124175.934] -- 3:02:50
+
+      Average standard deviation of split frequencies: 0.390204
+
+
+      Average standard deviation of split frequencies: 0.390204
+
+      2560000 -- [-124145.080] (-124174.607) * (-124253.795) [-124166.352] -- 3:02:13
+
+      Average standard deviation of split frequencies: 0.390204
+
+
+      Average standard deviation of split frequencies: 0.390204
+
+      2570000 -- [-124146.347] (-124167.759) * (-124245.202) [-124167.671] -- 3:01:35
+
+      Average standard deviation of split frequencies: 0.390204
+
+
+      Average standard deviation of split frequencies: 0.390204
+
+      2580000 -- [-124155.247] (-124190.250) * (-124257.689) [-124165.772] -- 3:00:59
+
+      Average standard deviation of split frequencies: 0.390203
+
+
+      Average standard deviation of split frequencies: 0.390203
+
+      2590000 -- [-124137.053] (-124172.729) * (-124260.162) [-124178.448] -- 3:00:22
+
+      Average standard deviation of split frequencies: 0.390203
+
+
+      Average standard deviation of split frequencies: 0.390203
+
+      2600000 -- [-124148.815] (-124175.243) * (-124250.281) [-124176.563] -- 2:59:44
+
+      Average standard deviation of split frequencies: 0.390203
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      2610000 -- [-124154.568] (-124170.181) * (-124256.362) [-124183.753] -- 2:59:07
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      2620000 -- [-124146.564] (-124170.397) * (-124254.004) [-124175.183] -- 2:58:30
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      2630000 -- [-124144.124] (-124178.925) * (-124251.859) [-124181.814] -- 2:57:52
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      2640000 -- [-124145.454] (-124177.208) * (-124247.862) [-124173.006] -- 2:57:16
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390220
+
+      2650000 -- [-124146.261] (-124172.727) * (-124261.002) [-124176.286] -- 2:56:38
+
+      Average standard deviation of split frequencies: 0.390220
+
+
+      Average standard deviation of split frequencies: 0.390220
+
+      2660000 -- [-124149.932] (-124183.642) * (-124243.402) [-124179.613] -- 2:56:01
+
+      Average standard deviation of split frequencies: 0.390220
+
+
+      Average standard deviation of split frequencies: 0.390219
+
+      2670000 -- [-124142.147] (-124186.007) * (-124261.265) [-124172.218] -- 2:55:23
+
+      Average standard deviation of split frequencies: 0.390219
+
+
+      Average standard deviation of split frequencies: 0.390219
+
+      2680000 -- [-124140.058] (-124165.268) * (-124256.370) [-124175.434] -- 2:54:46
+
+      Average standard deviation of split frequencies: 0.390219
+
+
+      Average standard deviation of split frequencies: 0.390219
+
+      2690000 -- [-124146.801] (-124175.822) * (-124254.118) [-124180.805] -- 2:54:09
+
+      Average standard deviation of split frequencies: 0.390219
+
+
+      Average standard deviation of split frequencies: 0.390218
+
+      2700000 -- [-124151.863] (-124174.456) * (-124251.928) [-124175.964] -- 2:53:32
+
+      Average standard deviation of split frequencies: 0.390218
+
+
+      Average standard deviation of split frequencies: 0.390224
+
+      2710000 -- [-124142.731] (-124173.033) * (-124259.353) [-124187.000] -- 2:52:55
+
+      Average standard deviation of split frequencies: 0.390224
+
+
+      Average standard deviation of split frequencies: 0.390230
+
+      2720000 -- [-124144.775] (-124181.934) * (-124259.613) [-124170.814] -- 2:52:18
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      2730000 -- [-124146.542] (-124173.975) * (-124256.095) [-124181.269] -- 2:51:40
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      2740000 -- [-124157.818] (-124181.379) * (-124248.536) [-124177.604] -- 2:51:03
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      2750000 -- [-124141.175] (-124174.796) * (-124248.130) [-124168.762] -- 2:50:26
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      2760000 -- [-124144.699] (-124177.804) * (-124247.594) [-124173.236] -- 2:49:48
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      2770000 -- [-124140.724] (-124176.985) * (-124250.372) [-124175.412] -- 2:49:11
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      2780000 -- [-124147.302] (-124169.486) * (-124270.172) [-124179.082] -- 2:48:34
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      2790000 -- [-124143.574] (-124175.319) * (-124261.074) [-124176.997] -- 2:47:57
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      2800000 -- [-124149.998] (-124189.479) * (-124260.194) [-124180.916] -- 2:47:20
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      2810000 -- [-124147.526] (-124188.115) * (-124250.558) [-124175.535] -- 2:46:42
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      2820000 -- [-124143.516] (-124176.368) * (-124252.895) [-124173.544] -- 2:46:05
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      2830000 -- [-124143.923] (-124182.036) * (-124248.432) [-124185.859] -- 2:45:28
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      2840000 -- [-124142.561] (-124181.625) * (-124249.020) [-124179.261] -- 2:44:50
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390231
+
+      2850000 -- [-124148.026] (-124189.919) * (-124266.955) [-124172.199] -- 2:44:14
+
+      Average standard deviation of split frequencies: 0.390231
+
+
+      Average standard deviation of split frequencies: 0.390230
+
+      2860000 -- [-124146.585] (-124185.362) * (-124247.235) [-124166.330] -- 2:43:36
+
+      Average standard deviation of split frequencies: 0.390230
+
+
+      Average standard deviation of split frequencies: 0.390230
+
+      2870000 -- [-124138.930] (-124171.528) * (-124257.721) [-124170.010] -- 2:42:59
+
+      Average standard deviation of split frequencies: 0.390230
+
+
+      Average standard deviation of split frequencies: 0.390230
+
+      2880000 -- [-124142.733] (-124177.680) * (-124246.873) [-124173.834] -- 2:42:22
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      2890000 -- [-124140.285] (-124180.659) * (-124257.955) [-124178.614] -- 2:41:44
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      2900000 -- [-124145.814] (-124169.985) * (-124256.385) [-124180.701] -- 2:41:07
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      2910000 -- [-124146.755] (-124193.579) * (-124254.699) [-124165.669] -- 2:40:30
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      2920000 -- [-124142.536] (-124172.879) * (-124258.848) [-124179.155] -- 2:39:52
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      2930000 -- [-124138.821] (-124164.626) * (-124250.033) [-124178.696] -- 2:39:16
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      2940000 -- [-124142.984] (-124172.837) * (-124255.847) [-124168.642] -- 2:38:39
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      2950000 -- [-124139.159] (-124174.697) * (-124258.675) [-124180.186] -- 2:38:01
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      2960000 -- [-124147.619] (-124176.882) * (-124265.886) [-124180.741] -- 2:37:24
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      2970000 -- [-124136.884] (-124168.521) * (-124258.238) [-124173.969] -- 2:36:47
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      2980000 -- [-124140.155] (-124164.682) * (-124253.189) [-124173.290] -- 2:36:09
+
+      Average standard deviation of split frequencies: 0.390232
+
+
+      Average standard deviation of split frequencies: 0.390231
+
+      2990000 -- [-124140.069] (-124188.782) * (-124252.616) [-124181.973] -- 2:35:32
+
+      Average standard deviation of split frequencies: 0.390231
+
+
+      Average standard deviation of split frequencies: 0.390231
+
+      3000000 -- [-124139.770] (-124173.030) * (-124250.662) [-124185.264] -- 2:34:55
+
+      Average standard deviation of split frequencies: 0.390231
+
+
+      Average standard deviation of split frequencies: 0.390231
+
+      3010000 -- [-124139.952] (-124186.485) * (-124257.840) [-124173.080] -- 2:34:17
+
+      Average standard deviation of split frequencies: 0.390230
+
+
+      Average standard deviation of split frequencies: 0.390230
+
+      3020000 -- [-124148.898] (-124175.688) * (-124245.813) [-124170.803] -- 2:33:41
+
+      Average standard deviation of split frequencies: 0.390230
+
+
+      Average standard deviation of split frequencies: 0.390230
+
+      3030000 -- [-124138.353] (-124183.872) * (-124263.093) [-124181.760] -- 2:33:03
+
+      Average standard deviation of split frequencies: 0.390230
+
+
+      Average standard deviation of split frequencies: 0.390230
+
+      3040000 -- [-124137.562] (-124179.845) * (-124253.807) [-124172.168] -- 2:32:26
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      3050000 -- [-124137.498] (-124178.650) * (-124237.764) [-124167.527] -- 2:31:49
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      3060000 -- [-124144.261] (-124178.540) * (-124253.197) [-124172.975] -- 2:31:11
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390229
+
+      3070000 -- [-124147.756] (-124171.850) * (-124253.503) [-124179.529] -- 2:30:35
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      3080000 -- [-124146.427] (-124173.766) * (-124262.380) [-124174.493] -- 2:29:58
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      3090000 -- [-124140.047] (-124175.901) * (-124242.062) [-124175.538] -- 2:29:20
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      3100000 -- [-124139.447] (-124170.871) * (-124261.698) [-124177.706] -- 2:28:43
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      3110000 -- [-124136.916] (-124180.419) * (-124247.356) [-124166.511] -- 2:28:06
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      3120000 -- [-124144.238] (-124182.736) * (-124242.662) [-124177.408] -- 2:27:28
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      3130000 -- [-124134.691] (-124170.231) * (-124248.222) [-124177.778] -- 2:26:51
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      3140000 -- [-124143.565] (-124169.719) * (-124254.905) [-124171.503] -- 2:26:14
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      3150000 -- [-124149.680] (-124191.201) * (-124256.734) [-124175.084] -- 2:25:36
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      3160000 -- [-124146.523] (-124168.557) * (-124252.949) [-124164.732] -- 2:24:59
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      3170000 -- [-124136.856] (-124179.348) * (-124260.125) [-124170.735] -- 2:24:22
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      3180000 -- [-124145.457] (-124180.429) * (-124252.351) [-124165.920] -- 2:23:44
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      3190000 -- [-124141.551] (-124170.426) * (-124263.144) [-124171.814] -- 2:23:08
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      3200000 -- [-124143.173] (-124167.934) * (-124256.953) [-124171.787] -- 2:22:30
+
+      Average standard deviation of split frequencies: 0.390224
+
+
+      Average standard deviation of split frequencies: 0.390224
+
+      3210000 -- [-124147.836] (-124175.749) * (-124248.509) [-124169.994] -- 2:21:53
+
+      Average standard deviation of split frequencies: 0.390224
+
+
+      Average standard deviation of split frequencies: 0.390224
+
+      3220000 -- [-124141.617] (-124177.044) * (-124251.836) [-124175.278] -- 2:21:17
+
+      Average standard deviation of split frequencies: 0.390224
+
+
+      Average standard deviation of split frequencies: 0.390224
+
+      3230000 -- [-124148.740] (-124180.271) * (-124251.272) [-124177.040] -- 2:20:39
+
+      Average standard deviation of split frequencies: 0.390229
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      3240000 -- [-124146.505] (-124180.979) * (-124248.405) [-124174.454] -- 2:20:02
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      3250000 -- [-124147.110] (-124169.596) * (-124239.061) [-124171.341] -- 2:19:25
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390228
+
+      3260000 -- [-124142.293] (-124176.126) * (-124252.282) [-124173.833] -- 2:18:47
+
+      Average standard deviation of split frequencies: 0.390228
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      3270000 -- [-124140.468] (-124174.873) * (-124253.812) [-124177.421] -- 2:18:10
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      3280000 -- [-124147.263] (-124187.406) * (-124243.992) [-124176.477] -- 2:17:33
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      3290000 -- [-124143.814] (-124176.304) * (-124248.205) [-124166.933] -- 2:16:56
+
+      Average standard deviation of split frequencies: 0.390227
+
+
+      Average standard deviation of split frequencies: 0.390227
+
+      3300000 -- [-124141.919] (-124165.122) * (-124251.661) [-124171.319] -- 2:16:19
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      3310000 -- [-124152.114] (-124190.115) * (-124241.234) [-124176.423] -- 2:15:42
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      3320000 -- [-124133.567] (-124175.496) * (-124247.609) [-124175.132] -- 2:15:04
+
+      Average standard deviation of split frequencies: 0.390226
+
+
+      Average standard deviation of split frequencies: 0.390226
+
+      3330000 -- [-124143.071] (-124171.671) * (-124258.417) [-124175.856] -- 2:14:27
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      3340000 -- [-124144.192] (-124185.891) * (-124253.717) [-124175.733] -- 2:13:50
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      3350000 -- [-124139.923] (-124184.274) * (-124250.863) [-124176.788] -- 2:13:13
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390225
+
+      3360000 -- [-124145.461] (-124166.934) * (-124253.159) [-124174.382] -- 2:12:36
+
+      Average standard deviation of split frequencies: 0.390225
+
+
+      Average standard deviation of split frequencies: 0.390224
+
+      3370000 -- [-124137.741] (-124180.728) * (-124250.375) [-124172.964] -- 2:11:58
+
+      Average standard deviation of split frequencies: 0.390224
+
+
+      Average standard deviation of split frequencies: 0.390224
+
+      3380000 -- [-124147.444] (-124175.610) * (-124246.341) [-124173.392] -- 2:11:21
+
+      Average standard deviation of split frequencies: 0.390224
+
+
+      Average standard deviation of split frequencies: 0.390224
+
+      3390000 -- [-124150.157] (-124184.161) * (-124246.531) [-124170.953] -- 2:10:44
+
+      Average standard deviation of split frequencies: 0.390224
+
+
+      Average standard deviation of split frequencies: 0.390224
+
+      3400000 -- [-124138.943] (-124172.298) * (-124262.290) [-124178.295] -- 2:10:07
+
+      Average standard deviation of split frequencies: 0.390223
+
+
+      Average standard deviation of split frequencies: 0.390223
+
+      3410000 -- [-124140.244] (-124172.311) * (-124258.101) [-124168.811] -- 2:09:30
+
+      Average standard deviation of split frequencies: 0.390223
+
+
+      Average standard deviation of split frequencies: 0.390223
+
+      3420000 -- [-124141.534] (-124202.359) * (-124252.575) [-124173.380] -- 2:08:53
+
+      Average standard deviation of split frequencies: 0.390223
+
+
+      Average standard deviation of split frequencies: 0.390223
+
+      3430000 -- [-124142.469] (-124173.993) * (-124257.519) [-124180.155] -- 2:08:15
+
+      Average standard deviation of split frequencies: 0.390223
+
+
+      Average standard deviation of split frequencies: 0.390223
+
+      3440000 -- [-124142.700] (-124172.023) * (-124251.857) [-124168.800] -- 2:07:39
+
+      Average standard deviation of split frequencies: 0.390222
+
+
+      Average standard deviation of split frequencies: 0.390222
+
+      3450000 -- [-124140.167] (-124189.707) * (-124255.957) [-124165.931] -- 2:07:01
+
+      Average standard deviation of split frequencies: 0.390222
+
+
+      Average standard deviation of split frequencies: 0.390222
+
+      3460000 -- [-124146.907] (-124171.979) * (-124264.450) [-124172.836] -- 2:06:24
+
+      Average standard deviation of split frequencies: 0.390222
+
+
+      Average standard deviation of split frequencies: 0.390222
+
+      3470000 -- [-124139.726] (-124180.641) * (-124252.013) [-124172.111] -- 2:05:47
+
+      Average standard deviation of split frequencies: 0.390222
+
+
+      Average standard deviation of split frequencies: 0.390221
+
+      3480000 -- [-124139.909] (-124177.660) * (-124244.523) [-124173.654] -- 2:05:09
+
+      Average standard deviation of split frequencies: 0.390221
+
+
+      Average standard deviation of split frequencies: 0.390221
+
+      3490000 -- [-124145.802] (-124170.903) * (-124254.702) [-124171.131] -- 2:04:32
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      3500000 -- [-124140.423] (-124185.745) * (-124252.963) [-124165.489] -- 2:03:56
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      3510000 -- [-124139.719] (-124189.352) * (-124250.124) [-124169.199] -- 2:03:18
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      3520000 -- [-124153.530] (-124185.755) * (-124258.175) [-124179.885] -- 2:02:41
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3530000 -- [-124143.763] (-124183.540) * (-124258.055) [-124172.967] -- 2:02:04
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3540000 -- [-124141.411] (-124183.723) * (-124257.740) [-124169.937] -- 2:01:27
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3550000 -- [-124145.165] (-124180.264) * (-124255.922) [-124175.761] -- 2:00:50
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3560000 -- [-124147.818] (-124177.022) * (-124252.666) [-124170.546] -- 2:00:12
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3570000 -- [-124153.075] (-124181.128) * (-124246.931) [-124175.890] -- 1:59:36
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3580000 -- [-124155.938] (-124177.594) * (-124258.586) [-124172.183] -- 1:58:58
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3590000 -- [-124145.654] (-124181.044) * (-124243.747) [-124178.844] -- 1:58:21
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3600000 -- [-124145.024] (-124192.034) * (-124269.481) [-124166.325] -- 1:57:44
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3610000 -- [-124136.349] (-124164.496) * (-124245.371) [-124169.828] -- 1:57:07
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      3620000 -- [-124144.036] (-124179.006) * (-124252.607) [-124172.977] -- 1:56:30
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      3630000 -- [-124147.224] (-124185.231) * (-124251.234) [-124168.477] -- 1:55:53
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      3640000 -- [-124139.547] (-124173.071) * (-124250.335) [-124174.468] -- 1:55:15
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      3650000 -- [-124151.788] (-124198.342) * (-124264.567) [-124170.562] -- 1:54:38
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      3660000 -- [-124145.631] (-124183.189) * (-124267.032) [-124166.503] -- 1:54:01
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      3670000 -- [-124151.247] (-124192.171) * (-124252.027) [-124180.526] -- 1:53:23
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      3680000 -- [-124142.664] (-124211.861) * (-124246.751) [-124166.839] -- 1:52:47
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      3690000 -- [-124134.250] (-124194.031) * (-124261.062) [-124167.821] -- 1:52:09
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      3700000 -- [-124137.304] (-124173.047) * (-124247.989) [-124169.696] -- 1:51:32
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      3710000 -- [-124138.306] (-124177.895) * (-124276.691) [-124178.113] -- 1:50:55
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      3720000 -- [-124146.148] (-124179.920) * (-124257.249) [-124172.315] -- 1:50:18
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      3730000 -- [-124148.324] (-124192.307) * (-124262.589) [-124170.233] -- 1:49:40
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      3740000 -- [-124142.685] (-124166.954) * (-124254.764) [-124172.784] -- 1:49:03
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3750000 -- [-124147.387] (-124180.979) * (-124253.598) [-124168.161] -- 1:48:26
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3760000 -- [-124149.960] (-124177.060) * (-124252.561) [-124173.449] -- 1:47:49
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3770000 -- [-124141.486] (-124177.749) * (-124252.831) [-124172.181] -- 1:47:12
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3780000 -- [-124133.239] (-124190.065) * (-124261.396) [-124186.165] -- 1:46:34
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3790000 -- [-124146.455] (-124176.361) * (-124262.538) [-124174.002] -- 1:45:58
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3800000 -- [-124148.923] (-124172.067) * (-124239.791) [-124180.860] -- 1:45:20
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      3810000 -- [-124137.824] (-124178.296) * (-124263.757) [-124174.859] -- 1:44:43
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      3820000 -- [-124143.916] (-124166.514) * (-124266.309) [-124169.737] -- 1:44:06
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      3830000 -- [-124145.750] (-124179.416) * (-124268.137) [-124172.974] -- 1:43:29
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      3840000 -- [-124144.649] (-124176.998) * (-124266.051) [-124181.041] -- 1:42:51
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      3850000 -- [-124142.609] (-124172.864) * (-124263.954) [-124170.616] -- 1:42:14
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      3860000 -- [-124148.749] (-124171.571) * (-124260.705) [-124174.515] -- 1:41:37
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      3870000 -- [-124141.737] (-124170.226) * (-124276.422) [-124172.540] -- 1:41:00
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      3880000 -- [-124138.014] (-124178.089) * (-124258.369) [-124174.292] -- 1:40:23
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      3890000 -- [-124147.812] (-124189.110) * (-124261.005) [-124175.970] -- 1:39:45
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      3900000 -- [-124158.849] (-124172.206) * (-124250.777) [-124168.834] -- 1:39:08
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3910000 -- [-124144.441] (-124184.689) * (-124250.658) [-124172.855] -- 1:38:31
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3920000 -- [-124141.635] (-124177.458) * (-124262.413) [-124180.235] -- 1:37:54
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3930000 -- [-124143.335] (-124179.770) * (-124245.160) [-124172.794] -- 1:37:16
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      3940000 -- [-124142.029] (-124170.847) * (-124252.928) [-124165.976] -- 1:36:39
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3950000 -- [-124139.912] (-124171.102) * (-124256.183) [-124183.999] -- 1:36:02
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3960000 -- [-124147.643] (-124180.825) * (-124248.234) [-124172.799] -- 1:35:25
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3970000 -- [-124151.178] (-124174.489) * (-124254.659) [-124179.030] -- 1:34:48
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3980000 -- [-124141.651] (-124187.788) * (-124265.593) [-124179.903] -- 1:34:11
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      3990000 -- [-124147.534] (-124173.546) * (-124256.205) [-124170.638] -- 1:33:34
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      4000000 -- [-124141.670] (-124173.362) * (-124254.763) [-124177.612] -- 1:32:57
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      4010000 -- [-124137.027] (-124166.947) * (-124258.318) [-124181.023] -- 1:32:19
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      4020000 -- [-124138.656] (-124179.821) * (-124252.727) [-124175.782] -- 1:31:42
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      4030000 -- [-124134.476] (-124173.782) * (-124251.204) [-124171.115] -- 1:31:05
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4040000 -- [-124141.944] (-124181.944) * (-124266.972) [-124178.960] -- 1:30:28
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4050000 -- [-124145.714] (-124173.370) * (-124254.285) [-124179.201] -- 1:29:51
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4060000 -- [-124139.195] (-124180.988) * (-124252.726) [-124181.091] -- 1:29:13
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4070000 -- [-124140.611] (-124171.129) * (-124262.356) [-124175.529] -- 1:28:36
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4080000 -- [-124142.702] (-124174.283) * (-124243.423) [-124172.487] -- 1:27:59
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4090000 -- [-124147.807] (-124189.655) * (-124250.178) [-124170.461] -- 1:27:22
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4100000 -- [-124144.554] (-124177.415) * (-124252.910) [-124173.275] -- 1:26:45
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4110000 -- [-124150.260] (-124182.317) * (-124261.502) [-124175.167] -- 1:26:08
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4120000 -- [-124157.531] (-124172.908) * (-124242.067) [-124176.943] -- 1:25:30
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4130000 -- [-124143.302] (-124185.688) * (-124250.540) [-124186.316] -- 1:24:53
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4140000 -- [-124140.802] (-124178.363) * (-124248.644) [-124182.018] -- 1:24:16
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4150000 -- [-124140.319] (-124173.830) * (-124261.897) [-124172.171] -- 1:23:39
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4160000 -- [-124142.333] (-124173.785) * (-124247.530) [-124168.793] -- 1:23:01
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4170000 -- [-124139.070] (-124182.607) * (-124262.176) [-124167.233] -- 1:22:24
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4180000 -- [-124141.822] (-124173.779) * (-124259.638) [-124175.317] -- 1:21:47
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4190000 -- [-124149.501] (-124166.868) * (-124256.790) [-124182.536] -- 1:21:10
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      4200000 -- [-124140.890] (-124170.354) * (-124256.080) [-124174.324] -- 1:20:33
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      4210000 -- [-124149.588] (-124168.967) * (-124254.459) [-124177.626] -- 1:19:55
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      4220000 -- [-124151.083] (-124183.658) * (-124257.417) [-124181.307] -- 1:19:19
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4230000 -- [-124137.902] (-124177.688) * (-124271.158) [-124179.694] -- 1:18:41
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      4240000 -- [-124142.244] (-124165.766) * (-124256.864) [-124179.298] -- 1:18:04
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4250000 -- [-124150.597] (-124182.517) * (-124265.349) [-124186.771] -- 1:17:27
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4260000 -- [-124143.029] (-124182.540) * (-124250.739) [-124180.124] -- 1:16:50
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4270000 -- [-124148.576] (-124177.396) * (-124254.833) [-124173.097] -- 1:16:12
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4280000 -- [-124149.237] (-124178.128) * (-124260.541) [-124172.978] -- 1:15:35
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4290000 -- [-124147.513] (-124171.883) * (-124262.355) [-124171.169] -- 1:14:58
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4300000 -- [-124141.969] (-124190.348) * (-124256.754) [-124174.577] -- 1:14:21
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4310000 -- [-124143.580] (-124187.757) * (-124254.397) [-124181.990] -- 1:13:43
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4320000 -- [-124144.466] (-124167.450) * (-124251.031) [-124171.010] -- 1:13:06
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4330000 -- [-124139.304] (-124180.109) * (-124257.210) [-124176.396] -- 1:12:29
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4340000 -- [-124150.684] (-124165.763) * (-124259.701) [-124176.622] -- 1:11:52
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4350000 -- [-124144.753] (-124185.554) * (-124248.359) [-124173.752] -- 1:11:15
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4360000 -- [-124147.484] (-124169.723) * (-124244.909) [-124172.719] -- 1:10:38
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4370000 -- [-124152.939] (-124176.921) * (-124259.660) [-124167.940] -- 1:10:00
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4380000 -- [-124139.061] (-124181.268) * (-124259.852) [-124183.251] -- 1:09:23
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4390000 -- [-124136.471] (-124175.366) * (-124254.756) [-124167.107] -- 1:08:46
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4400000 -- [-124146.584] (-124171.278) * (-124252.345) [-124175.005] -- 1:08:09
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4410000 -- [-124138.183] (-124183.082) * (-124254.865) [-124165.062] -- 1:07:32
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4420000 -- [-124152.008] (-124170.477) * (-124261.526) [-124171.547] -- 1:06:55
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4430000 -- [-124137.437] (-124169.175) * (-124259.845) [-124174.522] -- 1:06:17
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4440000 -- [-124151.291] (-124185.230) * (-124259.252) [-124171.378] -- 1:05:40
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4450000 -- [-124141.829] (-124192.834) * (-124261.069) [-124174.884] -- 1:05:03
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4460000 -- [-124157.147] (-124182.033) * (-124267.683) [-124178.883] -- 1:04:26
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      4470000 -- [-124137.581] (-124174.048) * (-124247.082) [-124178.076] -- 1:03:48
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4480000 -- [-124140.816] (-124199.242) * (-124252.317) [-124176.714] -- 1:03:11
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4490000 -- [-124139.592] (-124170.693) * (-124253.926) [-124183.012] -- 1:02:34
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4500000 -- [-124140.415] (-124176.920) * (-124252.285) [-124171.069] -- 1:01:57
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4510000 -- [-124139.687] (-124177.838) * (-124257.202) [-124173.140] -- 1:01:20
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      4520000 -- [-124147.367] (-124173.754) * (-124248.006) [-124181.555] -- 1:00:43
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4530000 -- [-124140.504] (-124180.268) * (-124253.632) [-124176.971] -- 1:00:06
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4540000 -- [-124144.937] (-124184.097) * (-124251.604) [-124184.775] -- 0:59:28
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4550000 -- [-124147.581] (-124173.675) * (-124247.397) [-124176.178] -- 0:58:51
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4560000 -- [-124145.951] (-124167.107) * (-124245.196) [-124172.883] -- 0:58:14
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4570000 -- [-124148.342] (-124167.264) * (-124251.630) [-124167.154] -- 0:57:37
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390210
+
+      4580000 -- [-124140.648] (-124184.180) * (-124256.231) [-124166.107] -- 0:57:00
+
+      Average standard deviation of split frequencies: 0.390210
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4590000 -- [-124142.328] (-124166.798) * (-124255.710) [-124168.281] -- 0:56:23
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4600000 -- [-124146.407] (-124170.886) * (-124247.918) [-124173.359] -- 0:55:46
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4610000 -- [-124147.200] (-124172.699) * (-124264.189) [-124176.068] -- 0:55:08
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4620000 -- [-124143.355] (-124171.978) * (-124261.266) [-124175.916] -- 0:54:31
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4630000 -- [-124151.960] (-124171.168) * (-124246.333) [-124176.679] -- 0:53:54
+
+      Average standard deviation of split frequencies: 0.390209
+
+
+      Average standard deviation of split frequencies: 0.390209
+
+      4640000 -- [-124147.128] (-124186.333) * (-124264.387) [-124182.397] -- 0:53:17
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      4650000 -- [-124147.958] (-124184.026) * (-124253.565) [-124168.694] -- 0:52:39
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      4660000 -- [-124153.217] (-124184.013) * (-124250.813) [-124171.011] -- 0:52:02
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      4670000 -- [-124135.888] (-124176.472) * (-124254.296) [-124176.070] -- 0:51:25
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      4680000 -- [-124141.699] (-124176.293) * (-124259.807) [-124169.140] -- 0:50:48
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      4690000 -- [-124150.276] (-124182.546) * (-124252.467) [-124179.653] -- 0:50:11
+
+      Average standard deviation of split frequencies: 0.390208
+
+
+      Average standard deviation of split frequencies: 0.390208
+
+      4700000 -- [-124147.417] (-124173.516) * (-124259.650) [-124171.534] -- 0:49:34
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      4710000 -- [-124146.301] (-124182.933) * (-124267.928) [-124184.798] -- 0:48:56
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      4720000 -- [-124144.042] (-124164.420) * (-124247.467) [-124175.907] -- 0:48:19
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      4730000 -- [-124143.349] (-124180.454) * (-124249.547) [-124173.180] -- 0:47:42
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      4740000 -- [-124136.359] (-124186.056) * (-124269.789) [-124174.381] -- 0:47:05
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      4750000 -- [-124148.098] (-124178.494) * (-124263.311) [-124175.166] -- 0:46:28
+
+      Average standard deviation of split frequencies: 0.390207
+
+
+      Average standard deviation of split frequencies: 0.390207
+
+      4760000 -- [-124144.383] (-124172.704) * (-124256.112) [-124173.516] -- 0:45:51
+
+      Average standard deviation of split frequencies: 0.390206
+
+
+      Average standard deviation of split frequencies: 0.390206
+
+      4770000 -- [-124140.294] (-124178.245) * (-124253.791) [-124174.334] -- 0:45:14
+
+      Average standard deviation of split frequencies: 0.390206
+
+
+      Average standard deviation of split frequencies: 0.390206
+
+      4780000 -- [-124143.187] (-124180.237) * (-124256.792) [-124180.961] -- 0:44:36
+
+      Average standard deviation of split frequencies: 0.390206
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      4790000 -- [-124148.259] (-124166.015) * (-124245.847) [-124174.051] -- 0:43:59
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      4800000 -- [-124140.099] (-124175.817) * (-124252.899) [-124169.032] -- 0:43:22
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      4810000 -- [-124137.393] (-124178.861) * (-124253.522) [-124166.040] -- 0:42:45
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      4820000 -- [-124136.914] (-124165.933) * (-124257.524) [-124166.865] -- 0:42:07
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      4830000 -- [-124142.315] (-124167.814) * (-124262.473) [-124184.858] -- 0:41:30
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      4840000 -- [-124144.617] (-124174.985) * (-124262.704) [-124177.156] -- 0:40:53
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      4850000 -- [-124143.777] (-124173.401) * (-124256.434) [-124177.134] -- 0:40:16
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      4860000 -- [-124143.590] (-124168.884) * (-124251.041) [-124177.141] -- 0:39:39
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      4870000 -- [-124141.182] (-124183.432) * (-124257.032) [-124172.248] -- 0:39:02
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      4880000 -- [-124142.380] (-124173.325) * (-124243.152) [-124169.844] -- 0:38:24
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      4890000 -- [-124140.587] (-124185.168) * (-124261.920) [-124168.085] -- 0:37:47
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      4900000 -- [-124134.048] (-124180.405) * (-124252.243) [-124179.958] -- 0:37:10
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      4910000 -- [-124144.614] (-124195.470) * (-124265.470) [-124175.903] -- 0:36:33
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390217
+
+      4920000 -- [-124142.109] (-124183.292) * (-124261.624) [-124179.537] -- 0:35:56
+
+      Average standard deviation of split frequencies: 0.390217
+
+
+      Average standard deviation of split frequencies: 0.390217
+
+      4930000 -- [-124149.685] (-124176.286) * (-124253.408) [-124176.033] -- 0:35:19
+
+      Average standard deviation of split frequencies: 0.390217
+
+
+      Average standard deviation of split frequencies: 0.390217
+
+      4940000 -- [-124146.195] (-124166.447) * (-124249.396) [-124181.772] -- 0:34:41
+
+      Average standard deviation of split frequencies: 0.390217
+
+
+      Average standard deviation of split frequencies: 0.390217
+
+      4950000 -- [-124148.197] (-124174.513) * (-124248.203) [-124168.833] -- 0:34:04
+
+      Average standard deviation of split frequencies: 0.390217
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      4960000 -- [-124153.586] (-124176.112) * (-124248.245) [-124179.411] -- 0:33:27
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      4970000 -- [-124140.071] (-124191.725) * (-124256.709) [-124171.615] -- 0:32:50
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      4980000 -- [-124146.379] (-124188.268) * (-124256.294) [-124175.679] -- 0:32:13
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      4990000 -- [-124134.849] (-124172.767) * (-124251.011) [-124176.816] -- 0:31:35
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      5000000 -- [-124139.046] (-124185.293) * (-124256.365) [-124162.951] -- 0:30:58
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      5010000 -- [-124136.275] (-124167.956) * (-124255.716) [-124171.908] -- 0:30:21
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5020000 -- [-124141.213] (-124175.383) * (-124249.240) [-124188.473] -- 0:29:44
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5030000 -- [-124149.827] (-124184.396) * (-124247.604) [-124174.701] -- 0:29:07
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5040000 -- [-124142.585] (-124181.932) * (-124261.883) [-124175.621] -- 0:28:30
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5050000 -- [-124147.149] (-124174.890) * (-124256.174) [-124170.881] -- 0:27:53
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5060000 -- [-124140.410] (-124185.470) * (-124261.684) [-124175.815] -- 0:27:15
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5070000 -- [-124142.923] (-124171.868) * (-124259.980) [-124166.548] -- 0:26:38
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5080000 -- [-124143.908] (-124194.889) * (-124257.601) [-124175.150] -- 0:26:01
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5090000 -- [-124137.644] (-124185.922) * (-124257.971) [-124170.185] -- 0:25:24
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5100000 -- [-124139.275] (-124173.021) * (-124256.743) [-124174.941] -- 0:24:47
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5110000 -- [-124150.967] (-124181.392) * (-124260.395) [-124174.754] -- 0:24:09
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5120000 -- [-124146.874] (-124172.093) * (-124244.700) [-124174.159] -- 0:23:32
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5130000 -- [-124144.541] (-124175.709) * (-124262.301) [-124169.780] -- 0:22:55
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      5140000 -- [-124141.203] (-124183.601) * (-124247.005) [-124171.799] -- 0:22:18
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      5150000 -- [-124150.911] (-124174.241) * (-124258.951) [-124174.098] -- 0:21:41
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      5160000 -- [-124146.679] (-124167.662) * (-124252.877) [-124170.248] -- 0:21:04
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      5170000 -- [-124146.785] (-124176.135) * (-124261.767) [-124172.450] -- 0:20:26
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      5180000 -- [-124130.258] (-124179.576) * (-124244.598) [-124184.105] -- 0:19:49
+
+      Average standard deviation of split frequencies: 0.390213
+
+
+      Average standard deviation of split frequencies: 0.390213
+
+      5190000 -- [-124145.691] (-124175.872) * (-124251.297) [-124186.038] -- 0:19:12
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      5200000 -- [-124156.133] (-124201.665) * (-124256.152) [-124180.096] -- 0:18:35
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5210000 -- [-124137.705] (-124192.497) * (-124262.911) [-124172.293] -- 0:17:58
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5220000 -- [-124145.636] (-124169.632) * (-124259.103) [-124176.863] -- 0:17:20
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      5230000 -- [-124148.373] (-124179.242) * (-124253.531) [-124175.957] -- 0:16:43
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5240000 -- [-124148.837] (-124177.314) * (-124252.596) [-124176.157] -- 0:16:06
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5250000 -- [-124140.877] (-124182.782) * (-124253.435) [-124173.130] -- 0:15:29
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5260000 -- [-124146.419] (-124173.768) * (-124265.289) [-124170.865] -- 0:14:52
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5270000 -- [-124136.492] (-124173.238) * (-124258.757) [-124182.307] -- 0:14:15
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5280000 -- [-124139.592] (-124169.586) * (-124260.918) [-124174.167] -- 0:13:37
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5290000 -- [-124142.337] (-124187.386) * (-124252.181) [-124185.326] -- 0:13:00
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5300000 -- [-124141.292] (-124177.144) * (-124258.682) [-124166.827] -- 0:12:23
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390214
+
+      5310000 -- [-124146.805] (-124176.384) * (-124258.835) [-124180.928] -- 0:11:46
+
+      Average standard deviation of split frequencies: 0.390214
+
+
+      Average standard deviation of split frequencies: 0.390217
+
+      5320000 -- [-124149.022] (-124173.377) * (-124258.021) [-124174.092] -- 0:11:09
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      5330000 -- [-124148.865] (-124179.992) * (-124276.701) [-124177.569] -- 0:10:32
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      5340000 -- [-124141.125] (-124177.781) * (-124245.010) [-124175.217] -- 0:09:54
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      5350000 -- [-124146.676] (-124164.672) * (-124264.651) [-124173.578] -- 0:09:17
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      5360000 -- [-124139.533] (-124178.900) * (-124264.747) [-124181.152] -- 0:08:40
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      5370000 -- [-124147.013] (-124187.332) * (-124246.445) [-124169.848] -- 0:08:03
+
+      Average standard deviation of split frequencies: 0.390216
+
+
+      Average standard deviation of split frequencies: 0.390216
+
+      5380000 -- [-124142.570] (-124166.479) * (-124253.772) [-124172.804] -- 0:07:26
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5390000 -- [-124138.062] (-124187.276) * (-124250.032) [-124172.598] -- 0:06:48
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5400000 -- [-124154.958] (-124195.323) * (-124259.404) [-124170.659] -- 0:06:11
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5410000 -- [-124142.736] (-124165.677) * (-124262.323) [-124177.891] -- 0:05:34
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5420000 -- [-124144.190] (-124176.813) * (-124255.306) [-124166.639] -- 0:04:57
+
+      Average standard deviation of split frequencies: 0.390215
+
+
+      Average standard deviation of split frequencies: 0.390215
+
+      5430000 -- [-124143.348] (-124180.079) * (-124248.037) [-124174.148] -- 0:04:20
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390212
+
+      5440000 -- [-124146.504] (-124196.759) * (-124254.558) [-124174.699] -- 0:03:43
+
+      Average standard deviation of split frequencies: 0.390212
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      5450000 -- [-124141.925] (-124186.719) * (-124268.645) [-124176.826] -- 0:03:05
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      5460000 -- [-124147.350] (-124175.225) * (-124258.533) [-124189.018] -- 0:02:28
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      5470000 -- [-124146.234] (-124179.798) * (-124253.940) [-124183.397] -- 0:01:51
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      5480000 -- [-124136.069] (-124174.360) * (-124263.985) [-124173.407] -- 0:01:14
+
+      Average standard deviation of split frequencies: 0.390211
+
+
+      Average standard deviation of split frequencies: 0.390211
+
+      5490000 -- [-124148.860] (-124170.522) * (-124247.617) [-124178.904] -- 0:00:37
+
+      Average standard deviation of split frequencies: 0.390211
+
+      Average standard deviation of split frequencies: 0.390211
+      5500000 -- [-124145.325] (-124189.595) * (-124253.393) [-124182.705] -- 0:00:00
+
+      Average standard deviation of split frequencies: 0.390211
+
+      Analysis completed in 5 hours 40 mins 50 seconds
+      Analysis used 20353.28 seconds of CPU time
+      Likelihood of best state for "cold" chain of run 1 was -124126.83
+      Likelihood of best state for "cold" chain of run 2 was -124134.99
+
+      Acceptance rates for the moves in the "cold" chain of run 1:
+         With prob.   (last 100)   chain accepted proposals by move
+            15.7 %     ( 27 %)     Dirichlet(Revmat)
+            24.7 %     ( 21 %)     Slider(Revmat)
+            14.1 %     ( 28 %)     Dirichlet(Pi)
+            22.2 %     ( 22 %)     Slider(Pi)
+             0.0 %     (  0 %)     ExtSPR(Tau,V)
+             0.0 %     (  0 %)     ExtTBR(Tau,V)
+             0.0 %     (  0 %)     NNI(Tau,V)
+             0.0 %     (  0 %)     ParsSPR(Tau,V)
+            24.8 %     ( 20 %)     Multiplier(V)
+             5.4 %     (  4 %)     Nodeslider(V)
+            24.0 %     ( 29 %)     TLMultiplier(V)
+
+      Acceptance rates for the moves in the "cold" chain of run 2:
+         With prob.   (last 100)   chain accepted proposals by move
+            15.5 %     ( 20 %)     Dirichlet(Revmat)
+            24.7 %     ( 29 %)     Slider(Revmat)
+            14.3 %     ( 30 %)     Dirichlet(Pi)
+            22.6 %     ( 29 %)     Slider(Pi)
+             0.0 %     (  0 %)     ExtSPR(Tau,V)
+             0.0 %     (  0 %)     ExtTBR(Tau,V)
+             0.0 %     (  0 %)     NNI(Tau,V)
+             0.0 %     (  0 %)     ParsSPR(Tau,V)
+            25.8 %     ( 27 %)     Multiplier(V)
+             5.5 %     (  8 %)     Nodeslider(V)
+            24.2 %     ( 22 %)     TLMultiplier(V)
+
+      Chain swap information for run 1:
+
+                   1       2 
+           ------------------
+         1 |            0.00 
+         2 |  550000         
+
+      Chain swap information for run 2:
+
+                   1       2 
+           ------------------
+         1 |            0.00 
+         2 |  550000         
+
+      Upper diagonal: Proportion of successful state exchanges between chains
+      Lower diagonal: Number of attempted state exchanges between chains
+
+      Chain information:
+
+        ID -- Heat 
+       -----------
+         1 -- 1.00  (cold chain)
+         2 -- 0.71 
+
+      Heat = 1 / (1 + T * (ID - 1))
+         (where T = 0.40 is the temperature and ID is the chain number)
+
+
+      ************************* WARNING!! ************************************  
+      MrBayes suspects that your runs have not converged because the tree       
+      samples are very different (average standard deviation of split frequen-  
+      cies larger than 0.10 (0.39)). MrBayes suggests that you run the ana-   
+      lysis longer or try to improve the MCMC sampling efficiency by fine-      
+      tuning MCMC proposal or heating parameters.                               
+      Summarizing trees in files "024.nex.run1.t" and "024.nex.run2.t"
+      Using relative burnin ('relburnin=yes'), discarding the first 25 % of sampled trees
+      Writing statistics to files 024.nex.<parts|tstat|vstat|trprobs|con>
+      Examining first file ...
+      Found one tree block in file "024.nex.run1.t" with 22001 trees in last block
+      Expecting the same number of trees in the last tree block of all files
+
+      Tree reading status:
+
+      0      10      20      30      40      50      60      70      80      90     100
+      v-------v-------v-------v-------v-------v-------v-------v-------v-------v-------v
+      *********************************************************************************
+
+      Read a total of 44002 trees in 2 files (sampling 33002 of them)
+         (Each file contained 22001 trees of which 16501 were sampled)
+                                                                                   
+      General explanation:                                                          
+                                                                                   
+      In an unrooted tree, a taxon bipartition (split) is specified by removing a   
+      branch, thereby dividing the species into those to the left and those to the  
+      right of the branch. Here, taxa to one side of the removed branch are denoted 
+      '.' and those to the other side are denoted '*'. Specifically, the '.' symbol 
+      is used for the taxa on the same side as the outgroup.                        
+                                                                                   
+      In a rooted or clock tree, the tree is rooted using the model and not by      
+      reference to an outgroup. Each bipartition therefore corresponds to a clade,  
+      that is, a group that includes all the descendants of a particular branch in  
+      the tree.  Taxa that are included in each clade are denoted using '*', and    
+      taxa that are not included are denoted using the '.' symbol.                  
+                                                                                   
+      The output first includes a key to all the bipartitions with frequency larger 
+      or equual to (Minpartfreq) in at least one run. Minpartfreq is a parameter to 
+      sumt command and currently it is set to 0.10.  This is followed by a table  
+      with statistics for the informative bipartitions (those including at least    
+      two taxa), sorted from highest to lowest probability. For each bipartition,   
+      the table gives the number of times the partition or split was observed in all
+      runs (#obs) and the posterior probability of the bipartition (Probab.), which 
+      is the same as the split frequency. If several runs are summarized, this is   
+      followed by the minimum split frequency (Min(s)), the maximum frequency       
+      (Max(s)), and the standard deviation of frequencies (Stddev(s)) across runs.  
+      The latter value should approach 0 for all bipartitions as MCMC runs converge.
+                                                                                   
+      This is followed by a table summarizing branch lengths, node heights (if a    
+      clock model was used) and relaxed clock parameters (if a relaxed clock model  
+      was used). The mean, variance, and 95 % credible interval are given for each 
+      of these parameters. If several runs are summarized, the potential scale      
+      reduction factor (PSRF) is also given; it should approach 1 as runs converge. 
+      Node heights will take calibration points into account, if such points were   
+      used in the analysis.                                                         
+                                                                                    
+      Note that Stddev may be unreliable if the partition is not present in all     
+      runs (the last column indicates the number of runs that sampled the partition 
+      if more than one run is summarized). The PSRF is not calculated at all if     
+      the partition is not present in all runs.The PSRF is also sensitive to small  
+      sample sizes and it should only be considered a rough guide to convergence    
+      since some of the assumptions allowing one to interpret it as a true potential
+      scale reduction factor are violated in MrBayes.                               
+                                                                                    
+      List of taxa in bipartitions:                                                 
+                                                                                   
+         1 -- Cassowary
+         2 -- Emu
+         3 -- EasternMoa
+         4 -- lbmoa
+         5 -- Dinornis
+         6 -- gskiwi
+         7 -- BrownKiwi
+         8 -- LSKiwi
+         9 -- GreatRhea
+        10 -- LesserRhea
+        11 -- Ostrich
+        12 -- BrushTurkey
+        13 -- Chicken
+        14 -- magpiegoose
+        15 -- duck
+        16 -- oystercatcher
+        17 -- turnstone
+        18 -- LBPenguin
+        19 -- GaviaStellata
+        20 -- Alligator
+        21 -- Caiman
+        22 -- Gtinamou
+        23 -- ECtinamou
+        24 -- Crypturellus
+
+      Key to taxon bipartitions (saved to file "024.nex.parts"):
+
+      ID -- Partition
+      ------------------------------
+       1 -- .***********************
+       2 -- .*......................
+       3 -- ..*.....................
+       4 -- ...*....................
+       5 -- ....*...................
+       6 -- .....*..................
+       7 -- ......*.................
+       8 -- .......*................
+       9 -- ........*...............
+      10 -- .........*..............
+      11 -- ..........*.............
+      12 -- ...........*............
+      13 -- ............*...........
+      14 -- .............*..........
+      15 -- ..............*.........
+      16 -- ...............*........
+      17 -- ................*.......
+      18 -- .................*......
+      19 -- ..................*.....
+      20 -- ...................*....
+      21 -- ....................*...
+      22 -- .....................*..
+      23 -- ......................*.
+      24 -- .......................*
+      25 -- ...............**.......
+      26 -- .................**.....
+      27 -- .**.....................
+      28 -- .............**.........
+      29 -- .....................**.
+      30 -- .***....................
+      31 -- ........**..............
+      32 -- .**********************.
+      33 -- ...................**...
+      34 -- ....**..................
+      35 -- ......**................
+      36 -- .................****...
+      37 -- .********************...
+      38 -- ....******..............
+      39 -- .*********..............
+      40 -- ......****..............
+      41 -- ...........**...........
+      42 -- ..........***...........
+      43 -- ..........**............
+      44 -- ..........*******.......
+      45 -- ..........***********...
+      46 -- ..........*****.........
+      47 -- ........*********.......
+      48 -- .*******................
+      49 -- ....****................
+      50 -- ........*****...........
+      51 -- ........***.............
+      52 -- ........*************...
+      53 -- ........*******.........
+      ------------------------------
+
+      Summary statistics for informative taxon bipartitions
+         (saved to file "024.nex.tstat"):
+
+      ID   #obs     Probab.     Sd(s)+      Min(s)      Max(s)   Nruns 
+      -----------------------------------------------------------------
+      25  33002    1.000000    0.000000    1.000000    1.000000    2
+      26  33002    1.000000    0.000000    1.000000    1.000000    2
+      27  33002    1.000000    0.000000    1.000000    1.000000    2
+      28  33002    1.000000    0.000000    1.000000    1.000000    2
+      29  32967    0.998939    0.001500    0.997879    1.000000    2
+      30  32967    0.998939    0.001500    0.997879    1.000000    2
+      31  32967    0.998939    0.001500    0.997879    1.000000    2
+      32  32967    0.998939    0.001500    0.997879    1.000000    2
+      33  32967    0.998939    0.001500    0.997879    1.000000    2
+      34  32967    0.998939    0.001500    0.997879    1.000000    2
+      35  32967    0.998939    0.001500    0.997879    1.000000    2
+      36  32967    0.998939    0.001500    0.997879    1.000000    2
+      37  32967    0.998939    0.001500    0.997879    1.000000    2
+      38  16501    0.500000    0.707107    0.000000    1.000000    1 *
+      39  16501    0.500000    0.707107    0.000000    1.000000    1 *
+      40  16501    0.500000    0.707107    0.000000    1.000000    1 *
+      41  16501    0.500000    0.707107    0.000000    1.000000    1 *
+      42  16501    0.500000    0.707107    0.000000    1.000000    1 *
+      43  16501    0.500000    0.707107    0.000000    1.000000    1 *
+      44  16501    0.500000    0.707107    0.000000    1.000000    1 *
+      45  16501    0.500000    0.707107    0.000000    1.000000    1 *
+      46  16501    0.500000    0.707107    0.000000    1.000000    1 *
+      47  16466    0.498939    0.705607    0.000000    0.997879    1 *
+      48  16466    0.498939    0.705607    0.000000    0.997879    1 *
+      49  16466    0.498939    0.705607    0.000000    0.997879    1 *
+      50  16466    0.498939    0.705607    0.000000    0.997879    1 *
+      51  16466    0.498939    0.705607    0.000000    0.997879    1 *
+      52  16466    0.498939    0.705607    0.000000    0.997879    1 *
+      53  16452    0.498515    0.705007    0.000000    0.997030    1 *
+      -----------------------------------------------------------------
+      + Convergence diagnostic (standard deviation of split frequencies)
+        should approach 0.0 as runs converge.
+
+      * The partition was not found in all runs so the values are unreliable
+
+      Summary statistics for branch and node parameters
+         (saved to file "024.nex.vstat"):
+
+                                              95% HPD Interval
+                                            --------------------
+      Parameter      Mean       Variance     Lower       Upper       Median     PSRF+  Nruns
+      --------------------------------------------------------------------------------------
+      length[1]     0.063446    0.000006    0.058578    0.068346    0.063419    1.005    2
+      length[2]     0.066176    0.000007    0.061053    0.071213    0.066120    1.000    2
+      length[3]     0.052535    0.000006    0.047921    0.057104    0.052481    1.000    2
+      length[4]     0.070691    0.000007    0.065399    0.076039    0.070696    1.002    2
+      length[5]     0.061551    0.000008    0.056263    0.066972    0.061518    1.192    2
+      length[6]     0.058815    0.000007    0.053628    0.064261    0.058772    1.247    2
+      length[7]     0.057948    0.000020    0.050509    0.065958    0.057859    2.485    2
+      length[8]     0.059718    0.000020    0.051812    0.067476    0.059645    2.390    2
+      length[9]     0.059870    0.000091    0.047024    0.073392    0.059201    5.300    2
+      length[10]    0.049884    0.000092    0.037195    0.063005    0.052226    5.880    2
+      length[11]    0.057013    0.000030    0.047867    0.065836    0.056942    3.080    2
+      length[12]    0.046848    0.000013    0.040491    0.053404    0.046786    2.129    2
+      length[13]    0.056327    0.000006    0.051551    0.061350    0.056280    1.133    2
+      length[14]    0.052807    0.000006    0.048119    0.057750    0.052774    1.127    2
+      length[15]    0.059199    0.000006    0.054305    0.064165    0.059155    1.104    2
+      length[16]    0.054314    0.000005    0.049903    0.058785    0.054302    1.012    2
+      length[17]    0.061720    0.000006    0.056862    0.066339    0.061670    1.003    2
+      length[18]    0.058834    0.000006    0.054227    0.063672    0.058785    1.002    2
+      length[19]    0.053320    0.000005    0.048794    0.057757    0.053296    1.001    2
+      length[20]    0.052198    0.000005    0.047806    0.056686    0.052175    1.003    2
+      length[21]    0.063758    0.000007    0.058904    0.068643    0.063742    1.003    2
+      length[22]    0.068192    0.000007    0.063200    0.073375    0.068186    1.000    2
+      length[23]    0.052296    0.000005    0.047727    0.056650    0.052231    1.000    2
+      length[24]    0.053432    0.000005    0.048888    0.057937    0.053386    1.004    2
+      length[25]    0.031395    0.000003    0.027707    0.034941    0.031390    1.019    2
+      length[26]    0.024623    0.000003    0.021227    0.027945    0.024587    1.000    2
+      length[27]    0.024613    0.000003    0.021465    0.028080    0.024569    1.011    2
+      length[28]    0.027656    0.000007    0.023070    0.032606    0.027636    1.877    2
+      length[29]    0.026344    0.000003    0.022949    0.029814    0.026317    1.017    2
+      length[30]    0.018649    0.000003    0.015274    0.022214    0.018605    1.142    2
+      length[31]    0.031828    0.000007    0.026966    0.036675    0.031780    1.727    2
+      length[32]    0.026937    0.000003    0.023561    0.030433    0.026903    1.001    2
+      length[33]    0.031099    0.000004    0.027515    0.034826    0.031066    1.000    2
+      length[34]    0.029743    0.000015    0.023330    0.036127    0.029807    2.819    2
+      length[35]    0.026352    0.000011    0.020738    0.032047    0.026235    2.412    2
+      length[36]    0.014790    0.000003    0.011699    0.018099    0.014733    1.013    2
+      length[37]    0.016741    0.000003    0.013307    0.020265    0.016685    1.195    2
+      length[38]    0.011244    0.000002    0.008626    0.013844    0.011217     NA      1 *
+      length[39]    0.015685    0.000002    0.012973    0.018471    0.015662     NA      1 *
+      length[40]    0.013738    0.000003    0.010716    0.016909    0.013702     NA      1 *
+      length[41]    0.022793    0.000003    0.019606    0.025905    0.022761     NA      1 *
+      length[42]    0.020174    0.000003    0.016882    0.023567    0.020128     NA      1 *
+      length[43]    0.023919    0.000003    0.020669    0.027002    0.023912     NA      1 *
+      length[44]    0.012460    0.000002    0.009820    0.015215    0.012436     NA      1 *
+      length[45]    0.016716    0.000002    0.013765    0.019570    0.016707     NA      1 *
+      length[46]    0.014307    0.000002    0.011240    0.017342    0.014269     NA      1 *
+      length[47]    0.012548    0.000002    0.009778    0.015166    0.012526     NA      1 *
+      length[48]    0.016655    0.000002    0.013770    0.019414    0.016621     NA      1 *
+      length[49]    0.017810    0.000003    0.014550    0.021283    0.017737     NA      1 *
+      length[50]    0.013484    0.000002    0.010568    0.016489    0.013448     NA      1 *
+      length[51]    0.024160    0.000003    0.020699    0.027751    0.024132     NA      1 *
+      length[52]    0.017192    0.000002    0.014259    0.020165    0.017152     NA      1 *
+      length[53]    0.011226    0.000002    0.008528    0.013794    0.011213     NA      1 *
+      --------------------------------------------------------------------------------------
+      + Convergence diagnostic (PSRF = Potential Scale Reduction Factor; Gelman
+        and Rubin, 1992) should approach 1.0 as runs converge. NA is reported when
+        deviation of parameter values within all runs is 0 or when a parameter
+        value (a branch length, for instance) is not sampled in all runs.
+      * The partition was not found in all runs so the values are unreliable.
+
+
+      Summary statistics for partitions with frequency >= 0.10 in at least one run:
+          Average standard deviation of split frequencies = 0.390211
+          Maximum standard deviation of split frequencies = 0.707107
+          Average PSRF for parameter values (excluding NA and >10.0) = 1.577
+          Maximum PSRF for parameter values = 5.880
+
+
+      Clade credibility values:
+
+      /------------------------------------------------------------ Cassowary (1)
+      |                                                                               
+      |------------------------------------------------------------ Crypturellus (24)
+      |                                                                               
+      |                                                    /------- Emu (2)
+      |                                            /--100--+                          
+      |                                            |       \------- EasternMoa (3)
+      |                             /------100-----+                                  
+      |                             |              \--------------- lbmoa (4)
+      |                             |                                                 
+      |                             |                      /------- Dinornis (5)
+      |              /------50------+       /------100-----+                          
+      |              |              |       |              \------- gskiwi (6)
+      |              |              |       |                                         
+      |              |              \---50--+              /------- BrownKiwi (7)
+      |              |                      |      /--100--+                          
+      |              |                      |      |       \------- LSKiwi (8)
+      +              |                      \--50--+                                  
+      |              |                             |       /------- GreatRhea (9)
+      |              |                             \--100--+                          
+      |              |                                     \------- LesserRhea (10)
+      |              |                                                                
+      |              |                                     /------- Ostrich (11)
+      |       /--100-+                             /---50--+                          
+      |       |      |                             |       \------- BrushTurkey (12)
+      |       |      |                      /--50--+                                  
+      |       |      |                      |      \--------------- Chicken (13)
+      |       |      |              /---50--+                                         
+      |       |      |              |       |              /------- magpiegoose (14)
+      |       |      |              |       \------100-----+                          
+      |       |      |       /--50--+                      \------- duck (15)
+      |       |      |       |      |                                                 
+      |       |      |       |      |                      /------- oystercatcher (16)
+      |       |      |       |      \----------100---------+                          
+      \--100--+      |       |                             \------- turnstone (17)
+              |      \---50--+                                                        
+              |              |                             /------- LBPenguin (18)
+              |              |                     /--100--+                          
+              |              |                     |       \------- GaviaStellata (19)
+              |              \---------100---------+                                  
+              |                                    |       /------- Alligator (20)
+              |                                    \--100--+                          
+              |                                            \------- Caiman (21)
+              |                                                                       
+              |                                            /------- Gtinamou (22)
+              \---------------------100--------------------+                          
+                                                           \------- ECtinamou (23)
+                                                                                      
+
+      Phylogram (based on average branch lengths):
+
+      /---------------------- Cassowary (1)
+      |                                                                               
+      |------------------- Crypturellus (24)
+      |                                                                               
+      |                                   /----------------------- Emu (2)
+      |                          /--------+                                           
+      |                          |        \------------------ EasternMoa (3)
+      |                    /-----+                                                    
+      |                    |     \------------------------- lbmoa (4)
+      |                    |                                                          
+      |                    |             /--------------------- Dinornis (5)
+      |              /-----+   /---------+                                            
+      |              |     |   |         \-------------------- gskiwi (6)
+      |              |     |   |                                                      
+      |              |     \---+            /--------------------- BrownKiwi (7)
+      |              |         |   /--------+                                         
+      |              |         |   |        \--------------------- LSKiwi (8)
+      +              |         \---+                                                  
+      |              |             |          /--------------------- GreatRhea (9)
+      |              |             \----------+                                       
+      |              |                        \------------------- LesserRhea (10)
+      |              |                                                                
+      |              |                              /-------------------- Ostrich (11)
+      |        /-----+                     /--------+                                 
+      |        |     |                     |        \---------------- BrushTurkey (12)
+      |        |     |              /------+                                          
+      |        |     |              |      \-------------------- Chicken (13)
+      |        |     |         /----+                                                 
+      |        |     |         |    |         /------------------ magpiegoose (14)
+      |        |     |         |    \---------+                                       
+      |        |     |     /---+              \--------------------- duck (15)
+      |        |     |     |   |                                                      
+      |        |     |     |   |          /------------------- oystercatcher (16)
+      |        |     |     |   \----------+                                           
+      \--------+     |     |              \---------------------- turnstone (17)
+               |     \-----+                                                          
+               |           |             /-------------------- LBPenguin (18)
+               |           |    /--------+                                            
+               |           |    |        \------------------ GaviaStellata (19)
+               |           \----+                                                     
+               |                |          /------------------ Alligator (20)
+               |                \----------+                                          
+               |                           \---------------------- Caiman (21)
+               |                                                                      
+               |         /----------------------- Gtinamou (22)
+               \---------+                                                            
+                         \------------------ ECtinamou (23)
+                                                                                      
+      |----------------| 0.050 expected changes per site
+
+      Calculating tree probabilities...
+
+      Credible sets of trees (5 trees sampled):
+         90 % credible set contains 2 trees
+         95 % credible set contains 2 trees
+         99 % credible set contains 2 trees
+
+      Summarizing parameters in files 024.nex.run1.p and 024.nex.run2.p
+      Writing summary statistics to file 024.nex.pstat
+      Using relative burnin ('relburnin=yes'), discarding the first 25 % of samples
+
+      Below are rough plots of the generation (x-axis) versus the log   
+      probability of observing the data (y-axis). You can use these     
+      graphs to determine what the burn in for your analysis should be. 
+      When the log probability starts to plateau you may be at station- 
+      arity. Sample trees and parameters after the log probability      
+      plateaus. Of course, this is not a guarantee that you are at sta- 
+      tionarity. Also examine the convergence diagnostics provided by   
+      the 'sump' and 'sumt' commands for all the parameters in your     
+      model. Remember that the burn in is the number of samples to dis- 
+      card. There are a total of ngen / samplefreq samples taken during 
+      a MCMC analysis.                                                  
+
+      Overlay plot for both runs:
+      (1 = Run number 1; 2 = Run number 2; * = Both runs)
+
+      +------------------------------------------------------------+ -124142.50
+      |111111 111111  1111 111111111 111111  11  1 111  11 11 111 1|
+      |      1      11    1         1      11  11 1   11  1  1   1 |
+      |                                                            |
+      |                                                            |
+      |                                                            |
+      |                                                            |
+      |                                                            |
+      |                                                            |
+      |                                                            |
+      |                                                            |
+      |                                                            |
+      |                                                            |
+      |                                                            |
+      |                                   2                        |
+      |22222222222222222222222222222222222 222222222222222222222222|
+      +------+-----+-----+-----+-----+-----+-----+-----+-----+-----+ -124175.98
+      ^                                                            ^
+      1375000                                                      5500000
+
+
+      Estimated marginal likelihoods for runs sampled in files
+         "024.nex.run1.p" and "024.nex.run2.p":
+         (Use the harmonic mean for Bayes factor comparisons of models)
+
+         (Values are saved to the file 024.nex.lstat)
+
+      Run   Arithmetic mean   Harmonic mean
+      --------------------------------------
+        1     -124135.83        -124165.58
+        2     -124166.96        -124190.16
+      --------------------------------------
+      TOTAL   -124136.52        -124189.47
+      --------------------------------------
+
+
+      Model parameter summaries over the runs sampled in files
+         "024.nex.run1.p" and "024.nex.run2.p":
+         Summaries are based on a total of 33002 samples from 2 runs.
+         Each run produced 22001 samples of which 16501 samples were included.
+         Parameter summaries saved to file "024.nex.pstat".
+
+                                            95% HPD Interval
+                                          --------------------
+      Parameter      Mean      Variance     Lower       Upper       Median    min ESS*  avg ESS    PSRF+ 
+      --------------------------------------------------------------------------------------------------
+      TL          1.853712    0.000186    1.826989    1.880165    1.853775   7294.12   8063.85    1.002
+      r(A<->C)    0.369297    0.000019    0.360524    0.377780    0.369332   1803.06   1857.38    1.019
+      r(A<->G)    0.223597    0.000015    0.215857    0.231240    0.223591   1520.48   1653.00    1.018
+      r(A<->T)    0.092060    0.000008    0.086257    0.097499    0.092011   2517.34   2596.06    1.003
+      r(C<->G)    0.048171    0.000006    0.043238    0.052851    0.048104   2303.52   2497.42    1.002
+      r(C<->T)    0.241343    0.000011    0.234653    0.247703    0.241326   1961.45   2172.84    1.000
+      r(G<->T)    0.025532    0.000002    0.022918    0.028310    0.025520   3035.47   3161.25    1.001
+      pi(A)       0.243945    0.000007    0.238669    0.249134    0.243932   2660.58   2766.12    1.018
+      pi(C)       0.254803    0.000007    0.249466    0.260029    0.254798   3126.02   3267.20    1.001
+      pi(G)       0.187472    0.000008    0.181546    0.192767    0.187465   2447.03   2456.07    1.002
+      pi(T)       0.313779    0.000011    0.307253    0.319908    0.313776   2774.56   2785.08    1.002
+      --------------------------------------------------------------------------------------------------
+      * Convergence diagnostic (ESS = Estimated Sample Size); min and avg values
+        correspond to minimal and average ESS among runs. 
+        ESS value below 100 may indicate that the parameter is undersampled. 
+      + Convergence diagnostic (PSRF = Potential Scale Reduction Factor; Gelman
+        and Rubin, 1992) should approach 1.0 as runs converge.
+
+
+   Exiting mrbayes block
+   Reached end of file
+
+   Tasks completed, exiting program because mode is noninteractive
+   To return control to the command line after completion of file processing, 
+   set mode to interactive with 'mb -i <filename>' (i is for interactive)
+   or use 'set mode=interactive'
+
