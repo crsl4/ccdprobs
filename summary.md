@@ -2,18 +2,28 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-- run mrbayes for 024,027,036,043,050,064 (use setting of ronquits paper); make sure it converges
-- use the con.tre to simulate sequences with our script and seqgen (nsites=500 and 1500); make sure branch lengths are not that small
-- run bistro, report running time, accuracy and ESS
 
+### Simulations
+- run exabayes (decide settings) on 027,036,043,050,064: `exabayes -f ../../Data/datasets/024.phy -n 1 -s 1234 -m DNA -C 2`
+- get consensus tree and simulate sequences (with our code and seqgen) with our script and seqgen (nsites=500 and 1500); make sure branch lengths are not that small
+- run bistro on simulated sequences with and without fixed tree: report running time, accuracy and ESS
+- run exabayes (saving running time) on simulated sequences again, and calculate the ESS for branch lengths and Q (`ESS mb = ESS/(num generations*% of moves without topology)`)
+- write description of simulation study to bistro manuscript
 
-- write down dirichlet paper
-- finish bistro methods
+### Real life datasets
+- rerun bistro on fixed tree for 024,027,036,043,050,059 (joint and independent BL)
+- run exabayes for 024,027,036,043,050,059, and compare ESS
+- run exabayes on artiodactyl to compare with bistro (this is a strong case for bistro)
+- run exabayes on cats and dogs to see if sampling branch lengths independently is bad for exabayes (because in cats and dogs we identified the problem of independent BL): we can use this example in discussion about the importance (or not so much) of BL correlation
 
+### Generalized Dirichlet
+- look at the proof of hypothesis test for difference of means with unequal population variances. The test statistics is approximate t, because the denominator is approximate gamma (not exactly gamma as in the equal variances case). We can check out this proof to show that sum of gammas with different scales is approximate gamma with a calculated new scale
 
-## Check with Bret
-- example for bistro manuscript
-- manuscript for dirichlet in BA: many things in red missing: how to cite this unpublished work in the main bistro paper? or do we want to start with the dirichlet one?
+### Bistro improvements
+- why does whales or 027 does not give good ESS with fixed tree? is it the branch lengths or Q? we need to run bmcmc and make plots
+  - the problem with short branch lengths could be that truncated normal is not great. maybe we need to fit a truncated gamma instead. We can decide if we need it by computing the loglik at 0.0001 and compare to the loglik at the max. if we need a truncated gamma, we can use the two points: mode (max) and value at 0 (or close to 0) to find the alpha and lambda that we need
+  - why is cats and dogs still bad? is it branch lengths (bad with fixed tree, compare with bmcmc plots) or is it topology (identify bad splits)?
+
 
 ## To knitr Rmd files:
 ```R
