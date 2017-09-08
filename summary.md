@@ -2,7 +2,7 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
-
+added test
 ### Simulations
 - run exabayes (decide settings) on 027,036,043,050,064: `exabayes -f ../../Data/datasets/024.phy -n 1 -s 1234 -m DNA -C 2`
 - get consensus tree and simulate sequences (with our code and seqgen) with our script and seqgen (nsites=500 and 1500); make sure branch lengths are not that small
