@@ -708,4 +708,9 @@ Bistro tree with PP=0.68 is not the true tree. But this is a difficult problem b
 
 # Simulation study
 
-1. We will run MrBayes on the 024,027,036,041,043,050,059,064. They use 20,000*(2n-3) generations, sampling every n generations. So, we modify the nexus files accordingly. We notice that in Ronquist manuscript, they use 900,000 generations in one chain for the 024 dataset. We used 1,100,000 with two chains and they did not converge. They probably did not notice because they had only one chain. We will use 5,000,000 generations in the 024 dataset and test if they converge.
+1. We want to run exabayes on 024,027,036,043,050,064. The option `-n` is the run ID, and `-C` is number of coupled chains:
+```shell
+cd Documents/phylo/github/CladeCondProb/ccdprobs/Bistro/Examples/Simulations/compareExabayes
+mpirun -np 2 exabayes -f ../../../Data/datasets/024.phy -n 1 -s 1234 -m DNA -C 2
+
+```

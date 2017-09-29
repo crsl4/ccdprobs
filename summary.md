@@ -1,10 +1,11 @@
 # Notebook BISTRO
 Bret Larget, Claudia Solis-Lemus (2016)
 
-test 
 ## To do now
 
 ### Simulations
+- wait for exabayes to be installed in darwin machines
+- try the example in darwin to make sure I have the correct invocation
 - run exabayes (decide settings) on 027,036,043,050,064: `exabayes -f ../../Data/datasets/024.phy -n 1 -s 1234 -m DNA -C 2`
 - get consensus tree and simulate sequences (with our code and seqgen) with our script and seqgen (nsites=500 and 1500); make sure branch lengths are not that small
 - run bistro on simulated sequences with and without fixed tree: report running time, accuracy and ESS
@@ -24,6 +25,12 @@ test
 - why does whales or 027 does not give good ESS with fixed tree? is it the branch lengths or Q? we need to run bmcmc and make plots
   - the problem with short branch lengths could be that truncated normal is not great. maybe we need to fit a truncated gamma instead. We can decide if we need it by computing the loglik at 0.0001 and compare to the loglik at the max. if we need a truncated gamma, we can use the two points: mode (max) and value at 0 (or close to 0) to find the alpha and lambda that we need
   - why is cats and dogs still bad? is it branch lengths (bad with fixed tree, compare with bmcmc plots) or is it topology (identify bad splits)?
+- try to break the cats and dogs tree in two, and do bootstap on the separate pieces and then stitch together. The procedure would be:
+  - do bootstrap on the whole tree: get bootstrap support for all edges
+  - randomly choose edges with high bootstrap support to split the tree (careful not to split 2 vs n-2, but relatively balanced sides)
+  - do bootstrap sample on the pieces and stitch together to get one tree
+  - repeat to get sample of trees
+  - use sample of trees to get estimate of ccdprobs
 
 
 ## To knitr Rmd files:
