@@ -711,6 +711,7 @@ Bistro tree with PP=0.68 is not the true tree. But this is a difficult problem b
 1. We want to run exabayes on 024,027,036,043,050,064. The option `-n` is the run ID, and `-C` is number of coupled chains:
 ```shell
 cd Documents/phylo/github/CladeCondProb/ccdprobs/Bistro/Examples/Simulations/compareExabayes
-mpirun -np 2 exabayes -f ../../../Data/datasets/024.phy -n 1 -s 1234 -m DNA -C 2
-
+mpirun -np 2 exabayes -f ../../../Data/datasets/024.phy -n 024 -s 1234 -m DNA -C 2
+consense -f ExaBayes_topologies.run-0.1 -n myCons
 ```
+

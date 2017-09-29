@@ -13,8 +13,8 @@ Bret Larget, Claudia Solis-Lemus (2016)
 - write description of simulation study to bistro manuscript
 
 ### Real life datasets
-- rerun bistro on fixed tree for 024,027,036,043,050,059 (joint and independent BL)
-- run exabayes for 024,027,036,043,050,059, and compare ESS
+- rerun bistro on fixed tree for 024,027,036,043,050,059,064 (joint and independent BL)
+- run exabayes for 024,027,036,043,050,059,064 and compare ESS
 - run exabayes on artiodactyl to compare with bistro (this is a strong case for bistro)
 - run exabayes on cats and dogs to see if sampling branch lengths independently is bad for exabayes (because in cats and dogs we identified the problem of independent BL): we can use this example in discussion about the importance (or not so much) of BL correlation
 
