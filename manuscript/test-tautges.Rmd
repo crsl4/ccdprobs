@@ -1,0 +1,176 @@
+---
+title: "Test Tautges Bounds"
+author: "Bret Larget"
+date: "10/19/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE,message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(dplyr)
+```
+
+Here is a short simulation to evaluate the bounds you found.
+Not surprisingly,
+they are not very tight.
+My previous study indicated that the approximation should get closer
+when the minimum alpha gets large,
+yet the bounds you found are invariant to proportional changes to the alpha parameters.
+
+Here I show what happens with $k=4$ as typical alphas vary from 2 to 20 to 200 to 2000 with the ratio of maximum lambda to minimum lambda being 10 and 1.1.
+
+## Set-up
+
+$Y_1,\ldots,Y_k \sim \text{independent Gamma}(\alpha_i,\lambda_i)$  
+$S = \sum_{i=1}^k Y_i$  
+$X_i = Y_i / S$ for $i = 1,\ldots,k$  
+Let $m_i(\alpha,\lambda) = \mathsf{E}(X_i)$.  
+Let $A_i(\alpha,\lambda) = (\alpha_i/\lambda_i) / \sum_{j=1}^k (\alpha_j/\lambda_j)$  
+Let $\alpha_+ = \sum_{i=1}^k \alpha_i$. 
+Let $\lambda_m = \min_i \lambda_i$ and $\lambda_M = \max_i \lambda_i$.
+
+Tautges Bound:
+$$
+|m_i(\alpha,\lambda) - A_i(\alpha,\lambda)| \le \frac{\alpha_i(\lambda_M - \lambda_m)}{\alpha_+ \lambda_i})
+$$
+
+Note that for fixed $\lambda$ but $\alpha$ increasing proportionally, the bounds do not change.
+I suspect that the true difference gets very small as $\alpha$ increases.
+Test by simulation.
+Pick random $\alpha$ and $\lambda$ with small,
+but not tiny values.
+Keep $\lambda$ fixed and see how $|m_i(\alpha,\lambda) - A_i(\alpha,\lambda)|$ changes when $\alpha$ is repeatedly multiplied by 10.
+
+```{r}
+## Pick parameters at random
+parameters = function(k=4,mean.a=2000,shape=2,lambda.ratio=NULL)
+{
+  alpha = rgamma(k,shape,shape/mean.a)
+  lambda = rgamma(k,shape,shape)
+  if ( !is.null(lambda.ratio) )
+  {
+    if ( lambda.ratio < 1 )
+      stop("lambda.ratio must be greater than or equal to one")
+    if ( lambda.ratio == 1 )
+      lambda = rep(1,k)
+    else
+      lambda = lambda + (max(lambda) - lambda.ratio*min(lambda))/(lambda.ratio-1)
+  }
+  lambda = lambda/mean(lambda)
+  return(data.frame(alpha,lambda))
+}
+
+## Generate a large sample in order to
+## numerically estimate the means
+generate = function(p,n=1000)
+{
+  k = nrow(p)
+  x = with(p, matrix(rgamma(n*k,rep(alpha,each=n),rep(lambda,each=n)),n,k) )
+  s = apply(x,1,sum)
+  for ( i in 1:n )
+    x[i,] = x[i,] / s[i]
+  return(x)
+}
+
+## Function to calculate bounds from p
+bounds.tautges = function(p)
+{
+  lambda.max = max(p$lambda)
+  lambda.min = min(p$lambda)
+  out = with(p, alpha * (lambda.max - lambda.min) / (sum(alpha) * lambda))
+  return ( out )
+}
+
+## approximate mean
+approximate = function(p)
+{
+  w = with(p, alpha/lambda )
+  return( w / sum(w) )
+}
+
+## Case where max(lambda) / min(lambda) = 10
+p.0 = parameters(k=4,mean.a=2,lambda.ratio=10)
+
+p.1 = with(p.0, data.frame(alpha=10*alpha,lambda=lambda))
+p.2 = with(p.0, data.frame(alpha=100*alpha,lambda=lambda))
+p.3 = with(p.0, data.frame(alpha=1000*alpha,lambda=lambda))
+
+m.0 = apply(generate(p.0,n=1000000),2,mean)
+m.1 = apply(generate(p.1,n=1000000),2,mean)
+m.2 = apply(generate(p.2,n=1000000),2,mean)
+m.3 = apply(generate(p.3,n=1000000),2,mean)
+
+b.0 = bounds.tautges(p.0)
+b.1 = bounds.tautges(p.1)
+b.2 = bounds.tautges(p.2)
+b.3 = bounds.tautges(p.3)
+
+## approximation is the same regardless of mutiple of alpha
+a.0 = approximate(p.0)
+
+## difference
+d.0 = m.0 - a.0
+d.1 = m.1 - a.0
+d.2 = m.2 - a.0
+d.3 = m.3 - a.0
+
+## results
+df.0 = data.frame(p.0,mean=m.0,approx=a.0,diff=d.0,bound=b.0)
+df.1 = data.frame(p.1,mean=m.1,approx=a.0,diff=d.1,bound=b.1)
+df.2 = data.frame(p.2,mean=m.2,approx=a.0,diff=d.2,bound=b.2)
+df.3 = data.frame(p.3,mean=m.3,approx=a.0,diff=d.3,bound=b.3)
+
+## show results
+show.results = function(df)
+{
+  cat("Lambda Ratio =",max(df$lambda)/min(df$lambda),"\n")
+  cat("\n","alpha and lambda","\n",sep="")
+  print(t(select(df,alpha,lambda)))
+  cat("\n","means and approximations","\n",sep="")
+  print(t(select(df,mean,approx)))
+  cat("\n","differences and bounds","\n",sep="")
+  print(t(select(df,diff,bound)))
+}
+
+show.results(df.0)
+show.results(df.1)
+show.results(df.2)
+show.results(df.3)
+
+## Case where max(lambda) / min(lambda) = 1.1
+p.0 = parameters(k=4,mean.a=2,lambda.ratio=1.1)
+
+p.1 = with(p.0, data.frame(alpha=10*alpha,lambda=lambda))
+p.2 = with(p.0, data.frame(alpha=100*alpha,lambda=lambda))
+p.3 = with(p.0, data.frame(alpha=1000*alpha,lambda=lambda))
+
+m.0 = apply(generate(p.0,n=1000000),2,mean)
+m.1 = apply(generate(p.1,n=1000000),2,mean)
+m.2 = apply(generate(p.2,n=1000000),2,mean)
+m.3 = apply(generate(p.3,n=1000000),2,mean)
+
+b.0 = bounds.tautges(p.0)
+b.1 = bounds.tautges(p.1)
+b.2 = bounds.tautges(p.2)
+b.3 = bounds.tautges(p.3)
+
+## approximation is the same regardless of mutiple of alpha
+a.0 = approximate(p.0)
+
+## difference
+d.0 = m.0 - a.0
+d.1 = m.1 - a.0
+d.2 = m.2 - a.0
+d.3 = m.3 - a.0
+
+## results
+df.0 = data.frame(p.0,mean=m.0,approx=a.0,diff=d.0,bound=b.0)
+df.1 = data.frame(p.1,mean=m.1,approx=a.0,diff=d.1,bound=b.1)
+df.2 = data.frame(p.2,mean=m.2,approx=a.0,diff=d.2,bound=b.2)
+df.3 = data.frame(p.3,mean=m.3,approx=a.0,diff=d.3,bound=b.3)
+
+show.results(df.0)
+show.results(df.1)
+show.results(df.2)
+show.results(df.3)
+```
