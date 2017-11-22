@@ -1,5 +1,65 @@
 # Results
 
+## Installing and testing Exabayes
+From Mike email:
+```
+I installed this manually onto darwin02. Looks like the executable is
+/usr/local/bin/yggdrasil
+```
+However, in the website it says: "You find executables (sequential: `yggdrasil`, parallel: `exabayes`) in the `./bin` folder". So, maybe we want to use `exabayes` better.
+
+But we do not have `exabayes` in `darwin02`:
+```shell
+ssh claudia@darwin02.stat.wisc.edu
+cd /usr/local/bin
+```
+Online, it says that:
+```
+$ ls bin
+     consense        credibleSet     exabayes        extractBips     parser          postProcParam   sdsf            yggdrasil
+```
+But here we have:
+```
+$ ls
+consense*  credibleSet*  extractBips*  parser*  postProcParam*  sdsf*  yggdrasil*
+```
+
+Small example in `darwin02`. We copy `024.phy` from `ccdprobs/Bistro/Data/datasets`.
+```shell
+cd /u/c/l/claudia/Documents/phylo/projects/CladeDist/exabayes
+/s/std/bin/stashticket 
+/s/std/bin/runauth /usr/bin/screen -S 024
+/usr/local/bin/yggdrasil -f 024.phy -m DNA -n 024 -s 1234
+```
+**aqui voy** Need to wait for the sequential run to finish.
+Started 11/22 1pm
+
+Now examine the output files created by ExaBayes (we neglect the binary alignment file and the checkpoint files). [Full documentation](https://sco.h-its.org/exelixis/web/software/exabayes/manual/index.html#comp-src):
+
+- `ExaBayes_info.024`: Contains the same information also printed to the screen.
+- `ExaBayes_topologies.024.0`: Contains all sampled topologies in nexus format.
+- `ExaBayes_parameters.024.0`: Contains values sampled for all non-topological, non-branch length values.
+- `ExaBayes_diagnostics.024`: Contains chain diagnostics (e.g., acceptance ratios for all proposals or topological convergence in form of asdsf).
+
+Now use the post-processing tools to examine the result. First, we create a consensus tree:
+```shell
+/usr/local/bin/consense -f ExaBayes_topologies.024.0 -n 024.cons
+```
+Let's inspect the 50% credible set of trees:
+```shell
+/usr/local/bin/credibleSet -f ExaBayes_topologies.024.0 -n 024.cred
+```
+The output file `ExaBayes_credibleSet.tmp` contains all sampled trees ordered by the frequency of their occurrence. You probably will find that no tree occurred more than once.
+
+Finally, let's check, how well the parameters are sampled:
+```shell
+/usr/local/bin/postProcParam   -f ExaBayes_parameters.024.0  -n 024.params
+```
+Alternatively, you could also open the parameter file with `Tracer` and visualize the distributions. If you do not have `Tracer` installed, have a look at `ExaBayes_parameterStatistics.params` (spreadsheet tools like Excel are helpful). You'll find summary statistics for each parameter. Specifically, check out the effective sampling size (ESS) value for each parameter. Since samples in a chain are correlated, they are less informative, than if you had drawn the values independently from the original distribution. The ESS of samples indicates the number of samples your samples corresponds to, if they were drawn independently.
+
+You will find that most ESS values are in the range between 30 and 80. This is not bad for the low number of generations, but to assure that each parameter has been sampled adequately, values should be >100 or even better >200. High ESS values indicate that your chain has explored this parameter sufficiently.
+
+---------------------------------------
 ## Simulated whales
 
 - When we fix the topology to the true tree (or mean tree), we get an `ESS 8%`

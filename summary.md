@@ -4,8 +4,8 @@ Bret Larget, Claudia Solis-Lemus (2016)
 ## To do now
 
 ### Simulations
-- wait for exabayes to be installed in darwin machines
-- try the example in darwin to make sure I have the correct invocation
+- ask mike about exabayes vs yggdrasil
+- wait for yggdrasil on 024 to check that everything works, and start sequential runs in the meantime for other datasets. Note that we cannot use independent chains `-C` with yggdrasil.
 - run exabayes (decide settings) on 027,036,043,050,064: `exabayes -f ../../Data/datasets/024.phy -n 1 -s 1234 -m DNA -C 2`
 - get consensus tree and simulate sequences (with our code and seqgen) with our script and seqgen (nsites=500 and 1500); make sure branch lengths are not that small
 - run bistro on simulated sequences with and without fixed tree: report running time, accuracy and ESS
