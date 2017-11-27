@@ -859,7 +859,8 @@ int main(int argc, char* argv[])
     ptree->mcmcNNI(rng,alignment,score,pmap,cmap,internalEdges,minParsimony);
 //    cerr << ptree->makeTopologyNumbers() << " " << setw(5) << score << endl;
   }
-  cerr << "Parsimony tree map" << endl;
+  cerr << endl;
+//  cerr << "Parsimony tree map" << endl;
   cerr << "Minimum parsimony score = " << minParsimony << endl;
   cerr << "Total number of sampled trees = " << pmap.size() << endl;
 
