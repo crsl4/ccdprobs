@@ -1,3 +1,4 @@
+
 // Bistro: main.C
 // Bret Larget and Claudia Solis-Lemus
 // Copyright 2016
@@ -52,7 +53,7 @@ vector<double> getDoublesFromSpaceList (string x)
   {
     s >> d;
     v.push_back(d);
-  } 
+  }
   return v;
 }
 
@@ -146,7 +147,7 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
      Vector4d p_star;
      Vector6d s_star;
      q_init.genDirichletProposal(logQ, rng, p_star, s_star);
-     
+
      QMatrix model(p_star,s_star);
 
      pi.push_back(convert(p_star));
@@ -288,6 +289,128 @@ void randomTrees(int coreID, int indStart, int indEnd, vector<double>& logwt, do
    samplerStream.close();
 }
 
+void mcmcChain(int coreID, string text,QMatrix& q_init,Alignment& alignment,unsigned int blockSize,double scale,mt19937_64& rng,vector<double>& logl,Parameter& parameters, vector<vector<double>>& pi, vector<vector<double>>& rates)
+{
+  Tree starttree(text,alignment);
+  string treeFile = parameters.getOutFileRoot() + "-" + to_string(coreID) + ".tre";
+  string parFile = parameters.getOutFileRoot() + "-" + to_string(coreID) + ".par";
+  ofstream treeStream(treeFile.c_str());
+  ofstream parStream(parFile.c_str());
+  if(coreID == 0)
+    starttree.mcmc(q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,true,pi,rates);
+  else
+    starttree.mcmc(q_init,alignment,blockSize,scale,rng,treeStream,parStream,true,false,logl,false,pi,rates);
+
+  treeStream.close();
+  parStream.close();
+}
+
+//prop = proportion of the chain to keep for the computation
+//used for pi and rates
+void calculatePandS(vector<vector<double>> pi, vector<vector<double>> rates, vector<double>& piMean,
+		    vector<double>& sMean, vector<double>& piVar, vector<double>& sVar)
+{
+  int n = pi.size(); //assumes pi,rates have the same size
+  for(int i=0; i<pi.size(); ++i)
+  {
+    for(int j=0; j<4; ++j)
+    {
+      piMean[j] += pi[i][j];
+      piVar[j] += pi[i][j]*pi[i][j];
+    }
+    for(int j=0; j<6; ++j)
+    {
+      sMean[j] += rates[i][j];
+      sVar[j] += rates[i][j]*rates[i][j];
+    }
+  }
+  for(int j=0; j<4; ++j)
+  {
+    piMean[j] /= n;
+    piVar[j] = piVar[j]/n - (piMean[j]*piMean[j]);
+  }
+  for(int j=0; j<6; ++j)
+  {
+    sMean[j] /= n;
+    sVar[j] = sVar[j]/n - (sMean[j]*sMean[j]);
+  }
+}
+
+// take last half of vector
+// calculate mean and variance per chain
+// calculate mean of means, variance of means (b), mean of variances (w)
+// v = (1-1/n)*w+1/n*b
+// rstat = sqrt(v/w)
+// http://astrostatistics.psu.edu/RLectures/diagnosticsMCMC.pdf
+double gelmanRubin(vector<vector<double>> logl, double prop)
+{
+  int numChains = logl.size();
+  int n = logl[0].size();
+  int it = prop*n;
+  cerr << n << " iterations. Will use last part of: " << it << endl;
+  vector<double> sums(numChains,0.0);
+  vector<double> sums2(numChains,0.0);
+
+  for(int i=0; i<numChains; ++i)
+  {
+    for(int j=it; j<n; ++j)
+    {
+      sums[i] += logl[i][j];
+      sums2[i] += logl[i][j]*logl[i][j];
+    }
+  }
+
+  vector<double> means(numChains,0.0);
+  vector<double> vars(numChains,0.0);
+  double meanMean = 0.0;
+  double meanVar = 0.0;
+  double sum2Mean = 0.0;
+  for(int i=0; i<numChains; ++i)
+  {
+    means[i] = sums[i]/it;
+    cerr << "mean" << i << " = " << means[i] << endl;
+    vars[i] = sums2[i]/it-(means[i]*means[i]);
+    cerr << "var" << i << " = " << vars[i] << endl;
+    sum2Mean += means[i]*means[i];
+    meanMean += means[i];
+    meanVar += vars[i];
+  }
+  meanMean /= numChains;
+  meanVar /= numChains;
+  double varMeans;
+  if(numChains > 1)
+    varMeans = sum2Mean/(numChains-1) - meanMean*meanMean*numChains/(numChains-1);
+  else
+    varMeans = 0;
+  varMeans *= it;
+  cerr << "Number of iterations: " << it << endl;
+  cerr << "mean of means: " << meanMean << endl;
+  cerr << "mean of variances: " << meanVar << endl;
+  cerr << "variance of means: " << varMeans << endl;
+  double weight = 1/(double)it;
+  cerr << "weight: " << weight << endl;
+  double v = (1-weight)*meanVar + weight*varMeans;
+  cerr << "v: " << v << endl;
+  return sqrt(v/meanVar);
+}
+
+void combine(vector<vector<vector<double>>> pi1, vector<vector<vector<double>>> rates1, vector<vector<double>> logl1, vector<vector<double>>& pi2, vector<vector<double>>& rates2, vector<double>& logl2, double prop, ofstream& file)
+{
+  int start = prop*pi1[0].size(); //assumes rates1,logl1 are same size
+  for(int i=0; i<pi1.size(); ++i) //number of chains
+  {
+    for(int j=start; j<pi1[0].size(); ++j)
+    {
+      file << logl1[i][j] << " "; 
+      file << pi1[i][j][0] << " " << pi1[i][j][1] << " " << pi1[i][j][2] << " " << pi1[i][j][3] << " ";
+      file << rates1[i][j][0] << " " << rates1[i][j][1] << " " << rates1[i][j][2] << " " << rates1[i][j][3] << " " << rates1[i][j][4] << " " << rates1[i][j][5] << endl;
+      logl2.push_back(logl1[i][j]);
+      pi2.push_back(pi1[i][j]);
+      rates2.push_back(rates1[i][j]);
+    }
+  }
+}
+
 void createCladeToWeightBranchLengthMap(map<dynamic_bitset<unsigned char>,vector<pair<double,double>>>& cladeToWeightBranchLengthMap,
 					vector<string> trees,vector<double> wt, Alignment& alignment)
 {
@@ -318,7 +441,7 @@ vector<double> quantiles(vector<pair<double,double>>& v)
   }
   // now we find the 97.5% quantile
   sum = 0;
-  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i ) 
+  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i )
   {
     sum += (i->second);
     if(sum < 0.025)
@@ -328,7 +451,7 @@ vector<double> quantiles(vector<pair<double,double>>& v)
   }
   // now we find the 2.5% quantile
   sum = 0;
-  for (vector<pair<double,double>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i ) 
+  for (vector<pair<double,double>>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i )
   {
     sum += (i->second);
     if(sum < 0.025)
@@ -338,7 +461,7 @@ vector<double> quantiles(vector<pair<double,double>>& v)
   }
   // now we find the median
   sum = 0;
-  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i ) 
+  for (vector<pair<double,double>>::iterator i = v.begin(); i != v.end(); ++i )
   {
     sum += (i->second);
     if(sum < 0.5)
@@ -467,7 +590,7 @@ int main(int argc, char* argv[])
     string mcmcname = parameters.getMCMCfile();
     cerr << "Reading mcmc output from file " << mcmcname << endl;
     ifstream mcmcIN(mcmcname.c_str());
-    if(!mcmcIN) 
+    if(!mcmcIN)
     {
       cerr << "Error: Could not open " << mcmcname << endl;
       exit(1);
@@ -476,7 +599,7 @@ int main(int argc, char* argv[])
     int ii = 1;
     if(getline(mcmcIN,l))
     {
-      do 
+      do
       {
 	if(ii == 1)
 	  p0 = convert(getDoublesFromSpaceList(l));
@@ -496,12 +619,12 @@ int main(int argc, char* argv[])
     // ---------------------- Estimate Q with base frequencies and pairwise counts -----------------
     vector<double> p_init = alignment.baseFrequencies();
     cerr << "Estimated base frequencies: " << convert(p_init).transpose() << endl << endl;
-    
+
     VectorXd s_pairwise(6);
     s_pairwise = alignment.averagePairwiseS();
     cerr << endl << "Estimated rates: " << endl;
     cerr << s_pairwise.transpose() << endl << endl;
-    
+
     // checking to see if p and s were initialized at command line
     if ( parameters.getEnteredP() )
       p0 = convert(parameters.getStationaryP());
@@ -511,69 +634,168 @@ int main(int argc, char* argv[])
       s0 = convert(parameters.getSymmetricQP());
     else
       s0 = s_pairwise;
-    
+
 // initial mcmc var (just so that there are not zeros)
     for ( int j=0; j<4; ++j )
       vp0(j) = p0(j)*(1-p0(j))/alignment.getNumSites();
-        
+
     for ( int j=0; j<6; ++j )
       vs0(j) = s0(j)*(1-s0(j))/alignment.getNumSites();
   }
-    
+
   QMatrix q_init(p0,s0,vp0,vs0);
 // ------------------------------ Put MLE branch lengths to tree -------------------------
   cout << "Putting MLE Branch Lengths" << endl;
   cout << "p: " << q_init.getStationaryP().transpose() << endl;
   cout << "s: " << q_init.getSymmetricQP().transpose() << endl;
   cout << "Q: " << endl << q_init.getQ() << endl << endl;
-  
+
   for ( int i=0; i<4; ++i )
   {
     starttree.mleLengths(alignment,q_init);
   }
   cout << starttree.makeTreeNumbers() << endl;
 
+
 // MCMC
   if ( parameters.getDoMCMC() )
   {
     cerr << "Running MCMC to estimate Q matrix ..." << endl;
+    int numChains = 4;
+    unsigned int blockSize = parameters.getNumMCMC();
+    cerr << "Block size = " << blockSize << endl;
 
-    string treeFile = parameters.getOutFileRoot() + ".tre";
-    string parFile = parameters.getOutFileRoot() + ".par";
-    ofstream treeStream(treeFile.c_str());
-    ofstream parStream(parFile.c_str());
-
-    // burnin
-    unsigned int mcmcGenerations = parameters.getNumMCMC();
-    unsigned int mcmcBurn =  mcmcGenerations / 5; // changed to 5 from 10 on 2017-06-16
-    vector<double>  logl(mcmcGenerations);
-    cerr << "burn-in: " << mcmcBurn << " generations." << endl;
-    starttree.mcmc(q_init,alignment,mcmcBurn,alignment.getNumSites(),rng,treeStream,parStream,true,logl);
-    cerr << endl << " done." << endl;
-
-    // mcmc to get final Q
-    cerr << "sampling: " << mcmcGenerations << " generations." << endl;
-    starttree.mcmc(q_init,alignment,mcmcGenerations,alignment.getNumSites(),rng,treeStream,parStream,false,logl);
-    cerr << endl << " done." << endl;
-    treeStream.close();
-    parStream.close();
-    for(int i=1; i<mcmcGenerations; ++i)
+    // generating the seeds for each chain
+    uniform_int_distribution<> rint_orig(0,4294967295);
+    unsigned int initial_seed = rint_orig(rng);
+    cout << "Seed = " << initial_seed << endl;
+    minstd_rand seed_rng(initial_seed);
+    uniform_int_distribution<> rint(0,4294967295);
+    vector<unsigned int> seeds(numChains);
+    vector<mt19937_64*> vrng;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
     {
-      cerr << "logl(" << i << ") = " << logl[i] << endl; 
+      *p = rint(seed_rng);
+      vrng.push_back( new mt19937_64(*p) );
+    }
+    cout << "Seeds per chain: " << endl;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
+      cout << setw(15) << *p << endl;
+
+    vector<thread> threads;
+    vector< vector<double> > logl1(numChains);
+    vector< vector< vector<double> > > pi1(numChains); //vector of vector of pi1,pi2,pi3,pi4
+    vector< vector< vector<double> > > rates1(numChains); //vector of vector of s1,s2,s3,s4,s5,s6
+    cerr << "successful initialization of parameters for mcmc chains" << endl;
+
+    if(parameters.getNoMCMCThreads())
+    {
+      QMatrix newQ(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
+      mcmcChain(0,starttree.makeTreeNumbers(),newQ,alignment,2*blockSize,alignment.getNumSites(),rng,logl1[0],parameters,pi1[0],rates1[0]);
+      q_init.reset(newQ.getStationaryP(),newQ.getSymmetricQP());
+      q_init.setMcmcVarP(newQ.getMcmcVarP());
+      q_init.setMcmcVarQP(newQ.getMcmcVarQP());
+    }
+    else
+    {
+    for ( int i=0; i<numChains; ++i )
+    {
+      cerr << "starting chain = " << i << endl;
+      QMatrix newQ(q_init.getStationaryP(),q_init.getSymmetricQP(),q_init.getMcmcVarP(),q_init.getMcmcVarQP());
+      threads.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),2*blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
     }
 
-// write mcmc output to a file
+    for(auto &t : threads){
+      t.join();
+    }
+    cerr << endl << "done." << endl;
+
+    int maxN = 10; //fixit
+    double lim = 1.05;
+    double prop = 0.5;
+    double rstat;
+    int it = 1;
+
+    rstat = gelmanRubin(logl1,prop);
+    cerr << "Gelman-Rubin = " << rstat << endl;
+
+    while(rstat > lim && it < maxN)
+    {
+      cerr << "convergence not met yet: Gelman-Rubin = " << rstat << " > " << lim << endl;
+      vector<thread> threads2;
+      for ( int i=0; i<numChains; ++i )
+      {
+	cerr << "starting chain = " << i << endl;
+	vector<double> piMean(4,0.0);
+	vector<double> sMean(6,0.0);
+	vector<double> piVar(4,0.0);
+	vector<double> sVar(6,0.0);
+	int last = pi1[i].size();
+	calculatePandS(pi1[i], rates1[i], piMean, sMean, piVar, sVar);
+	QMatrix newQ(convert(pi1[i][last-1]),convert(rates1[i][last-1]),convert(piVar),convert(sVar));
+	threads2.push_back(thread(mcmcChain,i,starttree.makeTreeNumbers(),ref(newQ),ref(alignment),blockSize,alignment.getNumSites(),ref(*(vrng[i])),ref(logl1[i]),ref(parameters),ref(pi1[i]),ref(rates1[i])));
+      }
+      for(auto &t : threads2){
+	t.join();
+      }
+      cerr << endl << "done." << endl;
+
+      rstat = gelmanRubin(logl1,prop);
+      it = it + 1;
+    }
+
+    if(it > maxN)
+      cerr << "Convergence never met. Gelman-Rubin = " << rstat << ", but we did more than " << it << "iterations." << endl;
+    else
+      cerr << "Convergence met. Gelman-Rubin = " << rstat << " < " << lim << endl;
+
+    vector<double> piMean(4,0.0);
+    vector<double> sMean(6,0.0);
+    vector<double> piVar(4,0.0);
+    vector<double> sVar(6,0.0);
+    vector<vector<double>> pi2;
+    vector<vector<double>> rates2;
+    vector<double> logl2;
+    string mcmcPars = parameters.getOutFileRoot() + ".mcmc.par";
+    ofstream mcmcp(mcmcPars.c_str());
+    combine(pi1,rates1,logl1,pi2,rates2,logl2,prop,mcmcp);
+    mcmcp.close();
+    calculatePandS(pi2, rates2, piMean, sMean, piVar, sVar);
+    q_init.reset(convert(piMean),convert(sMean));
+    q_init.setMcmcVarP(convert(piVar));
+    q_init.setMcmcVarQP(convert(sVar));
+    cerr << "pi: " << convert(piMean).transpose() << endl;
+    cerr << "rates: " << convert(sMean).transpose() << endl;
+
+    // mcmc log file
+    string mcmcLogfile = parameters.getOutFileRoot() + ".mcmc.log";
+    cerr << "Writing MCMC log to " << mcmcLogfile << endl;
+    ofstream mcmclog(mcmcLogfile.c_str());
+    mcmclog << "Initial seed = " << initial_seed << endl;
+    mcmclog << "Number of chains = " << numChains << endl;
+    mcmclog << "Block size = " << blockSize << endl;
+    mcmclog << "Seeds per chain: " << endl;
+    for ( vector<unsigned int>::iterator p=seeds.begin(); p!=seeds.end(); ++p )
+      mcmclog << setw(15) << *p << endl;
+    mcmclog << "Maximum number of iterations allowed of Gelman-Rubin approach = " << maxN << endl;
+    mcmclog << "Convergence whenever the Gelman-Rubin statistics was less than " << lim << endl;
+    mcmclog << "Proportion of the chain discarded as burnin = " << prop << endl;
+    mcmclog << "Gelman-Rubin statistics at the end = " << rstat << endl;
+    if(it > maxN)
+      mcmclog << "Convergence never met. Gelman-Rubin = " << rstat << ">" << lim << ", but we did more than " << it << "iterations." << endl;
+    else
+      mcmclog << "Number of iterations needed to reach convergence = " << it << endl;
+    mcmclog.close();
+    }
+
+    // write mcmc output to a file
     string mcmcFile = parameters.getOutFileRoot() + ".mcmc.out";
     cerr << "Writing MCMC output to " << mcmcFile << endl;
     ofstream mcmcstream(mcmcFile.c_str());
     Vector4d pi = q_init.getStationaryP();
     VectorXd s = q_init.getSymmetricQP();
     Vector4d vpi = q_init.getMcmcVarP();
-    VectorXd vs = q_init.getMcmcVarQP();  
-    // mcmcstream << pi.transpose() << endl;
-    // mcmcstream << s.transpose() << endl;
-    // mcmcstream << vpi.transpose() << endl;
-    // mcmcstream << vs.transpose() << endl;
+    VectorXd vs = q_init.getMcmcVarQP();
     string sep = " ";
     mcmcstream << pi[0] << sep << pi[1] << sep << pi[2] << sep << pi[3] << endl;
     mcmcstream << s[0] << sep << s[1] << sep << s[2] << sep << s[3] << sep << s[4] << sep << s[5] << endl;
@@ -610,12 +832,130 @@ int main(int argc, char* argv[])
 
   milliseconds ms7 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
+// NEW CODE --- mcmc on topologies using parsimony
+  Tree* ptree = new Tree(starttree.makeTopologyNumbers(),alignment);
+  ptree->reroot(1);
+  ptree->sortCanonical();
+  vector<Edge*> internalEdges;
+  ptree->getInternalEdges(internalEdges);
+//  cerr << "internal edges:";
+//  for ( vector<Edge*>::iterator e=internalEdges.begin(); e!=internalEdges.end(); ++e )
+//    cerr << " " << (*e)->getNumber();
+//  cerr << endl;
+  map<string,int> pmap; //topology to parsimony score map
+  map<string,int> cmap; //topology to count map
+  unsigned int mcmcGen = 10000;
+  int score = ptree->parsimonyScore(alignment);
+  int minParsimony = ptree->getNumTaxa()*alignment.getNumSites();
+  pmap[ptree->makeTopologyNumbers()] = score;
+  cerr << "MCMC on topologies" << endl;
+  cerr << '|';
+  for ( int i=0; i<mcmcGen; ++i )
+  {
+    if ( (mcmcGen >= 100) && ( (i+1) % (mcmcGen / 100) == 0 ) )
+      cerr << '*';
+    if ( (mcmcGen >= 10) && ( (i+1) % (mcmcGen / 10) == 0 ) )
+      cerr << '|';
+    ptree->mcmcNNI(rng,alignment,score,pmap,cmap,internalEdges,minParsimony);
+//    cerr << ptree->makeTopologyNumbers() << " " << setw(5) << score << endl;
+  }
+  cerr << endl;
+//  cerr << "Parsimony tree map" << endl;
+  cerr << "Minimum parsimony score = " << minParsimony << endl;
+  cerr << "Total number of sampled trees = " << pmap.size() << endl;
+
+  map<string,double> topologyToParsimonyWeightMap;
+  double PARSIMONY_SCALAR = 3.3;
+  for ( map<string,int>::iterator m=pmap.begin(); m != pmap.end(); ++m )
+  {
+    topologyToParsimonyWeightMap[ (*m).first ] =
+      exp( PARSIMONY_SCALAR * (minParsimony - (*m).second) );
+  }
+
+// --------------------- Clade distribution from mcmcNNI sample ------------------------------------
+  vector<int> taxaNumbers0;
+  vector<string> taxaNames0;
+  alignment.getTaxaNumbersAndNames(taxaNumbers0,taxaNames0);
+  CCDProbs<int> ccdCountsMCMC(cmap,taxaNumbers0,taxaNames0);
+  CCDProbs<double> ccdParsimonyMCMC(topologyToParsimonyWeightMap,taxaNumbers0,taxaNames0);
+
+  // write map out to temp files to check
+  string countsSmapFileMCMC = parameters.getOutFileRoot() + ".mcmc-nopars.smap";
+  string countsTmapFileMCMC = parameters.getOutFileRoot() + ".mcmc-nopars.tmap";
+  string parsimonySmapFileMCMC = parameters.getOutFileRoot() + ".mcmc-pars.smap";
+  string parsimonyTmapFileMCMC = parameters.getOutFileRoot() + ".mcmc-pars.tmap";
+
+  ofstream smap2(countsSmapFileMCMC.c_str());
+  ccdCountsMCMC.writeCladeCount(smap2);
+  smap2.close();
+  ofstream tmap2(countsTmapFileMCMC.c_str());
+  ccdCountsMCMC.writePairCount(tmap2);
+  tmap2.close();
+  smap2.open(parsimonySmapFileMCMC);
+  ccdParsimonyMCMC.writeCladeCount(smap2);
+  smap2.close();
+  tmap2.open(parsimonyTmapFileMCMC);
+  ccdParsimonyMCMC.writePairCount(tmap2);
+  tmap2.close();
+
+  cerr << endl << "Topology counts to file after MCMC" << endl;
+  {
+    string topologyCountsFile = parameters.getOutFileRoot() + ".mcmc.topCounts";
+    ofstream topCounts(topologyCountsFile.c_str());
+    map<string,double>::iterator wm=topologyToParsimonyWeightMap.begin();
+
+    topCounts << "tree count parsimonyWt parsimonyScore parsimonyDiff" << endl;;
+    for ( map<string,int>::iterator cm=cmap.begin(); cm != cmap.end(); ++cm )
+    {
+      string top = (*cm).first;
+      topCounts << top << " " << setw(5) << (*cm).second << " " << flush;
+      topCounts << setw(10) << setprecision(4) << fixed << (*wm).second;
+      topCounts << " " << setw(5) << pmap[ top ] << " " << setw(4) << minParsimony - pmap[ top ];
+      topCounts << " " << endl;
+      ++wm;
+    }
+    topCounts << endl;
+    topCounts.close();
+  }
+  cerr << "after writing to files" << endl;
+
+
+  // vector<double> weight(pmap.size(),0);
+  // double total = 0;
+  // cout << "topology to parsimony map" << endl;
+  // {
+  //   int i=0;
+  //   for ( map<string,int>::iterator p=pmap.begin(); p!= pmap.end(); ++p )
+  //   {
+  //     cout << p->first << " " << p->second << endl;
+  //     weight[i] = exp(PARSIMONY_SCALAR*(minParsimony - p->second));
+  //     total += weight[i++];
+  //   }
+  // }
+//  {
+//    int i=0;
+//    for ( vector<double>::iterator p=weight.begin(); p!=weight.end(); ++p )
+//    {
+//      if ( i < 100 )
+//      {
+//	cerr << weight[i] 
+//      (*p) /= total;
+  // {
+  //   int i=0;
+  //   cerr << "tree parsimony probability" << endl;
+  //   for ( map<string,int>::iterator p=pmap.begin(); p!= pmap.end(); ++p )
+  //   {
+  //     if ( weight[i] > 0.000001 )
+  // 	cerr << p->first << " " << p->second << " " << setw(10) << setprecision(8) << fixed << weight[i++] << endl;
+  //   }
+  // }
+
 // not normalized maps; normalization taken care of during alias creation
   map<string,int> topologyToCountMap;
   map<string,double> topologyToWeightMap;
   map<string,double> topologyToDistanceWeightMap;
 
-  if( parameters.getWeightScale() == 0)
+  if( parameters.getWeightScale() == 0) //for distance weight
     parameters.setWeightScale(200);
 
 // --------------------------------------- Bootstrap of topologies from ccdprobs -----------------------
@@ -653,14 +993,15 @@ int main(int argc, char* argv[])
 	alignment.setBootstrapWeights(weights,rng);
 	alignment.calculateGTRDistancesUsingWeights(weights,model_init,gtrDistanceMatrix,bootDistanceMatrix);
 	Tree bootTree(bootDistanceMatrix);
+	string topBL = bootTree.makeTreeNumbers(); //we want this unrooted 
 	bootTree.reroot(1); //warning: if 1 changes, need to change makeBinary if called after
 	bootTree.sortCanonical();
 	string unrootedTreeString = bootTree.makeTreeNumbers(); // for the new distance method
+	string unrootedTop = bootTree.makeTopologyNumbers(); // to match the pmap that is unrooted
 	bootTree.makeBinary();
 	bootTree.sortCanonical();
 
 	string top = bootTree.makeTopologyNumbers();
-	string topBL = bootTree.makeTreeNumbers();
 	// write bootstrap tree to file
 	if ( topBL.find("nan") != string::npos )
 	{
@@ -676,11 +1017,11 @@ int main(int argc, char* argv[])
 	if ( topologyToParsimonyScoreMap.find(top) == topologyToParsimonyScoreMap.end() )
 	{
 	  int score = bootTree.parsimonyScore(alignment);
-	  topologyToParsimonyScoreMap[ top ] = score;
+	  topologyToParsimonyScoreMap[ unrootedTop ] = score;
 	  if ( score < minimumParsimonyScore || b==0 )
 	    minimumParsimonyScore = score;
 	}
-	topologyToCountMap[ top ]++;
+	topologyToCountMap[ unrootedTop ]++;
       } // end of bootstrap
       cerr << endl;
       if ( badTrees > 0 )
@@ -702,6 +1043,32 @@ int main(int argc, char* argv[])
     meanTreeFileStream << meanTree << endl;
     meanTreeFileStream.close();
 
+#if 0
+    // ============================================================
+    // print out a table of likelihoods for different edge lengths
+    // and then exit
+    Tree logltree(meanTree,alignment);
+    logltree.mleLengths(alignment,model_init);
+    string profileFile = parameters.getOutFileRoot() + ".profile";
+    ofstream profile(profileFile.c_str());
+    logltree.printProfile(profile,alignment,model_init);
+    profile.close();
+    exit(0);
+    // ============================================================
+#endif
+
+#if 0
+    // ============================================================
+    // Likelihood profile
+    Tree logltree(meanTree,alignment);
+    string profileFile = parameters.getOutFileRoot() + ".profile";
+    ofstream profile(profileFile.c_str());
+    logltree.logLikelihoodProfile(profile,alignment,model_init);
+    profile.close();
+
+    // ============================================================
+#endif
+
     // calculate distance from trees to mean tree
     Tree mtree(meanTree,alignment);
     cerr << "mean tree topology = " << mtree.makeTopologyNumbers() << endl;
@@ -718,7 +1085,7 @@ int main(int argc, char* argv[])
       double d = mtree.distance(boottree);
       cout << boottree->makeTopologyNumbers() << " " << d << endl;
       boottree->reroot(1); //warning: if 1 changes, need to change makeBinary if called after
-      boottree->makeBinary();
+      //boottree->makeBinary();
       boottree->sortCanonical();
       string topDist = boottree->makeTopologyNumbers();
       bootstrapTreesDist << topDist << " " << d << endl;
@@ -739,8 +1106,8 @@ int main(int argc, char* argv[])
 	(*m).second * exp( 0.5 *
 			   (minimumParsimonyScore - topologyToParsimonyScoreMap[ (*m).first ]) );
     }
-    cout << endl << "Topology counts to file" << endl;
-    cerr << endl << "Topology counts to file" << endl;
+    cout << endl << "Topology counts to file after bootstrap" << endl;
+    cerr << endl << "Topology counts to file after bootstrap" << endl;
     {
       string topologyCountsFile = parameters.getOutFileRoot() + ".topCounts";
       ofstream topCounts(topologyCountsFile.c_str());
@@ -751,7 +1118,7 @@ int main(int argc, char* argv[])
       for ( map<string,int>::iterator cm=topologyToCountMap.begin(); cm != topologyToCountMap.end(); ++cm )
       {
 	Tree t((*cm).first,alignment);
-	t.unroot();
+	//t.unroot();
 	t.reroot(1);
 	t.sortCanonical();
 	string top = t.makeTopologyNumbers();
@@ -795,6 +1162,43 @@ int main(int argc, char* argv[])
   vector<string> taxaNames;
   alignment.getTaxaNumbersAndNames(taxaNumbers,taxaNames);
   milliseconds ms9 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
+
+// --------------------- Combine bootstrap map and mcmc map -----------------------------------------
+  // first we need to normalize the maps
+  double total = 0.0;
+  string pmapFile = parameters.getOutFileRoot() + ".pmap";
+  ofstream pmapStream(pmapFile.c_str());
+  pmapStream << "tree parsimonyWt" << endl;
+
+  for ( map<string,double>::iterator m=topologyToParsimonyWeightMap.begin(); m != topologyToParsimonyWeightMap.end(); ++m )
+    total += (*m).second;
+  for ( map<string,double>::iterator m=topologyToParsimonyWeightMap.begin(); m != topologyToParsimonyWeightMap.end(); ++m )
+  {
+    (*m).second /= total;
+    pmapStream << (*m).first << " " << (*m).second << endl;
+  }
+  pmapStream.close();
+
+  total = 0.0;
+  string dmapFile = parameters.getOutFileRoot() + ".dmap";
+  ofstream dmapStream(dmapFile.c_str());
+  dmapStream << "tree distanceWt" << endl;
+
+  for ( map<string,double>::iterator m=topologyToDistanceWeightMap.begin(); m != topologyToDistanceWeightMap.end(); ++m )
+    total += (*m).second;
+  for ( map<string,double>::iterator m=topologyToDistanceWeightMap.begin(); m != topologyToDistanceWeightMap.end(); ++m )
+  {
+    (*m).second /= total;
+    dmapStream << (*m).first << " " << (*m).second << endl;
+  }
+  dmapStream.close();
+
+  // now we are going to add the mcmc map to the distance map
+  for ( map<string,double>::iterator m=topologyToParsimonyWeightMap.begin(); m != topologyToParsimonyWeightMap.end(); ++m )
+    if ( topologyToDistanceWeightMap.find((*m).first) == topologyToDistanceWeightMap.end() )
+      topologyToDistanceWeightMap[ (*m).first ] = (*m).second;
+    else
+      topologyToDistanceWeightMap[ (*m).first ] += (*m).second;
 
 // --------------------- Clade distribution from bootstrap sample ------------------------------------
   CCDProbs<int> ccd(topologyToCountMap,taxaNumbers,taxaNames);
@@ -936,7 +1340,7 @@ int main(int argc, char* argv[])
 
     // combine vector of all trees
     cerr << "numRandom = " << numRandom << endl;
-    
+
     vector<string> trees;
     for( vector< vector<string> >::iterator p=trees0.begin(); p != trees0.end(); ++p)
     {
@@ -1096,7 +1500,7 @@ int main(int argc, char* argv[])
   unsigned int seconds = totalTime / 1000;
   unsigned int minutes = seconds / 60;
   unsigned int hours = minutes / 60;
-  
+
   cout << "Times: " << endl;
   // cout << "Processing command-line arguments: " << (ms1.count() - ms0.count())/1000 << "seconds" << endl;
   // cout << "Reading FASTA: " << (ms2.count() - ms1.count())/1000 << "seconds" << endl;
@@ -1117,6 +1521,6 @@ int main(int argc, char* argv[])
     cout << minutes << " minutes, " << seconds - 3600*hours - 60*minutes << " seconds." << endl;
   else
     cout << seconds << " seconds." << endl;
-    
+
   return 0;
 }

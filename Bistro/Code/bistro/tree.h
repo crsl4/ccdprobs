@@ -241,6 +241,7 @@ public:
   void logLikelihoodProfile(ostream&,Alignment&,QMatrix&,Edge*);
   Edge* pickOtherEdge(Edge*,mt19937_64&);
   void swapEdge(Edge*,Edge*);
+  Edge* findCladeEdge(Clade,Edge*,Clade&);
 };
 
 class Tree
@@ -340,6 +341,7 @@ public:
   void printProfile(ostream&,Alignment&,QMatrix&);
   void getInternalEdges(vector<Edge*>&);
   void mcmcNNI(mt19937_64&,Alignment&,int&,map<string,int>&,map<string,int>&,vector<Edge*>&,int&);
+  Edge* findCladeEdge(Clade);
 };
 
 class MCMCStats

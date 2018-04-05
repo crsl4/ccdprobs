@@ -291,7 +291,7 @@ void Tree::readSubtree(istringstream& s,Node* parent,vector<Node*>& leafNodes,ve
 
 void Tree::treeInit(string line)
 {
-  // Create the tree from parenthetic representation in line.
+    // Create the tree from parenthetic representation in line.
   // Create new nodes and edges on the fly.
   // Leaf node and internal node pointers placed in separate vectors.  Combine to vector nodes at end.
 
@@ -3472,71 +3472,3 @@ void Tree::mcmcNNI(mt19937_64& rng,Alignment& alignment,int& score,map<string,in
   cmap[oldTop]++;
 //  cerr << setw(6) << setprecision(4) << fixed << acceptProb << " " << oldTop << " " << oldScore << " " << top << " " << newScore << endl;
 }
-
-// function returns NULL if clade edge not yet found
-Edge* Node::findCladeEdge(Clade clade, Edge* parent, Clade& subtreeClade)
-{
-  /*
-  cerr << "findCladeEdge called" << endl;
-  cerr << "number = " << number << endl;
-  cerr << "clade: ";
-  clade.print(cerr);
-  cerr << endl;
-  cerr << "subtreeClade: ";
-  subtreeClade.print(cerr);
-  cerr << endl;
-  if ( parent != NULL )
-  {
-    cerr << "parent is edge " << parent->getNumber() << endl;
-    cerr << "Edge parent node has number " << getNeighbor(parent)->getNumber() << endl;
-  }
-  */
-  int numTaxa = clade.size();
-//  cerr << "numTaxa = " << numTaxa << endl << endl;
-  Clade tempClade(numTaxa);
-  if ( leaf )
-    tempClade.add(number);
-  for ( vector<Edge*>::iterator e=edges.begin(); e!=edges.end(); ++e )
-  {
-    if ( (*e) != parent )
-    {
-      subtreeClade.clear();
-      Edge* cladeEdge = getNeighbor(*e)->findCladeEdge(clade, *e, subtreeClade);
-      tempClade.add(subtreeClade);
-      if ( cladeEdge != NULL )
-	return cladeEdge;
-    }
-  }
-  subtreeClade = tempClade;
-//  cerr << "Subtree clade set to: ";
-//  subtreeClade.print(cerr);
-//  cerr << endl << endl;
-  if ( tempClade == clade )
-    return parent;
-  else
-    return NULL;
-}
-
-// find the edge that separates a clade from the rest of the tree.
-// return NULL if there is no such edge.
-Edge* Tree::findCladeEdge(Clade clade)
-{
-  Clade subtreeClade(numTaxa);
-  Edge* cladeEdge;
-  if ( root == NULL )
-    cladeEdge = nodes[numTaxa]->findCladeEdge(clade,NULL,subtreeClade); // first internal node
-  else
-    cladeEdge = root->findCladeEdge(clade,NULL,subtreeClade);
-  // print for testing
-  cerr << "Clade that is being searched ";
-  clade.print(cerr);
-  cerr << endl << endl;
-  if ( cladeEdge != NULL )
-    cerr << "Found edge " << cladeEdge->getNumber() << endl;
-  else
-    cerr << "Edge does not exist in tree" << endl;
-  cerr << endl;
-  print(cerr);
-  return cladeEdge;
-}
-  

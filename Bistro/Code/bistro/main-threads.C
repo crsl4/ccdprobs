@@ -538,6 +538,23 @@ int main(int argc, char* argv[])
   cerr << " done." << endl;
   cout << "Seed = " << parameters.getSeed() << endl << endl;
 
+    //************* new code to test clade finding
+//  Tree testTree(parameters.getTopology(),alignment);
+//  testTree.reroot(3);
+//  testTree.randomize(rng);
+//  testTree.reroot(1);
+//  Clade testClade(testTree.getNumTaxa());
+//  testClade.add(3);
+//  testClade.add(4);
+//  testClade.add(5);
+//  testClade.add(6);
+//  testTree.findCladeEdge(testClade);
+//  exit(0);
+  
+  //************* end of new code to test clade finding
+
+
+
   // -------------- Find Jukes-Cantor pairwise distances and JC tree -----------------------------
   cerr << "Finding initial Jukes-Cantor pairwise distances ...";
   MatrixXd jcDistanceMatrix(alignment.getNumTaxa(),alignment.getNumTaxa());
@@ -1494,6 +1511,10 @@ int main(int argc, char* argv[])
 
   }
 
+  // write alias distributions
+  ccdDist.writeAliasDistributions();
+
+  
   milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   unsigned int totalTime = (ms11.count() - ms5.count());
