@@ -31,8 +31,7 @@ cd /u/c/l/claudia/Documents/phylo/projects/CladeDist/exabayes
 /s/std/bin/runauth /usr/bin/screen -S 024
 /usr/local/bin/yggdrasil -f 024.phy -m DNA -n 024 -s 1234
 ```
-**aqui voy** Need to wait for the sequential run to finish.
-Started 11/22 1pm
+We do not have these results.
 
 Now examine the output files created by ExaBayes (we neglect the binary alignment file and the checkpoint files). [Full documentation](https://sco.h-its.org/exelixis/web/software/exabayes/manual/index.html#comp-src):
 
