@@ -1,0 +1,70 @@
+
+This is the multi-threaded MPI hybrid variant of ExaBayes (version 1.5),
+a tool for Bayesian MCMC sampling of phylogenetic trees, build with the
+Phylogenetic Likelihood Library (version 1.0.0, September 2013).
+
+This software has been released on 
+(git commit id:)
+
+	by Andre J. Aberer, Kassian Kobert and Alexandros Stamatakis
+
+Please send any bug reports, feature requests and inquiries to exabayes-at-googlegroups-dot-com
+
+The program was called as follows: 
+exabayes -f 140.phy -n 140 -s 1343 -m DNA 
+
+================================================================
+You provided an alignment file in phylip format. Trying to parse it...
+
+The (binary) alignment file you provided, consists of the following
+partitions:
+
+number:		0
+name:		unnamedPartition
+#patterns:	1041
+type:		DNA
+
+Parameter names will reference the above partition numbers.
+================================================================
+
+Parameters to be integrated (initial values derived from prior): 
+0	topo{0}
+	sub-id:	0
+	prior:	Uniform(0.00,0.00)
+	init value:	parsimony
+1	brlens{0}
+	sub-id:	0
+	prior:	Exponential(10.00)
+	init value:	0.10
+2	statefreq{0}
+	sub-id:	0
+	prior:	Dirichlet(1.00,1.00,1.00,1.00)
+	init value:	0.25,0.25,0.25,0.25
+3	revmat{0}
+	sub-id:	0
+	prior:	Dirichlet(1.00,1.00,1.00,1.00,1.00,1.00)
+	init value:	0.17,0.17,0.17,0.17,0.17,0.17
+4	ratehet{0}
+	sub-id:	0
+	prior:	Uniform(0.00,200.00)
+	init value:	100.00
+================================================================
+
+Will employ the following proposal mixture (frequency,id,type,affected variables): 
+15.38%	0	stNNI( topo{0};brlens{0} )
+15.38%	1	eSPR( topo{0};brlens{0};stopProb=0.50 )
+15.38%	2	parsSpr( topo{0};brlens{0};radius=9,warp=0.10 )
+5.13%	3	likeSPR( topo{0};brlens{0};radius=8,warp=1.00 )
+17.95%	4	blMult( brlens{0} )
+2.56%	5	TL-Mult( brlens{0} )
+17.95%	6	blDistGamma( brlens{0} )
+1.28%	7	freqSlider( statefreq{0};brlens{0} )
+1.28%	8	freqDirich( statefreq{0};brlens{0} )
+2.56%	9	revMatSlider( revmat{0};brlens{0} )
+2.56%	10	revMatDirich( revmat{0};brlens{0} )
+2.56%	11	rateHetMulti( ratehet{0} )
+
+
+initialized diagnostics file ExaBayes_diagnostics.140
+initialized file ExaBayes_topologies.run-0.140
+initialized file ExaBayes_parameters.run-0.140
