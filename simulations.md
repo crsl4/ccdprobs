@@ -389,5 +389,15 @@ perl ../../../scripts/nexus2phylip.pl -nexus sim-500-nsites-1500.nex
 ```
 
 4. We run bistro on the simulated data with/without fixed tree, see `Bistro/Scripts/bistroOneRep.pl` (need to decide the sample size)
+
+- Compile bistro
+```shell
+cd Documents/github/CladeCondProb/ccdprobs/Bistro/Code/bistro
+cp bistro bistro0 ##backup
+make ## errors, so we will use the old executable: tell bret
+```
+
+**aqui voy**: necesito modificar runningBistro.jl para correr bistro con fixed tree y sin fixed tree, hacer el script para correr un unico dataset, y correr en paralelo
+
 5. Run exabayes on the simulated sequences (save time)
 6. Compare ESS of branch lengths and Q between bistro and exabayes
