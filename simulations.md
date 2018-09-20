@@ -388,7 +388,7 @@ perl ../../../scripts/nexus2phylip.pl -nexus sim-404-nsites-1500.nex
 perl ../../../scripts/nexus2phylip.pl -nexus sim-500-nsites-1500.nex
 ```
 
-4. We run bistro on the simulated data with/without fixed tree, see `Bistro/Scripts/bistroOneRep.pl` (need to decide the sample size)
+4. We run bistro on the simulated data with/without fixed tree, see `Bistro/Scripts/runningBistro.pl` (need to decide the sample size: b,r)
 
 - Compile bistro
 ```shell
@@ -396,8 +396,17 @@ cd Documents/github/CladeCondProb/ccdprobs/Bistro/Code/bistro
 cp bistro bistro0 ##backup
 make ## errors, so we will use the old executable: tell bret
 ```
+For some reason, I do have a new `bistro` executable, which runs without any problem (I tested on artiodactyl data).
 
-**aqui voy**: necesito modificar runningBistro.jl para correr bistro con fixed tree y sin fixed tree, hacer el script para correr un unico dataset, y correr en paralelo
+We will use `Bistro/Scripts/runningBistro-paper.pl` and `Bistro/Scripts/runningBistro-fns.pl`. Note that we need 5 arguments for bistro:
+-t: tree topology
+-r: sample size for number of trees sampled
+-b: sample size for bootstrap of trees (to estimate ccdprobs)
+-o: outfile name
+-f: fasta file
+We also have the option -m for the mcmc number of generations, but we decide this based on the Gelman-Rubin statistic, by increasing the mcmc 1000 at a time.
+
+We will check if we can run this in darwin. So, first we will git push everything.
 
 5. Run exabayes on the simulated sequences (save time)
 6. Compare ESS of branch lengths and Q between bistro and exabayes
