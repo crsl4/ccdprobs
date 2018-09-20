@@ -388,7 +388,7 @@ perl ../../../scripts/nexus2phylip.pl -nexus sim-404-nsites-1500.nex
 perl ../../../scripts/nexus2phylip.pl -nexus sim-500-nsites-1500.nex
 ```
 
-4. We run bistro on the simulated data with/without fixed tree, see `Bistro/Scripts/runningBistro.pl` (need to decide the sample size: b,r)
+4. Script run bistro on the simulated data with/without fixed tree, see `Bistro/Scripts/runningBistro.pl` (need to decide the sample size: b,r)
 
 - Compile bistro
 ```shell
@@ -406,7 +406,35 @@ We will use `Bistro/Scripts/runningBistro-paper.pl` and `Bistro/Scripts/runningB
 -f: fasta file
 We also have the option -m for the mcmc number of generations, but we decide this based on the Gelman-Rubin statistic, by increasing the mcmc 1000 at a time.
 
+5. Run bistro in parallel in darwin02:
 We will check if we can run this in darwin. So, first we will git push everything.
+Then, we git clone in darwin02, in workspace/claudia (we cannot clone in afs because of disk quota).
+We commented out the makefile portion for mac, and uncommented the one for darwin, and ran `make`.
+I get an error
+```shell
+[claudia@darwin02] (40)$ make
+/s/gcc-5.4.0/bin/g++ -O3 -I. -std=c++11 -Wno-deprecated -Wdeprecated-declarations -c ccdprobs.C
+In file included from ccdprobs.C:12:0:
+alias.h:15:36: fatal error: boost/dynamic_bitset.hpp: No such file or directory
+compilation terminated.
+make: *** [ccdprobs.o] Error 1
+```
+
+I have an old executable which still works, so I will copy it (but need to email Mike/Bret about this):
+```shell
+cd /workspace/claudia/ccdprobs/Bistro/Code/bistro
+cp /u/c/l/claudia/Documents/phylo/projects/CladeDist/ccdprobs0/Bistro/Code/bistro/bistro .
+
+[claudia@darwin02] (54)$ ./bistro
+Processing command line ...Usage: bistro [options]
+```
+This bistro executable works, as I ran a small test in artiodactyl data.
+
+## r=1000, b=1000 (default settings)
+For 024, 027, 036, 043, 050, 064, 071, 125, 150, 354, 
+```shell
+julia runningBistro-paper.jl 024 1000 1000 0
+```
 
 5. Run exabayes on the simulated sequences (save time)
 6. Compare ESS of branch lengths and Q between bistro and exabayes

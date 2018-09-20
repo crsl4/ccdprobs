@@ -2,10 +2,10 @@
 ## running inside Bistro/Simulations
 ## Claudia September 2018
 
-function runBistro(stem,r,b)
+function runBistro(stem,r,b,thr)
     println("+++++++++++ running bistro for $stem +++++++++++++")
     try
-        out = readstring(`../Code/bistro/bistro -f ../Data/datasets/$stem.fasta -o bistro-$stem-$r-$b -r $r -b $b`);
+        out = readstring(`../Code/bistro/bistro -f ../Data/datasets/$stem.fasta -o bistro-$stem-$r-$b -r $r -b $b --threads $thr`);
         f = open("bistro-$stem-$r-$b.log","w")
         write(f,out)
         close(f)
@@ -14,10 +14,10 @@ function runBistro(stem,r,b)
     end
 end
 
-function runBistroFixT(stem,tree,r,b)
+function runBistroFixT(stem,tree,r,b,thr)
     println("+++++++++++ running bistro for $stem for fixed tree +++++++++++++")
     try
-        out = readstring(`../Code/bistro/bistro -f ../Data/datasets/$stem.fasta -o bistroFixT-$stem-$r-$b -r $r -b $b -t "$tree"`);
+        out = readstring(`../Code/bistro/bistro -f ../Data/datasets/$stem.fasta -o bistroFixT-$stem-$r-$b -r $r -b $b -t "$tree" --threads $thr`);
         f = open("bistroFixT-$stem-$r-$b.log","w")
         write(f,out)
         close(f)
