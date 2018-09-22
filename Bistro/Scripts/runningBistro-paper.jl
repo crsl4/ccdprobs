@@ -34,6 +34,6 @@ elseif(fix == 1)
     close(f)
     using RCall ## we need this for replace, for reasons unknown
     ## remove "1.00:"
-    tree2 = replace(tree,r"[0-9].[0-9]+:" => ":")
+    tree2 = replace(tree,r"[0-9]\.[0-9]+:" => ":")
     runBistroFixT(stem,tree2,r,b,thr)
 end
