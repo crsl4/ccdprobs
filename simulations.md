@@ -420,7 +420,7 @@ compilation terminated.
 make: *** [ccdprobs.o] Error 1
 ```
 
-I have an old executable which still works, so I will copy it (but need to email Mike/Bret about this):
+I have an old executable which still works, so I will copy it (**2do** but need to email Mike/Bret about this):
 ```shell
 cd /workspace/claudia/ccdprobs/Bistro/Code/bistro
 cp /u/c/l/claudia/Documents/phylo/projects/CladeDist/ccdprobs0/Bistro/Code/bistro/bistro .
@@ -430,11 +430,111 @@ Processing command line ...Usage: bistro [options]
 ```
 This bistro executable works, as I ran a small test in artiodactyl data.
 
+Now, we make sure that it runs as a julia script, but running `runningBistro-paper.jl` within julia.
+We have a problem: in darwin, there is only julia 0.5 installed. (**waiting** for prof bates reply).
+
+We will run in Mac Desktop for now:
+
 ## r=1000, b=1000 (default settings)
-For 024, 027, 036, 043, 050, 064, 071, 125, 150, 354, 
+1. In mac desktop, we need to run one dataset at a time (as we only have 8 cores)
 ```shell
-julia runningBistro-paper.jl 024 1000 1000 0
+cd Documents/github/CladeCondProb/ccdprobs/Bistro/Scripts
+julia runningBistro-paper.jl 024 1000 1000 0 4 
+julia runningBistro-paper.jl 024 1000 1000 1 4 
 ```
+Started 9/20/18 5pm, finished 6:30pm
+
+2. It turns out that I can run the julia script, even in julia0.5 
+In darwin02, for 027, 064, 125, 354, 036, 071. We will only run without fixing tree, because in julia0.5 we do not have RCall:
+```shell
+ssh claudia@darwin02.stat.wisc.edu
+cd /workspace/claudia/ccdprobs/Bistro/Scripts/
+/s/std/bin/stashticket
+/s/std/bin/runauth /usr/bin/screen -S 027-0
+julia runningBistro-paper.jl 027 1000 1000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 064-0
+julia runningBistro-paper.jl 064 1000 1000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 125-0
+julia runningBistro-paper.jl 125 1000 1000 0 5 
+##Estimated rates: 
+##-nan -nan -nan -nan -nan -nan
+
+/s/std/bin/runauth /usr/bin/screen -S 354-0
+julia runningBistro-paper.jl 354 1000 1000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 036-0
+julia runningBistro-paper.jl 036 1000 1000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 071-0
+julia runningBistro-paper.jl 071 1000 1000 0 5 
+```
+Started 9/20/18 5:30pm, finished 9/21 1pm all but 354
+
+Next batch darwin02: 043, 050, 150, 404, 500
+```shell
+ssh claudia@darwin02.stat.wisc.edu
+cd /workspace/claudia/ccdprobs/Bistro/Scripts/
+/s/std/bin/stashticket
+/s/std/bin/runauth /usr/bin/screen -S 043-0
+julia runningBistro-paper.jl 043 1000 1000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 050-0
+julia runningBistro-paper.jl 050 1000 1000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 150-0
+julia runningBistro-paper.jl 150 1000 1000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 404-0
+julia runningBistro-paper.jl 404 1000 1000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 500-0
+julia runningBistro-paper.jl 500 1000 1000 0 5
+```
+Started 9/21/2018 2:30pm, **aqui voy**
+
+3. We will run the case of fixed tree in mac desktop for 027, 064, 125, 354, 036, 071,  043, 050, 150, 404, 500 which are running in darwin02.
+```shell
+cd Documents/github/CladeCondProb/ccdprobs/Bistro/Scripts
+julia runningBistro-paper.jl 027 1000 1000 1 4 
+julia runningBistro-paper.jl 064 1000 1000 1 4 
+```
+Started 9/20/2018 7pm, finished 8:30pm
+
+```shell
+cd Documents/github/CladeCondProb/ccdprobs/Bistro/Scripts
+julia runningBistro-paper.jl 354 1000 1000 1 4 
+julia runningBistro-paper.jl 036 1000 1000 1 4 
+julia runningBistro-paper.jl 043 1000 1000 1 4 
+julia runningBistro-paper.jl 500 1000 1000 1 4 
+```
+Started 9/21/18 2pm, **aqui voy**
+
+Cases when removing the support, also removed part of the taxon name. So, we need to change the way in which we remove the ":1.00" from the parenthetical format. So, we modified this (9/22) and will try again:
+```shell
+cd Documents/github/CladeCondProb/ccdprobs/Bistro/Scripts
+julia runningBistro-paper.jl 125 1000 1000 1 4 
+##Error: could not find Seq in map.
+##WARNING: Error in Bistro fixed tree for sim-125-nsites-1500
+julia runningBistro-paper.jl 071 1000 1000 1 4 
+##Error: could not find Trebouxia_jamesii_AJ in map.
+##WARNING: Error in Bistro fixed tree for sim-071-nsites-1500
+julia runningBistro-paper.jl 050 1000 1000 1 4 
+##Error: could not find Hypoxylon_atroroseum_U in map.
+##WARNING: Error in Bistro fixed tree for sim-050-nsites-1500
+julia runningBistro-paper.jl 150 1000 1000 1 4 
+##Error: could not find Species in map.
+##WARNING: Error in Bistro fixed tree for sim-150-nsites-1500
+julia runningBistro-paper.jl 404 1000 1000 1 4 
+##Error: could not find Seq in map.
+##WARNING: Error in Bistro fixed tree for sim-404-nsites-1500
+```
+
+We wait for the runs in mac desktop, and we run the fixed tree there. 
+Also, we wait for darwin02 runs, to do the not fixed tree runs there.
+We want to check the ESS to see if r,b are good, or if we need to increase the sample sizes.
+
 
 5. Run exabayes on the simulated sequences (save time)
 6. Compare ESS of branch lengths and Q between bistro and exabayes
