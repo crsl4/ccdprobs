@@ -1511,10 +1511,6 @@ int main(int argc, char* argv[])
 
   }
 
-  // write alias distributions
-  ccdDist.writeAliasDistributions();
-
-  
   milliseconds ms11 = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
 
   unsigned int totalTime = (ms11.count() - ms5.count());
