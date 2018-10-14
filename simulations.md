@@ -336,6 +336,27 @@ postProcParam -f ExaBayes_parameters.run-0.500 -n 500.pars
 ```
 Alternatively, you could also open the parameter file with `Tracer` and visualize the distributions. If you do not have `Tracer` installed, have a look at `ExaBayes_parameterStatistics.params` (spreadsheet tools like Excel are helpful). You'll find summary statistics for each parameter. Specifically, check out the effective sampling size (ESS) value for each parameter. We will use this later when comparing to bistro ESS.
 
+- Branch lengths:
+```shell
+extractBips -f ExaBayes_topologies.run-0.024 -n 024.bls
+##file: ExaBayes_topologies.run-0.024
+##printed bipartitions and identifiers to file ExaBayes_bipartitions.024.bls
+##printed bipartition statistics to file ExaBayes_bipartitionStatistics.024.bls
+##printed file name identifiers (for future reference) to ExaBayes_fileNames.024.bls
+##printed branch lengths associated with bipartitions to ExaBayes_bipartitionBranchLengths.024.bls
+extractBips -f ExaBayes_topologies.run-0.027 -n 027.bls
+extractBips -f ExaBayes_topologies.run-0.036 -n 036.bls
+extractBips -f ExaBayes_topologies.run-0.043 -n 043.bls
+extractBips -f ExaBayes_topologies.run-0.050 -n 050.bls
+extractBips -f ExaBayes_topologies.run-0.064 -n 064.bls
+extractBips -f ExaBayes_topologies.run-0.071 -n 071.bls
+extractBips -f ExaBayes_topologies.run-0.125 -n 125.bls
+extractBips -f ExaBayes_topologies.run-0.150 -n 150.bls
+extractBips -f ExaBayes_topologies.run-0.354 -n 354.bls
+extractBips -f ExaBayes_topologies.run-0.404 -n 404.bls
+extractBips -f ExaBayes_topologies.run-0.500 -n 500.bls
+```
+
 3. Use the consensus tree to simulate data with our script: `Bistro/Scripts/simulatingData-paper.r` which is the newer script (nsites=1500). We need the consensus tree from exabayes, pi and r.
 ```shell
 (master) $ head ExaBayes_ConsensusExtendedMajorityRuleNewick.024.cons
@@ -488,13 +509,73 @@ julia runningBistro-paper.jl 150 1000 1000 0 5
 
 /s/std/bin/runauth /usr/bin/screen -S 404-0
 julia runningBistro-paper.jl 404 1000 1000 0 5 
+## found inf BL!
 
 /s/std/bin/runauth /usr/bin/screen -S 500-0
 julia runningBistro-paper.jl 500 1000 1000 0 5
+## found inf BL!
 ```
-Started 9/21/2018 2:30pm, **aqui voy**
+Started 9/21/2018 2:30pm, all finished 10/2/18 8am.
 
-3. We will run the case of fixed tree in mac desktop for 027, 064, 125, 354, 036, 071,  043, 050, 150, 404, 500 which are running in darwin02.
+## r=100000, b=10000
+We will increase sample size to avoid inference on few trees only (ESS<10 before).
+
+3. In darwin06, for 024, 027, 064, 354, 036, 071. We will only run without fixing tree, because in julia0.5 we do not have RCall:
+```shell
+ssh claudia@darwin06.stat.wisc.edu
+cd /workspace/claudia/ccdprobs/Bistro/Scripts/
+/s/std/bin/stashticket
+/s/std/bin/runauth /usr/bin/screen -S 024-0
+julia runningBistro-paper.jl 024 100000 10000 0 5
+
+/s/std/bin/runauth /usr/bin/screen -S 027-0
+julia runningBistro-paper.jl 027 100000 10000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 064-0
+julia runningBistro-paper.jl 064 100000 10000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 354-0
+julia runningBistro-paper.jl 354 100000 10000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 036-0
+julia runningBistro-paper.jl 036 100000 10000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 071-0
+julia runningBistro-paper.jl 071 100000 10000 0 5 
+```
+**aqui voy** Started 10/10/18 12pm
+
+
+Next batch darwin02: 043, 050, 150, 404, 500, 125
+```shell
+ssh claudia@darwin02.stat.wisc.edu
+cd /workspace/claudia/ccdprobs/Bistro/Scripts/
+/s/std/bin/stashticket
+/s/std/bin/runauth /usr/bin/screen -S 043-0
+julia runningBistro-paper.jl 043 100000 10000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 050-0
+julia runningBistro-paper.jl 050 100000 10000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 150-0
+julia runningBistro-paper.jl 150 100000 10000 0 5 
+
+/s/std/bin/runauth /usr/bin/screen -S 404-0
+julia runningBistro-paper.jl 404 100000 10000 0 5 
+## found inf BL!
+
+/s/std/bin/runauth /usr/bin/screen -S 500-0
+julia runningBistro-paper.jl 500 100000 10000 0 5
+## found inf BL!
+
+/s/std/bin/runauth /usr/bin/screen -S 125-0
+julia runningBistro-paper.jl 125 100000 10000 0 5 
+##Estimated rates: 
+##-nan -nan -nan -nan -nan -nan
+```
+
+
+4. We will run the case of fixed tree in mac desktop for 027, 064, 125, 354, 036, 071,  043, 050, 150, 404, 500 which are running in darwin02.
 ```shell
 cd Documents/github/CladeCondProb/ccdprobs/Bistro/Scripts
 julia runningBistro-paper.jl 027 1000 1000 1 4 
@@ -535,6 +616,102 @@ We wait for the runs in mac desktop, and we run the fixed tree there.
 Also, we wait for darwin02 runs, to do the not fixed tree runs there.
 We want to check the ESS to see if r,b are good, or if we need to increase the sample sizes.
 
+5. Run exabayes on the simulated sequences (argh we cannot compare time because running in different nodes).
 
-5. Run exabayes on the simulated sequences (save time)
+```shell
+cd Documents/github/CladeCondProb/ccdprobs/Bistro/Data/datasets
+exabayes -f sim-024-nsites-1500.phy -n sim024 -s 734 -m DNA
+exabayes -f sim-027-nsites-1500.phy -n sim027 -s 3326 -m DNA
+exabayes -f sim-036-nsites-1500.phy -n sim036 -s 5930 -m DNA
+exabayes -f sim-043-nsites-1500.phy -n sim043 -s 8072 -m DNA
+exabayes -f sim-050-nsites-1500.phy -n sim050 -s 7200 -m DNA
+exabayes -f sim-064-nsites-1500.phy -n sim064 -s 9682 -m DNA
+exabayes -f sim-071-nsites-1500.phy -n sim071 -s 1363 -m DNA
+exabayes -f sim-125-nsites-1500.phy -n sim125 -s 6667 -m DNA
+exabayes -f sim-150-nsites-1500.phy -n sim150 -s 345 -m DNA
+exabayes -f sim-354-nsites-1500.phy -n sim354 -s 3822 -m DNA
+exabayes -f sim-404-nsites-1500.phy -n sim404 -s 5351 -m DNA
+exabayes -f sim-500-nsites-1500.phy -n sim500 -s 2102 -m DNA
+```
+
+Then, we need to summarize the results:
+- Consensus tree:
+```shell
+consense -f ExaBayes_topologies.run-0.sim024 -n sim024.cons
+consense -f ExaBayes_topologies.run-0.sim027 -n sim027.cons
+consense -f ExaBayes_topologies.run-0.sim036 -n sim036.cons
+consense -f ExaBayes_topologies.run-0.sim043 -n sim043.cons
+consense -f ExaBayes_topologies.run-0.sim050 -n sim050.cons
+consense -f ExaBayes_topologies.run-0.sim064 -n sim064.cons
+consense -f ExaBayes_topologies.run-0.sim071 -n sim071.cons
+consense -f ExaBayes_topologies.run-0.sim125 -n sim125.cons
+consense -f ExaBayes_topologies.run-0.sim150 -n sim150.cons
+consense -f ExaBayes_topologies.run-0.sim354 -n sim354.cons
+consense -f ExaBayes_topologies.run-0.sim404 -n sim404.cons
+consense -f ExaBayes_topologies.run-0.sim500 -n sim500.cons
+```
+
+- Credible set for trees:
+```shell
+credibleSet -f ExaBayes_topologies.run-0.sim024 -n sim024.cred
+credibleSet -f ExaBayes_topologies.run-0.sim027 -n sim027.cred
+credibleSet -f ExaBayes_topologies.run-0.sim036 -n sim036.cred
+credibleSet -f ExaBayes_topologies.run-0.sim043 -n sim043.cred
+credibleSet -f ExaBayes_topologies.run-0.sim050 -n sim050.cred
+credibleSet -f ExaBayes_topologies.run-0.sim064 -n sim064.cred
+credibleSet -f ExaBayes_topologies.run-0.sim071 -n sim071.cred
+credibleSet -f ExaBayes_topologies.run-0.sim125 -n sim125.cred
+credibleSet -f ExaBayes_topologies.run-0.sim150 -n sim150.cred
+credibleSet -f ExaBayes_topologies.run-0.sim354 -n sim354.cred
+credibleSet -f ExaBayes_topologies.run-0.sim404 -n sim404.cred
+credibleSet -f ExaBayes_topologies.run-0.sim500 -n sim500.cred
+```
+
+- Parameters:
+```shell
+postProcParam -f ExaBayes_parameters.run-0.sim024 -n sim024.pars
+postProcParam -f ExaBayes_parameters.run-0.sim027 -n sim027.pars
+postProcParam -f ExaBayes_parameters.run-0.sim036 -n sim036.pars
+postProcParam -f ExaBayes_parameters.run-0.sim043 -n sim043.pars
+postProcParam -f ExaBayes_parameters.run-0.sim050 -n sim050.pars
+postProcParam -f ExaBayes_parameters.run-0.sim064 -n sim064.pars
+postProcParam -f ExaBayes_parameters.run-0.sim071 -n sim071.pars
+postProcParam -f ExaBayes_parameters.run-0.sim125 -n sim125.pars
+postProcParam -f ExaBayes_parameters.run-0.sim150 -n sim150.pars
+postProcParam -f ExaBayes_parameters.run-0.sim354 -n sim354.pars
+postProcParam -f ExaBayes_parameters.run-0.sim404 -n sim404.pars
+postProcParam -f ExaBayes_parameters.run-0.sim500 -n sim500.pars
+```
+
+- Branch lengths:
+```shell
+extractBips -f ExaBayes_topologies.run-0.sim024 -n sim024.bls
+extractBips -f ExaBayes_topologies.run-0.sim027 -n sim027.bls
+extractBips -f ExaBayes_topologies.run-0.sim036 -n sim036.bls
+extractBips -f ExaBayes_topologies.run-0.sim043 -n sim043.bls
+extractBips -f ExaBayes_topologies.run-0.sim050 -n sim050.bls
+extractBips -f ExaBayes_topologies.run-0.sim064 -n sim064.bls
+extractBips -f ExaBayes_topologies.run-0.sim071 -n sim071.bls
+extractBips -f ExaBayes_topologies.run-0.sim125 -n sim125.bls
+extractBips -f ExaBayes_topologies.run-0.sim150 -n sim150.bls
+extractBips -f ExaBayes_topologies.run-0.sim354 -n sim354.bls
+extractBips -f ExaBayes_topologies.run-0.sim404 -n sim404.bls
+extractBips -f ExaBayes_topologies.run-0.sim500 -n sim500.bls
+```
+
 6. Compare ESS of branch lengths and Q between bistro and exabayes
+
+First, we need to copy all the bistro/exabayes output files from different machines.
+
+```shell
+cd Documents/github/CladeCondProb/ccdprobs/Bistro/Simulations
+scp claudia@darwin02.stat.wisc.edu:/workspace/claudia/ccdprobs/Bistro/Simulations/*.meanTree
+scp claudia@darwin02.stat.wisc.edu:/workspace/claudia/ccdprobs/Bistro/Simulations/*.pstat
+scp claudia@darwin02.stat.wisc.edu:/workspace/claudia/ccdprobs/Bistro/Simulations/*.trprobs
+scp claudia@darwin02.stat.wisc.edu:/workspace/claudia/ccdprobs/Bistro/Simulations/*.tstat
+scp claudia@darwin02.stat.wisc.edu:/workspace/claudia/ccdprobs/Bistro/Simulations/*.vstat
+```
+
+We will also need to manually copy the files from Mac desktop (for fixed tree), and Mac GSU office (for exabayes on simulated data).
+
+
