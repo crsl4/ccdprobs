@@ -2,6 +2,17 @@
 Bret Larget, Claudia Solis-Lemus (2016)
 
 ## To do now
+- fix ms.pdf to do a better description of done and weaknesses, see this:
+```
+OK, after reading the attached PDF and other notes, I think that I more or less remember where we left off.
+Basically, we could not make importance sampling work because:
+-- our initial estimates of Q were always biased no matter what we did (raw counts, MCMC on fixed tree)
+-- our sample of trees was also biased for larger number of taxa (more than 10) with bootstrap sample and even with MCMC sample (though we might have not explored this last option much). We tried weighting in different ways without success, and our mean tree was not close to the MLE.
+ 
+I believe that at the end, the sampling of branch lengths was good using the truncated normal for short branches.
+```
+- cleanup the repo (only keep things that we are using now, create a new repo in fact called bistro)
+
 
 ### Simulations
 - run exabayes (decide settings) on 027,036,043,050,064: `exabayes -f ../../Data/datasets/024.phy -n 1 -s 1234 -m DNA -C 2`

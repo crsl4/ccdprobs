@@ -56,14 +56,14 @@
 
 \author{B. Larget$^{*}$\email{bret.larget@wisc.edu} \\
 	   University of Wisconsin-Madison, WI 53706, USA
-	   \and 
+	   \and
 	   C. Sol\'{i}s-Lemus$^{*}$\email{solislemus@wisc.edu}\\
 	   University of Wisconsin-Madison, WI 53706, USA
 	   }
 
 \begin{document}
 
-\date{{\it Received October} 2004. {\it Revised February} 2005.\newline 
+\date{{\it Received October} 2004. {\it Revised February} 2005.\newline
 {\it Accepted March} 2005.}
 
 \pagerange{\pageref{firstpage}--\pageref{lastpage}} \pubyear{2006}
@@ -167,12 +167,13 @@ $\mathbf{Q}(\pi,r)$ represents the rate matrix for the GTR model
 (\pi_A, \pi_C, \pi_G, \pi_T)$ and the transition rate parameters $s =
 (s_{AC}, s_{AG}, s_{AT}, s_{CG}, s_{CT}, s_{GT})$. Note that we have a
 different parametrization than MrBayes \falta{(add model
-  parametrization here)} 
+  parametrization here)}
 
 Let $X$ denote the DNA sequences as input data. We want to generate
 independent samples from the posterior distribution
 $p(\theta|X)$. Thus, we need to find a density $g(\theta|X)$ such that
-we can generate samples from $g$ instead of $p$.
+we can generate samples from $g$ instead of $p$. \falta{(explain
+  importance sampling here).}
 
 The success of importance sampling relies on choosing a density $g$
 that is close enough to the density of interest: centered in the same
@@ -191,8 +192,8 @@ g(\theta|X) = g_1(\mathbf{Q})g_2(T|\mathbf{Q})g_3(t|T,\mathbf{Q})
 The rate matrix $\mathbf{Q}$ is obtained from two components: a vector
 of base frequencies $\pi$ and a vector of transition rates $s$ which
 have commonly be assumed to follow a Dirichlet distribution: $\pi\sim
-Dirichlet(\alpha_1,\alpha_2,\alpha_3,\alpha_4)$ and $s\sim
-Dirichlet(\beta_1,\beta_2.\beta_3,\beta_4,\beta_5,\beta_6)$. 
+Dirichlet(a_1,a_2,a_3,a_4)$ and $s\sim
+Dirichlet(b_1,b_2.b_3,b_4,b_5,b_6)$.
 We found, however, that it is not always the case that the Dirichlet
 distribution is a good fit for $\pi$ and $s$, and we propose the use a
 new distribution: the symmetric generalized Dirichlet \falta{(how to
@@ -210,10 +211,10 @@ where $x_i > 0$ for all $i$ and $\sum_{i=1}^k x_i = 1$, and the
 parameters $\alpha_i > 0$ for $i=1,\ldots,k$.
 
 Each random variable $X_i$ has a marginal
-$\text{Beta}(\alpha_i,\theta-\alpha_i)$ distribution where $\theta =
+$\text{Beta}(\alpha_i,\eta-\alpha_i)$ distribution where $\eta =
 \sum_{i=1}^k \alpha_i$.  It follows that $X_i$ has mean
-$\mathsf{E}(X_i) = \alpha_i/\theta$ and variance $\mathsf{Var}(X_i) =
-\alpha_i(\theta-\alpha_i) / ( \theta^2(\theta+1) )$.  To generate
+$\mathsf{E}(X_i) = \alpha_i/\eta$ and variance $\mathsf{Var}(X_i) =
+\alpha_i(\eta-\alpha_i) / ( \eta^2(\eta+1) )$.  To generate
 random variables $X_1,\ldots,X_k \sim
 \text{Dirichlet}(\alpha_1,\ldots,\alpha_k)$, one simply generates
 independent random variables $Y_i \sim \text{Gamma}(\alpha_1,\lambda)$
@@ -231,7 +232,7 @@ and second moments.
 \subsubsection{A Symmetric Generalized Dirichlet distribution}
 
 We define the symmetric generalized Dirichlet distribution
-\falta{(reference)} on $X_1,\ldots,X_n$ to be the distribution of
+\falta{(reference)} on $X_1,\ldots,X_k$ to be the distribution of
 $(X_1,\ldots,X_k)$ where $X_i = Y_i \big/ \sum_{j=1}^k Y_j$ for
 $i=1,\ldots,k$ where the random variables $\{Y_i\}$ are mutually
 independent and $Y_i \sim \text{Gamma}(\alpha_i,\lambda_i)$.  As the
@@ -250,11 +251,11 @@ closed form solution.
     \alpha_i\big)\big(\prod_{i=1}^k
     \lambda_i^{\alpha_i}\big)}{\prod_{i=1}^k \Gamma(\alpha_i)}
   \times \frac{\prod_{i=1}^k x_i^{\alpha_i - 1}}{\big(\sum_{i=1}^k
-    \lambda_i x_i\big)^{\sum_{i=1}^k \alpha_i}},\\ 
+    \lambda_i x_i\big)^{\sum_{i=1}^k \alpha_i}},\\
   & \qquad \text{where
     $x_i > 0$ for all $i$ and $\sum_{i=1}^k x_i = 1$}
 \end{eqnarray*}
-For the derivation, see \falta{reference}. 
+For the derivation, see \falta{reference}.
 
 I have not been able to derive closed form solutions for the marginal
 means and variances, but the means are close (if not exactly equal to)
@@ -325,14 +326,14 @@ The bootstrap sample of trees has two problems: one, it is too spread
 out and therefore, it contains many clades that have too low posterior
 probability, and two, sometimes it lacks important clades with high
 posterior probability that never appear in the bootstrap
-sample. 
+sample.
 
 To overcome these problems, we decide to weight trees according to its
 distance from a center tree. The procedure is like this: from the
 bootstrap sample, we compute a mean tree \falta{(reference? bret mean
   published somewhere?)} and calculate the distance of each bootstrap
 tree to the mean tree. Each tree will then be assigned a weight of the
-form $\exp{-\lambda d(T_{mean},T)}$, for a constant $\lambda$ and for
+form $\exp{-\kappa d(T_{mean},T)}$, for a constant $\kappa$ and for
 the distance $d(T_{mean},T)$ defined as in \falta{(reference)}. In
 this way, trees that are close to the mean tree will have higher
 weight, and thus its clades will be sampled more often when using the
@@ -530,7 +531,7 @@ clade distribution will not be good (use mds plots to show)
 problems, limitations: two components: sample topolgy, and then
 sample BL. the second one is good, but the other one: there are
 cases when the shrinking of bootstrap towards the mean is good, in
-other not 
+other not
 
 \backmatter
 
@@ -542,7 +543,7 @@ other not
 The authors thank blabla.\vspace*{-8pt}
 
 %%%%%% include this section only if your manuscript refers to supplementary
-%%%%%% materials -- see Instructions for Authors at 
+%%%%%% materials -- see Instructions for Authors at
 %%%%%% http://www.tibs.org/biometrics
 
 \section*{Supplementary Materials}
@@ -581,7 +582,7 @@ inference of $h(X)w(X)$ under $g(x)$ for a weight function
 $w(x)=f(x)/g(x)$ defined when both $f(x)$ and $g(x)$ are \textit{normalized} densities (we will discuss the
     \textit{unnormalized} case in next subsection). That is,
 \begin{eqnarray*}
-E_f(h(X)) &= \int h(x) f(x) dx \\ 
+E_f(h(X)) &= \int h(x) f(x) dx \\
 &= \int h(x) \frac{f(x)}{g(x)} g(x) dx \\
 &= \int h(x) w(x) g(x) dx \\
 &= E_g(h(X)w(X))
@@ -667,15 +668,15 @@ not as efficient as expected.
 \end{document}
 
 % - status quo is mcmc, successful but computationally inefficient
-% (reference ronquist paper) 
-% - use IS as alternative 
+% (reference ronquist paper)
+% - use IS as alternative
 % - show methods
 % - show examples (improvement in ESS does not translate to improvement
-% in time, we do a lot more computation per tree) 
+% in time, we do a lot more computation per tree)
 % - discussion: problems, limitations: two components: sample topolgy, and then
 % sample BL. the second one is good, but the other one: there are
 % cases when the shrinking of bootstrap towards the mean is good, in
-% other not 
+% other not
 % - setting priors on pi,s, the dirichlet is fine, but in
 % the posterior is not really dirichlet (and we came up with the
 % generalized dirichlet, maybe a separate paper)
