@@ -1,4 +1,7 @@
-Bistro/Code/bistro/debug
+## this project
+Bistro/Simulations
+*.par
+*.tre
 
 # Compiled source #
 ###################
@@ -62,6 +65,8 @@ Thumbs.db
 *.mtc
 *.mtc1
 *.synctex.gz
+*.pdf
+*.bst
 
 
 # Mac IDE files
@@ -78,6 +83,9 @@ Backup[ ]of[ ]*.numbers/
 *.Rhistory
 *.err
 *.RData
+*.Rda
+*.rds
+*.jld
 
 # open office
 *.odt
@@ -90,4 +98,36 @@ Backup[ ]of[ ]*.numbers/
 *.jpeg
 *.png
 *.dot
+*.json
 
+# dropbox
+.dropbox
+
+# keynote
+*.key
+
+### office
+*.xls*
+*.doc*
+*.ppt*
+
+
+### plink
+*.raw
+*.bed
+*.bim
+*.fam
+*.ped
+*.map
+*.frq
+*.imiss
+*.lmiss
+*.vcf
+*.tsv
+*.cov
+
+## html
+*.html
+*.css
+*.js
+*.ttf
