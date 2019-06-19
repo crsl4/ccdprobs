@@ -1,6 +1,7 @@
 ## this project
 Bistro/Simulations
 Bistro/Data
+datasets
 *.par
 *.tre
 
