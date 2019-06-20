@@ -12,6 +12,8 @@ Basically, we could not make importance sampling work because:
 I believe that at the end, the sampling of branch lengths was good using the truncated normal for short branches.
 ```
 - cleanup the repo (only keep things that we are using now, create a new repo in fact called bistro)
+- see hohna, drummond again for measures of tree samples (maximum deviation of clade frequencies), and MDS to visualize tree space and tree islands
+- whidden and matsen: CCD has systematic problems when the PP has multiple peaks
 
 
 ### Simulations
